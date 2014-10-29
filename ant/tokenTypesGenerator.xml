@@ -1,0 +1,37 @@
+<!--
+  This file is part of the TinsPHP project published under the Apache License 2.0
+  For the full copyright and license information, please have a look at LICENSE in the
+  root folder or visit the project's website http://tsphp.ch/wiki/display/TSPHP/License
+  -->
+
+<project name="tokenTypesGenerator" basedir="../">
+
+    <import file="${basedir}/ant/build-common.xml" as="common"/>
+
+    <property file="${basedir}/ant/gen.properties"/>
+
+    <property name="parser" location="${basedir}/../tins-parser"/>
+    <property name="parser.tokens" location="${parser}/src/ch/tsphp/tinsphp/parser/antlr"/>
+
+    <target name="gen" depends="generateTokensFile" description="contains all targets which generate code"/>
+
+    <target name="generateTokensFile" depends="" description="generates the class TokenTypes">
+        <delete>
+            <fileset dir="${src.gen}" includes="*.tokens"/>
+        </delete>
+        <copy todir="${src.gen}">
+            <fileset dir="${parser.tokens}" includes="TinsPHP.tokens"/>
+        </copy>
+        <java classname="ch.tsphp.tinsphp.common.utils.TokenTypesGenerator" classpathref="libset">
+            <arg value="-t"/>
+            <arg value="${src.gen}/TinsPHP.tokens"/>
+            <arg value="-j"/>
+            <arg value="${src.gen}/TokenTypes.java"/>
+            <arg value="-h"/>
+            <arg value="${gen.header}"/>
+            <arg value="-f"/>
+            <arg value="${gen.footer}"/>
+        </java>
+    </target>
+
+</project>
