@@ -18,7 +18,7 @@ import ch.tsphp.common.symbols.ISymbol;
 import ch.tsphp.common.symbols.ITypeSymbol;
 
 /**
- * Adopted from the book "Language Implementation Patterns" by Terence Parr
+ * Adopted from the book "Language Implementation Patterns" by Terence Parr.
  */
 public abstract class ASymbol implements ISymbol
 {
