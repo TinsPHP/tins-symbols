@@ -11,7 +11,7 @@
     <import file="${basedir}/ant/copyCommon.xml" as="cp"/>
     <import file="${basedir}/ant/copyTinsCommon.xml" as="cpt"/>
     <import file="${basedir}/ant/copyQA.xml" as="copy"/>
-    <import file="${basedir}/ant/tokenTypesGenerator.xml" as="copy"/>
+    <import file="${basedir}/ant/tokenTypesGenerator.xml" as="gen"/>
 
     <!-- ================================================================== -->
     <!-- Specialised Target: cp.QA don't copy header.txt -->
