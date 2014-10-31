@@ -23,9 +23,6 @@ import java.util.SortedSet;
 public class ModifierHelper implements IModifierHelper
 {
 
-    public ModifierHelper() {
-    }
-
     public IModifierSet getModifiers(ITSPHPAst modifierAst) {
         IModifierSet modifiers = new ModifierSet();
 

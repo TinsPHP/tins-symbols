@@ -20,6 +20,8 @@ import java.util.HashSet;
 
 public class ModifierSet extends HashSet<Integer> implements IModifierSet
 {
+    static final long serialVersionUID = 1L;
+
     @Override
     public boolean isAbstract() {
         return contains(TokenTypes.Abstract);
