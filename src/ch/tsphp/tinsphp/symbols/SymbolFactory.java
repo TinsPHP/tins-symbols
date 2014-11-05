@@ -21,6 +21,7 @@ import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IAliasSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IModifierHelper;
+import ch.tsphp.tinsphp.common.symbols.INullTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 
@@ -35,16 +36,16 @@ public class SymbolFactory implements ISymbolFactory
         modifierHelper = theModifierHelper;
     }
 
-//    @Override
+    //    @Override
 //    public void setMixedTypeSymbol(ITypeSymbol typeSymbol) {
 //        mixedTypeSymbol = typeSymbol;
 //    }
 //
-//    @Override
-//    public INullTypeSymbol createNullTypeSymbol() {
-//        return new NullTypeSymbol();
-//
-//    }
+    @Override
+    public INullTypeSymbol createNullTypeSymbol() {
+        return new NullTypeSymbol();
+
+    }
 //
 //    @Override
 //    public IVoidTypeSymbol createVoidTypeSymbol() {
