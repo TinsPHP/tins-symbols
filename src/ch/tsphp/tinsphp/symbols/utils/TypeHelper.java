@@ -15,7 +15,11 @@ public final class TypeHelper
 
     }
 
-    public static final void addNullableModifier(ISymbolWithModifier symbol) {
+    public static void addNullableModifier(ISymbolWithModifier symbol) {
         symbol.addModifier(TokenTypes.QuestionMark);
+    }
+
+    public static void addFalseableModifier(ISymbolWithModifier symbol) {
+        symbol.addModifier(TokenTypes.LogicNot);
     }
 }

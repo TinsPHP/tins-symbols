@@ -11,6 +11,8 @@ import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.symbols.ASymbolWithModifier;
 import ch.tsphp.tinsphp.symbols.ModifierSet;
+import ch.tsphp.tinsphp.symbols.NullTypeSymbol;
+import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -19,39 +21,45 @@ import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInA
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class ASymbolWithModifierTest
+public class NullableTypeSymbol_ASymbolWithModifier_LSPTest extends ASymbolWithModifierTest
 {
-    class DummySymbolWithModifier extends ASymbolWithModifier
-    {
 
-        public DummySymbolWithModifier(ITSPHPAst definitionAst, IModifierSet theModifiers, String name) {
-            super(definitionAst, theModifiers, name);
-        }
-    }
-
-    @Test
+    @Override
     public void getModifiers_NothingDefined_ReturnEmptyModifierSet() {
+        // different behaviour - ANullableTypeSymbol has always the nullable modifier as well
+
+        // start same as in ASymbolWithModifierTest
         //no arrange necessary
 
         ASymbolWithModifier symbolWithModifier = createSymbolWithModifier(new ModifierSet());
         IModifierSet result = symbolWithModifier.getModifiers();
+        // end same as in ASymbolWithModifierTest
 
-        assertThat(result.size(), is(0));
+        //assertThat(result.size(), is(0));
+        assertThat(result, containsInAnyOrder(TokenTypes.QuestionMark));
     }
 
-    @Test
+    @Override
     public void getModifiers_OneDefined_ReturnModifierSetWithModifier() {
+        // different behaviour - ANullableTypeSymbol has always the nullable modifier as well
+
+        // start same as in ASymbolWithModifierTest
         int modifier = 12;
 
         ASymbolWithModifier symbolWithModifier = createSymbolWithModifier(new ModifierSet());
         symbolWithModifier.addModifier(modifier);
         IModifierSet result = symbolWithModifier.getModifiers();
+        // end same as in ASymbolWithModifierTest
 
-        assertThat(result, containsInAnyOrder(modifier));
+        //assertThat(result, containsInAnyOrder(modifier));
+        assertThat(result, containsInAnyOrder(modifier, TokenTypes.QuestionMark));
     }
 
-    @Test
+    @Override
     public void getModifiers_TwoDefined_ReturnModifierSetWithTwoModifier() {
+        // different behaviour - ANullableTypeSymbol has always the nullable modifier as well
+
+        // start same as in ASymbolWithModifierTest
         int modifier1 = 12;
         int modifier2 = 34;
 
@@ -59,22 +67,17 @@ public class ASymbolWithModifierTest
         symbolWithModifier.addModifier(modifier1);
         symbolWithModifier.addModifier(modifier2);
         IModifierSet result = symbolWithModifier.getModifiers();
+        // end same as in ASymbolWithModifierTest
 
-        assertThat(result, containsInAnyOrder(modifier1, modifier2));
+        //assertThat(result, containsInAnyOrder(modifier1, modifier2));
+        assertThat(result, containsInAnyOrder(modifier1, modifier2, TokenTypes.QuestionMark));
     }
 
-    @Test
-    public void removeModifiers_RemoveNotDefined_ReturnsFalse() {
-        //no arrange necessary
-
-        ASymbolWithModifier symbolWithModifier = createSymbolWithModifier();
-        boolean result = symbolWithModifier.removeModifier(12);
-
-        assertThat(result, is(false));
-    }
-
-    @Test
+    @Override
     public void removeModifiers_Defined_ReturnsSetWithoutModifier() {
+        // different behaviour - ANullableTypeSymbol has always the nullable modifier as well
+
+        // start same as in ASymbolWithModifierTest
         int modifier1 = 12;
         int modifier2 = 34;
 
@@ -85,24 +88,35 @@ public class ASymbolWithModifierTest
         IModifierSet set = symbolWithModifier.getModifiers();
 
         assertThat(result, is(true));
-        assertThat(set, containsInAnyOrder(modifier2));
+        // end same as in ASymbolWithModifierTest
+
+        //assertThat(set, containsInAnyOrder(modifier2));
+        assertThat(set, containsInAnyOrder(modifier2, TokenTypes.QuestionMark));
     }
 
     @Test
     public void setModifiers_Standard_ReturnSameSet() {
+        // different behaviour - ANullableTypeSymbol has always the nullable modifier as well
+
+        // start same as in ASymbolWithModifierTest
         IModifierSet set = new ModifierSet();
         set.add(12);
 
         ASymbolWithModifier symbolWithModifier = createSymbolWithModifier();
         symbolWithModifier.setModifiers(set);
         IModifierSet result = symbolWithModifier.getModifiers();
+        // end same as in ASymbolWithModifierTest
 
-        assertThat(result, is(set));
-        assertThat(result, containsInAnyOrder(12));
+//        assertThat(result, containsInAnyOrder(12));
+        assertThat(result, containsInAnyOrder(12, TokenTypes.QuestionMark));
     }
 
-    @Test
+    @Override
     public void toString_TypeDefinedModifiersNotEmpty_ReturnsNameColonTypeToStringPipeModifiers() {
+        // different behaviour - ANullableTypeSymbol has always the nullable modifier
+        // furthermore, NullableTypeSymbol has always null as name
+
+        // start same as in ASymbolWithModifierTest
         String name = "foo";
         String typeName = "bar";
         int modifier = 1023;
@@ -114,12 +128,19 @@ public class ASymbolWithModifierTest
         ASymbolWithModifier symbolWithModifier = createSymbolWithModifier(name, set);
         symbolWithModifier.setType(typeSymbol);
         String result = symbolWithModifier.toString();
+        // end same as in ASymbolWithModifierTest
 
-        assertThat(result, is(name + ":" + typeName + "|" + modifier));
+        //assertThat(result, is(name + ":" + typeName + "|" + modifier));
+        assertThat(result, is("null" + ":" + typeName + "|" + TokenTypes.QuestionMark + ", " + modifier));
     }
 
-    @Test
+
+    @Override
     public void toString_noTypeDefinedAndOneModifierDefined_ReturnNameInclModifiers() {
+        // different behaviour - ANullableTypeSymbol has always the nullable modifier
+        // furthermore, NullableTypeSymbol has always null as name
+
+        // start same as in ASymbolWithModifierTest
         String name = "bar";
         int modifier = 1002;
         IModifierSet set = new ModifierSet();
@@ -127,12 +148,18 @@ public class ASymbolWithModifierTest
 
         ASymbolWithModifier symbolWithModifier = createSymbolWithModifier(name, set);
         String result = symbolWithModifier.toString();
+        // end same as in ASymbolWithModifierTest
 
-        assertThat(result, is(name + "|" + modifier));
+        //assertThat(result, is(name + "|" + modifier));
+        assertThat(result, is("null" + "|" + TokenTypes.QuestionMark + ", " + modifier));
     }
 
-    @Test
+    @Override
     public void toString_noTypeDefinedAndThreeModifiersDefinedInOrder_ReturnNameInclModifiersSorted() {
+        // different behaviour - ANullableTypeSymbol has always the nullable modifier
+        // furthermore, NullableTypeSymbol has always null as name
+
+        // start same as in ASymbolWithModifierTest
         String name = "bar";
         IModifierSet set = new ModifierSet();
         set.add(1200);
@@ -141,12 +168,18 @@ public class ASymbolWithModifierTest
 
         ASymbolWithModifier symbolWithModifier = createSymbolWithModifier(name, set);
         String result = symbolWithModifier.toString();
+        // end same as in ASymbolWithModifierTest
 
-        assertThat(result, is(name + "|" + 1200 + ", " + 2400 + ", " + 3000));
+        //assertThat(result, is(name + "|" + 1200 + ", " + 2400  + ", " + 3000));
+        assertThat(result, is("null" + "|" + TokenTypes.QuestionMark + ", " + 1200 + ", " + 2400 + ", " + 3000));
     }
 
-    @Test
+    @Override
     public void toString_noTypeDefinedAndThreeModifiersDefinedLastFirst_ReturnNameInclModifiersSorted() {
+        // different behaviour - ANullableTypeSymbol has always the nullable modifier
+        // furthermore, NullableTypeSymbol has always null as name
+
+        // start same as in ASymbolWithModifierTest
         String name = "bar";
         IModifierSet set = new ModifierSet();
         set.add(3000);
@@ -155,12 +188,18 @@ public class ASymbolWithModifierTest
 
         ASymbolWithModifier symbolWithModifier = createSymbolWithModifier(name, set);
         String result = symbolWithModifier.toString();
+        // end same as in ASymbolWithModifierTest
 
-        assertThat(result, is(name + "|" + 1200 + ", " + 2400 + ", " + 3000));
+        //assertThat(result, is(name + "|" + 1200 + ", " + 2400  + ", " + 3000));
+        assertThat(result, is("null" + "|" + TokenTypes.QuestionMark + ", " + 1200 + ", " + 2400 + ", " + 3000));
     }
 
-    @Test
+    @Override
     public void toString_noTypeDefinedAndThreeModifiersDefinedFirstLast_ReturnNameInclModifiersSorted() {
+        // different behaviour - ANullableTypeSymbol has always the nullable modifier
+        // furthermore, NullableTypeSymbol has always null as name
+
+        // start same as in ASymbolWithModifierTest
         String name = "bar";
         IModifierSet set = new ModifierSet();
         set.add(2400);
@@ -169,8 +208,10 @@ public class ASymbolWithModifierTest
 
         ASymbolWithModifier symbolWithModifier = createSymbolWithModifier(name, set);
         String result = symbolWithModifier.toString();
+        // end same as in ASymbolWithModifierTest
 
-        assertThat(result, is(name + "|" + 1200 + ", " + 2400 + ", " + 3000));
+        //assertThat(result, is(name + "|" + 1200 + ", " + 2400  + ", " + 3000));
+        assertThat(result, is("null" + "|" + TokenTypes.QuestionMark + ", " + 1200 + ", " + 2400 + ", " + 3000));
     }
 
     private ASymbolWithModifier createSymbolWithModifier() {
@@ -185,8 +226,11 @@ public class ASymbolWithModifierTest
         return createSymbolWithModifier(mock(ITSPHPAst.class), modifierSet, name);
     }
 
+    @Override
     protected ASymbolWithModifier createSymbolWithModifier(
             ITSPHPAst definitionAst, IModifierSet modifiers, String name) {
-        return new DummySymbolWithModifier(definitionAst, modifiers, name);
+        ASymbolWithModifier symbol = new NullTypeSymbol();
+        symbol.setModifiers(modifiers);
+        return symbol;
     }
 }

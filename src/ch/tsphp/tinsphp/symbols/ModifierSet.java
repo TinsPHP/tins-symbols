@@ -16,11 +16,20 @@ package ch.tsphp.tinsphp.symbols;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
 
+import java.util.Collection;
 import java.util.HashSet;
 
 public class ModifierSet extends HashSet<Integer> implements IModifierSet
 {
     static final long serialVersionUID = 1L;
+
+    public ModifierSet() {
+        //empty modifier set
+    }
+
+    public ModifierSet(Collection<Integer> collection) {
+        super(collection);
+    }
 
     @Override
     public boolean isAbstract() {

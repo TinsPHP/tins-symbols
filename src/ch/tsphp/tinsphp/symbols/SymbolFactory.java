@@ -19,6 +19,7 @@ import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IAliasSymbol;
+import ch.tsphp.tinsphp.common.symbols.IAliasTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IModifierHelper;
 import ch.tsphp.tinsphp.common.symbols.INullTypeSymbol;
@@ -86,11 +87,12 @@ public class SymbolFactory implements ISymbolFactory
         return new AliasSymbol(useDefinition, alias);
     }
 
-    //    @Override
-//    public IAliasTypeSymbol createAliasTypeSymbol(ITSPHPAst definitionAst, String name) {
-//        return new AliasTypeSymbol(definitionAst, name, mixedTypeSymbol);
-//    }
-//
+    @Override
+    public IAliasTypeSymbol createAliasTypeSymbol(ITSPHPAst definitionAst, String name) {
+        return new AliasTypeSymbol(definitionAst, name, mixedTypeSymbol);
+    }
+
+    //
 //    @Override
 //    public IInterfaceTypeSymbol createInterfaceTypeSymbol(ITSPHPAst modifier, ITSPHPAst identifier,
 //            IScope currentScope) {

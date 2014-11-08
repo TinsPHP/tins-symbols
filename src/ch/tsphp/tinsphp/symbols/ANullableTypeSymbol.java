@@ -51,4 +51,14 @@ public abstract class ANullableTypeSymbol extends ATypeSymbol
         //make sure nullable is part of the modifiers
         TypeHelper.addNullableModifier(this);
     }
+
+    @Override
+    public boolean removeModifier(Integer modifier) {
+        if (modifier != TokenTypes.QuestionMark) {
+            return super.removeModifier(modifier);
+        }
+        //it's not allowed to remove the nullable modifier
+        return false;
+    }
+
 }

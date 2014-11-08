@@ -16,8 +16,6 @@ import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ISymbolWithModifier;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
 
-import java.util.TreeSet;
-
 public abstract class ASymbolWithModifier extends ASymbol implements ISymbolWithModifier
 {
 
@@ -30,7 +28,7 @@ public abstract class ASymbolWithModifier extends ASymbol implements ISymbolWith
 
     @Override
     public String toString() {
-        return super.toString() + ModifierHelper.getModifiersAsString(new TreeSet<>(modifiers));
+        return super.toString() + ModifierHelper.getModifiersAsString(modifiers);
     }
 
     @Override
@@ -50,6 +48,6 @@ public abstract class ASymbolWithModifier extends ASymbol implements ISymbolWith
 
     @Override
     public void setModifiers(IModifierSet newModifiers) {
-        modifiers = newModifiers;
+        modifiers = new ModifierSet(newModifiers);
     }
 }

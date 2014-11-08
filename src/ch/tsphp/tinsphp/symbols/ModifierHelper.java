@@ -19,11 +19,12 @@ import ch.tsphp.tinsphp.common.symbols.IModifierHelper;
 import java.util.Arrays;
 import java.util.List;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class ModifierHelper implements IModifierHelper
 {
 
-    public IModifierSet getModifiers(ITSPHPAst modifierAst) {
+    public IModifierSet getModifiers(final ITSPHPAst modifierAst) {
         IModifierSet modifiers = new ModifierSet();
 
         List<ITSPHPAst> children = modifierAst.getChildren();
@@ -35,12 +36,13 @@ public class ModifierHelper implements IModifierHelper
         return modifiers;
     }
 
-    public static String getModifiersAsString(SortedSet modifiers) {
+    public static String getModifiersAsString(final IModifierSet modifiers) {
+        SortedSet<Integer> sortedModifiers = new TreeSet<>(modifiers);
         String typeModifiers;
-        if (modifiers == null || modifiers.size() == 0) {
+        if (sortedModifiers.size() == 0) {
             typeModifiers = "";
         } else {
-            typeModifiers = Arrays.toString(modifiers.toArray());
+            typeModifiers = Arrays.toString(sortedModifiers.toArray());
             typeModifiers = "|" + typeModifiers.substring(1, typeModifiers.length() - 1);
         }
         return typeModifiers;

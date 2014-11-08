@@ -32,6 +32,18 @@ public class ModifierSetTest
     }
 
     @Test
+    public void is_viaConstruct_ReturnsTrue() throws NoSuchMethodException, InvocationTargetException,
+            IllegalAccessException {
+        //no arrange necessary
+
+        IModifierSet set = createModifierSet();
+        set.add(modifierType);
+        boolean result = (boolean) set.getClass().getMethod(methodName).invoke(set);
+
+        assertTrue(methodName + " failed.", result);
+    }
+
+    @Test
     public void is_ReturnsTrue() throws NoSuchMethodException, InvocationTargetException,
             IllegalAccessException {
         //no arrange necessary

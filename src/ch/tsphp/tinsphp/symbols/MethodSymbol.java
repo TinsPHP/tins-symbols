@@ -23,7 +23,6 @@ import ch.tsphp.tinsphp.common.symbols.TypeWithModifiersDto;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeSet;
 
 public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
 {
@@ -105,7 +104,7 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
 
     @Override
     public String toString() {
-        return super.toString() + ModifierHelper.getModifiersAsString(new TreeSet<>(returnTypeModifiers));
+        return super.toString() + ModifierHelper.getModifiersAsString(returnTypeModifiers);
     }
 
     //Warning! start code duplication - same as in GlobalNamespaceScope
