@@ -4,16 +4,18 @@
  * root folder or visit the project's website http://tsphp.ch/wiki/display/TINS/License
  */
 
-package ch.tsphp.tinsphp.symbols.test.unit.symbols;
+package ch.tsphp.tinsphp.symbols.test.unit.symbols.LSP;
 
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.tinsphp.symbols.ASymbol;
-import ch.tsphp.tinsphp.symbols.AliasSymbol;
+import ch.tsphp.tinsphp.symbols.ModifierSet;
+import ch.tsphp.tinsphp.symbols.VariableSymbol;
+import ch.tsphp.tinsphp.symbols.test.unit.symbols.ASymbolTest;
 
-public class AliasSymbol_ASymbol_LSPTest extends ASymbolTest
+public class VariableSymbol_ASymbol_LSPTest extends ASymbolTest
 {
     @Override
     protected ASymbol createSymbol(ITSPHPAst definitionAst, String name) {
-        return new AliasSymbol(definitionAst, name);
+        return new VariableSymbol(definitionAst, new ModifierSet(), name);
     }
 }

@@ -4,15 +4,16 @@
  * root folder or visit the project's website http://tsphp.ch/wiki/display/TINS/License
  */
 
-package ch.tsphp.tinsphp.symbols.test.unit.symbols;
+package ch.tsphp.tinsphp.symbols.test.unit.symbols.LSP;
 
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
+import ch.tsphp.tinsphp.symbols.ANullableTypeSymbol;
 import ch.tsphp.tinsphp.symbols.ASymbolWithModifier;
 import ch.tsphp.tinsphp.symbols.ModifierSet;
-import ch.tsphp.tinsphp.symbols.NullTypeSymbol;
 import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
+import ch.tsphp.tinsphp.symbols.test.unit.symbols.ASymbolWithModifierTest;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -21,8 +22,15 @@ import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInA
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class NullableTypeSymbol_ASymbolWithModifier_LSPTest extends ASymbolWithModifierTest
+public class ANullableTypeSymbol_ASymbolWithModifier_LSPTest extends ASymbolWithModifierTest
 {
+
+    class DummyNullableTypeSymbol extends ANullableTypeSymbol
+    {
+        public DummyNullableTypeSymbol(String name, ITypeSymbol parentTypeSymbol) {
+            super(name, parentTypeSymbol);
+        }
+    }
 
     @Override
     public void getModifiers_NothingDefined_ReturnEmptyModifierSet() {
@@ -114,7 +122,6 @@ public class NullableTypeSymbol_ASymbolWithModifier_LSPTest extends ASymbolWithM
     @Override
     public void toString_TypeDefinedModifiersNotEmpty_ReturnsNameColonTypeToStringPipeModifiers() {
         // different behaviour - ANullableTypeSymbol has always the nullable modifier
-        // furthermore, NullableTypeSymbol has always null as name
 
         // start same as in ASymbolWithModifierTest
         String name = "foo";
@@ -131,13 +138,12 @@ public class NullableTypeSymbol_ASymbolWithModifier_LSPTest extends ASymbolWithM
         // end same as in ASymbolWithModifierTest
 
         //assertThat(result, is(name + ":" + typeName + "|" + modifier));
-        assertThat(result, is("null" + ":" + typeName + "|" + TokenTypes.QuestionMark + ", " + modifier));
+        assertThat(result, is(name + ":" + typeName + "|" + TokenTypes.QuestionMark + ", " + modifier));
     }
 
     @Override
     public void toString_noTypeDefinedAndOneModifierDefined_ReturnNameInclModifiers() {
         // different behaviour - ANullableTypeSymbol has always the nullable modifier
-        // furthermore, NullableTypeSymbol has always null as name
 
         // start same as in ASymbolWithModifierTest
         String name = "bar";
@@ -150,13 +156,12 @@ public class NullableTypeSymbol_ASymbolWithModifier_LSPTest extends ASymbolWithM
         // end same as in ASymbolWithModifierTest
 
         //assertThat(result, is(name + "|" + modifier));
-        assertThat(result, is("null" + "|" + TokenTypes.QuestionMark + ", " + modifier));
+        assertThat(result, is(name + "|" + TokenTypes.QuestionMark + ", " + modifier));
     }
 
     @Override
     public void toString_noTypeDefinedAndThreeModifiersDefinedInOrder_ReturnNameInclModifiersSorted() {
         // different behaviour - ANullableTypeSymbol has always the nullable modifier
-        // furthermore, NullableTypeSymbol has always null as name
 
         // start same as in ASymbolWithModifierTest
         String name = "bar";
@@ -170,13 +175,12 @@ public class NullableTypeSymbol_ASymbolWithModifier_LSPTest extends ASymbolWithM
         // end same as in ASymbolWithModifierTest
 
         //assertThat(result, is(name + "|" + 1200 + ", " + 2400  + ", " + 3000));
-        assertThat(result, is("null" + "|" + TokenTypes.QuestionMark + ", " + 1200 + ", " + 2400 + ", " + 3000));
+        assertThat(result, is(name + "|" + TokenTypes.QuestionMark + ", " + 1200 + ", " + 2400 + ", " + 3000));
     }
 
     @Override
     public void toString_noTypeDefinedAndThreeModifiersDefinedLastFirst_ReturnNameInclModifiersSorted() {
         // different behaviour - ANullableTypeSymbol has always the nullable modifier
-        // furthermore, NullableTypeSymbol has always null as name
 
         // start same as in ASymbolWithModifierTest
         String name = "bar";
@@ -190,13 +194,12 @@ public class NullableTypeSymbol_ASymbolWithModifier_LSPTest extends ASymbolWithM
         // end same as in ASymbolWithModifierTest
 
         //assertThat(result, is(name + "|" + 1200 + ", " + 2400  + ", " + 3000));
-        assertThat(result, is("null" + "|" + TokenTypes.QuestionMark + ", " + 1200 + ", " + 2400 + ", " + 3000));
+        assertThat(result, is(name + "|" + TokenTypes.QuestionMark + ", " + 1200 + ", " + 2400 + ", " + 3000));
     }
 
     @Override
     public void toString_noTypeDefinedAndThreeModifiersDefinedFirstLast_ReturnNameInclModifiersSorted() {
         // different behaviour - ANullableTypeSymbol has always the nullable modifier
-        // furthermore, NullableTypeSymbol has always null as name
 
         // start same as in ASymbolWithModifierTest
         String name = "bar";
@@ -210,7 +213,7 @@ public class NullableTypeSymbol_ASymbolWithModifier_LSPTest extends ASymbolWithM
         // end same as in ASymbolWithModifierTest
 
         //assertThat(result, is(name + "|" + 1200 + ", " + 2400  + ", " + 3000));
-        assertThat(result, is("null" + "|" + TokenTypes.QuestionMark + ", " + 1200 + ", " + 2400 + ", " + 3000));
+        assertThat(result, is(name + "|" + TokenTypes.QuestionMark + ", " + 1200 + ", " + 2400 + ", " + 3000));
     }
 
     private ASymbolWithModifier createSymbolWithModifier() {
@@ -228,7 +231,7 @@ public class NullableTypeSymbol_ASymbolWithModifier_LSPTest extends ASymbolWithM
     @Override
     protected ASymbolWithModifier createSymbolWithModifier(
             ITSPHPAst definitionAst, IModifierSet modifiers, String name) {
-        ASymbolWithModifier symbol = new NullTypeSymbol();
+        DummyNullableTypeSymbol symbol = new DummyNullableTypeSymbol(name, mock(ITypeSymbol.class));
         symbol.setModifiers(modifiers);
         return symbol;
     }

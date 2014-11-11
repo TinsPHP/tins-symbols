@@ -4,12 +4,13 @@
  * root folder or visit the project's website http://tsphp.ch/wiki/display/TINS/License
  */
 
-package ch.tsphp.tinsphp.symbols.test.unit.symbols;
+package ch.tsphp.tinsphp.symbols.test.unit.symbols.LSP;
 
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.symbols.ATypeSymbol;
 import ch.tsphp.tinsphp.symbols.NullTypeSymbol;
+import ch.tsphp.tinsphp.symbols.test.unit.symbols.ATypeSymbolTest;
 
 import java.util.HashSet;
 import java.util.Set;

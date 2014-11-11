@@ -4,24 +4,19 @@
  * root folder or visit the project's website http://tsphp.ch/wiki/display/TINS/License
  */
 
-package ch.tsphp.tinsphp.symbols.test.unit.symbols;
+package ch.tsphp.tinsphp.symbols.test.unit.symbols.LSP;
 
 import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
-import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.symbols.ASymbolWithModifier;
 import ch.tsphp.tinsphp.symbols.MethodSymbol;
 import ch.tsphp.tinsphp.symbols.ModifierSet;
+import ch.tsphp.tinsphp.symbols.test.unit.symbols.ASymbolWithModifierTest;
 import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class MethodSymbol_ASymbolWithModifier_LSPTest extends ASymbolWithModifierTest
 {
@@ -29,7 +24,7 @@ public class MethodSymbol_ASymbolWithModifier_LSPTest extends ASymbolWithModifie
     private IModifierSet returnTypeModifiers;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         returnTypeModifiers = mock(IModifierSet.class);
     }
 

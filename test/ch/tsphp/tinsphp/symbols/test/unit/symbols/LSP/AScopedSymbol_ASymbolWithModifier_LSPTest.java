@@ -4,7 +4,7 @@
  * root folder or visit the project's website http://tsphp.ch/wiki/display/TINS/License
  */
 
-package ch.tsphp.tinsphp.symbols.test.unit.symbols;
+package ch.tsphp.tinsphp.symbols.test.unit.symbols.LSP;
 
 import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
@@ -13,6 +13,7 @@ import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.symbols.AScopedSymbol;
 import ch.tsphp.tinsphp.symbols.ASymbolWithModifier;
+import ch.tsphp.tinsphp.symbols.test.unit.symbols.ASymbolWithModifierTest;
 
 import static org.mockito.Mockito.mock;
 
