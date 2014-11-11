@@ -14,10 +14,12 @@ import java.util.Set;
 
 public class NullableTypeSymbol_ANullableTypeSymbol_LSPTest extends ANullableTypeSymbolTest
 {
+    @Override
     protected ANullableTypeSymbol createNullableTypeSymbol(String name, ITypeSymbol parentTypeSymbol) {
         return new NullTypeSymbol();
     }
 
+    @Override
     protected ANullableTypeSymbol createNullableTypeSymbol(String name, Set<ITypeSymbol> parentTypeSymbol) {
         return new NullTypeSymbol();
     }

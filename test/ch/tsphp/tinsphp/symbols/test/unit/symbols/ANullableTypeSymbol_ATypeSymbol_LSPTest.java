@@ -50,10 +50,12 @@ public class ANullableTypeSymbol_ATypeSymbol_LSPTest extends ATypeSymbolTest
         return createTypeSymbol(mock(ITSPHPAst.class), "foo", mock(ITypeSymbol.class));
     }
 
+    @Override
     protected ATypeSymbol createTypeSymbol(ITSPHPAst definitionAst, String name, ITypeSymbol parentTypeSymbol) {
         return new DummyNullableTypeSymbol(name, parentTypeSymbol);
     }
 
+    @Override
     protected ATypeSymbol createTypeSymbol(ITSPHPAst definitionAst, String name, Set<ITypeSymbol> parentTypeSymbol) {
         return new DummyNullableTypeSymbol(name, parentTypeSymbol);
     }

@@ -134,7 +134,6 @@ public class NullableTypeSymbol_ASymbolWithModifier_LSPTest extends ASymbolWithM
         assertThat(result, is("null" + ":" + typeName + "|" + TokenTypes.QuestionMark + ", " + modifier));
     }
 
-
     @Override
     public void toString_noTypeDefinedAndOneModifierDefined_ReturnNameInclModifiers() {
         // different behaviour - ANullableTypeSymbol has always the nullable modifier
