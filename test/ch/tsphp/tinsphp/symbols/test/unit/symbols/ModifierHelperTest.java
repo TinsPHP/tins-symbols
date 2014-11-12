@@ -19,19 +19,16 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.core.IsCollectionContaining.hasItem;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class ModifierHelperTest
 {
 
     @Test
-    public void getModifiers_GetChildrenReturnsNull_ReturnsEmptyModifierSet() {
-        ITSPHPAst ast = mock(ITSPHPAst.class);
-        when(ast.getChildren()).thenReturn(null);
+    public void getModifiers_ModifierIsNull_ReturnsEmptyModifierSet() {
+        //no arrange necessary
 
         IModifierHelper modifierHelper = createModifierHelper();
-        IModifierSet result = modifierHelper.getModifiers(ast);
+        IModifierSet result = modifierHelper.getModifiers(null);
 
         assertThat(result, is(empty()));
     }

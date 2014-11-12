@@ -15,8 +15,8 @@ package ch.tsphp.tinsphp.symbols;
 
 import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
+import ch.tsphp.common.exceptions.TSPHPException;
 import ch.tsphp.common.symbols.ITypeSymbol;
-import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IAliasSymbol;
 import ch.tsphp.tinsphp.common.symbols.IAliasTypeSymbol;
@@ -25,6 +25,12 @@ import ch.tsphp.tinsphp.common.symbols.IModifierHelper;
 import ch.tsphp.tinsphp.common.symbols.INullTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
+import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
+import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousVariableSymbol;
+import ch.tsphp.tinsphp.symbols.erroneous.ErroneousMethodSymbol;
+import ch.tsphp.tinsphp.symbols.erroneous.ErroneousTypeSymbol;
+import ch.tsphp.tinsphp.symbols.erroneous.ErroneousVariableSymbol;
 
 public class SymbolFactory implements ISymbolFactory
 {
@@ -37,15 +43,14 @@ public class SymbolFactory implements ISymbolFactory
         modifierHelper = theModifierHelper;
     }
 
-    //    @Override
-//    public void setMixedTypeSymbol(ITypeSymbol typeSymbol) {
-//        mixedTypeSymbol = typeSymbol;
-//    }
-//
+    @Override
+    public void setMixedTypeSymbol(ITypeSymbol typeSymbol) {
+        mixedTypeSymbol = typeSymbol;
+    }
+
     @Override
     public INullTypeSymbol createNullTypeSymbol() {
         return new NullTypeSymbol();
-
     }
 //
 //    @Override
@@ -136,25 +141,25 @@ public class SymbolFactory implements ISymbolFactory
 
     @Override
     public IVariableSymbol createVariableSymbol(ITSPHPAst typeModifier, ITSPHPAst variableId) {
-        IModifierSet modifiers = typeModifier != null ? modifierHelper.getModifiers(typeModifier) : new ModifierSet();
-        return new VariableSymbol(variableId, modifiers, variableId.getText());
+        return new VariableSymbol(variableId, modifierHelper.getModifiers(typeModifier), variableId.getText());
     }
 
-//    @Override
-//    public IErroneousTypeSymbol createErroneousTypeSymbol(ITSPHPAst ast, TSPHPException exception) {
-//        IMethodSymbol methodSymbol = createErroneousMethodSymbol(ast, exception);
-//        return new ErroneousTypeSymbol(ast, exception, methodSymbol);
-//    }
-//
-//    @Override
-//    public IErroneousMethodSymbol createErroneousMethodSymbol(ITSPHPAst ast, TSPHPException ex) {
-//        return new ErroneousMethodSymbol(ast, ex);
-//    }
-//
-//    @Override
-//    public IVariableSymbol createErroneousVariableSymbol(ITSPHPAst ast, TSPHPException exception) {
-//        IVariableSymbol variableSymbol = new ErroneousVariableSymbol(ast, exception);
-//        variableSymbol.setType(createErroneousTypeSymbol(ast, exception));
-//        return variableSymbol;
-//    }
+    @Override
+    public IErroneousTypeSymbol createErroneousTypeSymbol(ITSPHPAst ast, TSPHPException exception) {
+        IErroneousMethodSymbol methodSymbol = createErroneousMethodSymbol(ast, exception);
+        return new ErroneousTypeSymbol(ast, ast.getText(), exception, methodSymbol);
+    }
+
+    @Override
+    public IErroneousMethodSymbol createErroneousMethodSymbol(ITSPHPAst ast, TSPHPException ex) {
+        return new ErroneousMethodSymbol(ast, ast.getText(), ex);
+    }
+
+    @Override
+    public IErroneousVariableSymbol createErroneousVariableSymbol(ITSPHPAst ast,
+            TSPHPException exception) {
+        IErroneousVariableSymbol variableSymbol = new ErroneousVariableSymbol(ast, ast.getText(), exception);
+        variableSymbol.setType(createErroneousTypeSymbol(ast, exception));
+        return variableSymbol;
+    }
 }

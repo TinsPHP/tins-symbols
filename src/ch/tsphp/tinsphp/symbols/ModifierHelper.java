@@ -27,10 +27,12 @@ public class ModifierHelper implements IModifierHelper
     public IModifierSet getModifiers(final ITSPHPAst modifierAst) {
         IModifierSet modifiers = new ModifierSet();
 
-        List<ITSPHPAst> children = modifierAst.getChildren();
-        if (children != null && !children.isEmpty()) {
-            for (ITSPHPAst child : children) {
-                modifiers.add(child.getType());
+        if (modifierAst != null) {
+            List<ITSPHPAst> children = modifierAst.getChildren();
+            if (children != null) {
+                for (ITSPHPAst child : children) {
+                    modifiers.add(child.getType());
+                }
             }
         }
         return modifiers;
