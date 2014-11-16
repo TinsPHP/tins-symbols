@@ -25,9 +25,12 @@ import ch.tsphp.tinsphp.common.symbols.IModifierHelper;
 import ch.tsphp.tinsphp.common.symbols.INullTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
+import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousLazySymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousVariableSymbol;
+import ch.tsphp.tinsphp.common.symbols.erroneous.ILazySymbolResolver;
+import ch.tsphp.tinsphp.symbols.erroneous.ErroneousLazySymbol;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousMethodSymbol;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousTypeSymbol;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousVariableSymbol;
@@ -162,4 +165,12 @@ public class SymbolFactory implements ISymbolFactory
         variableSymbol.setType(createErroneousTypeSymbol(ast, exception));
         return variableSymbol;
     }
+
+    @Override
+    public IErroneousLazySymbol createErroneousLazySymbol(
+            ILazySymbolResolver symbolResolver, ITSPHPAst ast, TSPHPException exception) {
+        return new ErroneousLazySymbol(ast, ast.getText(), exception, symbolResolver);
+    }
+
+
 }

@@ -17,8 +17,8 @@ public class ErroneousVariableSymbol_AErroneousSymbolWithAccessModifier_LSPTest
 {
 
     @Override
-    protected AErroneousSymbolWithAccessModifier createSymbol(ITSPHPAst definitionAst, String name,
-            TSPHPException exception) {
+    protected AErroneousSymbolWithAccessModifier createSymbol(
+            ITSPHPAst definitionAst, String name, TSPHPException exception) {
         return new ErroneousVariableSymbol(definitionAst, name, exception);
     }
 }

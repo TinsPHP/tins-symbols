@@ -47,6 +47,6 @@ public class ErroneousVariableSymbol extends AErroneousSymbolWithAccessModifier 
 
     @Override
     public TypeWithModifiersDto toTypeWithModifiersDto() {
-        throw new UnsupportedOperationException("ErroneousVariableSymbol is not a real method.");
+        throw new UnsupportedOperationException("ErroneousVariableSymbol is not a real class.");
     }
 }

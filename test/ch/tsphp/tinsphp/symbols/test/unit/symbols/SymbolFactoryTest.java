@@ -18,9 +18,11 @@ import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IModifierHelper;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
+import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousLazySymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousVariableSymbol;
+import ch.tsphp.tinsphp.common.symbols.erroneous.ILazySymbolResolver;
 import ch.tsphp.tinsphp.symbols.ModifierSet;
 import ch.tsphp.tinsphp.symbols.SymbolFactory;
 import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
@@ -223,6 +225,43 @@ public class SymbolFactoryTest
 
         ISymbolFactory symbolFactory = createSymbolFactory();
         IErroneousVariableSymbol result = symbolFactory.createErroneousVariableSymbol(mock(ITSPHPAst.class), exception);
+
+        assertThat(result.getException(), is(exception));
+    }
+
+    @Test
+    public void createErroneousLazySymbol_Standard_LazyResolverIsPassedResolver() {
+        ILazySymbolResolver lazySymbolResolver = mock(ILazySymbolResolver.class);
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IErroneousLazySymbol result = symbolFactory.createErroneousLazySymbol(
+                lazySymbolResolver, mock(ITSPHPAst.class), new TSPHPException());
+        result.resolveSymbolLazily();
+
+        verify(lazySymbolResolver).resolve();
+    }
+
+    @Test
+    public void createErroneousLazySymbol_Standard_DefinitionAstIsPassedAstAndNameIsAstText() {
+        ITSPHPAst ast = mock(ITSPHPAst.class);
+        String name = "foo";
+        when(ast.getText()).thenReturn(name);
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IErroneousLazySymbol result = symbolFactory.createErroneousLazySymbol(
+                mock(ILazySymbolResolver.class), ast, new TSPHPException());
+
+        assertThat(result.getDefinitionAst(), is(ast));
+        assertThat(result.getName(), is(name));
+    }
+
+    @Test
+    public void createErroneousLazySymbol_Standard_ExceptionIsPassedException() {
+        TSPHPException exception = new TSPHPException();
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IErroneousLazySymbol result = symbolFactory.createErroneousLazySymbol(
+                mock(ILazySymbolResolver.class), mock(ITSPHPAst.class), exception);
 
         assertThat(result.getException(), is(exception));
     }

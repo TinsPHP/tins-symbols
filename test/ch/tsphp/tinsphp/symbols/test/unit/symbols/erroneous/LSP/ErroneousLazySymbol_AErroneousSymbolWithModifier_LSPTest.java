@@ -8,16 +8,19 @@ package ch.tsphp.tinsphp.symbols.test.unit.symbols.erroneous.LSP;
 
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
+import ch.tsphp.tinsphp.common.symbols.erroneous.ILazySymbolResolver;
 import ch.tsphp.tinsphp.symbols.erroneous.AErroneousSymbolWithModifier;
-import ch.tsphp.tinsphp.symbols.erroneous.ErroneousVariableSymbol;
+import ch.tsphp.tinsphp.symbols.erroneous.ErroneousLazySymbol;
 import ch.tsphp.tinsphp.symbols.test.unit.symbols.erroneous.AErroneousSymbolWithModifierTest;
 
-public class ErroneousVariableSymbol_AErroneousSymbolWithModifier_LSPTest extends AErroneousSymbolWithModifierTest
+import static org.mockito.Mockito.mock;
+
+public class ErroneousLazySymbol_AErroneousSymbolWithModifier_LSPTest extends AErroneousSymbolWithModifierTest
 {
 
     @Override
     protected AErroneousSymbolWithModifier createSymbol(
             ITSPHPAst definitionAst, String name, TSPHPException exception) {
-        return new ErroneousVariableSymbol(definitionAst, name, exception);
+        return new ErroneousLazySymbol(definitionAst, name, exception, mock(ILazySymbolResolver.class));
     }
 }

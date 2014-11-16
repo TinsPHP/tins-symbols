@@ -48,7 +48,6 @@ public class ErroneousTypeSymbol extends AErroneousScopedSymbol implements IErro
         return true;
     }
 
-
     @Override
     public ITSPHPAst getDefaultValue() {
         return AstHelperRegistry.get().createAst(TokenTypes.Null, "null");
