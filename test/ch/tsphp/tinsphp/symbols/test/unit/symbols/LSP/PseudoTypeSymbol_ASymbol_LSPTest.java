@@ -9,7 +9,7 @@ package ch.tsphp.tinsphp.symbols.test.unit.symbols.LSP;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.symbols.ASymbol;
-import ch.tsphp.tinsphp.symbols.NullTypeSymbol;
+import ch.tsphp.tinsphp.symbols.PseudoTypeSymbol;
 import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
 import ch.tsphp.tinsphp.symbols.test.unit.symbols.ASymbolTest;
 
@@ -19,25 +19,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class NullableTypeSymbol_ASymbol_LSPTest extends ASymbolTest
+public class PseudoTypeSymbol_ASymbol_LSPTest extends ASymbolTest
 {
-
-    @Override
-    public void getName_Standard_ReturnsOnePassedToConstructor() {
-        // different behaviour - NullableTypeSymbol has always null as name
-
-        // start same as in ASymbolTest
-        ITSPHPAst ast = mock(ITSPHPAst.class);
-        String name = "foo";
-
-        ASymbol symbol = createSymbol(ast, name);
-        String result = symbol.getName();
-        // end same as in ASymbolTest
-
-        //assertThat(result, is(name));
-        assertThat(result, is("null"));
-    }
-
 
     @Override
     public void getDefinitionAst_Standard_ReturnsOnePassedToConstructor() {
@@ -60,7 +43,6 @@ public class NullableTypeSymbol_ASymbol_LSPTest extends ASymbolTest
     public void toString_NoTypeDefined_ReturnsName() {
         // different behaviour - appends the modifiers in addition. See ASymbolWithModifier
         // Since ANullableTypeSymbol has always the nullable modifier it is different
-        // furthermore, NullableTypeSymbol has always null as name
 
         // start same as in ASymbolTest
         ITSPHPAst ast = mock(ITSPHPAst.class);
@@ -71,14 +53,13 @@ public class NullableTypeSymbol_ASymbol_LSPTest extends ASymbolTest
         // end same as in ASymbolTest
 
         //assertThat(result, is(name));
-        assertThat(result, is("null" + "|" + TokenTypes.QuestionMark));
+        assertThat(result, is(name + "|" + TokenTypes.QuestionMark));
     }
 
     @Override
     public void toString_TypeDefined_ReturnsNameColonTypeToString() {
         // different behaviour - appends the modifiers in addition. See ASymbolWithModifier
         // Since ANullableTypeSymbol has always the nullable modifier it is different
-        // furthermore, NullableTypeSymbol has always null as name
 
         // start same as in ASymbolTest
         ITSPHPAst ast = mock(ITSPHPAst.class);
@@ -93,11 +74,11 @@ public class NullableTypeSymbol_ASymbol_LSPTest extends ASymbolTest
         // end same as in ASymbolTest
 
         //assertThat(result, is(name + ":" + typeName));
-        assertThat(result, is("null" + ":" + typeName + "|" + TokenTypes.QuestionMark));
+        assertThat(result, is(name + ":" + typeName + "|" + TokenTypes.QuestionMark));
     }
 
     @Override
     protected ASymbol createSymbol(ITSPHPAst definitionAst, String name) {
-        return new NullTypeSymbol();
+        return new PseudoTypeSymbol(name, null);
     }
 }

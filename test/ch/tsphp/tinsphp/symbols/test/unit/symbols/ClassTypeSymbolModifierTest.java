@@ -8,10 +8,12 @@ package ch.tsphp.tinsphp.symbols.test.unit.symbols;
 
 import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
+import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
-import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
-import ch.tsphp.tinsphp.symbols.MethodSymbol;
+import ch.tsphp.tinsphp.common.symbols.IClassTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IPolymorphicTypeSymbol;
+import ch.tsphp.tinsphp.symbols.ClassTypeSymbol;
 import ch.tsphp.tinsphp.symbols.ModifierSet;
 import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
 import org.junit.Test;
@@ -23,16 +25,17 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(Parameterized.class)
-public class MethodSymbolModifierTest
+public class ClassTypeSymbolModifierTest
 {
     private String methodName;
     private int modifierType;
 
-    public MethodSymbolModifierTest(String theMethodName, int theModifierType) {
+    public ClassTypeSymbolModifierTest(String theMethodName, int theModifierType) {
         methodName = theMethodName;
         modifierType = theModifierType;
     }
@@ -42,26 +45,22 @@ public class MethodSymbolModifierTest
         IModifierSet set = createModifierSet();
         set.add(modifierType);
 
-        IMethodSymbol methodSymbol = createMethodSymbol(set);
-        boolean result = (boolean) methodSymbol.getClass().getMethod(methodName).invoke(methodSymbol);
+        IPolymorphicTypeSymbol typeSymbol = createClassTypeSymbol(set);
+        boolean result = (boolean) typeSymbol.getClass().getMethod(methodName).invoke(typeSymbol);
 
-        //the following three modifiers are return type modifiers and thus the expected result is false for those
-        //modifiers since no return modifier was defined
-        boolean is = !methodName.equals("isAlwaysCasting")
-                && !methodName.equals("isFalseable")
-                && !methodName.equals("isNullable");
-
-        assertEquals(methodName + " failed.", is, result);
+        assertTrue(methodName + " failed.", result);
     }
 
     @Test
     public void isNot_ReturnsFalse() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         IModifierSet set = createModifierSet();
 
-        IMethodSymbol methodSymbol = createMethodSymbol(set);
-        boolean result = (boolean) methodSymbol.getClass().getMethod(methodName).invoke(methodSymbol);
+        IPolymorphicTypeSymbol typeSymbol = createClassTypeSymbol(set);
+        boolean result = (boolean) typeSymbol.getClass().getMethod(methodName).invoke(typeSymbol);
 
-        assertFalse(methodName + " failed.", result);
+        //APolymorphicTypeSymbol is always nullable
+        boolean is = methodName.equals("isNullable");
+        assertEquals(methodName + " failed.", is, result);
     }
 
     @Parameterized.Parameters
@@ -69,11 +68,11 @@ public class MethodSymbolModifierTest
         return Arrays.asList(new Object[][]{
                 {"isAbstract", TokenTypes.Abstract},
                 {"isFinal", TokenTypes.Final},
-                {"isStatic", TokenTypes.Static},
-                {"isPublic", TokenTypes.Public},
-                {"isProtected", TokenTypes.Protected},
-                {"isPrivate", TokenTypes.Private},
-                {"isAlwaysCasting", TokenTypes.Cast},
+                //PHP does not yet support static, and access modifiers for classes
+//                {"isStatic", TokenTypes.Static},
+//                {"isPublic", TokenTypes.Public},
+//                {"isProtected", TokenTypes.Protected},
+//                {"isPrivate", TokenTypes.Private},
                 {"isFalseable", TokenTypes.LogicNot},
                 {"isNullable", TokenTypes.QuestionMark},
         });
@@ -83,25 +82,28 @@ public class MethodSymbolModifierTest
         return new ModifierSet();
     }
 
-    private IMethodSymbol createMethodSymbol(IModifierSet set) {
-        return createMethodSymbol(
+    private IClassTypeSymbol createClassTypeSymbol(IModifierSet set) {
+        ITypeSymbol typeSymbol = mock(ITypeSymbol.class);
+        when(typeSymbol.getName()).thenReturn("dummy");
+        return createClassTypeSymbol(
                 mock(IScopeHelper.class),
                 mock(ITSPHPAst.class),
                 set,
-                mock(IModifierSet.class),
                 "foo",
-                mock(IScope.class));
+                mock(IScope.class),
+                typeSymbol
+        );
     }
 
-    protected IMethodSymbol createMethodSymbol(
+    protected IClassTypeSymbol createClassTypeSymbol(
             IScopeHelper scopeHelper,
             ITSPHPAst definitionAst,
-            IModifierSet methodModifiers,
-            IModifierSet returnTypeModifiers,
+            IModifierSet modifiers,
             String name,
-            IScope enclosingScope) {
-        return new MethodSymbol(scopeHelper, definitionAst, methodModifiers, returnTypeModifiers, name, enclosingScope);
+            IScope enclosingScope,
+            ITypeSymbol parentTypeSymbol) {
+        return new ClassTypeSymbol(
+                scopeHelper, definitionAst, modifiers, name, enclosingScope, parentTypeSymbol);
     }
-
 
 }

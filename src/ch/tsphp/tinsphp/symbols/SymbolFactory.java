@@ -20,10 +20,15 @@ import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IAliasSymbol;
 import ch.tsphp.tinsphp.common.symbols.IAliasTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IArrayTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IClassTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IModifierHelper;
 import ch.tsphp.tinsphp.common.symbols.INullTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IPseudoTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IScalarTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
+import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousLazySymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
@@ -34,6 +39,8 @@ import ch.tsphp.tinsphp.symbols.erroneous.ErroneousLazySymbol;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousMethodSymbol;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousTypeSymbol;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousVariableSymbol;
+
+import java.util.Map;
 
 public class SymbolFactory implements ISymbolFactory
 {
@@ -51,44 +58,42 @@ public class SymbolFactory implements ISymbolFactory
         mixedTypeSymbol = typeSymbol;
     }
 
+    public ITypeSymbol getMixedTypeSymbol() {
+        return mixedTypeSymbol;
+    }
+
     @Override
     public INullTypeSymbol createNullTypeSymbol() {
         return new NullTypeSymbol();
     }
-//
+
+    //
 //    @Override
 //    public IVoidTypeSymbol createVoidTypeSymbol() {
 //        return new VoidTypeSymbol();
 //
 //    }
 //
-//    @Override
-//    @SuppressWarnings("checkstyle:parameternumber")
-//    public IScalarTypeSymbol createScalarTypeSymbol(
-//            String name,
-//            int tokenTypeForCasting,
-//            Set<ITypeSymbol> parentTypeSymbol,
-//            int defaultValueTokenType,
-//            String defaultValue) {
-//
-//        return new ScalarTypeSymbol(
-//                name,
-//                parentTypeSymbol,
-//                tokenTypeForCasting,
-//                defaultValueTokenType,
-//                defaultValue);
-//    }
-//
-//    @Override
-//    public IArrayTypeSymbol createArrayTypeSymbol(String name, int tokenType,
-//            ITypeSymbol keyValue, ITypeSymbol valueType) {
-//        return new ArrayTypeSymbol(name, tokenType, keyValue, valueType, mixedTypeSymbol);
-//    }
-//
-//    @Override
-//    public IPseudoTypeSymbol createPseudoTypeSymbol(String name) {
-//        return new PseudoTypeSymbol(name, mixedTypeSymbol);
-//    }
+    @Override
+    @SuppressWarnings("checkstyle:parameternumber")
+    public IScalarTypeSymbol createScalarTypeSymbol(
+            String name,
+            ITypeSymbol parentTypeSymbol,
+            int defaultValueTokenType,
+            String defaultValue) {
+
+        return new ScalarTypeSymbol(name, parentTypeSymbol, defaultValueTokenType, defaultValue);
+    }
+
+    @Override
+    public IArrayTypeSymbol createArrayTypeSymbol(String name, ITypeSymbol keyValue, ITypeSymbol valueType) {
+        return new ArrayTypeSymbol(name, keyValue, valueType, mixedTypeSymbol);
+    }
+
+    @Override
+    public IPseudoTypeSymbol createPseudoTypeSymbol(String name) {
+        return new PseudoTypeSymbol(name, mixedTypeSymbol);
+    }
 
     @Override
     public IAliasSymbol createAliasSymbol(ITSPHPAst useDefinition, String alias) {
@@ -100,8 +105,7 @@ public class SymbolFactory implements ISymbolFactory
         return new AliasTypeSymbol(definitionAst, name, mixedTypeSymbol);
     }
 
-    //
-//    @Override
+    //    @Override
 //    public IInterfaceTypeSymbol createInterfaceTypeSymbol(ITSPHPAst modifier, ITSPHPAst identifier,
 //            IScope currentScope) {
 //        return new InterfaceTypeSymbol(
@@ -113,18 +117,23 @@ public class SymbolFactory implements ISymbolFactory
 //                mixedTypeSymbol);
 //    }
 //
-//    @Override
-//    public IClassTypeSymbol createClassTypeSymbol(ITSPHPAst classModifierAst, ITSPHPAst identifier,
-//            IScope currentScope) {
-//        return new ClassTypeSymbol(
-//                scopeHelper,
-//                identifier,
-//                modifierHelper.getModifiers(classModifierAst),
-//                identifier.getText(),
-//                currentScope,
-//                mixedTypeSymbol);
-//    }
-//
+    @Override
+    public IClassTypeSymbol createClassTypeSymbol(
+            ITSPHPAst classModifierAst, ITSPHPAst identifier, IScope currentScope) {
+        return new ClassTypeSymbol(
+                scopeHelper,
+                identifier,
+                modifierHelper.getModifiers(classModifierAst),
+                identifier.getText(),
+                currentScope,
+                mixedTypeSymbol);
+    }
+
+    @Override
+    public IUnionTypeSymbol createUnionTypeSymbol(Map<String, ITypeSymbol> types) {
+        return new UnionTypeSymbol(types);
+    }
+
     @Override
     public IMethodSymbol createMethodSymbol(ITSPHPAst methodModifier, ITSPHPAst returnTypeModifier,
             ITSPHPAst identifier, IScope currentScope) {
@@ -171,6 +180,5 @@ public class SymbolFactory implements ISymbolFactory
             ILazySymbolResolver symbolResolver, ITSPHPAst ast, TSPHPException exception) {
         return new ErroneousLazySymbol(ast, ast.getText(), exception, symbolResolver);
     }
-
 
 }

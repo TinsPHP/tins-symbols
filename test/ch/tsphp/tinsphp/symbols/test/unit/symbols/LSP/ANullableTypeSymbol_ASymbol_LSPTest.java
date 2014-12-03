@@ -32,7 +32,7 @@ public class ANullableTypeSymbol_ASymbol_LSPTest extends ASymbolTest
     @Override
     public void getDefinitionAst_Standard_ReturnsOnePassedToConstructor() {
         // different behaviour - nullable types are pre-defined types which do not have a definition Ast
-        // it therefore always return null.
+        // therefore it always returns null.
 
         // start same as in ASymbolTest
         ITSPHPAst ast = mock(ITSPHPAst.class);

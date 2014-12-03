@@ -9,8 +9,8 @@ package ch.tsphp.tinsphp.symbols.test.unit.symbols.LSP;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
-import ch.tsphp.tinsphp.symbols.ANullableTypeSymbol;
 import ch.tsphp.tinsphp.symbols.ASymbolWithModifier;
+import ch.tsphp.tinsphp.symbols.ArrayTypeSymbol;
 import ch.tsphp.tinsphp.symbols.ModifierSet;
 import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
 import ch.tsphp.tinsphp.symbols.test.unit.symbols.ASymbolWithModifierTest;
@@ -21,15 +21,8 @@ import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInA
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class ANullableTypeSymbol_ASymbolWithModifier_LSPTest extends ASymbolWithModifierTest
+public class ArrayTypeSymbol_ASymbolWithModifier_LSPTest extends ASymbolWithModifierTest
 {
-
-    class DummyNullableTypeSymbol extends ANullableTypeSymbol
-    {
-        public DummyNullableTypeSymbol(String name, ITypeSymbol parentTypeSymbol) {
-            super(name, parentTypeSymbol);
-        }
-    }
 
     @Override
     public void getModifiers_NothingDefined_ReturnEmptyModifierSet() {
@@ -230,7 +223,7 @@ public class ANullableTypeSymbol_ASymbolWithModifier_LSPTest extends ASymbolWith
     @Override
     protected ASymbolWithModifier createSymbolWithModifier(
             ITSPHPAst definitionAst, IModifierSet modifiers, String name) {
-        DummyNullableTypeSymbol symbol = new DummyNullableTypeSymbol(name, mock(ITypeSymbol.class));
+        ArrayTypeSymbol symbol = new ArrayTypeSymbol(name, null, null, null);
         symbol.setModifiers(modifiers);
         return symbol;
     }

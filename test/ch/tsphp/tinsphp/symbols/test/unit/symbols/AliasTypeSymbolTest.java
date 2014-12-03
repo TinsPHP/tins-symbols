@@ -21,7 +21,7 @@ public class AliasTypeSymbolTest
     public void getDefaultValue_Standard_ThrowsException() {
         //no arrange necessary
 
-        IAliasTypeSymbol symbol = this.createAliasTypeSymbol();
+        IAliasTypeSymbol symbol = createAliasTypeSymbol();
         symbol.getDefaultValue();
 
         //assert in annotation

@@ -61,8 +61,10 @@ public abstract class AScopedSymbol extends ASymbolWithModifier implements IScop
     }
 
     @Override
+    @Deprecated
     public boolean doubleDefinitionCheck(ISymbol symbol) {
-        return scopeHelper.checkIsNotDoubleDefinition(symbols, symbol);
+        throw new UnsupportedOperationException("deprecated - should not be used anymore, "
+                + "use phase controller instead");
     }
 
     //Warning! start code duplication - same as in AScope

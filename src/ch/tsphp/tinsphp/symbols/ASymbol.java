@@ -23,14 +23,14 @@ import ch.tsphp.common.symbols.ITypeSymbol;
 public abstract class ASymbol implements ISymbol
 {
 
+    protected final ITSPHPAst definitionAst;
     protected final String name;
     protected ITypeSymbol type;
     protected IScope definitionScope;
-    protected final ITSPHPAst definitionAst;
 
     protected ASymbol(ITSPHPAst theDefinitionAst, String theName) {
-        name = theName;
         definitionAst = theDefinitionAst;
+        name = theName;
     }
 
     @Override

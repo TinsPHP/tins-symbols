@@ -38,8 +38,7 @@ public class MethodSymbolReturnTypeModifierTest
     }
 
     @Test
-    public void is_ReturnsTrue() throws NoSuchMethodException, InvocationTargetException,
-            IllegalAccessException {
+    public void is_ReturnsTrue() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         IModifierSet set = createModifierSet();
         set.add(modifierType);
 
@@ -57,8 +56,7 @@ public class MethodSymbolReturnTypeModifierTest
     }
 
     @Test
-    public void isNot_ReturnsFalse() throws NoSuchMethodException, InvocationTargetException,
-            IllegalAccessException {
+    public void isNot_ReturnsFalse() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         IModifierSet set = createModifierSet();
 
         IMethodSymbol methodSymbol = createMethodSymbol(set);
@@ -87,11 +85,17 @@ public class MethodSymbolReturnTypeModifierTest
     }
 
     private IMethodSymbol createMethodSymbol(IModifierSet set) {
-        return createMethodSymbol(mock(IScopeHelper.class), mock(ITSPHPAst.class), mock(IModifierSet.class), set, "foo",
+        return createMethodSymbol(
+                mock(IScopeHelper.class),
+                mock(ITSPHPAst.class),
+                mock(IModifierSet.class),
+                set,
+                "foo",
                 mock(IScope.class));
     }
 
-    protected IMethodSymbol createMethodSymbol(IScopeHelper scopeHelper,
+    protected IMethodSymbol createMethodSymbol(
+            IScopeHelper scopeHelper,
             ITSPHPAst definitionAst,
             IModifierSet methodModifiers,
             IModifierSet returnTypeModifiers,

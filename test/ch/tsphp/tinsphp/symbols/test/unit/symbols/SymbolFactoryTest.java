@@ -14,9 +14,14 @@ import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IAliasSymbol;
 import ch.tsphp.tinsphp.common.symbols.IAliasTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IArrayTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IClassTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IModifierHelper;
+import ch.tsphp.tinsphp.common.symbols.IPseudoTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IScalarTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
+import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousLazySymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
@@ -29,16 +34,127 @@ import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.hamcrest.core.Is.is;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class SymbolFactoryTest
 {
+    @Test
+    public void getMixedTypeSymbol_NothingSet_ReturnsNull() {
+        //no arrange necessary
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        ITypeSymbol result = symbolFactory.getMixedTypeSymbol();
+
+        assertThat(result, is(nullValue()));
+    }
+
+    @Test
+    public void getMixedTypeSymbol_TypeSymbolSet_ReturnsTypeSymbol() {
+        ITypeSymbol typeSymbol = mock(ITypeSymbol.class);
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        symbolFactory.setMixedTypeSymbol(typeSymbol);
+        ITypeSymbol result = symbolFactory.getMixedTypeSymbol();
+
+        assertThat(result, is(typeSymbol));
+    }
+
+    @Test
+    public void createScalarTypeSymbol_Standard_NameIsPassedName() {
+        String name = "foo";
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IScalarTypeSymbol result = symbolFactory.createScalarTypeSymbol(name, null, 0, "");
+
+        assertThat(result.getName(), is(name));
+    }
+
+    @Test
+    public void createScalarTypeSymbol_Standard_ParentTypeSymbolIsPassedTypeSymbol() {
+        ITypeSymbol parentTypeSymbol = mock(ITypeSymbol.class);
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IScalarTypeSymbol result = symbolFactory.createScalarTypeSymbol("", parentTypeSymbol, 0, "");
+
+        assertThat(result.getParentTypeSymbols(), containsInAnyOrder(parentTypeSymbol));
+    }
+
+
+    @Test
+    public void createScalarTypeSymbol_Standard_GetDefaultValueIsBuiltOutOfPassedDefaultTokenAndValue() {
+        int defaultTokenType = 389;
+        String defaultValue = "hello";
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IScalarTypeSymbol result = symbolFactory.createScalarTypeSymbol("", null, defaultTokenType, defaultValue);
+
+        ITSPHPAst ast = result.getDefaultValue();
+        assertThat(ast.getType(), is(defaultTokenType));
+        assertThat(ast.getText(), is(defaultValue));
+    }
+
+    @Test
+    public void createArrayTypeSymbol_Standard_NameIsPassedName() {
+        String name = "foo";
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IArrayTypeSymbol result = symbolFactory.createArrayTypeSymbol(name, null, null);
+
+        assertThat(result.getName(), is(name));
+    }
+
+    @Test
+    public void createArrayTypeSymbol_Standard_KeyTypeSymbolIsPassedTypeSymbol() {
+        ITypeSymbol typeSymbol = mock(ITypeSymbol.class);
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IArrayTypeSymbol result = symbolFactory.createArrayTypeSymbol("", typeSymbol, null);
+
+        assertThat(result.getKeyTypeSymbol(), is(typeSymbol));
+    }
+
+    @Test
+    public void createArrayTypeSymbol_Standard_ValueTypeSymbolIsPassedTypeSymbol() {
+        ITypeSymbol typeSymbol = mock(ITypeSymbol.class);
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IArrayTypeSymbol result = symbolFactory.createArrayTypeSymbol("", null, typeSymbol);
+
+        assertThat(result.getValueTypeSymbol(), is(typeSymbol));
+    }
+
+    @Test
+    public void createPseudoTypeSymbol_Standard_NameIsPassedName() {
+        String name = "foo";
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IPseudoTypeSymbol result = symbolFactory.createPseudoTypeSymbol(name);
+
+        assertThat(result.getName(), is(name));
+    }
+
+    @Test
+    public void createPseudoTypeSymbol_Standard_ParentTypeIsDefinedMixed() {
+        ITypeSymbol mixed = mock(ITypeSymbol.class);
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        symbolFactory.setMixedTypeSymbol(mixed);
+        IPseudoTypeSymbol result = symbolFactory.createPseudoTypeSymbol("");
+
+        assertThat(result.getParentTypeSymbols(), containsInAnyOrder(mixed));
+    }
+
+
     @Test
     public void createAliaSymbol_Standard_DefinitionAstIsPassedAstAndNameIsPassedName() {
         ITSPHPAst ast = mock(ITSPHPAst.class);
@@ -72,6 +188,84 @@ public class SymbolFactoryTest
 
         assertThat(result.getDefinitionAst(), is(ast));
         assertThat(result.getName(), is(name));
+    }
+
+    @Test
+    public void createClassTypeSymbol_Standard_DefinitionAstIsPassedIdentifierAndNameIsTextOfIdentifier() {
+        ITSPHPAst identifier = mock(ITSPHPAst.class);
+        String name = "foo";
+        when(identifier.getText()).thenReturn(name);
+        //required that we do not get NullPointers for this test
+        ITypeSymbol mixed = mock(ITypeSymbol.class);
+        when(mixed.getName()).thenReturn("mixed");
+        IModifierHelper modifierHelper = mock(IModifierHelper.class);
+        when(modifierHelper.getModifiers(any(ITSPHPAst.class))).thenReturn(new ModifierSet());
+
+        ISymbolFactory symbolFactory = createSymbolFactory(modifierHelper);
+        symbolFactory.setMixedTypeSymbol(mixed);
+        IClassTypeSymbol result = symbolFactory.createClassTypeSymbol(null, identifier, null);
+
+        assertThat(result.getDefinitionAst(), is(identifier));
+        assertThat(result.getName(), is(name));
+    }
+
+    @Test
+    public void createClassTypeSymbol_Standard_EnclosingScopeIsPassedScope() {
+        IScope scope = mock(IScope.class);
+        //required that we do not get NullPointers for this test
+        ITypeSymbol mixed = mock(ITypeSymbol.class);
+        when(mixed.getName()).thenReturn("mixed");
+        IModifierHelper modifierHelper = mock(IModifierHelper.class);
+        when(modifierHelper.getModifiers(any(ITSPHPAst.class))).thenReturn(new ModifierSet());
+
+        ISymbolFactory symbolFactory = createSymbolFactory(modifierHelper);
+        symbolFactory.setMixedTypeSymbol(mixed);
+        IClassTypeSymbol result = symbolFactory.createClassTypeSymbol(null, mock(ITSPHPAst.class), scope);
+
+        assertThat(result.getEnclosingScope(), is(scope));
+    }
+
+    @Test
+    public void createClassTypeSymbol_Standard_ParentTypeIsDefinedMixed() {
+        IScope scope = mock(IScope.class);
+        //required that we do not get NullPointers for this test
+        ITypeSymbol mixed = mock(ITypeSymbol.class);
+        when(mixed.getName()).thenReturn("mixed");
+        IModifierHelper modifierHelper = mock(IModifierHelper.class);
+        when(modifierHelper.getModifiers(any(ITSPHPAst.class))).thenReturn(new ModifierSet());
+
+        ISymbolFactory symbolFactory = createSymbolFactory(modifierHelper);
+        symbolFactory.setMixedTypeSymbol(mixed);
+        IClassTypeSymbol result = symbolFactory.createClassTypeSymbol(null, mock(ITSPHPAst.class), scope);
+
+        assertThat(result.getParentTypeSymbols(), containsInAnyOrder(mixed));
+    }
+
+    @Test
+    public void createClassTypeSymbol_Standard_ModifiersAreResultOfPassedModifierAstToModifierHelper() {
+        IScope scope = mock(IScope.class);
+        //required that we do not get NullPointers for this test
+        ITypeSymbol mixed = mock(ITypeSymbol.class);
+        when(mixed.getName()).thenReturn("mixed");
+        IModifierHelper modifierHelper = mock(IModifierHelper.class);
+        IModifierSet set = new ModifierSet();
+        when(modifierHelper.getModifiers(any(ITSPHPAst.class))).thenReturn(set);
+
+        ISymbolFactory symbolFactory = createSymbolFactory(modifierHelper);
+        symbolFactory.setMixedTypeSymbol(mixed);
+        IClassTypeSymbol result = symbolFactory.createClassTypeSymbol(null, mock(ITSPHPAst.class), scope);
+
+        assertThat(result.getModifiers(), is(set));
+    }
+
+    @Test
+    public void createUnionTypeSymbol_Standard_TypesArePassedTypes() {
+        Map<String, ITypeSymbol> types = new HashMap<>();
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IUnionTypeSymbol result = symbolFactory.createUnionTypeSymbol(types);
+
+        assertThat(result.getTypeSymbols(), is(types));
     }
 
     @Test
