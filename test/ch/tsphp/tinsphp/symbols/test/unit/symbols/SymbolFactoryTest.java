@@ -134,7 +134,7 @@ public class SymbolFactoryTest
     }
 
     @Test
-    public void createPseudoTypeSymbol_Standard_NameIsPassedName() {
+    public void createPseudoTypeSymbol1_Standard_NameIsPassedName() {
         String name = "foo";
 
         ISymbolFactory symbolFactory = createSymbolFactory();
@@ -144,7 +144,7 @@ public class SymbolFactoryTest
     }
 
     @Test
-    public void createPseudoTypeSymbol_Standard_ParentTypeIsDefinedMixed() {
+    public void createPseudoTypeSymbol1_Standard_ParentTypeIsDefinedMixed() {
         ITypeSymbol mixed = mock(ITypeSymbol.class);
 
         ISymbolFactory symbolFactory = createSymbolFactory();
@@ -152,6 +152,27 @@ public class SymbolFactoryTest
         IPseudoTypeSymbol result = symbolFactory.createPseudoTypeSymbol("");
 
         assertThat(result.getParentTypeSymbols(), containsInAnyOrder(mixed));
+    }
+
+    @Test
+    public void createPseudoTypeSymbol2_Standard_NameIsPassedName() {
+        String name = "foo";
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IPseudoTypeSymbol result = symbolFactory.createPseudoTypeSymbol(name, mock(ITypeSymbol.class));
+
+        assertThat(result.getName(), is(name));
+    }
+
+
+    @Test
+    public void createPseudoTypeSymbol2_PassedParentTypeSymbol_ParentTypeIsPassedTypeSymbol() {
+        ITypeSymbol parentTypeSymbol = mock(ITypeSymbol.class);
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IPseudoTypeSymbol result = symbolFactory.createPseudoTypeSymbol("", parentTypeSymbol);
+
+        assertThat(result.getParentTypeSymbols(), containsInAnyOrder(parentTypeSymbol));
     }
 
 

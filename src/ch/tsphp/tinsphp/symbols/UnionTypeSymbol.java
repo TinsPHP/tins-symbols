@@ -32,12 +32,12 @@ public class UnionTypeSymbol implements IUnionTypeSymbol
 
     @Override
     public boolean isFalseable() {
-        return typeSymbols.containsKey(PrimitiveTypeNames.TYPE_NAME_FALSE);
+        return typeSymbols.containsKey(PrimitiveTypeNames.FALSE);
     }
 
     @Override
     public boolean isNullable() {
-        return typeSymbols.containsKey(PrimitiveTypeNames.TYPE_NAME_NULL);
+        return typeSymbols.containsKey(PrimitiveTypeNames.NULL);
     }
 
 

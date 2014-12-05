@@ -27,16 +27,17 @@ public class UnionTypeSymbolTest
     @Test
     public void getTypeSymbols_Standard_ReturnsSetPassedByConstructor() {
         Map<String, ITypeSymbol> types = new HashMap<>();
-        types.put(PrimitiveTypeNames.TYPE_NAME_NULL, mock(ITypeSymbol.class));
-        types.put(PrimitiveTypeNames.TYPE_NAME_FALSE, mock(ITypeSymbol.class));
-        types.put(PrimitiveTypeNames.TYPE_NAME_TRUE, mock(ITypeSymbol.class));
-        types.put(PrimitiveTypeNames.TYPE_NAME_INT, mock(ITypeSymbol.class));
-        types.put(PrimitiveTypeNames.TYPE_NAME_FLOAT, mock(ITypeSymbol.class));
-        types.put(PrimitiveTypeNames.TYPE_NAME_NUM, mock(ITypeSymbol.class));
-        types.put(PrimitiveTypeNames.TYPE_NAME_STRING, mock(ITypeSymbol.class));
-        types.put(PrimitiveTypeNames.TYPE_NAME_SCALAR, mock(ITypeSymbol.class));
-        types.put(PrimitiveTypeNames.TYPE_NAME_ARRAY, mock(ITypeSymbol.class));
-        types.put(PrimitiveTypeNames.TYPE_NAME_RESOURCE, mock(ITypeSymbol.class));
+        types.put(PrimitiveTypeNames.NULL, mock(ITypeSymbol.class));
+        types.put(PrimitiveTypeNames.FALSE, mock(ITypeSymbol.class));
+        types.put(PrimitiveTypeNames.TRUE, mock(ITypeSymbol.class));
+        types.put(PrimitiveTypeNames.INT, mock(ITypeSymbol.class));
+        types.put(PrimitiveTypeNames.FLOAT, mock(ITypeSymbol.class));
+        types.put(PrimitiveTypeNames.NUM, mock(ITypeSymbol.class));
+        types.put(PrimitiveTypeNames.STRING, mock(ITypeSymbol.class));
+        types.put(PrimitiveTypeNames.SCALAR, mock(ITypeSymbol.class));
+        types.put(PrimitiveTypeNames.ARRAY, mock(ITypeSymbol.class));
+        types.put(PrimitiveTypeNames.RESOURCE, mock(ITypeSymbol.class));
+        types.put(PrimitiveTypeNames.MIXED, mock(ITypeSymbol.class));
 
         IUnionTypeSymbol typeSymbol = createUnionTypeSymbol(types);
         Map<String, ITypeSymbol> result = typeSymbol.getTypeSymbols();
@@ -47,7 +48,7 @@ public class UnionTypeSymbolTest
     @Test
     public void isFalseable_ContainsFalseType_ReturnsTrue() {
         Map<String, ITypeSymbol> types = new HashMap<>();
-        types.put(PrimitiveTypeNames.TYPE_NAME_FALSE, mock(ITypeSymbol.class));
+        types.put(PrimitiveTypeNames.FALSE, mock(ITypeSymbol.class));
 
         IUnionTypeSymbol typeSymbol = createUnionTypeSymbol(types);
         boolean result = typeSymbol.isFalseable();
@@ -58,7 +59,7 @@ public class UnionTypeSymbolTest
     @Test
     public void isFalseable_DoesNotContainFalseType_ReturnsFalse() {
         Map<String, ITypeSymbol> types = new HashMap<>();
-        types.put(PrimitiveTypeNames.TYPE_NAME_BOOL, mock(ITypeSymbol.class));
+        types.put(PrimitiveTypeNames.BOOL, mock(ITypeSymbol.class));
 
         IUnionTypeSymbol typeSymbol = createUnionTypeSymbol(types);
         boolean result = typeSymbol.isFalseable();
@@ -69,7 +70,7 @@ public class UnionTypeSymbolTest
     @Test
     public void isFalseable_ContainsNullType_ReturnsTrue() {
         Map<String, ITypeSymbol> types = new HashMap<>();
-        types.put(PrimitiveTypeNames.TYPE_NAME_NULL, mock(ITypeSymbol.class));
+        types.put(PrimitiveTypeNames.NULL, mock(ITypeSymbol.class));
 
         IUnionTypeSymbol typeSymbol = createUnionTypeSymbol(types);
         boolean result = typeSymbol.isNullable();
@@ -80,7 +81,7 @@ public class UnionTypeSymbolTest
     @Test
     public void isNullable_DoesNotContainNullType_ReturnsFalse() {
         Map<String, ITypeSymbol> types = new HashMap<>();
-        types.put(PrimitiveTypeNames.TYPE_NAME_BOOL, mock(ITypeSymbol.class));
+        types.put(PrimitiveTypeNames.BOOL, mock(ITypeSymbol.class));
 
         IUnionTypeSymbol typeSymbol = createUnionTypeSymbol(types);
         boolean result = typeSymbol.isNullable();

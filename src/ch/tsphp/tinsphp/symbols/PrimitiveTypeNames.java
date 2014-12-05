@@ -9,15 +9,17 @@ package ch.tsphp.tinsphp.symbols;
 public class PrimitiveTypeNames
 {
 
-    public static final String TYPE_NAME_NULL = "\\null";
-    public static final String TYPE_NAME_TRUE = "\\false";
-    public static final String TYPE_NAME_FALSE = "\\true";
-    public static final String TYPE_NAME_BOOL = "\\bool";
-    public static final String TYPE_NAME_INT = "\\int";
-    public static final String TYPE_NAME_FLOAT = "\\float";
-    public static final String TYPE_NAME_NUM = "\\num";
-    public static final String TYPE_NAME_STRING = "\\string";
-    public static final String TYPE_NAME_SCALAR = "\\scalar";
-    public static final String TYPE_NAME_ARRAY = "\\array";
-    public static final String TYPE_NAME_RESOURCE = "\\resource";
+    public static final String NULL = "\\null";
+    public static final String TRUE = "\\false";
+    public static final String FALSE = "\\true";
+    public static final String BOOL = "\\bool";
+    public static final String INT = "\\int";
+    public static final String FLOAT = "\\float";
+    public static final String NUM = "\\num";
+    public static final String STRING = "\\string";
+    public static final String SCALAR = "\\scalar";
+    public static final String ARRAY = "\\array";
+    public static final String RESOURCE = "\\resource";
+    public static final String MIXED = "\\mixed";
+
 }
