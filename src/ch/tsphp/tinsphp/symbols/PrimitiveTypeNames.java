@@ -10,8 +10,8 @@ public class PrimitiveTypeNames
 {
 
     public static final String NULL = "\\null";
-    public static final String TRUE = "\\false";
-    public static final String FALSE = "\\true";
+    public static final String FALSE = "\\false";
+    public static final String TRUE = "\\true";
     public static final String BOOL = "\\bool";
     public static final String INT = "\\int";
     public static final String FLOAT = "\\float";
