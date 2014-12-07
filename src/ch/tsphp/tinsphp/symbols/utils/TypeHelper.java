@@ -12,7 +12,6 @@ import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
 public final class TypeHelper
 {
     private TypeHelper() {
-
     }
 
     public static void addNullableModifier(ISymbolWithModifier symbol) {
@@ -21,5 +20,9 @@ public final class TypeHelper
 
     public static void addFalseableModifier(ISymbolWithModifier symbol) {
         symbol.addModifier(TokenTypes.LogicNot);
+    }
+
+    public static void addAlwaysCastingModifier(ISymbolWithModifier symbol) {
+        symbol.addModifier(TokenTypes.Cast);
     }
 }

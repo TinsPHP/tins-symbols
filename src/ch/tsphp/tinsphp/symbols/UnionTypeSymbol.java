@@ -17,7 +17,7 @@ import java.util.Set;
 
 public class UnionTypeSymbol implements IUnionTypeSymbol
 {
-    private static final String ERROR_MESSAGE = "You are dealing with a UnionTypeSymbol.";
+    private static final String ERROR_MESSAGE = "You are dealing with an UnionTypeSymbol.";
 
     private Map<String, ITypeSymbol> typeSymbols;
 
