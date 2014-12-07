@@ -19,7 +19,7 @@ public class UnionTypeSymbol implements IUnionTypeSymbol
 {
     private static final String ERROR_MESSAGE = "You are dealing with an UnionTypeSymbol.";
 
-    private Map<String, ITypeSymbol> typeSymbols;
+    private final Map<String, ITypeSymbol> typeSymbols;
 
     public UnionTypeSymbol(Map<String, ITypeSymbol> theTypeSymbols) {
         typeSymbols = theTypeSymbols;

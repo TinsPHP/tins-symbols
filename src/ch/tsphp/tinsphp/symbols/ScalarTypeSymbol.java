@@ -23,9 +23,8 @@ import ch.tsphp.tinsphp.common.symbols.IScalarTypeSymbol;
 public class ScalarTypeSymbol extends ATypeSymbol implements IScalarTypeSymbol
 {
 
-    private int defaultValueTokenType;
-
-    private String defaultValue;
+    private final int defaultValueTokenType;
+    private final String defaultValue;
 
     @SuppressWarnings("checkstyle:parameternumber")
     public ScalarTypeSymbol(
