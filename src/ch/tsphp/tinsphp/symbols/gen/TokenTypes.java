@@ -189,6 +189,10 @@ package ch.tsphp.tinsphp.symbols.gen;
     public static final int Void = 175;
     public static final int While = 176;
     public static final int Whitespace = 177;
+    public static final int False = 178;
+    public static final int PhpEnd = 179;
+    public static final int PhpStart = 180;
+    public static final int True = 181;
 
     private TokenTypes() {
     }
