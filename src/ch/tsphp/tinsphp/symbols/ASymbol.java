@@ -44,6 +44,11 @@ public abstract class ASymbol implements ISymbol
     }
 
     @Override
+    public String getAbsoluteName() {
+        return (definitionScope != null ? definitionScope.getScopeName() : "") + name;
+    }
+
+    @Override
     public IScope getDefinitionScope() {
         return definitionScope;
     }

@@ -54,7 +54,6 @@ public class UnionTypeSymbol implements IUnionTypeSymbol
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
-
     @Override
     public void addModifier(Integer integer) {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
@@ -82,6 +81,11 @@ public class UnionTypeSymbol implements IUnionTypeSymbol
 
     @Override
     public String getName() {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
+
+    @Override
+    public String getAbsoluteName() {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 

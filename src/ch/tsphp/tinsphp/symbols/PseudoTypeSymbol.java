@@ -24,4 +24,9 @@ public class PseudoTypeSymbol extends ANullableTypeSymbol implements IPseudoType
     public PseudoTypeSymbol(String name, ITypeSymbol parentTypeSymbol) {
         super(name, parentTypeSymbol);
     }
+
+    @Override
+    public String getAbsoluteName() {
+        return name;
+    }
 }

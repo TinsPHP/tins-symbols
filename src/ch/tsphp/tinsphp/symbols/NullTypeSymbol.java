@@ -23,4 +23,9 @@ public class NullTypeSymbol extends ANullableTypeSymbol implements INullTypeSymb
     public NullTypeSymbol() {
         super("null", new HashSet<ITypeSymbol>());
     }
+    
+    @Override
+    public String getAbsoluteName() {
+        return name;
+    }
 }

@@ -42,4 +42,9 @@ public class ScalarTypeSymbol extends ATypeSymbol implements IScalarTypeSymbol
     public ITSPHPAst getDefaultValue() {
         return AstHelperRegistry.get().createAst(defaultValueTokenType, defaultValue);
     }
+
+    @Override
+    public String getAbsoluteName() {
+        return name;
+    }
 }

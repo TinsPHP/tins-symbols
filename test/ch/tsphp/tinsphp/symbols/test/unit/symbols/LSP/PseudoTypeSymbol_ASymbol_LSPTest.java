@@ -6,12 +6,15 @@
 
 package ch.tsphp.tinsphp.symbols.test.unit.symbols.LSP;
 
+import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.symbols.ASymbol;
 import ch.tsphp.tinsphp.symbols.PseudoTypeSymbol;
 import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
 import ch.tsphp.tinsphp.symbols.test.unit.symbols.ASymbolTest;
+import org.hamcrest.core.Is;
+import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -75,6 +78,25 @@ public class PseudoTypeSymbol_ASymbol_LSPTest extends ASymbolTest
 
         //assertThat(result, is(name + ":" + typeName));
         assertThat(result, is(name + ":" + typeName + "|" + TokenTypes.QuestionMark));
+    }
+
+    @Test
+    public void getAbsoluteName_DefinitionScopeNotNull_ReturnsNameWithDefinitionScopeNameAsPrefix() {
+        // different behaviour - global types do not belong to a namespace and thus are not prefix with its name
+
+        // start same as in ASymbolTest
+        String scopeName = "\\";
+        String name = "dummy";
+        IScope scope = mock(IScope.class);
+        when(scope.getScopeName()).thenReturn(scopeName);
+
+        ASymbol symbol = createSymbol(mock(ITSPHPAst.class), name);
+        symbol.setDefinitionScope(scope);
+        String result = symbol.getAbsoluteName();
+        // end same as in ASymbolTest
+
+//        assertThat(result, Is.is(scopeName + name));
+        assertThat(result, Is.is(name));
     }
 
     @Override

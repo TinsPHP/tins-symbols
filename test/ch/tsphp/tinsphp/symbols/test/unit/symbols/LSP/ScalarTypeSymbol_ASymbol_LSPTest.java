@@ -6,15 +6,19 @@
 
 package ch.tsphp.tinsphp.symbols.test.unit.symbols.LSP;
 
+import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.tinsphp.symbols.ASymbol;
 import ch.tsphp.tinsphp.symbols.ScalarTypeSymbol;
 import ch.tsphp.tinsphp.symbols.test.unit.symbols.ASymbolTest;
+import org.hamcrest.core.Is;
+import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ScalarTypeSymbol_ASymbol_LSPTest extends ASymbolTest
 {
@@ -34,6 +38,25 @@ public class ScalarTypeSymbol_ASymbol_LSPTest extends ASymbolTest
 
         //assertThat(result, is(ast));
         assertThat(result, is(nullValue()));
+    }
+
+    @Test
+    public void getAbsoluteName_DefinitionScopeNotNull_ReturnsNameWithDefinitionScopeNameAsPrefix() {
+        // different behaviour - global types do not belong to a namespace and thus are not prefix with its name
+
+        // start same as in ASymbolTest
+        String scopeName = "\\";
+        String name = "dummy";
+        IScope scope = mock(IScope.class);
+        when(scope.getScopeName()).thenReturn(scopeName);
+
+        ASymbol symbol = createSymbol(mock(ITSPHPAst.class), name);
+        symbol.setDefinitionScope(scope);
+        String result = symbol.getAbsoluteName();
+        // end same as in ASymbolTest
+
+//        assertThat(result, Is.is(scopeName + name));
+        assertThat(result, Is.is(name));
     }
 
     @Override

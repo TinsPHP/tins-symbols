@@ -170,6 +170,16 @@ public class UnionTypeSymbolTest
     }
 
     @Test(expected = UnsupportedOperationException.class)
+    public void getAbsoluteName_Standard_ThrowsUnsupportedOperationException() {
+        //no arrange necessary
+
+        IUnionTypeSymbol typeSymbol = createUnionTypeSymbol();
+        typeSymbol.getAbsoluteName();
+
+        //assert in annotation
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
     public void getDefinitionScope_Standard_ThrowsUnsupportedOperationException() {
         //no arrange necessary
 

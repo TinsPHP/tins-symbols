@@ -10,6 +10,7 @@ import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.symbols.ASymbol;
+import org.hamcrest.core.Is;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -48,6 +49,30 @@ public class ASymbolTest
         String result = symbol.getName();
 
         assertThat(result, is(name));
+    }
+
+    @Test
+    public void getAbsoluteName_DefinitionScopeIsNull_ReturnsName() {
+        String name = "dummy";
+
+        ASymbol symbol = createSymbol(mock(ITSPHPAst.class), name);
+        String result = symbol.getAbsoluteName();
+
+        assertThat(result, Is.is(name));
+    }
+
+    @Test
+    public void getAbsoluteName_DefinitionScopeNotNull_ReturnsNameWithDefinitionScopeNameAsPrefix() {
+        String scopeName = "\\";
+        String name = "dummy";
+        IScope scope = mock(IScope.class);
+        when(scope.getScopeName()).thenReturn(scopeName);
+
+        ASymbol symbol = createSymbol(mock(ITSPHPAst.class), name);
+        symbol.setDefinitionScope(scope);
+        String result = symbol.getAbsoluteName();
+
+        assertThat(result, Is.is(scopeName + name));
     }
 
     @Test

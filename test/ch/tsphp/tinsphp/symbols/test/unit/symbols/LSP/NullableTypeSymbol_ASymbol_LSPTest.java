@@ -6,12 +6,15 @@
 
 package ch.tsphp.tinsphp.symbols.test.unit.symbols.LSP;
 
+import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.symbols.ASymbol;
 import ch.tsphp.tinsphp.symbols.NullTypeSymbol;
 import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
 import ch.tsphp.tinsphp.symbols.test.unit.symbols.ASymbolTest;
+import org.hamcrest.core.Is;
+import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -38,6 +41,39 @@ public class NullableTypeSymbol_ASymbol_LSPTest extends ASymbolTest
         assertThat(result, is("null"));
     }
 
+    @Test
+    public void getAbsoluteName_DefinitionScopeIsNull_ReturnsName() {
+        // different behaviour - NullableTypeSymbol does always return null as type
+
+        // start same as in ASymbolTest
+        String name = "dummy";
+
+        ASymbol symbol = createSymbol(mock(ITSPHPAst.class), name);
+        String result = symbol.getAbsoluteName();
+
+        // end same as in ASymbolTest
+//        assertThat(result, Is.is(name));
+        assertThat(result, Is.is("null"));
+    }
+
+    @Test
+    public void getAbsoluteName_DefinitionScopeNotNull_ReturnsNameWithDefinitionScopeNameAsPrefix() {
+        // different behaviour - NullableTypeSymbol does always return null as type
+
+        // start same as in ASymbolTest
+        String scopeName = "\\";
+        String name = "dummy";
+        IScope scope = mock(IScope.class);
+        when(scope.getScopeName()).thenReturn(scopeName);
+
+        ASymbol symbol = createSymbol(mock(ITSPHPAst.class), name);
+        symbol.setDefinitionScope(scope);
+        String result = symbol.getAbsoluteName();
+        // end same as in ASymbolTest
+
+//        assertThat(result, Is.is(scopeName + name));
+        assertThat(result, Is.is("null"));
+    }
 
     @Override
     public void getDefinitionAst_Standard_ReturnsOnePassedToConstructor() {
@@ -95,6 +131,7 @@ public class NullableTypeSymbol_ASymbol_LSPTest extends ASymbolTest
         //assertThat(result, is(name + ":" + typeName));
         assertThat(result, is("null" + ":" + typeName + "|" + TokenTypes.QuestionMark));
     }
+
 
     @Override
     protected ASymbol createSymbol(ITSPHPAst definitionAst, String name) {
