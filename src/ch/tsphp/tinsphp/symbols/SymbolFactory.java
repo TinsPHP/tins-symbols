@@ -16,7 +16,10 @@ package ch.tsphp.tinsphp.symbols;
 import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
+import ch.tsphp.common.symbols.ILazyTypeSymbol;
 import ch.tsphp.common.symbols.ITypeSymbol;
+import ch.tsphp.common.symbols.IUnionTypeSymbol;
+import ch.tsphp.tinsphp.common.inference.constraints.IOverloadResolver;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IAliasSymbol;
 import ch.tsphp.tinsphp.common.symbols.IAliasTypeSymbol;
@@ -28,7 +31,6 @@ import ch.tsphp.tinsphp.common.symbols.INullTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IPseudoTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IScalarTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
-import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousLazySymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
@@ -46,11 +48,14 @@ public class SymbolFactory implements ISymbolFactory
 {
     private final IScopeHelper scopeHelper;
     private final IModifierHelper modifierHelper;
+    private final IOverloadResolver overloadResolver;
     private ITypeSymbol mixedTypeSymbol = null;
 
-    public SymbolFactory(IScopeHelper theScopeHelper, IModifierHelper theModifierHelper) {
+    public SymbolFactory(
+            IScopeHelper theScopeHelper, IModifierHelper theModifierHelper, IOverloadResolver theOverloadResolver) {
         scopeHelper = theScopeHelper;
         modifierHelper = theModifierHelper;
+        overloadResolver = theOverloadResolver;
     }
 
     @Override
@@ -135,8 +140,13 @@ public class SymbolFactory implements ISymbolFactory
     }
 
     @Override
+    public IUnionTypeSymbol createUnionTypeSymbol() {
+        return new UnionTypeSymbol(overloadResolver);
+    }
+
+    @Override
     public IUnionTypeSymbol createUnionTypeSymbol(Map<String, ITypeSymbol> types) {
-        return new UnionTypeSymbol(types);
+        return new UnionTypeSymbol(overloadResolver, types);
     }
 
     @Override
@@ -159,6 +169,11 @@ public class SymbolFactory implements ISymbolFactory
     @Override
     public IVariableSymbol createVariableSymbol(ITSPHPAst typeModifier, ITSPHPAst variableId) {
         return new VariableSymbol(variableId, modifierHelper.getModifiers(typeModifier), variableId.getText());
+    }
+
+    @Override
+    public ILazyTypeSymbol createLazyTypeSymbol() {
+        return new LazyTypeSymbol();
     }
 
     @Override

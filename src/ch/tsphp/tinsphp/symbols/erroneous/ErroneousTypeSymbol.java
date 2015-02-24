@@ -52,4 +52,9 @@ public class ErroneousTypeSymbol extends AErroneousScopedSymbol implements IErro
     public ITSPHPAst getDefaultValue() {
         return AstHelperRegistry.get().createAst(TokenTypes.Null, "null");
     }
+
+    @Override
+    public ITypeSymbol evalSelf() {
+        return this;
+    }
 }

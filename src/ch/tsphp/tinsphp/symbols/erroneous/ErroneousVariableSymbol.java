@@ -46,7 +46,14 @@ public class ErroneousVariableSymbol extends AErroneousSymbolWithAccessModifier 
     }
 
     @Override
+    public boolean isFinal() {
+        return false;
+    }
+
+    @Override
     public TypeWithModifiersDto toTypeWithModifiersDto() {
         throw new UnsupportedOperationException("ErroneousVariableSymbol is not a real class.");
     }
+
+
 }

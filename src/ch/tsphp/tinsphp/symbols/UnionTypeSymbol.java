@@ -6,28 +6,87 @@
 
 package ch.tsphp.tinsphp.symbols;
 
-import ch.tsphp.common.IScope;
-import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ITypeSymbol;
-import ch.tsphp.common.symbols.modifiers.IModifierSet;
-import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
+import ch.tsphp.common.symbols.IUnionTypeSymbol;
+import ch.tsphp.tinsphp.common.inference.constraints.IOverloadResolver;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
-public class UnionTypeSymbol implements IUnionTypeSymbol
+public class UnionTypeSymbol extends ALazyTypeSymbol implements IUnionTypeSymbol
 {
-    private static final String ERROR_MESSAGE = "You are dealing with an UnionTypeSymbol.";
 
-    private final Map<String, ITypeSymbol> typeSymbols;
+    private final IOverloadResolver overloadResolver;
+    private Map<String, ITypeSymbol> typeSymbols;
 
-    public UnionTypeSymbol(Map<String, ITypeSymbol> theTypeSymbols) {
+    public UnionTypeSymbol(IOverloadResolver theOverloadResolver) {
+        this(theOverloadResolver, new HashMap<String, ITypeSymbol>());
+    }
+
+    public UnionTypeSymbol(IOverloadResolver theOverloadResolver, Map<String, ITypeSymbol> theTypeSymbols) {
+        overloadResolver = theOverloadResolver;
         typeSymbols = theTypeSymbols;
     }
 
     @Override
     public Map<String, ITypeSymbol> getTypeSymbols() {
         return typeSymbols;
+    }
+
+    @Override
+    public void addTypeSymbol(ITypeSymbol typeSymbol) {
+        if (isReadyForEval()) {
+            throw new RuntimeException("Cannot add a type symbol to a closed union");
+        }
+        if (typeSymbol instanceof IUnionTypeSymbol) {
+            merge((IUnionTypeSymbol) typeSymbol);
+        } else {
+            addAndSimplify(typeSymbol.getAbsoluteName(), typeSymbol);
+        }
+    }
+
+    private void addAndSimplify(String absoluteName, ITypeSymbol newTypeSymbol) {
+        //no need to add it if it already exist in the union; ergo simplification = do not insert
+        if (!typeSymbols.containsKey(absoluteName)) {
+            boolean isNotSubTypeOfExisting = true;
+            Iterator<Map.Entry<String, ITypeSymbol>> iterator = typeSymbols.entrySet().iterator();
+            while (iterator.hasNext()) {
+                ITypeSymbol existingTypeInUnion = iterator.next().getValue();
+                if (overloadResolver.isFirstSameOrSubTypeOfSecond(existingTypeInUnion, newTypeSymbol)) {
+                    //remove all sub-types, they do no longer add information to the union type
+                    iterator.remove();
+                } else if (isNotSubTypeOfExisting && overloadResolver.isFirstSameOrParentTypeOfSecond
+                        (existingTypeInUnion, newTypeSymbol)) {
+                    //new type
+                    isNotSubTypeOfExisting = false;
+                }
+            }
+
+            if (isNotSubTypeOfExisting) {
+                typeSymbols.put(absoluteName, newTypeSymbol);
+            }
+        }
+    }
+
+    @Override
+    public void merge(IUnionTypeSymbol unionTypeSymbol) {
+        if (isReadyForEval()) {
+            throw new RuntimeException("Cannot add a type symbol to a closed union");
+        }
+        for (Map.Entry<String, ITypeSymbol> entry : unionTypeSymbol.getTypeSymbols().entrySet()) {
+            addAndSimplify(entry.getKey(), entry.getValue());
+        }
+    }
+
+    @Override
+    public void seal() {
+        notifyForEvalReadyListeners();
+    }
+
+    @Override
+    public ITypeSymbol evalSelf() {
+        return isReadyForEval() ? this : null;
     }
 
     @Override
@@ -40,72 +99,4 @@ public class UnionTypeSymbol implements IUnionTypeSymbol
         return typeSymbols.containsKey(PrimitiveTypeNames.NULL);
     }
 
-
-    //--------------------------------------------------------------
-    // Unsupported Methods
-
-    @Override
-    public Set<ITypeSymbol> getParentTypeSymbols() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public ITSPHPAst getDefaultValue() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public void addModifier(Integer integer) {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public boolean removeModifier(Integer integer) {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public IModifierSet getModifiers() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public void setModifiers(IModifierSet modifierSet) {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public ITSPHPAst getDefinitionAst() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public String getName() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public String getAbsoluteName() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public IScope getDefinitionScope() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public void setDefinitionScope(IScope iScope) {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public ITypeSymbol getType() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public void setType(ITypeSymbol iTypeSymbol) {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
 }

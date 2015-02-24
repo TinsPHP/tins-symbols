@@ -36,11 +36,6 @@ public class ErroneousLazySymbol extends AErroneousScopedSymbol implements IErro
     }
 
     @Override
-    public TypeWithModifiersDto toTypeWithModifiersDto() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
     public boolean isFalseable() {
         return true;
     }
@@ -76,6 +71,11 @@ public class ErroneousLazySymbol extends AErroneousScopedSymbol implements IErro
     }
 
     @Override
+    public boolean isFinal() {
+        return false;
+    }
+
+    @Override
     public Set<ITypeSymbol> getParentTypeSymbols() {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
@@ -84,4 +84,15 @@ public class ErroneousLazySymbol extends AErroneousScopedSymbol implements IErro
     public ITSPHPAst getDefaultValue() {
         return AstHelperRegistry.get().createAst(TokenTypes.Null, "null");
     }
+
+    @Override
+    public ITypeSymbol evalSelf() {
+        return this;
+    }
+
+    @Override
+    public TypeWithModifiersDto toTypeWithModifiersDto() {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
+
 }

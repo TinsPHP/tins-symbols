@@ -10,7 +10,9 @@ import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
 import ch.tsphp.common.symbols.ITypeSymbol;
+import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
+import ch.tsphp.tinsphp.common.inference.constraints.IOverloadResolver;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IAliasSymbol;
 import ch.tsphp.tinsphp.common.symbols.IAliasTypeSymbol;
@@ -21,7 +23,6 @@ import ch.tsphp.tinsphp.common.symbols.IModifierHelper;
 import ch.tsphp.tinsphp.common.symbols.IPseudoTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IScalarTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
-import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousLazySymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
@@ -486,10 +487,11 @@ public class SymbolFactoryTest
     }
 
     private ISymbolFactory createSymbolFactory(IModifierHelper modifierHelper) {
-        return createSymbolFactory(mock(IScopeHelper.class), modifierHelper);
+        return createSymbolFactory(mock(IScopeHelper.class), modifierHelper, mock(IOverloadResolver.class));
     }
 
-    protected ISymbolFactory createSymbolFactory(IScopeHelper theScopeHelper, IModifierHelper theModifierHelper) {
-        return new SymbolFactory(theScopeHelper, theModifierHelper);
+    protected ISymbolFactory createSymbolFactory(
+            IScopeHelper theScopeHelper, IModifierHelper theModifierHelper, IOverloadResolver overloadResolver) {
+        return new SymbolFactory(theScopeHelper, theModifierHelper, overloadResolver);
     }
 }

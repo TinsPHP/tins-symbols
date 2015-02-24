@@ -12,10 +12,12 @@
 
 package ch.tsphp.tinsphp.symbols.erroneous;
 
+import ch.tsphp.common.IConstraint;
 import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
 import ch.tsphp.common.symbols.ISymbol;
+import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousSymbol;
 
 import java.util.List;
@@ -29,6 +31,20 @@ public abstract class AErroneousScopedSymbol extends AErroneousSymbolWithModifie
     public AErroneousScopedSymbol(ITSPHPAst ast, String name, TSPHPException theException) {
         super(ast, name, theException);
     }
+
+
+    @Override
+    public boolean isFullyInitialised(ISymbol symbol) {
+        return true;
+    }
+
+    @Override
+    public boolean isPartiallyInitialised(ISymbol symbol) {
+        return true;
+    }
+
+    //--------------------------------------------------------------
+    // Unsupported Methods
 
     @Override
     public String getScopeName() {
@@ -72,14 +88,28 @@ public abstract class AErroneousScopedSymbol extends AErroneousSymbolWithModifie
     }
 
     @Override
-    public boolean isFullyInitialised(ISymbol symbol) {
-        return true;
+    public Map<String, List<IConstraint>> getConstraints() {
+        throw new UnsupportedOperationException(ERROR_MESSAGE_SCOPE);
     }
 
     @Override
-    public boolean isPartiallyInitialised(ISymbol symbol) {
-        return true;
+    public List<IConstraint> getConstraintsForVariable(String variable) {
+        throw new UnsupportedOperationException(ERROR_MESSAGE_SCOPE);
     }
 
+    @Override
+    public void addConstraint(String variable, IConstraint constraint) {
+        throw new UnsupportedOperationException(ERROR_MESSAGE_SCOPE);
+    }
+
+    @Override
+    public IUnionTypeSymbol getResultOfConstraintSolving(String variableId) {
+        throw new UnsupportedOperationException(ERROR_MESSAGE_SCOPE);
+    }
+
+    @Override
+    public void setResultOfConstraintSolving(String variableId, IUnionTypeSymbol typeSymbol) {
+        throw new UnsupportedOperationException(ERROR_MESSAGE_SCOPE);
+    }
 
 }

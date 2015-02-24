@@ -186,4 +186,14 @@ public abstract class APolymorphicTypeSymbol extends AScopedSymbol implements IP
         //make sure nullable is part of the modifiers
         TypeHelper.addNullableModifier(this);
     }
+
+    //TODO same as in ATypeSymbol chance to move it out?
+
+    /**
+     * Returns itself, override in sub-classes for another behaviour (lazy types for instance).
+     */
+    @Override
+    public ITypeSymbol evalSelf() {
+        return this;
+    }
 }

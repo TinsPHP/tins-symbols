@@ -8,10 +8,12 @@ package ch.tsphp.tinsphp.symbols.test.unit.symbols;
 
 import ch.tsphp.common.IScope;
 import ch.tsphp.common.symbols.ITypeSymbol;
-import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
+import ch.tsphp.common.symbols.IUnionTypeSymbol;
+import ch.tsphp.tinsphp.common.inference.constraints.IOverloadResolver;
 import ch.tsphp.tinsphp.symbols.ModifierSet;
 import ch.tsphp.tinsphp.symbols.PrimitiveTypeNames;
 import ch.tsphp.tinsphp.symbols.UnionTypeSymbol;
+import ch.tsphp.tinsphp.symbols.utils.OverloadResolver;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -89,6 +91,28 @@ public class UnionTypeSymbolTest
         assertThat(result, is(false));
     }
 
+    //TODO move to ALazyTypeSymbolTest
+    @Test
+    public void getName_Standard_ReturnsQuestionMark() {
+        //no arrange necessary
+
+        IUnionTypeSymbol typeSymbol = createUnionTypeSymbol();
+        String result = typeSymbol.getName();
+
+        assertThat(result, is("?"));
+    }
+
+    //TODO move to ALazyTypeSymbolTest
+    @Test
+    public void getAbsoluteName_Standard_ReturnsQuestionMark() {
+        //no arrange necessary
+
+        IUnionTypeSymbol typeSymbol = createUnionTypeSymbol();
+        String result = typeSymbol.getAbsoluteName();
+
+        assertThat(result, is("?"));
+    }
+
     @Test(expected = UnsupportedOperationException.class)
     public void getParentTypeSymbols_Standard_ThrowsUnsupportedOperationException() {
         //no arrange necessary
@@ -159,25 +183,7 @@ public class UnionTypeSymbolTest
         //assert in annotation
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void getName_Standard_ThrowsUnsupportedOperationException() {
-        //no arrange necessary
 
-        IUnionTypeSymbol typeSymbol = createUnionTypeSymbol();
-        typeSymbol.getName();
-
-        //assert in annotation
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void getAbsoluteName_Standard_ThrowsUnsupportedOperationException() {
-        //no arrange necessary
-
-        IUnionTypeSymbol typeSymbol = createUnionTypeSymbol();
-        typeSymbol.getAbsoluteName();
-
-        //assert in annotation
-    }
 
     @Test(expected = UnsupportedOperationException.class)
     public void getDefinitionScope_Standard_ThrowsUnsupportedOperationException() {
@@ -220,11 +226,20 @@ public class UnionTypeSymbolTest
     }
 
     private IUnionTypeSymbol createUnionTypeSymbol() {
-        return createUnionTypeSymbol(new HashMap<String, ITypeSymbol>());
+        return createUnionTypeSymbol(new OverloadResolver());
     }
 
-    protected IUnionTypeSymbol createUnionTypeSymbol(Map<String, ITypeSymbol> typeSymbols) {
-        return new UnionTypeSymbol(typeSymbols);
+    private IUnionTypeSymbol createUnionTypeSymbol(Map<String, ITypeSymbol> typeSymbols) {
+        return createUnionTypeSymbol(new OverloadResolver(), typeSymbols);
+    }
+
+    protected IUnionTypeSymbol createUnionTypeSymbol(IOverloadResolver overloadResolver) {
+        return new UnionTypeSymbol(overloadResolver);
+    }
+
+    protected IUnionTypeSymbol createUnionTypeSymbol(
+            IOverloadResolver overloadResolver, Map<String, ITypeSymbol> typeSymbols) {
+        return new UnionTypeSymbol(overloadResolver, typeSymbols);
     }
 
 }

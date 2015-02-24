@@ -25,6 +25,11 @@ public class VariableSymbol extends ASymbolWithAccessModifier implements IVariab
     }
 
     @Override
+    public boolean isFinal() {
+        return modifiers.isFinal();
+    }
+
+    @Override
     public boolean isStatic() {
         return modifiers.isStatic();
     }
@@ -43,6 +48,7 @@ public class VariableSymbol extends ASymbolWithAccessModifier implements IVariab
     public boolean isNullable() {
         return modifiers.isNullable();
     }
+
 
     @Override
     public TypeWithModifiersDto toTypeWithModifiersDto() {
