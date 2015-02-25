@@ -124,20 +124,20 @@ public abstract class AScopedSymbol extends ASymbolWithModifier implements IScop
     //Warning! end code duplication - same as in AScope
 
 
-    //Warning! start code duplication - same as in AScopedSymbol
+    //Warning! start code duplication - same as in AScope
     @Override
     public IUnionTypeSymbol getResultOfConstraintSolving(String variableId) {
         return constraintSolvingResults.get(variableId);
     }
 
     @Override
-    public void setResultOfConstraintSolving(String variableId, IUnionTypeSymbol typeSymbol) {
+    public void setResultOfConstraintSolving(String variableId, IUnionTypeSymbol unionTypeSymbol) {
         if (!constraintSolvingResults.containsKey(variableId)) {
-            constraintSolvingResults.put(variableId, typeSymbol);
+            constraintSolvingResults.put(variableId, unionTypeSymbol);
         } else {
             throw new IllegalStateException(
                     "the constraint solving results already contain a solution for " + variableId);
         }
     }
-    //Warning! end code duplication - same as in AScopedSymbol
+    //Warning! end code duplication - same as in AScope
 }

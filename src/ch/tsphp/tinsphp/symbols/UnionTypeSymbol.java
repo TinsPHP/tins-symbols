@@ -35,18 +35,19 @@ public class UnionTypeSymbol extends ALazyTypeSymbol implements IUnionTypeSymbol
     }
 
     @Override
-    public void addTypeSymbol(ITypeSymbol typeSymbol) {
+    public boolean addTypeSymbol(ITypeSymbol typeSymbol) {
         if (isReadyForEval()) {
             throw new RuntimeException("Cannot add a type symbol to a closed union");
         }
         if (typeSymbol instanceof IUnionTypeSymbol) {
-            merge((IUnionTypeSymbol) typeSymbol);
-        } else {
-            addAndSimplify(typeSymbol.getAbsoluteName(), typeSymbol);
+            return merge((IUnionTypeSymbol) typeSymbol);
         }
+        return addAndSimplify(typeSymbol.getAbsoluteName(), typeSymbol);
     }
 
-    private void addAndSimplify(String absoluteName, ITypeSymbol newTypeSymbol) {
+    private boolean addAndSimplify(String absoluteName, ITypeSymbol newTypeSymbol) {
+        boolean changedUnion = false;
+
         //no need to add it if it already exist in the union; ergo simplification = do not insert
         if (!typeSymbols.containsKey(absoluteName)) {
             boolean isNotSubTypeOfExisting = true;
@@ -55,28 +56,36 @@ public class UnionTypeSymbol extends ALazyTypeSymbol implements IUnionTypeSymbol
                 ITypeSymbol existingTypeInUnion = iterator.next().getValue();
                 if (overloadResolver.isFirstSameOrSubTypeOfSecond(existingTypeInUnion, newTypeSymbol)) {
                     //remove all sub-types, they do no longer add information to the union type
+                    changedUnion = true;
                     iterator.remove();
-                } else if (isNotSubTypeOfExisting && overloadResolver.isFirstSameOrParentTypeOfSecond
-                        (existingTypeInUnion, newTypeSymbol)) {
+                } else if (isNotSubTypeOfExisting &&
+                        overloadResolver.isFirstSameOrParentTypeOfSecond(existingTypeInUnion, newTypeSymbol)) {
                     //new type
                     isNotSubTypeOfExisting = false;
                 }
             }
 
             if (isNotSubTypeOfExisting) {
+                changedUnion = true;
                 typeSymbols.put(absoluteName, newTypeSymbol);
             }
         }
+
+        return changedUnion;
     }
 
     @Override
-    public void merge(IUnionTypeSymbol unionTypeSymbol) {
+    public boolean merge(IUnionTypeSymbol unionTypeSymbol) {
+        boolean changedUnion = false;
+
         if (isReadyForEval()) {
             throw new RuntimeException("Cannot add a type symbol to a closed union");
         }
         for (Map.Entry<String, ITypeSymbol> entry : unionTypeSymbol.getTypeSymbols().entrySet()) {
-            addAndSimplify(entry.getKey(), entry.getValue());
+            changedUnion = changedUnion || addAndSimplify(entry.getKey(), entry.getValue());
         }
+
+        return changedUnion;
     }
 
     @Override
