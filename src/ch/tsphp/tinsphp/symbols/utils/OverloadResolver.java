@@ -45,7 +45,10 @@ public class OverloadResolver implements IOverloadResolver
     }
 
     private int getPromoLevelActualIsUnion(IUnionTypeSymbol actualParameterType, ITypeSymbol formalParameterType) {
-        int highestPromotionLevel = -1;
+        // an empty union is the bottom type of all types and hence is a sub-type of all types
+        // hence the initial promotion level of 0 in case no type exist within the union
+        int highestPromotionLevel = 0;
+
         //All actual types must be sub-types of formal
         for (ITypeSymbol typeSymbol : actualParameterType.getTypeSymbols().values()) {
             int promotionLevel = getPromoLevelActualIsNotUnion(typeSymbol, formalParameterType);

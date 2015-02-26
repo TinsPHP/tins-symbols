@@ -41,7 +41,6 @@ public class OverloadResolverPromotionLevelTest
     private static ITypeSymbol fooType;
     //Warning! end code duplication - same as in ConstraintSolverTest from the inference component
 
-
     @BeforeClass
     public static void init() {
         //Warning! start code duplication - same as in ConstraintSolverTest from the inference component
@@ -267,6 +266,41 @@ public class OverloadResolverPromotionLevelTest
         assertThat(result, is(-1));
     }
 
+    //--------------------  tests with empty union on the left
+
+    @Test
+    public void getPromotionLevelFromTo_EmptyToInt_Returns0() {
+        ITypeSymbol actual = createUnion();
+        ITypeSymbol formal = intType;
+
+        IOverloadResolver solver = createOverloadResolver();
+        int result = solver.getPromotionLevelFromTo(actual, formal);
+
+        assertThat(result, is(0));
+    }
+
+    @Test
+    public void getPromotionLevelFromTo_EmptyToFoo_Returns0() {
+        ITypeSymbol actual = createUnion();
+        ITypeSymbol formal = fooType;
+
+        IOverloadResolver solver = createOverloadResolver();
+        int result = solver.getPromotionLevelFromTo(actual, formal);
+
+        assertThat(result, is(0));
+    }
+
+    @Test
+    public void getPromotionLevelFromTo_EmptyToMixed_Returns0() {
+        ITypeSymbol actual = createUnion();
+        ITypeSymbol formal = fooType;
+
+        IOverloadResolver solver = createOverloadResolver();
+        int result = solver.getPromotionLevelFromTo(actual, formal);
+
+        assertThat(result, is(0));
+    }
+
     //--------------------  tests with unions on the right
 
     @Test
@@ -335,6 +369,41 @@ public class OverloadResolverPromotionLevelTest
         assertThat(result, is(-1));
     }
 
+    //--------------------  tests with empty union on the right
+
+    @Test
+    public void getPromotionLevelFromTo_IntToEmpty_ReturnsMinus1() {
+        ITypeSymbol actual = intType;
+        ITypeSymbol formal = createUnion();
+
+        IOverloadResolver solver = createOverloadResolver();
+        int result = solver.getPromotionLevelFromTo(actual, formal);
+
+        assertThat(result, is(-1));
+    }
+
+    @Test
+    public void getPromotionLevelFromTo_ArrayToEmpty_ReturnsMinus1() {
+        ITypeSymbol actual = arrayType;
+        ITypeSymbol formal = createUnion();
+
+        IOverloadResolver solver = createOverloadResolver();
+        int result = solver.getPromotionLevelFromTo(actual, formal);
+
+        assertThat(result, is(-1));
+    }
+
+    @Test
+    public void getPromotionLevelFromTo_InterfaceAToEmpty_ReturnsMinus1() {
+        ITypeSymbol actual = interfaceAType;
+        ITypeSymbol formal = createUnion();
+
+        IOverloadResolver solver = createOverloadResolver();
+        int result = solver.getPromotionLevelFromTo(actual, formal);
+
+        assertThat(result, is(-1));
+    }
+
     //--------------------  tests with unions on the left and on the right
 
     @Test
@@ -368,6 +437,19 @@ public class OverloadResolverPromotionLevelTest
         int result = solver.getPromotionLevelFromTo(actual, formal);
 
         assertThat(result, is(-1));
+    }
+
+    //--------------------  special case empty union on the left and on the right
+
+    @Test
+    public void getPromotionLevelFromTo_EmptyToEmpty_Returns0() {
+        ITypeSymbol actual = createUnion();
+        ITypeSymbol formal = createUnion();
+
+        IOverloadResolver solver = createOverloadResolver();
+        int result = solver.getPromotionLevelFromTo(actual, formal);
+
+        assertThat(result, is(0));
     }
 
     private IUnionTypeSymbol createUnion(ITypeSymbol... typeSymbols) {
