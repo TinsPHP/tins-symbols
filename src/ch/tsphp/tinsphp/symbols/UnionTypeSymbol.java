@@ -16,6 +16,13 @@ import java.util.Map;
 
 public class UnionTypeSymbol extends ALazyTypeSymbol implements IUnionTypeSymbol
 {
+    private static enum ETypeRelation
+    {
+        NO_RELATION,
+        PARENT_TYPE,
+        SUB_TYPE
+    }
+
 
     private final IOverloadResolver overloadResolver;
     private Map<String, ITypeSymbol> typeSymbols;
@@ -50,22 +57,25 @@ public class UnionTypeSymbol extends ALazyTypeSymbol implements IUnionTypeSymbol
 
         //no need to add it if it already exist in the union; ergo simplification = do not insert
         if (!typeSymbols.containsKey(absoluteName)) {
-            boolean isNotSubTypeOfExisting = true;
+
+            ETypeRelation status = ETypeRelation.NO_RELATION;
             Iterator<Map.Entry<String, ITypeSymbol>> iterator = typeSymbols.entrySet().iterator();
             while (iterator.hasNext()) {
                 ITypeSymbol existingTypeInUnion = iterator.next().getValue();
-                if (overloadResolver.isFirstSameOrSubTypeOfSecond(existingTypeInUnion, newTypeSymbol)) {
-                    //remove all sub-types, they do no longer add information to the union type
-                    changedUnion = true;
+                if ((status == ETypeRelation.NO_RELATION || status == ETypeRelation.PARENT_TYPE) &&
+                        overloadResolver.isFirstSameOrSubTypeOfSecond(existingTypeInUnion, newTypeSymbol)) {
+                    //remove sub-type, it does no longer add information to the union type
+                    status = ETypeRelation.PARENT_TYPE;
                     iterator.remove();
-                } else if (isNotSubTypeOfExisting &&
+                } else if (status == ETypeRelation.NO_RELATION &&
                         overloadResolver.isFirstSameOrParentTypeOfSecond(existingTypeInUnion, newTypeSymbol)) {
-                    //new type
-                    isNotSubTypeOfExisting = false;
+                    //new type is a sub type of an existing and hence it does not add new information to the union
+                    status = ETypeRelation.SUB_TYPE;
+                    break;
                 }
             }
 
-            if (isNotSubTypeOfExisting) {
+            if (status == ETypeRelation.NO_RELATION || status == ETypeRelation.PARENT_TYPE) {
                 changedUnion = true;
                 typeSymbols.put(absoluteName, newTypeSymbol);
             }
@@ -73,6 +83,7 @@ public class UnionTypeSymbol extends ALazyTypeSymbol implements IUnionTypeSymbol
 
         return changedUnion;
     }
+
 
     @Override
     public boolean merge(IUnionTypeSymbol unionTypeSymbol) {
@@ -82,7 +93,8 @@ public class UnionTypeSymbol extends ALazyTypeSymbol implements IUnionTypeSymbol
             throw new RuntimeException("Cannot add a type symbol to a closed union");
         }
         for (Map.Entry<String, ITypeSymbol> entry : unionTypeSymbol.getTypeSymbols().entrySet()) {
-            changedUnion = changedUnion || addAndSimplify(entry.getKey(), entry.getValue());
+            boolean hasUnionChanged = addAndSimplify(entry.getKey(), entry.getValue());
+            changedUnion = changedUnion || hasUnionChanged;
         }
 
         return changedUnion;
