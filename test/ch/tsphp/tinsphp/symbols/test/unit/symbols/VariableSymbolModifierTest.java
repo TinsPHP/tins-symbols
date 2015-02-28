@@ -61,7 +61,7 @@ public class VariableSymbolModifierTest
     @Parameterized.Parameters
     public static Collection<Object[]> testStrings() {
         return Arrays.asList(new Object[][]{
-                //not yet supported by PHP
+                //not yet supported by PHP but constants are treated as final VariableSymbols as well
 //                {"isFinal", TokenTypes.Final},
                 {"isStatic", TokenTypes.Static},
                 {"isPublic", TokenTypes.Public},

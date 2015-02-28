@@ -23,7 +23,6 @@ public class UnionTypeSymbol extends ALazyTypeSymbol implements IUnionTypeSymbol
         SUB_TYPE
     }
 
-
     private final IOverloadResolver overloadResolver;
     private Map<String, ITypeSymbol> typeSymbols;
 
@@ -44,7 +43,8 @@ public class UnionTypeSymbol extends ALazyTypeSymbol implements IUnionTypeSymbol
     @Override
     public boolean addTypeSymbol(ITypeSymbol typeSymbol) {
         if (isReadyForEval()) {
-            throw new RuntimeException("Cannot add a type symbol to a closed union");
+            throw new IllegalStateException("Cannot add a type symbol to a closed union.\n"
+                    + "Tried to add: " + typeSymbol.toString());
         }
         if (typeSymbol instanceof IUnionTypeSymbol) {
             return merge((IUnionTypeSymbol) typeSymbol);
@@ -62,13 +62,13 @@ public class UnionTypeSymbol extends ALazyTypeSymbol implements IUnionTypeSymbol
             Iterator<Map.Entry<String, ITypeSymbol>> iterator = typeSymbols.entrySet().iterator();
             while (iterator.hasNext()) {
                 ITypeSymbol existingTypeInUnion = iterator.next().getValue();
-                if ((status == ETypeRelation.NO_RELATION || status == ETypeRelation.PARENT_TYPE) &&
-                        overloadResolver.isFirstSameOrSubTypeOfSecond(existingTypeInUnion, newTypeSymbol)) {
+                if ((status == ETypeRelation.NO_RELATION || status == ETypeRelation.PARENT_TYPE)
+                        && overloadResolver.isFirstSameOrSubTypeOfSecond(existingTypeInUnion, newTypeSymbol)) {
                     //remove sub-type, it does no longer add information to the union type
                     status = ETypeRelation.PARENT_TYPE;
                     iterator.remove();
-                } else if (status == ETypeRelation.NO_RELATION &&
-                        overloadResolver.isFirstSameOrParentTypeOfSecond(existingTypeInUnion, newTypeSymbol)) {
+                } else if (status == ETypeRelation.NO_RELATION
+                        && overloadResolver.isFirstSameOrParentTypeOfSecond(existingTypeInUnion, newTypeSymbol)) {
                     //new type is a sub type of an existing and hence it does not add new information to the union
                     status = ETypeRelation.SUB_TYPE;
                     break;
@@ -84,13 +84,13 @@ public class UnionTypeSymbol extends ALazyTypeSymbol implements IUnionTypeSymbol
         return changedUnion;
     }
 
-
     @Override
     public boolean merge(IUnionTypeSymbol unionTypeSymbol) {
         boolean changedUnion = false;
 
         if (isReadyForEval()) {
-            throw new RuntimeException("Cannot add a type symbol to a closed union");
+            throw new IllegalStateException("Cannot add a type symbol to a closed union.\n"
+                    + "Tried to add: " + unionTypeSymbol.toString());
         }
         for (Map.Entry<String, ITypeSymbol> entry : unionTypeSymbol.getTypeSymbols().entrySet()) {
             boolean hasUnionChanged = addAndSimplify(entry.getKey(), entry.getValue());
@@ -112,12 +112,33 @@ public class UnionTypeSymbol extends ALazyTypeSymbol implements IUnionTypeSymbol
 
     @Override
     public boolean isFalseable() {
-        return typeSymbols.containsKey(PrimitiveTypeNames.FALSE);
+        return isReadyForEval() && typeSymbols.containsKey(PrimitiveTypeNames.FALSE);
     }
 
     @Override
     public boolean isNullable() {
-        return typeSymbols.containsKey(PrimitiveTypeNames.NULL);
+        return isReadyForEval() && typeSymbols.containsKey(PrimitiveTypeNames.NULL);
     }
 
+    @Override
+    public String getName() {
+        return getAbsoluteName();
+    }
+
+    @Override
+    public String getAbsoluteName() {
+        if (isReadyForEval()) {
+            StringBuilder sb = new StringBuilder("{");
+            Iterator<String> iterator = typeSymbols.keySet().iterator();
+            if (iterator.hasNext()) {
+                sb.append(iterator.next());
+            }
+            while (iterator.hasNext()) {
+                sb.append(" V ").append(iterator.next());
+            }
+            sb.append("}");
+            return sb.toString();
+        }
+        return super.getAbsoluteName();
+    }
 }

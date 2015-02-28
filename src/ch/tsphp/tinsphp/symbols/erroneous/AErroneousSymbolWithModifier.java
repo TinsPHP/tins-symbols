@@ -10,10 +10,8 @@ import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
 import ch.tsphp.common.symbols.ISymbolWithModifier;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
-import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousSymbol;
 
-public abstract class AErroneousSymbolWithModifier extends AErroneousSymbol
-        implements IErroneousSymbol, ISymbolWithModifier
+public abstract class AErroneousSymbolWithModifier extends AErroneousSymbol implements ISymbolWithModifier
 {
     public static final String ERROR_MESSAGE_MODIFIER = "AErroneousScopedSymbol is not a real symbol with modifier.";
 

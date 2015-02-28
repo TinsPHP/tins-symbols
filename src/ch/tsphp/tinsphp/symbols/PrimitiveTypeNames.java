@@ -6,7 +6,7 @@
 
 package ch.tsphp.tinsphp.symbols;
 
-public class PrimitiveTypeNames
+public final class PrimitiveTypeNames
 {
 
     public static final String NULL = "\\null";
@@ -22,4 +22,6 @@ public class PrimitiveTypeNames
     public static final String RESOURCE = "\\resource";
     public static final String MIXED = "\\mixed";
 
+    private PrimitiveTypeNames() {
+    }
 }

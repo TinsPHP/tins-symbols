@@ -79,18 +79,21 @@ public class OverloadResolver implements IOverloadResolver
     }
 
     private int getPromoLevelWithoutUnion(ITypeSymbol actualParameterType, ITypeSymbol formalParameterType) {
-        int highestPromotionLevel = 0;
+        int promotionLevel = 0;
         if (actualParameterType != formalParameterType) {
-            highestPromotionLevel = -1;
+            promotionLevel = -1;
             Set<ITypeSymbol> parentTypes = actualParameterType.getParentTypeSymbols();
             for (ITypeSymbol parentType : parentTypes) {
-                int promotionLevel = getPromoLevelWithoutUnion(parentType, formalParameterType);
-                if (highestPromotionLevel < promotionLevel) {
-                    //+1 since its not the actual parameter but the parent of the actual
-                    highestPromotionLevel = promotionLevel + 1;
+                int parentPromotionLevel = getPromoLevelWithoutUnion(parentType, formalParameterType);
+                if (parentPromotionLevel != -1) {
+                    if (promotionLevel == -1 || promotionLevel > parentPromotionLevel + 1) {
+                        //+1 since its not the actual parameter but the parent of the actual
+                        promotionLevel = parentPromotionLevel + 1;
+                    }
                 }
+
             }
         }
-        return highestPromotionLevel;
+        return promotionLevel;
     }
 }

@@ -18,12 +18,11 @@ import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
 import ch.tsphp.common.symbols.ISymbol;
 import ch.tsphp.common.symbols.IUnionTypeSymbol;
-import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousSymbol;
 
 import java.util.List;
 import java.util.Map;
 
-public abstract class AErroneousScopedSymbol extends AErroneousSymbolWithModifier implements IErroneousSymbol, IScope
+public abstract class AErroneousScopedSymbol extends AErroneousSymbolWithModifier implements IScope
 {
 
     public static final String ERROR_MESSAGE_SCOPE = "AErroneousScopedSymbol is not a real scope.";

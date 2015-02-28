@@ -28,11 +28,19 @@ public abstract class ALazyTypeSymbol implements ILazyTypeSymbol
     public abstract ITypeSymbol evalSelf();
 
     @Override
-    public void addForEvalReadyListener(IForEvalReadyListener typeSymbol) {
-        listeners.add(typeSymbol);
+    public void addForEvalReadyListener(IForEvalReadyListener listener) {
+        if (!isReadyForEval()) {
+            listeners.add(listener);
+        } else {
+            listener.notifyReadyForEval();
+        }
     }
 
     protected void notifyForEvalReadyListeners() {
+        if (isReadyForEval) {
+            throw new IllegalStateException("LazyTypeSymbol is already ready for eval");
+        }
+
         isReadyForEval = true;
         for (IForEvalReadyListener listener : listeners) {
             listener.notifyReadyForEval();

@@ -20,6 +20,7 @@ import ch.tsphp.tinsphp.common.symbols.IArrayTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IClassTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IModifierHelper;
+import ch.tsphp.tinsphp.common.symbols.INullTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IPseudoTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IScalarTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
@@ -68,6 +69,17 @@ public class SymbolFactoryTest
         ITypeSymbol result = symbolFactory.getMixedTypeSymbol();
 
         assertThat(result, is(typeSymbol));
+    }
+
+    @Test
+    public void createNullTypeSymbol_Standard_ReturnsAlwaysTheSameObject() {
+        //no arrange necessary
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        INullTypeSymbol result1 = symbolFactory.createNullTypeSymbol();
+        INullTypeSymbol result2 = symbolFactory.createNullTypeSymbol();
+
+        assertThat(result1, is(result2));
     }
 
     @Test

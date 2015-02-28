@@ -15,10 +15,9 @@ package ch.tsphp.tinsphp.symbols.erroneous;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
 import ch.tsphp.tinsphp.common.symbols.ISymbolWithAccessModifier;
-import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousSymbol;
 
 public abstract class AErroneousSymbolWithAccessModifier extends AErroneousSymbolWithModifier
-        implements IErroneousSymbol, ISymbolWithAccessModifier
+        implements ISymbolWithAccessModifier
 {
 
     public AErroneousSymbolWithAccessModifier(ITSPHPAst ast, String name, TSPHPException theException) {

@@ -70,10 +70,10 @@ public class ErroneousLazySymbol extends AErroneousScopedSymbol implements IErro
         return true;
     }
 
-    @Override
-    public boolean isFinal() {
-        return false;
-    }
+//    @Override
+//    public boolean isFinal() {
+//        return false;
+//    }
 
     @Override
     public Set<ITypeSymbol> getParentTypeSymbols() {

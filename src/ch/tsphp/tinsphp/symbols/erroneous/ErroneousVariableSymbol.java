@@ -45,10 +45,10 @@ public class ErroneousVariableSymbol extends AErroneousSymbolWithAccessModifier 
         return true;
     }
 
-    @Override
-    public boolean isFinal() {
-        return false;
-    }
+//    @Override
+//    public boolean isFinal() {
+//        return false;
+//    }
 
     @Override
     public TypeWithModifiersDto toTypeWithModifiersDto() {

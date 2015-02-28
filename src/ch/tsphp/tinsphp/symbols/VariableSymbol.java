@@ -24,10 +24,10 @@ public class VariableSymbol extends ASymbolWithAccessModifier implements IVariab
         super(definitionAst, modifiers, name);
     }
 
-    @Override
-    public boolean isFinal() {
-        return modifiers.isFinal();
-    }
+//    @Override
+//    public boolean isFinal() {
+//        return modifiers.isFinal();
+//    }
 
     @Override
     public boolean isStatic() {

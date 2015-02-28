@@ -9,13 +9,11 @@ package ch.tsphp.tinsphp.symbols.test.unit.utils;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadResolver;
+import ch.tsphp.tinsphp.symbols.test.unit.testutils.ATypeTest;
 import ch.tsphp.tinsphp.symbols.utils.OverloadResolver;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -23,77 +21,8 @@ import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class OverloadResolverPromotionLevelTest
+public class OverloadResolverPromotionLevelTest extends ATypeTest
 {
-    //Warning! start code duplication - same as in ConstraintSolverTest from the inference component
-    private static ITypeSymbol mixedType;
-    private static ITypeSymbol arrayType;
-    private static ITypeSymbol scalarType;
-    private static ITypeSymbol stringType;
-    private static ITypeSymbol numType;
-    private static ITypeSymbol floatType;
-    private static ITypeSymbol intType;
-    private static ITypeSymbol nothingType;
-
-    private static ITypeSymbol interfaceAType;
-    private static ITypeSymbol interfaceSubAType;
-    private static ITypeSymbol interfaceBType;
-    private static ITypeSymbol fooType;
-    //Warning! end code duplication - same as in ConstraintSolverTest from the inference component
-
-    @BeforeClass
-    public static void init() {
-        //Warning! start code duplication - same as in ConstraintSolverTest from the inference component
-        mixedType = mock(ITypeSymbol.class);
-
-        arrayType = mock(ITypeSymbol.class);
-        when(arrayType.getParentTypeSymbols()).thenReturn(set(mixedType));
-        when(arrayType.getAbsoluteName()).thenReturn("array");
-
-        scalarType = mock(ITypeSymbol.class);
-        when(scalarType.getParentTypeSymbols()).thenReturn(set(mixedType));
-        when(scalarType.getAbsoluteName()).thenReturn("scalar");
-
-        stringType = mock(ITypeSymbol.class);
-        when(stringType.getParentTypeSymbols()).thenReturn(set(scalarType));
-        when(stringType.getAbsoluteName()).thenReturn("string");
-
-        numType = mock(ITypeSymbol.class);
-        when(numType.getParentTypeSymbols()).thenReturn(set(scalarType));
-        when(numType.getAbsoluteName()).thenReturn("num");
-
-        floatType = mock(ITypeSymbol.class);
-        when(floatType.getParentTypeSymbols()).thenReturn(set(numType));
-        when(floatType.getAbsoluteName()).thenReturn("float");
-
-        intType = mock(ITypeSymbol.class);
-        when(intType.getParentTypeSymbols()).thenReturn(set(numType));
-        when(intType.getAbsoluteName()).thenReturn("int");
-
-        nothingType = mock(ITypeSymbol.class);
-        when(nothingType.getAbsoluteName()).thenReturn("nothing");
-
-        interfaceAType = mock(ITypeSymbol.class);
-        when(interfaceAType.getParentTypeSymbols()).thenReturn(set(mixedType));
-        when(interfaceAType.getAbsoluteName()).thenReturn("IA");
-
-        interfaceSubAType = mock(ITypeSymbol.class);
-        when(interfaceSubAType.getParentTypeSymbols()).thenReturn(set(interfaceAType));
-        when(interfaceSubAType.getAbsoluteName()).thenReturn("ISubA");
-
-        interfaceBType = mock(ITypeSymbol.class);
-        when(interfaceBType.getParentTypeSymbols()).thenReturn(set(mixedType));
-        when(interfaceBType.getAbsoluteName()).thenReturn("IB");
-
-        fooType = mock(ITypeSymbol.class);
-        when(fooType.getParentTypeSymbols()).thenReturn(set(interfaceSubAType, interfaceBType));
-        when(fooType.getAbsoluteName()).thenReturn("Foo");
-        //Warning! end code duplication - same as in ConstraintSolverTest from the inference component
-    }
-
-    private static HashSet<ITypeSymbol> set(ITypeSymbol... symbols) {
-        return new HashSet<>(Arrays.asList(symbols));
-    }
 
     @Test
     public void getPromotionLevelFromTo_IntToInt_Returns0() {
@@ -418,7 +347,7 @@ public class OverloadResolverPromotionLevelTest
     }
 
     @Test
-    public void getPromotionLevelFromTo_IntAndFooToScalarAndArrayAndIA_Returns1() {
+    public void getPromotionLevelFromTo_IntAndFooToScalarAndArrayAndIA_Returns2() {
         ITypeSymbol actual = createUnion(intType, fooType);
         ITypeSymbol formal = createUnion(scalarType, arrayType, interfaceAType);
 
@@ -440,6 +369,46 @@ public class OverloadResolverPromotionLevelTest
     }
 
     //--------------------  special case empty union on the left and on the right
+
+    @Test
+    public void isFirstSameOrSubTypeOfSecond_IntAndNum_ReturnsTrue() {
+        //no arrange necessary
+
+        IOverloadResolver solver = createOverloadResolver();
+        boolean result = solver.isFirstSameOrSubTypeOfSecond(intType, numType);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void isFirstSameOrSubTypeOfSecond_BoolAndNum_ReturnsFalse() {
+        //no arrange necessary
+
+        IOverloadResolver solver = createOverloadResolver();
+        boolean result = solver.isFirstSameOrSubTypeOfSecond(boolType, numType);
+
+        assertThat(result, is(false));
+    }
+
+    @Test
+    public void isFirstSameOrParentTypeOfSecond_NumAndFloat_ReturnsTrue() {
+        //no arrange necessary
+
+        IOverloadResolver solver = createOverloadResolver();
+        boolean result = solver.isFirstSameOrParentTypeOfSecond(numType, floatType);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void isFirstSameOrParentTypeOfSecond_IntAndNum_ReturnsFalse() {
+        //no arrange necessary
+
+        IOverloadResolver solver = createOverloadResolver();
+        boolean result = solver.isFirstSameOrParentTypeOfSecond(intType, numType);
+
+        assertThat(result, is(false));
+    }
 
     @Test
     public void getPromotionLevelFromTo_EmptyToEmpty_Returns0() {

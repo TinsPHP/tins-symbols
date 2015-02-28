@@ -65,6 +65,9 @@ public abstract class AScopedSymbol extends ASymbolWithModifier implements IScop
         return scopeHelper.resolve(this, ast);
     }
 
+    /**
+     * @deprecated should not be used anymore, use the corresponding phase controller instead
+     */
     @Override
     @Deprecated
     public boolean doubleDefinitionCheck(ISymbol symbol) {

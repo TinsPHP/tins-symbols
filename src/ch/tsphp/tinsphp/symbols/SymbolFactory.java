@@ -16,7 +16,6 @@ package ch.tsphp.tinsphp.symbols;
 import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
-import ch.tsphp.common.symbols.ILazyTypeSymbol;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadResolver;
@@ -50,6 +49,7 @@ public class SymbolFactory implements ISymbolFactory
     private final IModifierHelper modifierHelper;
     private final IOverloadResolver overloadResolver;
     private ITypeSymbol mixedTypeSymbol = null;
+    private INullTypeSymbol nullTypeSymbol = new NullTypeSymbol();
 
     public SymbolFactory(
             IScopeHelper theScopeHelper, IModifierHelper theModifierHelper, IOverloadResolver theOverloadResolver) {
@@ -69,7 +69,7 @@ public class SymbolFactory implements ISymbolFactory
 
     @Override
     public INullTypeSymbol createNullTypeSymbol() {
-        return new NullTypeSymbol();
+        return nullTypeSymbol;
     }
 
     //
@@ -139,10 +139,10 @@ public class SymbolFactory implements ISymbolFactory
                 mixedTypeSymbol);
     }
 
-    @Override
-    public IUnionTypeSymbol createUnionTypeSymbol() {
-        return new UnionTypeSymbol(overloadResolver);
-    }
+//    @Override
+//    public IUnionTypeSymbol createUnionTypeSymbol() {
+//        return new UnionTypeSymbol(overloadResolver);
+//    }
 
     @Override
     public IUnionTypeSymbol createUnionTypeSymbol(Map<String, ITypeSymbol> types) {
@@ -171,10 +171,10 @@ public class SymbolFactory implements ISymbolFactory
         return new VariableSymbol(variableId, modifierHelper.getModifiers(typeModifier), variableId.getText());
     }
 
-    @Override
-    public ILazyTypeSymbol createLazyTypeSymbol() {
-        return new LazyTypeSymbol();
-    }
+//    @Override
+//    public ILazyTypeSymbol createLazyTypeSymbol() {
+//        return new LazyTypeSymbol();
+//    }
 
     @Override
     public IErroneousTypeSymbol createErroneousTypeSymbol(ITSPHPAst ast, TSPHPException exception) {
