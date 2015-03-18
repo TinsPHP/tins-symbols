@@ -14,11 +14,13 @@ package ch.tsphp.tinsphp.symbols.erroneous;
 
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
+import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.TypeWithModifiersDto;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
 
 import java.util.List;
+import java.util.Map;
 
 
 public class ErroneousMethodSymbol extends AErroneousScopedSymbol implements IErroneousMethodSymbol
@@ -88,5 +90,15 @@ public class ErroneousMethodSymbol extends AErroneousScopedSymbol implements IEr
     @Override
     public boolean isNullable() {
         return true;
+    }
+
+    @Override
+    public Map<String, ITypeVariableSymbol> getTypeVariables() {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
+
+    @Override
+    public void addTypeVariable(ITypeVariableSymbol typeVariableSymbol) {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 }

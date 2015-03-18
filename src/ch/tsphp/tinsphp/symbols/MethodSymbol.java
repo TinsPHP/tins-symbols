@@ -18,17 +18,23 @@ import ch.tsphp.common.symbols.ISymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
+import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.TypeWithModifiersDto;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
 {
 
     private final List<IVariableSymbol> parameters = new ArrayList<>();
     private final IModifierSet returnTypeModifiers;
+    //Warning! start code duplication - same as in GlobalNamespaceScope
+    private final Map<String, ITypeVariableSymbol> typeVariables = new HashMap<>();
+    //Warning! end code duplication - same as in GlobalNamespaceScope
 
     @SuppressWarnings("checkstyle:parameternumber")
     public MethodSymbol(
@@ -119,6 +125,18 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
         String symbolName = symbol.getName();
         return initialisedSymbols.containsKey(symbolName) && !initialisedSymbols.get(symbolName);
     }
+    //Warning! end code duplication - same as in GlobalNamespaceScope
 
+
+    //Warning! start code duplication - same as in GlobalNamespaceScope
+    @Override
+    public Map<String, ITypeVariableSymbol> getTypeVariables() {
+        return typeVariables;
+    }
+
+    @Override
+    public void addTypeVariable(ITypeVariableSymbol typeVariableSymbol) {
+        typeVariables.put(typeVariableSymbol.getAbsoluteName(), typeVariableSymbol);
+    }
     //Warning! end code duplication - same as in GlobalNamespaceScope
 }

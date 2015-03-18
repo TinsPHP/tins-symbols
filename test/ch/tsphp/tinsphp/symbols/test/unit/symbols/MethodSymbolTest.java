@@ -12,17 +12,20 @@ import ch.tsphp.common.symbols.ISymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
+import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.symbols.MethodSymbol;
 import ch.tsphp.tinsphp.symbols.ModifierSet;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
+import static org.hamcrest.collection.IsMapContaining.hasKey;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -160,6 +163,29 @@ public class MethodSymbolTest
         String result = methodSymbol.toString();
 
         assertThat(result, is(name + "|" + modifier + "|" + returnTypeModifier));
+    }
+
+    @Test
+    public void getTypeVariables_NothingDefined_ReturnsEmptyMap() {
+
+        IMethodSymbol methodSymbol = createMethodSymbol();
+        Map<String, ITypeVariableSymbol> result = methodSymbol.getTypeVariables();
+
+        assertThat(result.size(), is(0));
+    }
+
+    @Test
+    public void addAndGetTypeVariables_AddedOneFor$a_ReturnsMapWithCorrespondingConstraint() {
+        ITypeVariableSymbol $a = mock(ITypeVariableSymbol.class);
+        when($a.getAbsoluteName()).thenReturn("$a");
+
+        IMethodSymbol methodSymbol = createMethodSymbol();
+        methodSymbol.addTypeVariable($a);
+        Map<String, ITypeVariableSymbol> result = methodSymbol.getTypeVariables();
+
+        assertThat(result.size(), is(1));
+        assertThat(result, hasKey("$a"));
+        assertThat(result.get("$a"), is($a));
     }
 
     private IMethodSymbol createMethodSymbol() {

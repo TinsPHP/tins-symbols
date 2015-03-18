@@ -12,12 +12,10 @@
 
 package ch.tsphp.tinsphp.symbols.erroneous;
 
-import ch.tsphp.common.IConstraint;
 import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
 import ch.tsphp.common.symbols.ISymbol;
-import ch.tsphp.common.symbols.IUnionTypeSymbol;
 
 import java.util.List;
 import java.util.Map;
@@ -85,30 +83,4 @@ public abstract class AErroneousScopedSymbol extends AErroneousSymbolWithModifie
     public Map<String, Boolean> getInitialisedSymbols() {
         throw new UnsupportedOperationException(ERROR_MESSAGE_MODIFIER);
     }
-
-    @Override
-    public Map<String, List<IConstraint>> getConstraints() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE_SCOPE);
-    }
-
-    @Override
-    public List<IConstraint> getConstraintsForVariable(String variable) {
-        throw new UnsupportedOperationException(ERROR_MESSAGE_SCOPE);
-    }
-
-    @Override
-    public void addConstraint(String variable, IConstraint constraint) {
-        throw new UnsupportedOperationException(ERROR_MESSAGE_SCOPE);
-    }
-
-    @Override
-    public IUnionTypeSymbol getResultOfConstraintSolving(String variableId) {
-        throw new UnsupportedOperationException(ERROR_MESSAGE_SCOPE);
-    }
-
-    @Override
-    public void setResultOfConstraintSolving(String variableId, IUnionTypeSymbol typeSymbol) {
-        throw new UnsupportedOperationException(ERROR_MESSAGE_SCOPE);
-    }
-
 }

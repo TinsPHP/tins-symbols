@@ -6,11 +6,9 @@
 
 package ch.tsphp.tinsphp.symbols.test.unit.symbols;
 
-import ch.tsphp.common.IConstraint;
 import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ISymbol;
-import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.symbols.AScopedSymbol;
@@ -19,12 +17,9 @@ import org.junit.Test;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
-import static org.hamcrest.collection.IsMapContaining.hasKey;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -265,115 +260,6 @@ public class AScopedSymbolTest
         scopedSymbol.addToInitialisedSymbols(symbol2, false);
         //assert 2
         assertThat(result, hasEntry("dummy", true));
-    }
-
-    @Test
-    public void getConstraints_NothingDefined_ReturnsEmptyMap() {
-
-        AScopedSymbol scopedSymbol = createScopedSymbol("foo");
-        Map<String, List<IConstraint>> result = scopedSymbol.getConstraints();
-
-        assertThat(result.size(), is(0));
-    }
-
-    @Test
-    public void addAndgetConstraints_AddedOneFor$a_ReturnsMapWithCorrespondingConstraint() {
-        IConstraint constraint = mock(IConstraint.class);
-
-        AScopedSymbol scopedSymbol = createScopedSymbol("foo");
-        scopedSymbol.addConstraint("$a", constraint);
-        Map<String, List<IConstraint>> result = scopedSymbol.getConstraints();
-
-        assertThat(result.size(), is(1));
-        assertThat(result, hasKey("$a"));
-        assertThat(result.get("$a"), hasItems(constraint));
-    }
-
-    @Test
-    public void getConstraintsForVariable_NothingDefined_ReturnsEmptyMap() {
-
-        AScopedSymbol scopedSymbol = createScopedSymbol("foo");
-        List<IConstraint> result = scopedSymbol.getConstraintsForVariable("$b");
-
-        assertThat(result, is(nullValue()));
-    }
-
-    @Test
-    public void addAndGetConstraintsForVariable_Get$bAddedOneFor$a_ReturnsNull() {
-        IConstraint constraint = mock(IConstraint.class);
-
-        AScopedSymbol scopedSymbol = createScopedSymbol("foo");
-        scopedSymbol.addConstraint("$a", constraint);
-        List<IConstraint> result = scopedSymbol.getConstraintsForVariable("$b");
-
-        assertThat(result, is(nullValue()));
-    }
-
-    @Test
-    public void addAndGetConstraintsForVariable_Get$bAddedOneFor$b_ReturnsConstraint() {
-        IConstraint constraint = mock(IConstraint.class);
-
-        AScopedSymbol scopedSymbol = createScopedSymbol("foo");
-        scopedSymbol.addConstraint("$b", constraint);
-        List<IConstraint> result = scopedSymbol.getConstraintsForVariable("$b");
-
-        assertThat(result, hasItems(constraint));
-    }
-
-    @Test
-    public void addAndGetConstraintsForVariable_Get$bAddedTwoFor$b_ReturnsBothConstraint() {
-        IConstraint constraint1 = mock(IConstraint.class);
-        IConstraint constraint2 = mock(IConstraint.class);
-
-        AScopedSymbol scopedSymbol = createScopedSymbol("foo");
-        scopedSymbol.addConstraint("$b", constraint1);
-        scopedSymbol.addConstraint("$b", constraint2);
-        List<IConstraint> result = scopedSymbol.getConstraintsForVariable("$b");
-
-        assertThat(result, hasItems(constraint1, constraint2));
-    }
-
-    @Test
-    public void getResultOfConstraintSolving_NothingDefined_ReturnsNull() {
-        //no arrange necessary
-
-        AScopedSymbol scopedSymbol = createScopedSymbol("foo");
-        IUnionTypeSymbol result = scopedSymbol.getResultOfConstraintSolving("$a");
-
-        assertThat(result, is(nullValue()));
-    }
-
-    @Test
-    public void setAndGetResultOfConstraintSolving_$aSetAndGet$b_ReturnsNull() {
-        IUnionTypeSymbol resultTypeSymbol = mock(IUnionTypeSymbol.class);
-
-        AScopedSymbol scopedSymbol = createScopedSymbol("foo");
-        scopedSymbol.setResultOfConstraintSolving("$a", resultTypeSymbol);
-        IUnionTypeSymbol result = scopedSymbol.getResultOfConstraintSolving("$b");
-
-        assertThat(result, is(nullValue()));
-    }
-
-    @Test
-    public void setAndGetResultOfConstraintSolving_$aSetAndGet$a_ReturnsUnionTypeSymbol() {
-        IUnionTypeSymbol resultTypeSymbol = mock(IUnionTypeSymbol.class);
-
-        AScopedSymbol scopedSymbol = createScopedSymbol("foo");
-        scopedSymbol.setResultOfConstraintSolving("$a", resultTypeSymbol);
-        IUnionTypeSymbol result = scopedSymbol.getResultOfConstraintSolving("$a");
-
-        assertThat(result, is(resultTypeSymbol));
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void setResultOfConstraintSolving_AlreadySet_ThrowsIllegalStateException() {
-        //no arrange necessary
-
-        AScopedSymbol scopedSymbol = createScopedSymbol("foo");
-        scopedSymbol.setResultOfConstraintSolving("$a", mock(IUnionTypeSymbol.class));
-        scopedSymbol.setResultOfConstraintSolving("$a", mock(IUnionTypeSymbol.class));
-
-        //assert in annotation
     }
 
     private AScopedSymbol createScopedSymbol(String name) {

@@ -139,10 +139,10 @@ public class SymbolFactory implements ISymbolFactory
                 mixedTypeSymbol);
     }
 
-//    @Override
-//    public IUnionTypeSymbol createUnionTypeSymbol() {
-//        return new UnionTypeSymbol(overloadResolver);
-//    }
+    @Override
+    public IUnionTypeSymbol createUnionTypeSymbol() {
+        return new UnionTypeSymbol(overloadResolver);
+    }
 
     @Override
     public IUnionTypeSymbol createUnionTypeSymbol(Map<String, ITypeSymbol> types) {

@@ -13,15 +13,12 @@
 
 package ch.tsphp.tinsphp.symbols;
 
-import ch.tsphp.common.IConstraint;
 import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.LowerCaseStringMap;
 import ch.tsphp.common.symbols.ISymbol;
-import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
-import ch.tsphp.tinsphp.common.utils.MapHelper;
 
 import java.util.HashMap;
 import java.util.List;
@@ -39,8 +36,6 @@ public abstract class AScopedSymbol extends ASymbolWithModifier implements IScop
     protected final IScope enclosingScope;
     protected final Map<String, List<ISymbol>> symbols = new LowerCaseStringMap<>();
     protected final Map<String, Boolean> initialisedSymbols = new HashMap<>();
-    protected final Map<String, List<IConstraint>> constraints = new HashMap<>();
-    protected final Map<String, IUnionTypeSymbol> constraintSolvingResults = new HashMap<>();
     //Warning! start code duplication - same as in AScope
 
     @SuppressWarnings("checkstyle:parameternumber")
@@ -105,42 +100,6 @@ public abstract class AScopedSymbol extends ASymbolWithModifier implements IScop
     @Override
     public Map<String, Boolean> getInitialisedSymbols() {
         return initialisedSymbols;
-    }
-    //Warning! end code duplication - same as in AScope
-
-
-    //Warning! start code duplication - same as in AScope
-    @Override
-    public Map<String, List<IConstraint>> getConstraints() {
-        return constraints;
-    }
-
-    @Override
-    public List<IConstraint> getConstraintsForVariable(String variableId) {
-        return constraints.get(variableId);
-    }
-
-    @Override
-    public void addConstraint(String variableId, IConstraint constraint) {
-        MapHelper.addToListMap(constraints, variableId, constraint);
-    }
-    //Warning! end code duplication - same as in AScope
-
-
-    //Warning! start code duplication - same as in AScope
-    @Override
-    public IUnionTypeSymbol getResultOfConstraintSolving(String variableId) {
-        return constraintSolvingResults.get(variableId);
-    }
-
-    @Override
-    public void setResultOfConstraintSolving(String variableId, IUnionTypeSymbol unionTypeSymbol) {
-        if (!constraintSolvingResults.containsKey(variableId)) {
-            constraintSolvingResults.put(variableId, unionTypeSymbol);
-        } else {
-            throw new IllegalStateException(
-                    "the constraint solving results already contain a solution for " + variableId);
-        }
     }
     //Warning! end code duplication - same as in AScope
 }
