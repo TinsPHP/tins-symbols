@@ -18,9 +18,11 @@ import ch.tsphp.tinsphp.common.symbols.IAliasSymbol;
 import ch.tsphp.tinsphp.common.symbols.IAliasTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IArrayTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IClassTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IFunctionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IModifierHelper;
 import ch.tsphp.tinsphp.common.symbols.INullTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IOverloadSymbol;
 import ch.tsphp.tinsphp.common.symbols.IPseudoTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IScalarTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
@@ -37,12 +39,14 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNot.not;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -293,6 +297,17 @@ public class SymbolFactoryTest
     }
 
     @Test
+    public void createUnionTypeSymbol_WithoutHashMap_StillReturnsAnEmptyMap() {
+        //no arrange necessary
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IUnionTypeSymbol result = symbolFactory.createUnionTypeSymbol();
+
+        assertThat(result.getTypeSymbols(), is(not(nullValue())));
+        assertThat(result.getTypeSymbols().size(), is(0));
+    }
+
+    @Test
     public void createUnionTypeSymbol_Standard_TypesArePassedTypes() {
         Map<String, ITypeSymbol> types = new HashMap<>();
 
@@ -300,6 +315,49 @@ public class SymbolFactoryTest
         IUnionTypeSymbol result = symbolFactory.createUnionTypeSymbol(types);
 
         assertThat(result.getTypeSymbols(), is(types));
+    }
+
+    @Test
+    public void createOverloadSymbol_Standard_NameIsPassedName() {
+        String name = "+";
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IOverloadSymbol result = symbolFactory.createOverloadSymbol(name);
+
+        assertThat(result.getName(), is(name));
+    }
+
+    @Test
+    public void createConstantFunctionTypeSymbol_Standard_NameIsPassedName() {
+        String name = "+";
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IFunctionTypeSymbol result = symbolFactory.createConstantFunctionTypeSymbol(name, null,
+                mock(ITypeSymbol.class));
+
+        assertThat(result.getName(), is(name));
+    }
+
+    @Test
+    public void createConstantFunctionTypeSymbol_Standard_ParametersConstraintSameSizeAsPassedParameters() {
+        List<String> parameters = Arrays.asList("$x", "$y");
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IFunctionTypeSymbol result = symbolFactory.createConstantFunctionTypeSymbol(
+                "+", parameters, mock(ITypeSymbol.class));
+
+        assertThat(result.getParametersConstraints().size(), is(parameters.size()));
+    }
+
+    @Test
+    public void createConstantFunctionTypeSymbol_Standard_ReturnTypeIsPassedReturnType() {
+        ITypeSymbol returnTypeSymbol = mock(ITypeSymbol.class);
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IFunctionTypeSymbol result = symbolFactory.createConstantFunctionTypeSymbol(
+                "+", null, returnTypeSymbol);
+
+        assertThat(result.getCachedReturnTypeSymbol(null), is(returnTypeSymbol));
     }
 
     @Test

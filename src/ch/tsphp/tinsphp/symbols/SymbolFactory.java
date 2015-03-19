@@ -24,9 +24,11 @@ import ch.tsphp.tinsphp.common.symbols.IAliasSymbol;
 import ch.tsphp.tinsphp.common.symbols.IAliasTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IArrayTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IClassTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IFunctionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IModifierHelper;
 import ch.tsphp.tinsphp.common.symbols.INullTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IOverloadSymbol;
 import ch.tsphp.tinsphp.common.symbols.IPseudoTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IScalarTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
@@ -41,6 +43,7 @@ import ch.tsphp.tinsphp.symbols.erroneous.ErroneousMethodSymbol;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousTypeSymbol;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousVariableSymbol;
 
+import java.util.List;
 import java.util.Map;
 
 public class SymbolFactory implements ISymbolFactory
@@ -147,6 +150,17 @@ public class SymbolFactory implements ISymbolFactory
     @Override
     public IUnionTypeSymbol createUnionTypeSymbol(Map<String, ITypeSymbol> types) {
         return new UnionTypeSymbol(overloadResolver, types);
+    }
+
+    @Override
+    public IOverloadSymbol createOverloadSymbol(String name) {
+        return new OverloadSymbol(name);
+    }
+
+    @Override
+    public IFunctionTypeSymbol createConstantFunctionTypeSymbol(
+            String name, List<String> parameterIds, ITypeSymbol returnTypeSymbol) {
+        return new ConstantFunctionTypeSymbol(name, parameterIds, returnTypeSymbol, mixedTypeSymbol);
     }
 
     @Override
