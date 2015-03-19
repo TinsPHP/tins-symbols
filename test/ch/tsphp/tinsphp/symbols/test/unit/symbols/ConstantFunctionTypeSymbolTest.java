@@ -54,7 +54,7 @@ public class ConstantFunctionTypeSymbolTest
 
         IFunctionTypeSymbol symbol = createFunctionTypeSymbol();
         symbol.addParameterConstraint("$nonExistingParameter", constraint);
-        List<List<IConstraint>> result = symbol.getParametersConstraints();
+        symbol.getParametersConstraints();
 
         //assert in annotation
     }
@@ -70,11 +70,11 @@ public class ConstantFunctionTypeSymbolTest
     }
 
     @Test
-    public void getCachedReturnTypeSymbol_Standard_ReturnsOnePassedByConstructor() {
+    public void apply_Standard_ReturnsOnePassedByConstructor() {
         ITypeSymbol returnType = mock(ITypeSymbol.class);
 
         IFunctionTypeSymbol symbol = createFunctionTypeSymbol("$x", null, returnType, null);
-        ITypeSymbol result = symbol.getCachedReturnTypeSymbol(null);
+        ITypeSymbol result = symbol.apply(null);
 
         assertThat(result, is(returnType));
     }

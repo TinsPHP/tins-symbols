@@ -32,6 +32,7 @@ import ch.tsphp.tinsphp.common.symbols.IOverloadSymbol;
 import ch.tsphp.tinsphp.common.symbols.IPseudoTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IScalarTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
+import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousLazySymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
@@ -140,6 +141,11 @@ public class SymbolFactory implements ISymbolFactory
                 identifier.getText(),
                 currentScope,
                 mixedTypeSymbol);
+    }
+
+    @Override
+    public ITypeVariableSymbol createExpressionTypeVariableSymbol(ITSPHPAst exprAst) {
+        return new ExpressionTypeVariableSymbol(exprAst);
     }
 
     @Override

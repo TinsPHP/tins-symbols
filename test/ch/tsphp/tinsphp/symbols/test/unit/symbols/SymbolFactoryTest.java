@@ -357,7 +357,7 @@ public class SymbolFactoryTest
         IFunctionTypeSymbol result = symbolFactory.createConstantFunctionTypeSymbol(
                 "+", null, returnTypeSymbol);
 
-        assertThat(result.getCachedReturnTypeSymbol(null), is(returnTypeSymbol));
+        assertThat(result.apply(null), is(returnTypeSymbol));
     }
 
     @Test

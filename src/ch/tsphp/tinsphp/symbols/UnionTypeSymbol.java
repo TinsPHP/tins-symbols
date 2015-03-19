@@ -128,7 +128,7 @@ public class UnionTypeSymbol extends ALazyTypeSymbol implements IUnionTypeSymbol
     @Override
     public String getAbsoluteName() {
         if (isReadyForEval()) {
-            StringBuilder sb = new StringBuilder("{");
+            StringBuilder sb = new StringBuilder();
             Iterator<String> iterator = typeSymbols.keySet().iterator();
             if (iterator.hasNext()) {
                 sb.append(iterator.next());
@@ -136,7 +136,10 @@ public class UnionTypeSymbol extends ALazyTypeSymbol implements IUnionTypeSymbol
             while (iterator.hasNext()) {
                 sb.append(" V ").append(iterator.next());
             }
-            sb.append("}");
+            if (typeSymbols.size() != 1) {
+                sb.insert(0, "{");
+                sb.append("}");
+            }
             return sb.toString();
         }
         return super.getAbsoluteName();

@@ -13,12 +13,21 @@
 package ch.tsphp.tinsphp.symbols;
 
 import ch.tsphp.common.ITSPHPAst;
+import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
+import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.TypeWithModifiersDto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class VariableSymbol extends ASymbolWithAccessModifier implements IVariableSymbol
 {
+
+    //Warning! start code duplication - same as in ExpressionTypeVariableSymbol
+    private final List<IConstraint> constraints = new ArrayList<>();
+    //Warning! end code duplication - same as in ExpressionTypeVariableSymbol
 
     public VariableSymbol(ITSPHPAst definitionAst, IModifierSet modifiers, String name) {
         super(definitionAst, modifiers, name);
@@ -49,9 +58,26 @@ public class VariableSymbol extends ASymbolWithAccessModifier implements IVariab
         return modifiers.isNullable();
     }
 
-
     @Override
     public TypeWithModifiersDto toTypeWithModifiersDto() {
         return new TypeWithModifiersDto(getType(), modifiers);
     }
+
+
+    //Warning! start code duplication - same as in ExpressionTypeVariableSymbol
+    @Override
+    public IUnionTypeSymbol getType() {
+        return (IUnionTypeSymbol) super.getType();
+    }
+
+    @Override
+    public void addConstraint(IConstraint constraint) {
+        constraints.add(constraint);
+    }
+
+    @Override
+    public List<IConstraint> getConstraints() {
+        return constraints;
+    }
+    //Warning! end code duplication - same as in ExpressionTypeVariableSymbol
 }

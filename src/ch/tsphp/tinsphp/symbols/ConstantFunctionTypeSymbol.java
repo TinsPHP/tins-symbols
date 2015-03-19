@@ -8,6 +8,7 @@ package ch.tsphp.tinsphp.symbols;
 
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ITypeSymbol;
+import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.symbols.IFunctionTypeSymbol;
 
@@ -59,7 +60,7 @@ public class ConstantFunctionTypeSymbol extends ATypeSymbol implements IFunction
     }
 
     @Override
-    public ITypeSymbol getCachedReturnTypeSymbol(List<ITypeSymbol> arguments) {
+    public ITypeSymbol apply(List<IUnionTypeSymbol> arguments) {
         return returnTypeSymbol;
     }
 

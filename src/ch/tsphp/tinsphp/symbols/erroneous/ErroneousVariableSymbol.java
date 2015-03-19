@@ -14,15 +14,26 @@ package ch.tsphp.tinsphp.symbols.erroneous;
 
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
+import ch.tsphp.common.symbols.IUnionTypeSymbol;
+import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.symbols.TypeWithModifiersDto;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousVariableSymbol;
+
+import java.util.List;
 
 
 public class ErroneousVariableSymbol extends AErroneousSymbolWithAccessModifier implements IErroneousVariableSymbol
 {
 
+    private static final String ERROR_MESSAGE = "ErroneousVariableSymbol is not a real class.";
+
     public ErroneousVariableSymbol(ITSPHPAst ast, String name, TSPHPException exception) {
         super(ast, name, exception);
+    }
+
+    @Override
+    public IUnionTypeSymbol getType() {
+        return (IUnionTypeSymbol) super.getType();
     }
 
     @Override
@@ -52,8 +63,16 @@ public class ErroneousVariableSymbol extends AErroneousSymbolWithAccessModifier 
 
     @Override
     public TypeWithModifiersDto toTypeWithModifiersDto() {
-        throw new UnsupportedOperationException("ErroneousVariableSymbol is not a real class.");
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
+    @Override
+    public void addConstraint(IConstraint constraint) {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
 
+    @Override
+    public List<IConstraint> getConstraints() {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
 }
