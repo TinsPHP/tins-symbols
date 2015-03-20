@@ -11,7 +11,6 @@ import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
 import ch.tsphp.common.symbols.ISymbol;
 import ch.tsphp.common.symbols.ITypeSymbol;
-import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.symbols.TypeWithModifiersDto;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousLazySymbol;
@@ -106,11 +105,6 @@ public class ErroneousLazySymbol extends AErroneousScopedSymbol implements IErro
     @Override
     public List<IConstraint> getConstraints() {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public IUnionTypeSymbol getType() {
-        return (IUnionTypeSymbol) super.getType();
     }
 
 }
