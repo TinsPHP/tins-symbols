@@ -9,8 +9,10 @@ package ch.tsphp.tinsphp.symbols.erroneous;
 import ch.tsphp.common.AstHelperRegistry;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
+import ch.tsphp.common.symbols.IForEvalReadyListener;
 import ch.tsphp.common.symbols.ISymbol;
 import ch.tsphp.common.symbols.ITypeSymbol;
+import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.symbols.TypeWithModifiersDto;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousLazySymbol;
@@ -18,6 +20,7 @@ import ch.tsphp.tinsphp.common.symbols.erroneous.ILazySymbolResolver;
 import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class ErroneousLazySymbol extends AErroneousScopedSymbol implements IErroneousLazySymbol
@@ -107,4 +110,38 @@ public class ErroneousLazySymbol extends AErroneousScopedSymbol implements IErro
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
+    @Override
+    public IUnionTypeSymbol getType() {
+        return (IUnionTypeSymbol) super.getType();
+    }
+
+    @Override
+    public Map<String, ITypeSymbol> getTypeSymbols() {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
+
+    @Override
+    public boolean addTypeSymbol(ITypeSymbol symbol) {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
+
+    @Override
+    public boolean merge(IUnionTypeSymbol unionTypeSymbol) {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
+
+    @Override
+    public void seal() {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
+
+    @Override
+    public void addForEvalReadyListener(IForEvalReadyListener typeSymbol) {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
+
+    @Override
+    public boolean isReadyForEval() {
+        return true;
+    }
 }

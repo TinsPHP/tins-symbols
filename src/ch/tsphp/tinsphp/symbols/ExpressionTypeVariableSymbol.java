@@ -7,6 +7,7 @@
 package ch.tsphp.tinsphp.symbols;
 
 import ch.tsphp.common.ITSPHPAst;
+import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 
@@ -24,6 +25,11 @@ public class ExpressionTypeVariableSymbol extends ASymbol implements ITypeVariab
     }
 
     //Warning! start code duplication - same as in VariableSymbol
+    @Override
+    public IUnionTypeSymbol getType() {
+        return (IUnionTypeSymbol) super.getType();
+    }
+
     @Override
     public void addConstraint(IConstraint constraint) {
         constraints.add(constraint);

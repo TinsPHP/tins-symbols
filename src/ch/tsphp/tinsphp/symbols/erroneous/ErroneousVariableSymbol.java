@@ -14,6 +14,7 @@ package ch.tsphp.tinsphp.symbols.erroneous;
 
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
+import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.symbols.TypeWithModifiersDto;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousVariableSymbol;
@@ -28,6 +29,11 @@ public class ErroneousVariableSymbol extends AErroneousSymbolWithAccessModifier 
 
     public ErroneousVariableSymbol(ITSPHPAst ast, String name, TSPHPException exception) {
         super(ast, name, exception);
+    }
+
+    @Override
+    public IUnionTypeSymbol getType() {
+        return (IUnionTypeSymbol) super.getType();
     }
 
     @Override

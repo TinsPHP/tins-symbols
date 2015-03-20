@@ -13,6 +13,7 @@
 package ch.tsphp.tinsphp.symbols;
 
 import ch.tsphp.common.ITSPHPAst;
+import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
@@ -64,6 +65,11 @@ public class VariableSymbol extends ASymbolWithAccessModifier implements IVariab
 
 
     //Warning! start code duplication - same as in ExpressionTypeVariableSymbol
+    @Override
+    public IUnionTypeSymbol getType() {
+        return (IUnionTypeSymbol) super.getType();
+    }
+
     @Override
     public void addConstraint(IConstraint constraint) {
         constraints.add(constraint);

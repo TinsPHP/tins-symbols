@@ -10,7 +10,9 @@ import ch.tsphp.common.AstHelperRegistry;
 import ch.tsphp.common.IAstHelper;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
+import ch.tsphp.common.symbols.IForEvalReadyListener;
 import ch.tsphp.common.symbols.ITypeSymbol;
+import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousTypeSymbol;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousTypeSymbol;
@@ -27,7 +29,7 @@ public class ErroneousTypeSymbolTest
 {
 
     @Test(expected = UnsupportedOperationException.class)
-    public void getParentTypeSymbols_Standard_ThrowsUnsupportedOeprationException() {
+    public void getParentTypeSymbols_Standard_ThrowsUnsupportedOperationException() {
         //no arrange necessary
 
         IErroneousTypeSymbol typeSymbol = createTypeSymbol();
@@ -77,6 +79,68 @@ public class ErroneousTypeSymbolTest
         ITypeSymbol result = typeSymbol.evalSelf();
 
         assertThat(result, Is.is((ITypeSymbol) typeSymbol));
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void getTypeSymbols_Standard_ThrowsUnsupportedOperationException() {
+        //no arrange necessary
+
+        IErroneousTypeSymbol typeSymbol = createTypeSymbol();
+        typeSymbol.getTypeSymbols();
+
+        //assert in annotation
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void addTypeSymbol_Standard_ThrowsUnsupportedOperationException() {
+        //no arrange necessary
+
+        IErroneousTypeSymbol typeSymbol = createTypeSymbol();
+        typeSymbol.addTypeSymbol(mock(ITypeSymbol.class));
+
+        //assert in annotation
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void merge_Standard_ThrowsUnsupportedOperationException() {
+        //no arrange necessary
+
+        IErroneousTypeSymbol typeSymbol = createTypeSymbol();
+        typeSymbol.merge(mock(IUnionTypeSymbol.class));
+
+        //assert in annotation
+    }
+
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void seal_Standard_ThrowsUnsupportedOperationException() {
+        //no arrange necessary
+
+        IErroneousTypeSymbol typeSymbol = createTypeSymbol();
+        typeSymbol.seal();
+
+        //assert in annotation
+    }
+
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void addForEvalReadyListener_Standard_ThrowsUnsupportedOperationException() {
+        //no arrange necessary
+
+        IErroneousTypeSymbol typeSymbol = createTypeSymbol();
+        typeSymbol.addForEvalReadyListener(mock(IForEvalReadyListener.class));
+
+        //assert in annotation
+    }
+
+    @Test
+    public void isReadyForEval_Standard_ReturnsTrue() {
+        //no arrange necessary
+
+        IErroneousTypeSymbol typeSymbol = createTypeSymbol();
+        boolean result = typeSymbol.isReadyForEval();
+
+        assertThat(result, is(true));
     }
 
     private IErroneousTypeSymbol createTypeSymbol() {

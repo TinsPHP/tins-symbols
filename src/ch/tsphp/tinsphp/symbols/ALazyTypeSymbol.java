@@ -19,7 +19,7 @@ import java.util.Set;
 
 public abstract class ALazyTypeSymbol implements ILazyTypeSymbol
 {
-    private static final String ERROR_MESSAGE = "You are dealing with an IGenericTypeSymbol.";
+    private static final String ERROR_MESSAGE = "You are dealing with an ILazyTypeSymbol.";
 
     private Collection<IForEvalReadyListener> listeners = new ArrayDeque<>();
     private boolean isReadyForEval = false;
@@ -64,6 +64,11 @@ public abstract class ALazyTypeSymbol implements ILazyTypeSymbol
         return "?";
     }
 
+    @Override
+    public IScope getDefinitionScope() {
+        return null;
+    }
+
     //--------------------------------------------------------------
     // Unsupported Methods
 
@@ -99,12 +104,6 @@ public abstract class ALazyTypeSymbol implements ILazyTypeSymbol
 
     @Override
     public ITSPHPAst getDefinitionAst() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-
-    @Override
-    public IScope getDefinitionScope() {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 

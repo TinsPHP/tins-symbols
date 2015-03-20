@@ -16,6 +16,7 @@ import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.nullValue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -146,6 +147,16 @@ public class ALazyTypeSymbolTest
         assertThat(result, CoreMatchers.is("?"));
     }
 
+    @Test
+    public void getDefinitionScope_Standard_ThrowsUnsupportedOperationException() {
+        //no arrange necessary
+
+        ALazyTypeSymbol typeSymbol = createLazyTypeSymbol();
+        IScope result = typeSymbol.getDefinitionScope();
+
+        assertThat(result, is(nullValue()));
+    }
+
     @Test(expected = UnsupportedOperationException.class)
     public void getParentTypeSymbols_Standard_ThrowsUnsupportedOperationException() {
         //no arrange necessary
@@ -212,17 +223,6 @@ public class ALazyTypeSymbolTest
 
         ALazyTypeSymbol typeSymbol = createLazyTypeSymbol();
         typeSymbol.getDefinitionAst();
-
-        //assert in annotation
-    }
-
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void getDefinitionScope_Standard_ThrowsUnsupportedOperationException() {
-        //no arrange necessary
-
-        ALazyTypeSymbol typeSymbol = createLazyTypeSymbol();
-        typeSymbol.getDefinitionScope();
 
         //assert in annotation
     }

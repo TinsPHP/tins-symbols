@@ -10,7 +10,9 @@ import ch.tsphp.common.AstHelperRegistry;
 import ch.tsphp.common.IAstHelper;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
+import ch.tsphp.common.symbols.IForEvalReadyListener;
 import ch.tsphp.common.symbols.ITypeSymbol;
+import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousLazySymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.ILazySymbolResolver;
@@ -150,7 +152,6 @@ public class ErroneousLazySymbolTest
         //assert in annotation
     }
 
-
     @Test
     public void evalSelf_Standard_ReturnsThis() {
         //no arrange necessary
@@ -159,6 +160,68 @@ public class ErroneousLazySymbolTest
         ITypeSymbol result = lazySymbol.evalSelf();
 
         assertThat(result, Is.is((ITypeSymbol) lazySymbol));
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void getTypeSymbols_Standard_ThrowsUnsupportedOperationException() {
+        //no arrange necessary
+
+        IErroneousLazySymbol lazySymbol = createLazySymbol();
+        lazySymbol.getTypeSymbols();
+
+        //assert in annotation
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void addTypeSymbol_Standard_ThrowsUnsupportedOperationException() {
+        //no arrange necessary
+
+        IErroneousLazySymbol lazySymbol = createLazySymbol();
+        lazySymbol.addTypeSymbol(mock(ITypeSymbol.class));
+
+        //assert in annotation
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void merge_Standard_ThrowsUnsupportedOperationException() {
+        //no arrange necessary
+
+        IErroneousLazySymbol lazySymbol = createLazySymbol();
+        lazySymbol.merge(mock(IUnionTypeSymbol.class));
+
+        //assert in annotation
+    }
+
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void seal_Standard_ThrowsUnsupportedOperationException() {
+        //no arrange necessary
+
+        IErroneousLazySymbol lazySymbol = createLazySymbol();
+        lazySymbol.seal();
+
+        //assert in annotation
+    }
+
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void addForEvalReadyListener_Standard_ThrowsUnsupportedOperationException() {
+        //no arrange necessary
+
+        IErroneousLazySymbol lazySymbol = createLazySymbol();
+        lazySymbol.addForEvalReadyListener(mock(IForEvalReadyListener.class));
+
+        //assert in annotation
+    }
+
+    @Test
+    public void isReadyForEval_Standard_ReturnsTrue() {
+        //no arrange necessary
+
+        IErroneousLazySymbol lazySymbol = createLazySymbol();
+        boolean result = lazySymbol.isReadyForEval();
+
+        assertThat(result, is(true));
     }
 
     private IErroneousLazySymbol createLazySymbol() {
