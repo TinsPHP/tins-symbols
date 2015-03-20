@@ -103,6 +103,16 @@ public class ATypeSymbolTest
         assertThat(result, is(true));
     }
 
+    @Test
+    public void evalSelf_Standard_ReturnsThis() {
+        //no arrange necessary
+
+        ATypeSymbol typeSymbol = createTypeSymbol();
+        ITypeSymbol result = typeSymbol.evalSelf();
+
+        assertThat(result, is((ITypeSymbol) typeSymbol));
+    }
+
     private ATypeSymbol createTypeSymbol() {
         return createTypeSymbol(mock(ITypeSymbol.class));
     }

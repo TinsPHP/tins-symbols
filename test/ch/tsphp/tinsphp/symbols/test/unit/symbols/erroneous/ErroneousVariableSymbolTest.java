@@ -8,6 +8,8 @@ package ch.tsphp.tinsphp.symbols.test.unit.symbols.erroneous;
 
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
+import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
+import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousVariableSymbol;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousVariableSymbol;
 import org.junit.Test;
@@ -65,6 +67,27 @@ public class ErroneousVariableSymbolTest
 
         IErroneousVariableSymbol variableSymbol = createVariableSymbol();
         variableSymbol.toTypeWithModifiersDto();
+
+        //assert in annotation
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void getConstraints_NothingDefined_ReturnsEmptyList() {
+        //no arrange necessary
+
+        IVariableSymbol variableSymbol = createVariableSymbol();
+        variableSymbol.getConstraints();
+
+        //assert in annotation
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void addAndGetConstraints_OneDefined_ReturnsListWithIt() {
+        IConstraint constraint = mock(IConstraint.class);
+
+        IVariableSymbol variableSymbol = createVariableSymbol();
+        variableSymbol.addConstraint(constraint);
+        variableSymbol.getConstraints();
 
         //assert in annotation
     }

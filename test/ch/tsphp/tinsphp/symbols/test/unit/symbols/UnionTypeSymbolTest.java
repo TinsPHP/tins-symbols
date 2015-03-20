@@ -347,6 +347,18 @@ public class UnionTypeSymbolTest extends ATypeTest
     }
 
     @Test
+    public void getName_IsSealedAndOneTypeOnly_ReturnsTypeWithoutBraces() {
+        //no arrange necessary
+
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol();
+        unionTypeSymbol.addTypeSymbol(intType);
+        unionTypeSymbol.seal();
+        String result = unionTypeSymbol.getName();
+
+        assertThat(result, is("int"));
+    }
+
+    @Test
     public void getName_IsSealedAndEmpty_ReturnsEmptyBraces() {
         //no arrange necessary
 

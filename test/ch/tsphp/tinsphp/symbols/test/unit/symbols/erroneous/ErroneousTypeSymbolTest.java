@@ -10,10 +10,12 @@ import ch.tsphp.common.AstHelperRegistry;
 import ch.tsphp.common.IAstHelper;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
+import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousTypeSymbol;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousTypeSymbol;
 import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
+import org.hamcrest.core.Is;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -65,6 +67,16 @@ public class ErroneousTypeSymbolTest
         ITSPHPAst result = typeSymbol.getDefaultValue();
 
         assertThat(result, is(ast));
+    }
+
+    @Test
+    public void evalSelf_Standard_ReturnsThis() {
+        //no arrange necessary
+
+        IErroneousTypeSymbol typeSymbol = createTypeSymbol();
+        ITypeSymbol result = typeSymbol.evalSelf();
+
+        assertThat(result, Is.is((ITypeSymbol) typeSymbol));
     }
 
     private IErroneousTypeSymbol createTypeSymbol() {

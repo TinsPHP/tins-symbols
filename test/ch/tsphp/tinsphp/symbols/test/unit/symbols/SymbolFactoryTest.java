@@ -26,6 +26,7 @@ import ch.tsphp.tinsphp.common.symbols.IOverloadSymbol;
 import ch.tsphp.tinsphp.common.symbols.IPseudoTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IScalarTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
+import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousLazySymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
@@ -294,6 +295,16 @@ public class SymbolFactoryTest
         IClassTypeSymbol result = symbolFactory.createClassTypeSymbol(null, mock(ITSPHPAst.class), scope);
 
         assertThat(result.getModifiers(), is(set));
+    }
+
+    @Test
+    public void createExpressionTypeVariableSymbol_Standard_DefinitionAstIsPassedAst() {
+        ITSPHPAst ast = mock(ITSPHPAst.class);
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        ITypeVariableSymbol result = symbolFactory.createExpressionTypeVariableSymbol(ast);
+
+        assertThat(result.getDefinitionAst(), is(ast));
     }
 
     @Test

@@ -10,10 +10,13 @@ import ch.tsphp.common.AstHelperRegistry;
 import ch.tsphp.common.IAstHelper;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
+import ch.tsphp.common.symbols.ITypeSymbol;
+import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousLazySymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.ILazySymbolResolver;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousLazySymbol;
 import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
+import org.hamcrest.core.Is;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -126,12 +129,44 @@ public class ErroneousLazySymbolTest
         assertThat(result, is(false));
     }
 
+    @Test(expected = UnsupportedOperationException.class)
+    public void getConstraints_NothingDefined_ReturnsEmptyList() {
+        //no arrange necessary
+
+        IErroneousLazySymbol lazySymbol = createLazySymbol();
+        lazySymbol.getConstraints();
+
+        //assert in annotation
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void addAndGetConstraints_OneDefined_ReturnsListWithIt() {
+        IConstraint constraint = mock(IConstraint.class);
+
+        IErroneousLazySymbol lazySymbol = createLazySymbol();
+        lazySymbol.addConstraint(constraint);
+        lazySymbol.getConstraints();
+
+        //assert in annotation
+    }
+
+
+    @Test
+    public void evalSelf_Standard_ReturnsThis() {
+        //no arrange necessary
+
+        IErroneousLazySymbol lazySymbol = createLazySymbol();
+        ITypeSymbol result = lazySymbol.evalSelf();
+
+        assertThat(result, Is.is((ITypeSymbol) lazySymbol));
+    }
+
     private IErroneousLazySymbol createLazySymbol() {
-        return createVariableSymbol(
+        return createLazySymbol(
                 mock(ILazySymbolResolver.class), mock(ITSPHPAst.class), "foo", new TSPHPException());
     }
 
-    protected IErroneousLazySymbol createVariableSymbol(
+    protected IErroneousLazySymbol createLazySymbol(
             ILazySymbolResolver lazySymbolResolver, ITSPHPAst ast, String name, TSPHPException exception) {
         return new ErroneousLazySymbol(ast, name, exception, lazySymbolResolver);
     }
