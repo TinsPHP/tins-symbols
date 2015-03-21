@@ -14,15 +14,34 @@ import ch.tsphp.tinsphp.symbols.test.unit.symbols.ASymbolTest;
 import org.hamcrest.core.Is;
 import org.junit.Test;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class PseudoTypeSymbol_ASymbol_LSPTest extends ASymbolTest
 {
+    @Override
+    public void getDefinitionAst_Standard_ReturnsOnePassedToConstructor() {
+        // different behaviour - pseudo types do not have a definition ast
+        // therefore it always returns null.
+
+        // start same as in ASymbolTest
+        ITSPHPAst ast = mock(ITSPHPAst.class);
+        String name = "foo";
+
+        ASymbol symbol = createSymbol(ast, name);
+        ITSPHPAst result = symbol.getDefinitionAst();
+        // end same as in ASymbolTest
+
+        //assertThat(result, is(ast));
+        assertThat(result, is(nullValue()));
+    }
+
     @Test
     public void getAbsoluteName_DefinitionScopeNotNull_ReturnsNameWithDefinitionScopeNameAsPrefix() {
-        // different behaviour - global types do not belong to a namespace and thus are not prefix with its name
+        // different behaviour - pseudo types do not belong to a namespace and thus are not prefix with its name
 
         // start same as in ASymbolTest
         String scopeName = "\\";
