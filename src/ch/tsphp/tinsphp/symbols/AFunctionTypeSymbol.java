@@ -18,11 +18,15 @@ import java.util.Map;
 
 public abstract class AFunctionTypeSymbol extends ATypeSymbol implements IFunctionTypeSymbol
 {
+    protected final Map<String, Integer> nameToIndexMap = new HashMap<>();
+    protected final List<String> indexToName;
+    
     private final List<List<IConstraint>> parameterConstraints = new ArrayList<>();
-    private final Map<String, Integer> nameToIndexMap = new HashMap<>();
 
     public AFunctionTypeSymbol(String theName, List<String> theParameterIds, ITypeSymbol theParentTypeSymbol) {
         super(null, theName, theParentTypeSymbol);
+
+        indexToName = theParameterIds;
 
         int size = theParameterIds != null ? theParameterIds.size() : 0;
         for (int i = 0; i < size; ++i) {

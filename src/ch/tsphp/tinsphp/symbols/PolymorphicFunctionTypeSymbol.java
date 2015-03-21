@@ -8,11 +8,12 @@ package ch.tsphp.tinsphp.symbols;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.IUnionTypeSymbol;
+import ch.tsphp.tinsphp.common.inference.constraints.IConstraintSolver;
+import ch.tsphp.tinsphp.common.inference.constraints.IReadOnlyTypeVariableCollection;
 import ch.tsphp.tinsphp.common.symbols.IFunctionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -20,42 +21,71 @@ public class PolymorphicFunctionTypeSymbol extends AFunctionTypeSymbol implement
 {
 
     private final Map<String, ITypeVariableSymbol> typeVariables;
+    private final IConstraintSolver constraintSolver;
     private final Map<String, ITypeSymbol> cachedReturnTypes = new HashMap<>();
 
     public PolymorphicFunctionTypeSymbol(
             String theName,
             List<String> theParameterIds,
-            ITypeSymbol theParentTypeSymbol, Map<String, ITypeVariableSymbol> theTypeVariables) {
+            ITypeSymbol theParentTypeSymbol,
+            Map<String, ITypeVariableSymbol> theTypeVariables,
+            IConstraintSolver theConstraintSolver) {
 
         super(theName, theParameterIds, theParentTypeSymbol);
         typeVariables = theTypeVariables;
+        constraintSolver = theConstraintSolver;
     }
 
     @Override
-    public Map<String, ITypeVariableSymbol> getTypeVariables() {
-        return typeVariables;
-    }
-
-    @Override
-    public ITypeSymbol getCachedApply(List<IUnionTypeSymbol> arguments) {
-        return cachedReturnTypes.get(getKey(arguments));
+    public ITypeSymbol apply(List<IUnionTypeSymbol> arguments) {
+        String key = getKey(arguments);
+        ITypeSymbol returnTypeSymbol = cachedReturnTypes.get(key);
+        if (returnTypeSymbol == null) {
+            returnTypeSymbol = solveConstraints(arguments);
+            cachedReturnTypes.put(key, returnTypeSymbol);
+        }
+        return returnTypeSymbol;
     }
 
     private String getKey(List<IUnionTypeSymbol> arguments) {
         StringBuilder sb = new StringBuilder();
 
-        Iterator<IUnionTypeSymbol> iterator = arguments.iterator();
-        if (iterator.hasNext()) {
-            sb.append(iterator.next());
+        int size = indexToName.size();
+        if (size > 0) {
+            sb.append(arguments.get(0).getAbsoluteName());
         }
-        while (iterator.hasNext()) {
-            sb.append(" x ").append(iterator.next());
+        for (int i = 1; i < size; ++i) {
+            sb.append(" x ").append(arguments.get(i).getAbsoluteName());
         }
         return sb.toString();
     }
 
-    @Override
-    public void cacheApply(List<IUnionTypeSymbol> arguments, ITypeSymbol returnTypeSymbol) {
-        cachedReturnTypes.put(getKey(arguments), returnTypeSymbol);
+    private ITypeSymbol solveConstraints(List<IUnionTypeSymbol> arguments) {
+        HashMap<String, ITypeVariableSymbol> typeVariablesAfterInstantiation = new HashMap<>(typeVariables);
+
+        int size = indexToName.size();
+        for (int i = 0; i < size; ++i) {
+            typeVariablesAfterInstantiation.get(indexToName.get(i)).setType(arguments.get(i));
+        }
+
+        FunctionTemplate functionTemplate = new FunctionTemplate(typeVariablesAfterInstantiation);
+        constraintSolver.solveConstraints(functionTemplate);
+        Map<String, ITypeVariableSymbol> typeVariablesAfterInference = functionTemplate.getTypeVariables();
+
+        return typeVariablesAfterInference.get("return").getType();
+    }
+
+    private class FunctionTemplate implements IReadOnlyTypeVariableCollection
+    {
+        private final Map<String, ITypeVariableSymbol> typeVariables;
+
+        public FunctionTemplate(Map<String, ITypeVariableSymbol> theTypeVariables) {
+            typeVariables = theTypeVariables;
+        }
+
+        @Override
+        public Map<String, ITypeVariableSymbol> getTypeVariables() {
+            return typeVariables;
+        }
     }
 }

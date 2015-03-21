@@ -6,12 +6,11 @@
 
 package ch.tsphp.tinsphp.symbols;
 
-import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 
-public class ExpressionTypeVariableSymbol extends ATypeVariableSymbol implements ITypeVariableSymbol
+public class MinimalTypeVariableSymbol extends ATypeVariableSymbol implements ITypeVariableSymbol
 {
-    public ExpressionTypeVariableSymbol(ITSPHPAst theDefinitionAst) {
-        super(theDefinitionAst, "@" + theDefinitionAst.getLine() + "|" + theDefinitionAst.getCharPositionInLine());
+    public MinimalTypeVariableSymbol(String name) {
+        super(null, name);
     }
 }

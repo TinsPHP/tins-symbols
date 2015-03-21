@@ -25,9 +25,9 @@ import java.util.List;
 public class VariableSymbol extends ASymbolWithAccessModifier implements IVariableSymbol
 {
 
-    //Warning! start code duplication - same as in ExpressionTypeVariableSymbol
+    //Warning! start code duplication - same as in ATypeVariableSymbol
     private final List<IConstraint> constraints = new ArrayList<>();
-    //Warning! end code duplication - same as in ExpressionTypeVariableSymbol
+    //Warning! end code duplication - same as in ATypeVariableSymbol
 
     public VariableSymbol(ITSPHPAst definitionAst, IModifierSet modifiers, String name) {
         super(definitionAst, modifiers, name);
@@ -64,7 +64,7 @@ public class VariableSymbol extends ASymbolWithAccessModifier implements IVariab
     }
 
 
-    //Warning! start code duplication - same as in ExpressionTypeVariableSymbol
+    //Warning! start code duplication - same as in ATypeVariableSymbol
     @Override
     public IUnionTypeSymbol getType() {
         return (IUnionTypeSymbol) super.getType();
@@ -79,5 +79,5 @@ public class VariableSymbol extends ASymbolWithAccessModifier implements IVariab
     public List<IConstraint> getConstraints() {
         return constraints;
     }
-    //Warning! end code duplication - same as in ExpressionTypeVariableSymbol
+    //Warning! end code duplication - same as in ATypeVariableSymbol
 }

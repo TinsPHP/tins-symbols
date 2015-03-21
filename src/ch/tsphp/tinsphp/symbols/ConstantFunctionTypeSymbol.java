@@ -9,10 +9,8 @@ package ch.tsphp.tinsphp.symbols;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IFunctionTypeSymbol;
-import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 
 import java.util.List;
-import java.util.Map;
 
 public class ConstantFunctionTypeSymbol extends AFunctionTypeSymbol implements IFunctionTypeSymbol
 {
@@ -26,21 +24,11 @@ public class ConstantFunctionTypeSymbol extends AFunctionTypeSymbol implements I
 
         super(theName, theParameterIds, theParentTypeSymbol);
         returnTypeSymbol = theReturnTypeSymbol;
-
     }
 
     @Override
-    public Map<String, ITypeVariableSymbol> getTypeVariables() {
-        throw new UnsupportedOperationException("constant functions do not have type variables");
-    }
-
-    @Override
-    public ITypeSymbol getCachedApply(List<IUnionTypeSymbol> arguments) {
+    public ITypeSymbol apply(List<IUnionTypeSymbol> arguments) {
         return returnTypeSymbol;
     }
 
-    @Override
-    public void cacheApply(List<IUnionTypeSymbol> arguments, ITypeSymbol returnType) {
-        throw new UnsupportedOperationException("constant functions do not cache a result type");
-    }
 }

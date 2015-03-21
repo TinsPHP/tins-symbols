@@ -10,14 +10,12 @@ import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.symbols.IFunctionTypeSymbol;
-import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 import ch.tsphp.tinsphp.symbols.AFunctionTypeSymbol;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -34,18 +32,8 @@ public class AFunctionTypeSymbolTest
         }
 
         @Override
-        public Map<String, ITypeVariableSymbol> getTypeVariables() {
+        public ITypeSymbol apply(List<IUnionTypeSymbol> arguments) {
             return null;
-        }
-
-        @Override
-        public ITypeSymbol getCachedApply(List<IUnionTypeSymbol> arguments) {
-            return null;
-        }
-
-        @Override
-        public void cacheApply(List<IUnionTypeSymbol> arguments, ITypeSymbol returnTypeSymbol) {
-
         }
     }
 

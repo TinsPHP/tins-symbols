@@ -8,6 +8,8 @@ package ch.tsphp.tinsphp.symbols.test.unit.symbols;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.IUnionTypeSymbol;
+import ch.tsphp.tinsphp.common.inference.constraints.IConstraintSolver;
+import ch.tsphp.tinsphp.common.inference.constraints.IReadOnlyTypeVariableCollection;
 import ch.tsphp.tinsphp.common.symbols.IFunctionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 import ch.tsphp.tinsphp.symbols.PolymorphicFunctionTypeSymbol;
@@ -20,86 +22,144 @@ import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class PolymorphicFunctionTypeSymbolTest
 {
 
     @Test
-    public void getTypeVariables_Standard_ReturnsOnePassedToConstructor() {
-        Map<String, ITypeVariableSymbol> typeVariables = new HashMap<>();
+    public void apply_NothingCached_UsesConstraintSolverAndReturnsTypeOfReturnTypeVariable() {
+        ITypeVariableSymbol parameterTypeSymbolVariable = mock(ITypeVariableSymbol.class);
+        String name = "$x";
+        ITypeVariableSymbol returnTypeSymbolVariable = mock(ITypeVariableSymbol.class);
+        final IUnionTypeSymbol unionTypeSymbol = mock(IUnionTypeSymbol.class);
+        when(unionTypeSymbol.getAbsoluteName()).thenReturn("int");
+        when(returnTypeSymbolVariable.getType()).thenReturn(unionTypeSymbol);
+        Map<String, ITypeVariableSymbol> map = new HashMap<>();
+        map.put(name, parameterTypeSymbolVariable);
+        map.put("return", returnTypeSymbolVariable);
+        IConstraintSolver constraintSolver = mock(IConstraintSolver.class);
 
-        IFunctionTypeSymbol symbol = createFunctionTypeSymbol("foo", asList("$a"), null, typeVariables);
-        Map<String, ITypeVariableSymbol> result = symbol.getTypeVariables();
+        IFunctionTypeSymbol symbol = createFunctionTypeSymbol("foo", asList(name), null, map, constraintSolver);
+        ITypeSymbol result = symbol.apply(asList(unionTypeSymbol));
 
-        assertThat(result, is(typeVariables));
+        verify(constraintSolver).solveConstraints(any(IReadOnlyTypeVariableCollection.class));
+        assertThat(result, is((ITypeSymbol) unionTypeSymbol));
     }
 
     @Test
-    public void getCachedApply_NothingCached_ReturnsNull() {
-        //no arrange necessary
+    public void apply_SecondCall_SecondCallDoesNotUseConstraintSolverIsSameResultAsFirstCall() {
+        ITypeVariableSymbol parameterTypeSymbolVariable = mock(ITypeVariableSymbol.class);
+        String name = "$x";
+        ITypeVariableSymbol returnTypeSymbolVariable = mock(ITypeVariableSymbol.class);
+        final IUnionTypeSymbol unionTypeSymbol = mock(IUnionTypeSymbol.class);
+        when(unionTypeSymbol.getAbsoluteName()).thenReturn("int");
+        when(returnTypeSymbolVariable.getType()).thenReturn(unionTypeSymbol);
+        Map<String, ITypeVariableSymbol> map = new HashMap<>();
+        map.put(name, parameterTypeSymbolVariable);
+        map.put("return", returnTypeSymbolVariable);
+        IConstraintSolver constraintSolver = mock(IConstraintSolver.class);
 
-        IFunctionTypeSymbol symbol = createFunctionTypeSymbol();
-        ITypeSymbol result = symbol.getCachedApply(new ArrayList<IUnionTypeSymbol>());
+        IFunctionTypeSymbol symbol = createFunctionTypeSymbol("foo", asList(name), null, map, constraintSolver);
+        ITypeSymbol result1 = symbol.apply(asList(unionTypeSymbol));
+        ITypeSymbol result2 = symbol.apply(asList(unionTypeSymbol));
 
-        assertThat(result, is(nullValue()));
+        verify(constraintSolver, times(1)).solveConstraints(any(IReadOnlyTypeVariableCollection.class));
+        assertThat(result1, is((ITypeSymbol) unionTypeSymbol));
+        assertThat(result2, is(result1));
     }
 
     @Test
-    public void getCachedApply_IntResultsInFloat_ReturnsFloat() {
-        IUnionTypeSymbol intTypeSymbol = mock(IUnionTypeSymbol.class);
-        when(intTypeSymbol.getAbsoluteName()).thenReturn("int");
-        IUnionTypeSymbol floatTypeSymbol = mock(IUnionTypeSymbol.class);
-        when(floatTypeSymbol.getAbsoluteName()).thenReturn("float");
+    public void
+    apply_SecondCallWithoutParameterAndTwoArguments_SecondCallDoesNotUseConstraintSolverIsSameResultAsFirstCall() {
+        ITypeVariableSymbol returnTypeSymbolVariable = mock(ITypeVariableSymbol.class);
+        final IUnionTypeSymbol unionTypeSymbol = mock(IUnionTypeSymbol.class);
+        when(unionTypeSymbol.getAbsoluteName()).thenReturn("int");
+        when(returnTypeSymbolVariable.getType()).thenReturn(unionTypeSymbol);
+        Map<String, ITypeVariableSymbol> map = new HashMap<>();
+        map.put("return", returnTypeSymbolVariable);
+        IConstraintSolver constraintSolver = mock(IConstraintSolver.class);
+        IUnionTypeSymbol additionalArgument = mock(IUnionTypeSymbol.class);
+        when(additionalArgument.getAbsoluteName()).thenReturn("additionalType");
 
-        IFunctionTypeSymbol symbol = createFunctionTypeSymbol();
-        symbol.cacheApply(asList(intTypeSymbol), floatTypeSymbol);
-        ITypeSymbol result = symbol.getCachedApply(asList(intTypeSymbol));
+        IFunctionTypeSymbol symbol = createFunctionTypeSymbol(
+                "foo", new ArrayList<String>(), null, map, constraintSolver);
+        ITypeSymbol result1 = symbol.apply(asList(unionTypeSymbol));
+        ITypeSymbol result2 = symbol.apply(asList(unionTypeSymbol, additionalArgument));
 
-        assertThat(result, is((ITypeSymbol) floatTypeSymbol));
+        verify(constraintSolver, times(1)).solveConstraints(any(IReadOnlyTypeVariableCollection.class));
+        assertThat(result1, is((ITypeSymbol) unionTypeSymbol));
+        assertThat(result2, is(result1));
     }
 
     @Test
-    public void getCachedApply_IntResultsInFloatAndFloatGiven_ReturnsNull() {
-        IUnionTypeSymbol intTypeSymbol = mock(IUnionTypeSymbol.class);
-        when(intTypeSymbol.getAbsoluteName()).thenReturn("int");
-        IUnionTypeSymbol floatTypeSymbol = mock(IUnionTypeSymbol.class);
-        when(floatTypeSymbol.getAbsoluteName()).thenReturn("float");
+    public void
+    apply_SecondCallOneParameterAndTwoArguments_SecondCallDoesNotUseConstraintSolverIsSameResultAsFirstCall() {
+        ITypeVariableSymbol parameterTypeSymbolVariable = mock(ITypeVariableSymbol.class);
+        String name = "$x";
+        ITypeVariableSymbol returnTypeSymbolVariable = mock(ITypeVariableSymbol.class);
+        final IUnionTypeSymbol unionTypeSymbol = mock(IUnionTypeSymbol.class);
+        when(unionTypeSymbol.getAbsoluteName()).thenReturn("int");
+        when(returnTypeSymbolVariable.getType()).thenReturn(unionTypeSymbol);
+        Map<String, ITypeVariableSymbol> map = new HashMap<>();
+        map.put(name, parameterTypeSymbolVariable);
+        map.put("return", returnTypeSymbolVariable);
+        IConstraintSolver constraintSolver = mock(IConstraintSolver.class);
+        IUnionTypeSymbol additionalArgument = mock(IUnionTypeSymbol.class);
+        when(additionalArgument.getAbsoluteName()).thenReturn("additionalType");
 
-        IFunctionTypeSymbol symbol = createFunctionTypeSymbol();
-        symbol.cacheApply(asList(intTypeSymbol), floatTypeSymbol);
-        ITypeSymbol result = symbol.getCachedApply(asList(floatTypeSymbol));
+        IFunctionTypeSymbol symbol = createFunctionTypeSymbol("foo", asList(name), null, map, constraintSolver);
+        ITypeSymbol result1 = symbol.apply(asList(unionTypeSymbol));
+        ITypeSymbol result2 = symbol.apply(asList(unionTypeSymbol, additionalArgument));
 
-        assertThat(result, is(nullValue()));
+        verify(constraintSolver, times(1)).solveConstraints(any(IReadOnlyTypeVariableCollection.class));
+        assertThat(result1, is((ITypeSymbol) unionTypeSymbol));
+        assertThat(result2, is(result1));
     }
 
     @Test
-    public void getCachedApply_IntAndFloatResultsInFloatAndFloatAndIntGiven_ReturnsFloat() {
-        IUnionTypeSymbol intTypeSymbol = mock(IUnionTypeSymbol.class);
-        when(intTypeSymbol.getAbsoluteName()).thenReturn("int");
-        IUnionTypeSymbol floatTypeSymbol = mock(IUnionTypeSymbol.class);
-        when(floatTypeSymbol.getAbsoluteName()).thenReturn("float");
+    public void
+    apply_SecondCallTwoParameterAndThreeArguments_SecondCallDoesNotUseConstraintSolverIsSameResultAsFirstCall() {
+        ITypeVariableSymbol parameterTypeSymbolVariable = mock(ITypeVariableSymbol.class);
+        String name1 = "$x";
+        String name2 = "$y";
+        ITypeVariableSymbol returnTypeSymbolVariable = mock(ITypeVariableSymbol.class);
+        final IUnionTypeSymbol unionTypeSymbol = mock(IUnionTypeSymbol.class);
+        when(unionTypeSymbol.getAbsoluteName()).thenReturn("int");
+        when(returnTypeSymbolVariable.getType()).thenReturn(unionTypeSymbol);
+        Map<String, ITypeVariableSymbol> map = new HashMap<>();
+        map.put(name1, parameterTypeSymbolVariable);
+        map.put(name2, parameterTypeSymbolVariable);
+        map.put("return", returnTypeSymbolVariable);
+        IConstraintSolver constraintSolver = mock(IConstraintSolver.class);
+        IUnionTypeSymbol additionalArgument = mock(IUnionTypeSymbol.class);
+        when(additionalArgument.getAbsoluteName()).thenReturn("additionalType");
 
-        IFunctionTypeSymbol symbol = createFunctionTypeSymbol();
-        symbol.cacheApply(asList(intTypeSymbol, floatTypeSymbol), floatTypeSymbol);
-        ITypeSymbol result = symbol.getCachedApply(asList(floatTypeSymbol, intTypeSymbol));
+        IFunctionTypeSymbol symbol = createFunctionTypeSymbol("foo", asList(name1, name2), null, map, constraintSolver);
+        ITypeSymbol result1 = symbol.apply(asList(unionTypeSymbol, unionTypeSymbol));
+        ITypeSymbol result2 = symbol.apply(asList(unionTypeSymbol, unionTypeSymbol, additionalArgument));
 
-        assertThat(result, is(nullValue()));
-    }
-
-    private IFunctionTypeSymbol createFunctionTypeSymbol() {
-        return createFunctionTypeSymbol(
-                "foo", new ArrayList<String>(), mock(ITypeSymbol.class), new HashMap<String, ITypeVariableSymbol>());
+        verify(constraintSolver, times(1)).solveConstraints(any(IReadOnlyTypeVariableCollection.class));
+        assertThat(result1, is((ITypeSymbol) unionTypeSymbol));
+        assertThat(result2, is(result1));
     }
 
     protected IFunctionTypeSymbol createFunctionTypeSymbol(
             String name,
             List<String> parameterIds,
             ITypeSymbol parentTypeSymbol,
-            Map<String, ITypeVariableSymbol> typeVariables) {
-        return new PolymorphicFunctionTypeSymbol(name, parameterIds, parentTypeSymbol, typeVariables);
+            Map<String, ITypeVariableSymbol> typeVariables,
+            IConstraintSolver constraintSolver) {
+        return new PolymorphicFunctionTypeSymbol(
+                name,
+                parameterIds,
+                parentTypeSymbol,
+                typeVariables,
+                constraintSolver);
     }
 }

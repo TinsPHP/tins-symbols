@@ -9,7 +9,7 @@ package ch.tsphp.tinsphp.symbols.test.unit.symbols;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
-import ch.tsphp.tinsphp.symbols.ExpressionTypeVariableSymbol;
+import ch.tsphp.tinsphp.symbols.ATypeVariableSymbol;
 import org.junit.Test;
 
 import java.util.List;
@@ -19,8 +19,16 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.mockito.Mockito.mock;
 
-public class ExpressionTypeVariableSymbolTest
+public class ATypeVariableSymbolTest
 {
+    private class DummyTypeVariableSymbol extends ATypeVariableSymbol
+    {
+
+        protected DummyTypeVariableSymbol(ITSPHPAst theDefinitionAst, String theName) {
+            super(theDefinitionAst, theName);
+        }
+    }
+
     @Test
     public void getConstraints_NothingDefined_ReturnsEmptyList() {
         //no arrange necessary
@@ -44,10 +52,10 @@ public class ExpressionTypeVariableSymbolTest
     }
 
     private ITypeVariableSymbol createExpressionTypeVariableSymbol() {
-        return createExpressionTypeVariableSymbol(mock(ITSPHPAst.class));
+        return createExpressionTypeVariableSymbol(mock(ITSPHPAst.class), "foo");
     }
 
-    protected ITypeVariableSymbol createExpressionTypeVariableSymbol(ITSPHPAst definitionAst) {
-        return new ExpressionTypeVariableSymbol(definitionAst);
+    protected ITypeVariableSymbol createExpressionTypeVariableSymbol(ITSPHPAst definitionAst, String name) {
+        return new DummyTypeVariableSymbol(definitionAst, name);
     }
 }

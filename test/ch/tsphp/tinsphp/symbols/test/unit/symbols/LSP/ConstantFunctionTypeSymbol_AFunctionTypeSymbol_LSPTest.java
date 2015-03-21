@@ -15,6 +15,7 @@ import java.util.List;
 
 public class ConstantFunctionTypeSymbol_AFunctionTypeSymbol_LSPTest extends AFunctionTypeSymbolTest
 {
+    @Override
     protected IFunctionTypeSymbol createFunctionTypeSymbol(
             String name,
             List<String> parameterIds,

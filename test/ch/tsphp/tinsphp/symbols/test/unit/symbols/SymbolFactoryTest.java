@@ -12,6 +12,7 @@ import ch.tsphp.common.exceptions.TSPHPException;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
+import ch.tsphp.tinsphp.common.inference.constraints.IConstraintSolver;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadResolver;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IAliasSymbol;
@@ -308,6 +309,16 @@ public class SymbolFactoryTest
     }
 
     @Test
+    public void createMinimalTypeVariableSymbol_Standard_NameIsPassedName() {
+        String name = "foo";
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        ITypeVariableSymbol result = symbolFactory.createMinimalTypeVariableSymbol(name);
+
+        assertThat(result.getName(), is(name));
+    }
+
+    @Test
     public void createUnionTypeSymbol_WithoutHashMap_StillReturnsAnEmptyMap() {
         //no arrange necessary
 
@@ -368,18 +379,7 @@ public class SymbolFactoryTest
         IFunctionTypeSymbol result = symbolFactory.createConstantFunctionTypeSymbol(
                 "+", null, returnTypeSymbol);
 
-        assertThat(result.getCachedApply(null), is(returnTypeSymbol));
-    }
-
-    @Test
-    public void createPolymorphicFunctionTypeSymbol_Standard_ReturnTypeIsPassedReturnType() {
-        Map<String, ITypeVariableSymbol> typeVariables = new HashMap<>();
-
-        ISymbolFactory symbolFactory = createSymbolFactory();
-        IFunctionTypeSymbol result = symbolFactory.createPolymorphicFunctionTypeSymbol(
-                "+", null, typeVariables);
-
-        assertThat(result.getTypeVariables(), is(typeVariables));
+        assertThat(result.apply(null), is(returnTypeSymbol));
     }
 
     @Test
@@ -579,11 +579,18 @@ public class SymbolFactoryTest
     }
 
     private ISymbolFactory createSymbolFactory(IModifierHelper modifierHelper) {
-        return createSymbolFactory(mock(IScopeHelper.class), modifierHelper, mock(IOverloadResolver.class));
+        return createSymbolFactory(
+                mock(IScopeHelper.class),
+                modifierHelper,
+                mock(IOverloadResolver.class),
+                mock(IConstraintSolver.class));
     }
 
     protected ISymbolFactory createSymbolFactory(
-            IScopeHelper theScopeHelper, IModifierHelper theModifierHelper, IOverloadResolver overloadResolver) {
-        return new SymbolFactory(theScopeHelper, theModifierHelper, overloadResolver);
+            IScopeHelper theScopeHelper,
+            IModifierHelper theModifierHelper,
+            IOverloadResolver overloadResolver,
+            IConstraintSolver constraintSolver) {
+        return new SymbolFactory(theScopeHelper, theModifierHelper, overloadResolver, constraintSolver);
     }
 }
