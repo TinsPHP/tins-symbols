@@ -166,7 +166,13 @@ public class SymbolFactory implements ISymbolFactory
     @Override
     public IFunctionTypeSymbol createConstantFunctionTypeSymbol(
             String name, List<String> parameterIds, ITypeSymbol returnTypeSymbol) {
-        return new ConstantFunctionTypeSymbol(name, parameterIds, returnTypeSymbol, mixedTypeSymbol);
+        return new ConstantFunctionTypeSymbol(name, parameterIds, mixedTypeSymbol, returnTypeSymbol);
+    }
+
+    @Override
+    public IFunctionTypeSymbol createPolymorphicFunctionTypeSymbol(
+            String name, List<String> parameterIds, Map<String, ITypeVariableSymbol> functionTypeVariables) {
+        return new PolymorphicFunctionTypeSymbol(name, parameterIds, mixedTypeSymbol, functionTypeVariables);
     }
 
     @Override

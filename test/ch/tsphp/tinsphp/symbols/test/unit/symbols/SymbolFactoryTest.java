@@ -368,7 +368,18 @@ public class SymbolFactoryTest
         IFunctionTypeSymbol result = symbolFactory.createConstantFunctionTypeSymbol(
                 "+", null, returnTypeSymbol);
 
-        assertThat(result.apply(null), is(returnTypeSymbol));
+        assertThat(result.getCachedApply(null), is(returnTypeSymbol));
+    }
+
+    @Test
+    public void createPolymorphicFunctionTypeSymbol_Standard_ReturnTypeIsPassedReturnType() {
+        Map<String, ITypeVariableSymbol> typeVariables = new HashMap<>();
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IFunctionTypeSymbol result = symbolFactory.createPolymorphicFunctionTypeSymbol(
+                "+", null, typeVariables);
+
+        assertThat(result.getTypeVariables(), is(typeVariables));
     }
 
     @Test

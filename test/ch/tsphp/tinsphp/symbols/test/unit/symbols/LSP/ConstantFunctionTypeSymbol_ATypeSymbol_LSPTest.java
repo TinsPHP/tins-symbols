@@ -25,7 +25,7 @@ public class ConstantFunctionTypeSymbol_ATypeSymbol_LSPTest extends ATypeSymbolT
 
     @Override
     protected ATypeSymbol createTypeSymbol(ITSPHPAst definitionAst, String name, ITypeSymbol parentTypeSymbol) {
-        return new ConstantFunctionTypeSymbol(name, new ArrayList<String>(), null, parentTypeSymbol);
+        return new ConstantFunctionTypeSymbol(name, new ArrayList<String>(), parentTypeSymbol, null);
     }
 
     @Override
