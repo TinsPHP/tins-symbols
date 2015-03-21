@@ -27,8 +27,12 @@ public abstract class ATypeSymbol extends ASymbolWithModifier implements ITypeSy
     @SuppressWarnings("checkstyle:parameternumber")
     public ATypeSymbol(final ITSPHPAst theDefinitionAst, final String theName, final ITypeSymbol theParentTypeSymbol) {
         super(theDefinitionAst, new ModifierSet(), theName);
-        parentTypeSymbols = new HashSet<>(1);
-        parentTypeSymbols.add(theParentTypeSymbol);
+        if (theParentTypeSymbol != null) {
+            parentTypeSymbols = new HashSet<>(1);
+            parentTypeSymbols.add(theParentTypeSymbol);
+        } else {
+            parentTypeSymbols = new HashSet<>();
+        }
     }
 
     @SuppressWarnings("checkstyle:parameternumber")
