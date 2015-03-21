@@ -50,6 +50,16 @@ public class ATypeSymbolTest
     }
 
     @Test
+    public void getParentTypeSymbols_WithTypeAndIsNull_ReturnsEmptySet() {
+        ITypeSymbol parentTypeSymbol = null;
+
+        ATypeSymbol typeSymbol = createTypeSymbol(parentTypeSymbol);
+        Set<ITypeSymbol> result = typeSymbol.getParentTypeSymbols();
+
+        assertThat(result.size(), is(0));
+    }
+
+    @Test
     public void getParentTypeSymbols_StandardWithSet_ReturnsOnePassedToConstructor() {
         ITypeSymbol parentTypeSymbol = mock(ITypeSymbol.class);
         Set<ITypeSymbol> parentTypeSymbols = new HashSet<>();
