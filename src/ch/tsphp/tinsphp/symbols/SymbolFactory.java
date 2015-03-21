@@ -53,24 +53,28 @@ public class SymbolFactory implements ISymbolFactory
     private final IScopeHelper scopeHelper;
     private final IModifierHelper modifierHelper;
     private final IOverloadResolver overloadResolver;
-    private final IConstraintSolver constraintSolver;
+    private IConstraintSolver constraintSolver;
     private ITypeSymbol mixedTypeSymbol = null;
     private INullTypeSymbol nullTypeSymbol = new NullTypeSymbol();
 
     public SymbolFactory(
             IScopeHelper theScopeHelper,
             IModifierHelper theModifierHelper,
-            IOverloadResolver theOverloadResolver,
-            IConstraintSolver theConstraintSolver) {
+            IOverloadResolver theOverloadResolver) {
         scopeHelper = theScopeHelper;
         modifierHelper = theModifierHelper;
         overloadResolver = theOverloadResolver;
-        constraintSolver = theConstraintSolver;
+
     }
 
     @Override
     public void setMixedTypeSymbol(ITypeSymbol typeSymbol) {
         mixedTypeSymbol = typeSymbol;
+    }
+
+    @Override
+    public void setConstraintSolver(IConstraintSolver theConstraintSolver) {
+        constraintSolver = theConstraintSolver;
     }
 
     public ITypeSymbol getMixedTypeSymbol() {

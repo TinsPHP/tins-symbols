@@ -12,7 +12,6 @@ import ch.tsphp.common.exceptions.TSPHPException;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
-import ch.tsphp.tinsphp.common.inference.constraints.IConstraintSolver;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadResolver;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IAliasSymbol;
@@ -582,15 +581,14 @@ public class SymbolFactoryTest
         return createSymbolFactory(
                 mock(IScopeHelper.class),
                 modifierHelper,
-                mock(IOverloadResolver.class),
-                mock(IConstraintSolver.class));
+                mock(IOverloadResolver.class)
+        );
     }
 
     protected ISymbolFactory createSymbolFactory(
             IScopeHelper theScopeHelper,
             IModifierHelper theModifierHelper,
-            IOverloadResolver overloadResolver,
-            IConstraintSolver constraintSolver) {
-        return new SymbolFactory(theScopeHelper, theModifierHelper, overloadResolver, constraintSolver);
+            IOverloadResolver overloadResolver) {
+        return new SymbolFactory(theScopeHelper, theModifierHelper, overloadResolver);
     }
 }
