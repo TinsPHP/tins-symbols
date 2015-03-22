@@ -27,6 +27,7 @@ public class VariableSymbol extends ASymbolWithAccessModifier implements IVariab
 
     //Warning! start code duplication - same as in ATypeVariableSymbol
     private final List<IConstraint> constraints = new ArrayList<>();
+    private boolean isByValue = true;
     //Warning! end code duplication - same as in ATypeVariableSymbol
 
     public VariableSymbol(ITSPHPAst definitionAst, IModifierSet modifiers, String name) {
@@ -78,6 +79,18 @@ public class VariableSymbol extends ASymbolWithAccessModifier implements IVariab
     @Override
     public List<IConstraint> getConstraints() {
         return constraints;
+    }
+    //Warning! end code duplication - same as in ATypeVariableSymbol
+
+    //Warning! start code duplication - same as in ATypeVariableSymbol
+    @Override
+    public void setIsByRef() {
+        isByValue = false;
+    }
+
+    @Override
+    public boolean isByValue() {
+        return isByValue;
     }
     //Warning! end code duplication - same as in ATypeVariableSymbol
 }

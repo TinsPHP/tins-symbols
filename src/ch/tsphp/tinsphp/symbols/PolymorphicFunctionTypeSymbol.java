@@ -11,6 +11,7 @@ import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraintSolver;
 import ch.tsphp.tinsphp.common.inference.constraints.IReadOnlyTypeVariableCollection;
 import ch.tsphp.tinsphp.common.symbols.IFunctionTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 
 import java.util.HashMap;
@@ -21,6 +22,7 @@ public class PolymorphicFunctionTypeSymbol extends AFunctionTypeSymbol implement
 {
 
     private final Map<String, ITypeVariableSymbol> typeVariables;
+    private final ISymbolFactory symbolFactory;
     private final IConstraintSolver constraintSolver;
     private final Map<String, ITypeSymbol> cachedReturnTypes = new HashMap<>();
 
@@ -29,10 +31,12 @@ public class PolymorphicFunctionTypeSymbol extends AFunctionTypeSymbol implement
             List<String> theParameterIds,
             ITypeSymbol theParentTypeSymbol,
             Map<String, ITypeVariableSymbol> theTypeVariables,
+            ISymbolFactory theSymbolFactory,
             IConstraintSolver theConstraintSolver) {
 
         super(theName, theParameterIds, theParentTypeSymbol);
         typeVariables = theTypeVariables;
+        symbolFactory = theSymbolFactory;
         constraintSolver = theConstraintSolver;
     }
 
@@ -61,11 +65,19 @@ public class PolymorphicFunctionTypeSymbol extends AFunctionTypeSymbol implement
     }
 
     private ITypeSymbol solveConstraints(List<IUnionTypeSymbol> arguments) {
-        HashMap<String, ITypeVariableSymbol> typeVariablesAfterInstantiation = new HashMap<>(typeVariables);
+        //TODO rstoll TINS-348 inference procedural - solve parametric function constraints
+        //copying the collection is not enough, a deep copy is not clever either I suppose, way to expensive.
+        //look for other possibilities
+        Map<String, ITypeVariableSymbol> typeVariablesAfterInstantiation = new HashMap<>(typeVariables);
 
         int size = indexToName.size();
         for (int i = 0; i < size; ++i) {
-            typeVariablesAfterInstantiation.get(indexToName.get(i)).setType(arguments.get(i));
+            ITypeVariableSymbol parameter = typeVariablesAfterInstantiation.get(indexToName.get(i));
+            if (parameter.isByValue()) {
+                parameter.getType().merge(arguments.get(i));
+            } else {
+                parameter.setType(arguments.get(i));
+            }
         }
 
         FunctionTemplate functionTemplate = new FunctionTemplate(typeVariablesAfterInstantiation);

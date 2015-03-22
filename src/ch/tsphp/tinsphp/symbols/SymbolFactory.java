@@ -163,6 +163,7 @@ public class SymbolFactory implements ISymbolFactory
         return new ExpressionTypeVariableSymbol(exprAst);
     }
 
+
     @Override
     public IUnionTypeSymbol createUnionTypeSymbol() {
         return new UnionTypeSymbol(overloadResolver);
@@ -194,6 +195,7 @@ public class SymbolFactory implements ISymbolFactory
                 parameterIds,
                 mixedTypeSymbol,
                 functionTypeVariables,
+                this,
                 constraintSolver);
     }
 

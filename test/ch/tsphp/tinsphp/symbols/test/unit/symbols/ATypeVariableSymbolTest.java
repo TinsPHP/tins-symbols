@@ -51,6 +51,27 @@ public class ATypeVariableSymbolTest
         assertThat(result.get(0), is(constraint));
     }
 
+    @Test
+    public void isByValue_Standard_ReturnsTrue() {
+        //no arrange necessary
+
+        ITypeVariableSymbol symbol = createExpressionTypeVariableSymbol();
+        boolean result = symbol.isByValue();
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void isByValue_SetByRefCalled_ReturnsFalse() {
+        //no arrange necessary
+
+        ITypeVariableSymbol symbol = createExpressionTypeVariableSymbol();
+        symbol.setIsByRef();
+        boolean result = symbol.isByValue();
+
+        assertThat(result, is(false));
+    }
+
     private ITypeVariableSymbol createExpressionTypeVariableSymbol() {
         return createExpressionTypeVariableSymbol(mock(ITSPHPAst.class), "foo");
     }

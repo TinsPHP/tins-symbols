@@ -18,11 +18,13 @@ public abstract class ATypeVariableSymbol extends ASymbol implements ITypeVariab
 {
     //Warning! start code duplication - same as in VariableSymbol
     private final List<IConstraint> constraints = new ArrayList<>();
+    private boolean isByValue = true;
+    //Warning! end code duplication - same as in VariableSymbol
 
     protected ATypeVariableSymbol(ITSPHPAst theDefinitionAst, String theName) {
         super(theDefinitionAst, theName);
     }
-    //Warning! end code duplication - same as in VariableSymbol
+
 
     //Warning! start code duplication - same as in VariableSymbol
     @Override
@@ -38,6 +40,18 @@ public abstract class ATypeVariableSymbol extends ASymbol implements ITypeVariab
     @Override
     public List<IConstraint> getConstraints() {
         return constraints;
+    }
+    //Warning! end code duplication - same as in VariableSymbol
+
+    //Warning! start code duplication - same as in VariableSymbol
+    @Override
+    public void setIsByRef() {
+        isByValue = false;
+    }
+
+    @Override
+    public boolean isByValue() {
+        return isByValue;
     }
     //Warning! end code duplication - same as in VariableSymbol
 }

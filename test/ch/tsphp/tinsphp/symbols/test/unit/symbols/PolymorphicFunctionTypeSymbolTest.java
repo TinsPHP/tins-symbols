@@ -11,6 +11,7 @@ import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraintSolver;
 import ch.tsphp.tinsphp.common.inference.constraints.IReadOnlyTypeVariableCollection;
 import ch.tsphp.tinsphp.common.symbols.IFunctionTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 import ch.tsphp.tinsphp.symbols.PolymorphicFunctionTypeSymbol;
 import org.junit.Test;
@@ -24,6 +25,7 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -45,7 +47,7 @@ public class PolymorphicFunctionTypeSymbolTest
         map.put("return", returnTypeSymbolVariable);
         IConstraintSolver constraintSolver = mock(IConstraintSolver.class);
 
-        IFunctionTypeSymbol symbol = createFunctionTypeSymbol("foo", asList(name), null, map, constraintSolver);
+        IFunctionTypeSymbol symbol = createFunctionTypeSymbol(asList(name), map, constraintSolver);
         ITypeSymbol result = symbol.apply(asList(unionTypeSymbol));
 
         verify(constraintSolver).solveConstraints(any(IReadOnlyTypeVariableCollection.class));
@@ -65,7 +67,7 @@ public class PolymorphicFunctionTypeSymbolTest
         map.put("return", returnTypeSymbolVariable);
         IConstraintSolver constraintSolver = mock(IConstraintSolver.class);
 
-        IFunctionTypeSymbol symbol = createFunctionTypeSymbol("foo", asList(name), null, map, constraintSolver);
+        IFunctionTypeSymbol symbol = createFunctionTypeSymbol(asList(name), map, constraintSolver);
         ITypeSymbol result1 = symbol.apply(asList(unionTypeSymbol));
         ITypeSymbol result2 = symbol.apply(asList(unionTypeSymbol));
 
@@ -88,7 +90,7 @@ public class PolymorphicFunctionTypeSymbolTest
         when(additionalArgument.getAbsoluteName()).thenReturn("additionalType");
 
         IFunctionTypeSymbol symbol = createFunctionTypeSymbol(
-                "foo", new ArrayList<String>(), null, map, constraintSolver);
+                new ArrayList<String>(), map, constraintSolver);
         ITypeSymbol result1 = symbol.apply(asList(unionTypeSymbol));
         ITypeSymbol result2 = symbol.apply(asList(unionTypeSymbol, additionalArgument));
 
@@ -113,7 +115,7 @@ public class PolymorphicFunctionTypeSymbolTest
         IUnionTypeSymbol additionalArgument = mock(IUnionTypeSymbol.class);
         when(additionalArgument.getAbsoluteName()).thenReturn("additionalType");
 
-        IFunctionTypeSymbol symbol = createFunctionTypeSymbol("foo", asList(name), null, map, constraintSolver);
+        IFunctionTypeSymbol symbol = createFunctionTypeSymbol(asList(name), map, constraintSolver);
         ITypeSymbol result1 = symbol.apply(asList(unionTypeSymbol));
         ITypeSymbol result2 = symbol.apply(asList(unionTypeSymbol, additionalArgument));
 
@@ -140,7 +142,7 @@ public class PolymorphicFunctionTypeSymbolTest
         IUnionTypeSymbol additionalArgument = mock(IUnionTypeSymbol.class);
         when(additionalArgument.getAbsoluteName()).thenReturn("additionalType");
 
-        IFunctionTypeSymbol symbol = createFunctionTypeSymbol("foo", asList(name1, name2), null, map, constraintSolver);
+        IFunctionTypeSymbol symbol = createFunctionTypeSymbol(asList(name1, name2), map, constraintSolver);
         ITypeSymbol result1 = symbol.apply(asList(unionTypeSymbol, unionTypeSymbol));
         ITypeSymbol result2 = symbol.apply(asList(unionTypeSymbol, unionTypeSymbol, additionalArgument));
 
@@ -149,17 +151,35 @@ public class PolymorphicFunctionTypeSymbolTest
         assertThat(result2, is(result1));
     }
 
+    private IFunctionTypeSymbol createFunctionTypeSymbol(
+            List<String> parameterIds,
+            Map<String, ITypeVariableSymbol> typeVariables,
+            IConstraintSolver constraintSolver) {
+
+        ISymbolFactory symbolFactory = mock(ISymbolFactory.class);
+        when(symbolFactory.createMinimalTypeVariableSymbol(anyString())).thenReturn(mock(ITypeVariableSymbol.class));
+        return createFunctionTypeSymbol(
+                "foo",
+                parameterIds,
+                null,
+                typeVariables,
+                symbolFactory,
+                constraintSolver);
+    }
+
     protected IFunctionTypeSymbol createFunctionTypeSymbol(
             String name,
             List<String> parameterIds,
             ITypeSymbol parentTypeSymbol,
             Map<String, ITypeVariableSymbol> typeVariables,
+            ISymbolFactory symbolFactory,
             IConstraintSolver constraintSolver) {
         return new PolymorphicFunctionTypeSymbol(
                 name,
                 parameterIds,
                 parentTypeSymbol,
                 typeVariables,
+                symbolFactory,
                 constraintSolver);
     }
 }

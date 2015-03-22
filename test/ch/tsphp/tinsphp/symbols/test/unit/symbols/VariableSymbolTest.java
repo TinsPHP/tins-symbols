@@ -45,6 +45,27 @@ public class VariableSymbolTest
         assertThat(result.get(0), is(constraint));
     }
 
+    @Test
+    public void isByValue_Standard_ReturnsTrue() {
+        //no arrange necessary
+
+        IVariableSymbol variableSymbol = createVariableSymbol();
+        boolean result = variableSymbol.isByValue();
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void isByValue_SetByRefCalled_ReturnsFalse() {
+        //no arrange necessary
+
+        IVariableSymbol variableSymbol = createVariableSymbol();
+        variableSymbol.setIsByRef();
+        boolean result = variableSymbol.isByValue();
+
+        assertThat(result, is(false));
+    }
+
     private IVariableSymbol createVariableSymbol() {
         return createVariableSymbol(mock(ITSPHPAst.class), new ModifierSet(), "foo");
     }
