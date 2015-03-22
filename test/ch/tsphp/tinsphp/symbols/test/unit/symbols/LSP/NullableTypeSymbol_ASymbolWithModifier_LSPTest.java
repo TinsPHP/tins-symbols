@@ -16,6 +16,8 @@ import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
 import ch.tsphp.tinsphp.symbols.test.unit.symbols.ASymbolWithModifierTest;
 import org.junit.Test;
 
+import java.util.HashSet;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
@@ -229,7 +231,7 @@ public class NullableTypeSymbol_ASymbolWithModifier_LSPTest extends ASymbolWithM
     @Override
     protected ASymbolWithModifier createSymbolWithModifier(
             ITSPHPAst definitionAst, IModifierSet modifiers, String name) {
-        ASymbolWithModifier symbol = new NullTypeSymbol();
+        ASymbolWithModifier symbol = new NullTypeSymbol(new HashSet<ITypeSymbol>());
         symbol.setModifiers(modifiers);
         return symbol;
     }

@@ -55,7 +55,7 @@ public class SymbolFactory implements ISymbolFactory
     private final IOverloadResolver overloadResolver;
     private IConstraintSolver constraintSolver;
     private ITypeSymbol mixedTypeSymbol = null;
-    private INullTypeSymbol nullTypeSymbol = new NullTypeSymbol();
+    private INullTypeSymbol nullTypeSymbol;
 
     public SymbolFactory(
             IScopeHelper theScopeHelper,
@@ -70,6 +70,7 @@ public class SymbolFactory implements ISymbolFactory
     @Override
     public void setMixedTypeSymbol(ITypeSymbol typeSymbol) {
         mixedTypeSymbol = typeSymbol;
+        nullTypeSymbol = new NullTypeSymbol(mixedTypeSymbol);
     }
 
     @Override

@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
@@ -85,6 +86,32 @@ public class SymbolFactoryTest
         INullTypeSymbol result2 = symbolFactory.createNullTypeSymbol();
 
         assertThat(result1, is(result2));
+    }
+
+    @Test
+    public void createNullTypeSymbol_MixedNotYetSet_ReturnsNull() {
+        //see TINS-350 null is not subtype of mixed
+
+        //no arrange necessary
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        INullTypeSymbol result = symbolFactory.createNullTypeSymbol();
+
+        assertThat(result, is(nullValue()));
+    }
+
+    @Test
+    public void createNullTypeSymbol_MixedSet_MixedIsParent() {
+        //see TINS-350 null is not subtype of mixed
+
+        ITypeSymbol mixedTypeSymbol = mock(ITypeSymbol.class);
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        symbolFactory.setMixedTypeSymbol(mixedTypeSymbol);
+        INullTypeSymbol result = symbolFactory.createNullTypeSymbol();
+
+        assertThat(result.getParentTypeSymbols(), hasItems(mixedTypeSymbol));
+        assertThat(result.getParentTypeSymbols().size(), is(1));
     }
 
     @Test
@@ -572,6 +599,7 @@ public class SymbolFactoryTest
 
         assertThat(result.getException(), is(exception));
     }
+
 
     private ISymbolFactory createSymbolFactory() {
         return createSymbolFactory(mock(IModifierHelper.class));

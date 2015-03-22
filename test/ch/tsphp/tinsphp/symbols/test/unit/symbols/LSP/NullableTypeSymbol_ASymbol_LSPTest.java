@@ -16,6 +16,8 @@ import ch.tsphp.tinsphp.symbols.test.unit.symbols.ASymbolTest;
 import org.hamcrest.core.Is;
 import org.junit.Test;
 
+import java.util.HashSet;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -135,6 +137,6 @@ public class NullableTypeSymbol_ASymbol_LSPTest extends ASymbolTest
 
     @Override
     protected ASymbol createSymbol(ITSPHPAst definitionAst, String name) {
-        return new NullTypeSymbol();
+        return new NullTypeSymbol(new HashSet<ITypeSymbol>());
     }
 }

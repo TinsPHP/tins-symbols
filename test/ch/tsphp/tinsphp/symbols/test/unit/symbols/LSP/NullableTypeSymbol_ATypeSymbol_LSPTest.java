@@ -12,7 +12,6 @@ import ch.tsphp.tinsphp.symbols.ATypeSymbol;
 import ch.tsphp.tinsphp.symbols.NullTypeSymbol;
 import ch.tsphp.tinsphp.symbols.test.unit.symbols.ATypeSymbolTest;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -37,57 +36,17 @@ public class NullableTypeSymbol_ATypeSymbol_LSPTest extends ATypeSymbolTest
         assertThat(result, is(true));
     }
 
-    @Override
-    public void getParentTypeSymbols_StandardWithType_ReturnsOnePassedToConstructor() {
-        // different behaviour - ANullableTypeSymbol has always the nullable modifier
-
-        // start same as in ATypeSymbol
-        ITypeSymbol parentTypeSymbol = mock(ITypeSymbol.class);
-
-        ATypeSymbol typeSymbol = createTypeSymbol(parentTypeSymbol);
-        Set<ITypeSymbol> result = typeSymbol.getParentTypeSymbols();
-        // end same as in ATypeSymbol
-
-//        assertThat(result, IsIterableContainingInAnyOrder.containsInAnyOrder(parentTypeSymbol));
-        assertThat(result.size(), is(0));
-    }
-
-    @Override
-    public void getParentTypeSymbols_StandardWithSet_ReturnsOnePassedToConstructor() {
-        // different behaviour - ANullableTypeSymbol has always the nullable modifier
-
-        // start same as in ATypeSymbol
-        ITypeSymbol parentTypeSymbol = mock(ITypeSymbol.class);
-        Set<ITypeSymbol> parentTypeSymbols = new HashSet<>();
-        parentTypeSymbols.add(parentTypeSymbol);
-
-        ATypeSymbol typeSymbol = createTypeSymbol(parentTypeSymbols);
-        Set<ITypeSymbol> result = typeSymbol.getParentTypeSymbols();
-        // end same as in ATypeSymbol
-
-//        assertThat(result, is(parentTypeSymbols));
-        assertThat(result.size(), is(0));
-    }
-
     private ATypeSymbol createTypeSymbol() {
         return createTypeSymbol(mock(ITSPHPAst.class), "foo", mock(ITypeSymbol.class));
     }
 
-    private ATypeSymbol createTypeSymbol(Set<ITypeSymbol> parentTypeSymbols) {
-        return createTypeSymbol(mock(ITSPHPAst.class), "foo", parentTypeSymbols);
-    }
-
-    private ATypeSymbol createTypeSymbol(ITypeSymbol parentTypeSymbol) {
-        return createTypeSymbol(mock(ITSPHPAst.class), "foo", parentTypeSymbol);
-    }
-
     @Override
     protected ATypeSymbol createTypeSymbol(ITSPHPAst definitionAst, String name, ITypeSymbol parentTypeSymbol) {
-        return new NullTypeSymbol();
+        return new NullTypeSymbol(parentTypeSymbol);
     }
 
     @Override
     protected ATypeSymbol createTypeSymbol(ITSPHPAst definitionAst, String name, Set<ITypeSymbol> parentTypeSymbol) {
-        return new NullTypeSymbol();
+        return new NullTypeSymbol(parentTypeSymbol);
     }
 }

@@ -17,11 +17,11 @@ public class NullableTypeSymbol_ANullableTypeSymbol_LSPTest extends ANullableTyp
 {
     @Override
     protected ANullableTypeSymbol createNullableTypeSymbol(String name, ITypeSymbol parentTypeSymbol) {
-        return new NullTypeSymbol();
+        return new NullTypeSymbol(parentTypeSymbol);
     }
 
     @Override
     protected ANullableTypeSymbol createNullableTypeSymbol(String name, Set<ITypeSymbol> parentTypeSymbol) {
-        return new NullTypeSymbol();
+        return new NullTypeSymbol(parentTypeSymbol);
     }
 }

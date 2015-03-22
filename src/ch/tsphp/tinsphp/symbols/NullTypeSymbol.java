@@ -15,15 +15,19 @@ package ch.tsphp.tinsphp.symbols;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.INullTypeSymbol;
 
-import java.util.HashSet;
+import java.util.Set;
 
 public class NullTypeSymbol extends ANullableTypeSymbol implements INullTypeSymbol
 {
 
-    public NullTypeSymbol() {
-        super("null", new HashSet<ITypeSymbol>());
+    public NullTypeSymbol(ITypeSymbol parentTypeSymbol) {
+        super("null", parentTypeSymbol);
     }
-    
+
+    public NullTypeSymbol(Set<ITypeSymbol> parentTypeSymbols) {
+        super("null", parentTypeSymbols);
+    }
+
     @Override
     public String getAbsoluteName() {
         return name;
