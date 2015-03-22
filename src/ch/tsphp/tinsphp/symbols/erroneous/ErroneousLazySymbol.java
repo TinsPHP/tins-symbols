@@ -116,6 +116,16 @@ public class ErroneousLazySymbol extends AErroneousScopedSymbol implements IErro
     }
 
     @Override
+    public void setIsByRef() {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
+
+    @Override
+    public boolean isByValue() {
+        return true;
+    }
+
+    @Override
     public Map<String, ITypeSymbol> getTypeSymbols() {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }

@@ -132,7 +132,7 @@ public class ErroneousLazySymbolTest
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void getConstraints_NothingDefined_ReturnsEmptyList() {
+    public void getConstraints_Standard_ThrowsUnsupportedOperationException() {
         //no arrange necessary
 
         IErroneousLazySymbol lazySymbol = createLazySymbol();
@@ -142,12 +142,20 @@ public class ErroneousLazySymbolTest
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void addAndGetConstraints_OneDefined_ReturnsListWithIt() {
+    public void addConstraint_Standard_ThrowsUnsupportedOperationException() {
         IConstraint constraint = mock(IConstraint.class);
 
         IErroneousLazySymbol lazySymbol = createLazySymbol();
         lazySymbol.addConstraint(constraint);
-        lazySymbol.getConstraints();
+
+        //assert in annotation
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void setIsByRef_Standard_ThrowsUnsupportedOperationException() {
+
+        IErroneousLazySymbol lazySymbol = createLazySymbol();
+        lazySymbol.setIsByRef();
 
         //assert in annotation
     }
@@ -220,6 +228,16 @@ public class ErroneousLazySymbolTest
 
         IErroneousLazySymbol lazySymbol = createLazySymbol();
         boolean result = lazySymbol.isReadyForEval();
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void isByValue_Standard_ReturnsTrue() {
+        //no arrange necessary
+
+        IErroneousLazySymbol lazySymbol = createLazySymbol();
+        boolean result = lazySymbol.isByValue();
 
         assertThat(result, is(true));
     }

@@ -72,7 +72,7 @@ public class ErroneousVariableSymbolTest
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void getConstraints_NothingDefined_ReturnsEmptyList() {
+    public void getConstraints_Standard_ThrowsUnsupportedOperationException() {
         //no arrange necessary
 
         IVariableSymbol variableSymbol = createVariableSymbol();
@@ -82,14 +82,32 @@ public class ErroneousVariableSymbolTest
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void addAndGetConstraints_OneDefined_ReturnsListWithIt() {
+    public void addConstraint_Standard_ThrowsUnsupportedOperationException() {
         IConstraint constraint = mock(IConstraint.class);
 
         IVariableSymbol variableSymbol = createVariableSymbol();
         variableSymbol.addConstraint(constraint);
-        variableSymbol.getConstraints();
 
         //assert in annotation
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void setIsByRef_Standard_ThrowsUnsupportedOperationException() {
+
+        IVariableSymbol variableSymbol = createVariableSymbol();
+        variableSymbol.setIsByRef();
+
+        //assert in annotation
+    }
+
+    @Test
+    public void isByValue_Standard_ReturnsTrue() {
+        //no arrange necessary
+
+        IVariableSymbol variableSymbol = createVariableSymbol();
+        boolean result = variableSymbol.isByValue();
+
+        assertThat(result, is(true));
     }
 
     private IErroneousVariableSymbol createVariableSymbol() {

@@ -37,6 +37,16 @@ public class ErroneousVariableSymbol extends AErroneousSymbolWithAccessModifier 
     }
 
     @Override
+    public void setIsByRef() {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
+
+    @Override
+    public boolean isByValue() {
+        return true;
+    }
+
+    @Override
     public boolean isStatic() {
         return true;
     }
