@@ -22,8 +22,10 @@ import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.TypeWithModifiersDto;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +35,8 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
     private final List<IVariableSymbol> parameters = new ArrayList<>();
     private final IModifierSet returnTypeModifiers;
     //Warning! start code duplication - same as in GlobalNamespaceScope
-    private final Map<String, ITypeVariableSymbol> typeVariables = new HashMap<>();
+    private final Map<String, ITypeVariableSymbol> typeVariables = new LinkedHashMap<>();
+    private final Collection<ITypeVariableSymbol> typeVariablesWhichNeedToBeSealed = new ArrayDeque<>();
     //Warning! end code duplication - same as in GlobalNamespaceScope
 
     @SuppressWarnings("checkstyle:parameternumber")
@@ -137,6 +140,16 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
     @Override
     public void addTypeVariable(ITypeVariableSymbol typeVariableSymbol) {
         typeVariables.put(typeVariableSymbol.getAbsoluteName(), typeVariableSymbol);
+    }
+
+    @Override
+    public void addTypeVariableWhichNeedToBeSealed(ITypeVariableSymbol typeVariableSymbol) {
+        typeVariablesWhichNeedToBeSealed.add(typeVariableSymbol);
+    }
+
+    @Override
+    public Collection<ITypeVariableSymbol> getTypeVariablesWhichNeedToBeSealed() {
+        return typeVariablesWhichNeedToBeSealed;
     }
     //Warning! end code duplication - same as in GlobalNamespaceScope
 }

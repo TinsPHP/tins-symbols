@@ -14,11 +14,14 @@ import ch.tsphp.tinsphp.common.symbols.IFunctionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 
+import java.util.ArrayDeque;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class PolymorphicFunctionTypeSymbol extends AFunctionTypeSymbol implements IFunctionTypeSymbol
+public class PolymorphicFunctionTypeSymbol extends AFunctionTypeSymbol
+        implements IFunctionTypeSymbol, IReadOnlyTypeVariableCollection
 {
 
     private final Map<String, ITypeVariableSymbol> typeVariables;
@@ -41,14 +44,27 @@ public class PolymorphicFunctionTypeSymbol extends AFunctionTypeSymbol implement
     }
 
     @Override
+    public Map<String, ITypeVariableSymbol> getTypeVariables() {
+        return typeVariables;
+    }
+
+    @Override
+    public Collection<ITypeVariableSymbol> getTypeVariablesWhichNeedToBeSealed() {
+        return new ArrayDeque<>();
+    }
+
+    @Override
     public ITypeSymbol apply(List<IUnionTypeSymbol> arguments) {
-        String key = getKey(arguments);
-        ITypeSymbol returnTypeSymbol = cachedReturnTypes.get(key);
-        if (returnTypeSymbol == null) {
-            returnTypeSymbol = solveConstraints(arguments);
-            cachedReturnTypes.put(key, returnTypeSymbol);
-        }
-        return returnTypeSymbol;
+        return solveConstraints(arguments);
+        //caching only works for functions without side effects. Before I do not have a flag which denotes that the
+        //current function does not have side effects, I cannot use the cache
+//        String key = getKey(arguments);
+//        ITypeSymbol returnTypeSymbol = cachedReturnTypes.get(key);
+//        if (returnTypeSymbol == null) {
+//            returnTypeSymbol = solveConstraints(arguments);
+//            cachedReturnTypes.put(key, returnTypeSymbol);
+//        }
+//        return returnTypeSymbol;
     }
 
     private String getKey(List<IUnionTypeSymbol> arguments) {
@@ -65,39 +81,41 @@ public class PolymorphicFunctionTypeSymbol extends AFunctionTypeSymbol implement
     }
 
     private ITypeSymbol solveConstraints(List<IUnionTypeSymbol> arguments) {
-        //TODO rstoll TINS-348 inference procedural - solve parametric function constraints
-        //copying the collection is not enough, a deep copy is not clever either I suppose, way to expensive.
-        //look for other possibilities
-        Map<String, ITypeVariableSymbol> typeVariablesAfterInstantiation = new HashMap<>(typeVariables);
+        instantiateParameters(arguments);
 
+        constraintSolver.solveConstraints(this);
+        IUnionTypeSymbol returnType = typeVariables.get("return").getType();
+
+        mergeByRefParameters(arguments);
+
+        resetParameters();
+        return returnType;
+    }
+
+    private void instantiateParameters(List<IUnionTypeSymbol> arguments) {
         int size = indexToName.size();
         for (int i = 0; i < size; ++i) {
-            ITypeVariableSymbol parameter = typeVariablesAfterInstantiation.get(indexToName.get(i));
-            if (parameter.isByValue()) {
-                parameter.getType().merge(arguments.get(i));
-            } else {
-                parameter.setType(arguments.get(i));
+            ITypeVariableSymbol parameter = typeVariables.get(indexToName.get(i));
+            parameter.getType().merge(arguments.get(i));
+        }
+    }
+
+    private void mergeByRefParameters(List<IUnionTypeSymbol> arguments) {
+        int size = indexToName.size();
+        for (int i = 0; i < size; ++i) {
+            ITypeVariableSymbol parameter = typeVariables.get(indexToName.get(i));
+            if (!parameter.isByValue()) {
+                arguments.get(i).merge(parameter.getType());
             }
         }
-
-        FunctionTemplate functionTemplate = new FunctionTemplate(typeVariablesAfterInstantiation);
-        constraintSolver.solveConstraints(functionTemplate);
-        Map<String, ITypeVariableSymbol> typeVariablesAfterInference = functionTemplate.getTypeVariables();
-
-        return typeVariablesAfterInference.get("return").getType();
     }
 
-    private class FunctionTemplate implements IReadOnlyTypeVariableCollection
-    {
-        private final Map<String, ITypeVariableSymbol> typeVariables;
-
-        public FunctionTemplate(Map<String, ITypeVariableSymbol> theTypeVariables) {
-            typeVariables = theTypeVariables;
+    private void resetParameters() {
+        for (String parameterId : nameToIndexMap.keySet()) {
+            typeVariables.get(parameterId).setType(symbolFactory.createUnionTypeSymbol());
         }
-
-        @Override
-        public Map<String, ITypeVariableSymbol> getTypeVariables() {
-            return typeVariables;
-        }
+        typeVariables.get("return").setType(symbolFactory.createUnionTypeSymbol());
     }
+
+
 }
