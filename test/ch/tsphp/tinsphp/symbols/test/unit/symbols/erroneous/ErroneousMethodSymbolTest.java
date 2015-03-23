@@ -152,11 +152,31 @@ public class ErroneousMethodSymbolTest
     }
 
     @Test(expected = UnsupportedOperationException.class)
+    public void getTypeVariablesWhichNeedToBeSealed_Standard_ThrowsUnsupportedOperationException() {
+        //no arrange necessary
+
+        IErroneousMethodSymbol methodSymbol = createMethodSymbol();
+        methodSymbol.getTypeVariablesWhichNeedToBeSealed();
+
+        //assert in annotation
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
     public void addTypeVariable_Standard_ThrowsUnsupportedOperationException() {
         //no arrange necessary
 
         IErroneousMethodSymbol methodSymbol = createMethodSymbol();
         methodSymbol.addTypeVariable(mock(ITypeVariableSymbol.class));
+
+        //assert in annotation
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void addTypeVariableWhichNeedToBeSealed_Standard_ThrowsUnsupportedOperationException() {
+        //no arrange necessary
+
+        IErroneousMethodSymbol methodSymbol = createMethodSymbol();
+        methodSymbol.addTypeVariableWhichNeedToBeSealed(mock(ITypeVariableSymbol.class));
 
         //assert in annotation
     }

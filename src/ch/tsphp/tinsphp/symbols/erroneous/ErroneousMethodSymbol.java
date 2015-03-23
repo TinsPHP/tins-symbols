@@ -19,6 +19,7 @@ import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.TypeWithModifiersDto;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -98,7 +99,17 @@ public class ErroneousMethodSymbol extends AErroneousScopedSymbol implements IEr
     }
 
     @Override
+    public Collection<ITypeVariableSymbol> getTypeVariablesWhichNeedToBeSealed() {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
+
+    @Override
     public void addTypeVariable(ITypeVariableSymbol typeVariableSymbol) {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
+
+    @Override
+    public void addTypeVariableWhichNeedToBeSealed(ITypeVariableSymbol typeVariableSymbol) {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 }

@@ -37,6 +37,7 @@ public class PolymorphicFunctionTypeSymbolTest
     @Test
     public void apply_NothingCached_UsesConstraintSolverAndReturnsTypeOfReturnTypeVariable() {
         ITypeVariableSymbol parameterTypeSymbolVariable = mock(ITypeVariableSymbol.class);
+        when(parameterTypeSymbolVariable.getType()).thenReturn(mock(IUnionTypeSymbol.class));
         String name = "$x";
         ITypeVariableSymbol returnTypeSymbolVariable = mock(ITypeVariableSymbol.class);
         final IUnionTypeSymbol unionTypeSymbol = mock(IUnionTypeSymbol.class);
@@ -55,8 +56,9 @@ public class PolymorphicFunctionTypeSymbolTest
     }
 
     @Test
-    public void apply_SecondCall_SecondCallDoesNotUseConstraintSolverIsSameResultAsFirstCall() {
+    public void apply_SecondCall_SecondCallAlsoUsesConstraintSolver() {
         ITypeVariableSymbol parameterTypeSymbolVariable = mock(ITypeVariableSymbol.class);
+        when(parameterTypeSymbolVariable.getType()).thenReturn(mock(IUnionTypeSymbol.class));
         String name = "$x";
         ITypeVariableSymbol returnTypeSymbolVariable = mock(ITypeVariableSymbol.class);
         final IUnionTypeSymbol unionTypeSymbol = mock(IUnionTypeSymbol.class);
@@ -71,14 +73,15 @@ public class PolymorphicFunctionTypeSymbolTest
         ITypeSymbol result1 = symbol.apply(asList(unionTypeSymbol));
         ITypeSymbol result2 = symbol.apply(asList(unionTypeSymbol));
 
-        verify(constraintSolver, times(1)).solveConstraints(any(IReadOnlyTypeVariableCollection.class));
+        //as long as functions have side effects we cannot cache the result
+        verify(constraintSolver, times(2)).solveConstraints(any(IReadOnlyTypeVariableCollection.class));
         assertThat(result1, is((ITypeSymbol) unionTypeSymbol));
         assertThat(result2, is(result1));
     }
 
     @Test
     public void
-    apply_SecondCallWithoutParameterAndTwoArguments_SecondCallDoesNotUseConstraintSolverIsSameResultAsFirstCall() {
+    apply_SecondCallWithoutParameterAndTwoArguments_SecondCallAlsoUsesConstraintSolverIsSameResultAsFirstCall() {
         ITypeVariableSymbol returnTypeSymbolVariable = mock(ITypeVariableSymbol.class);
         final IUnionTypeSymbol unionTypeSymbol = mock(IUnionTypeSymbol.class);
         when(unionTypeSymbol.getAbsoluteName()).thenReturn("int");
@@ -94,15 +97,17 @@ public class PolymorphicFunctionTypeSymbolTest
         ITypeSymbol result1 = symbol.apply(asList(unionTypeSymbol));
         ITypeSymbol result2 = symbol.apply(asList(unionTypeSymbol, additionalArgument));
 
-        verify(constraintSolver, times(1)).solveConstraints(any(IReadOnlyTypeVariableCollection.class));
+        //as long as functions have side effects we cannot cache the result
+        verify(constraintSolver, times(2)).solveConstraints(any(IReadOnlyTypeVariableCollection.class));
         assertThat(result1, is((ITypeSymbol) unionTypeSymbol));
         assertThat(result2, is(result1));
     }
 
     @Test
     public void
-    apply_SecondCallOneParameterAndTwoArguments_SecondCallDoesNotUseConstraintSolverIsSameResultAsFirstCall() {
+    apply_SecondCallOneParameterAndTwoArguments_SecondCallAlsoUsesConstraintSolverIsSameResultAsFirstCall() {
         ITypeVariableSymbol parameterTypeSymbolVariable = mock(ITypeVariableSymbol.class);
+        when(parameterTypeSymbolVariable.getType()).thenReturn(mock(IUnionTypeSymbol.class));
         String name = "$x";
         ITypeVariableSymbol returnTypeSymbolVariable = mock(ITypeVariableSymbol.class);
         final IUnionTypeSymbol unionTypeSymbol = mock(IUnionTypeSymbol.class);
@@ -119,15 +124,16 @@ public class PolymorphicFunctionTypeSymbolTest
         ITypeSymbol result1 = symbol.apply(asList(unionTypeSymbol));
         ITypeSymbol result2 = symbol.apply(asList(unionTypeSymbol, additionalArgument));
 
-        verify(constraintSolver, times(1)).solveConstraints(any(IReadOnlyTypeVariableCollection.class));
+        verify(constraintSolver, times(2)).solveConstraints(any(IReadOnlyTypeVariableCollection.class));
         assertThat(result1, is((ITypeSymbol) unionTypeSymbol));
         assertThat(result2, is(result1));
     }
 
     @Test
     public void
-    apply_SecondCallTwoParameterAndThreeArguments_SecondCallDoesNotUseConstraintSolverIsSameResultAsFirstCall() {
+    apply_SecondCallTwoParameterAndThreeArguments_SecondCallAlsoUsesConstraintSolverIsSameResultAsFirstCall() {
         ITypeVariableSymbol parameterTypeSymbolVariable = mock(ITypeVariableSymbol.class);
+        when(parameterTypeSymbolVariable.getType()).thenReturn(mock(IUnionTypeSymbol.class));
         String name1 = "$x";
         String name2 = "$y";
         ITypeVariableSymbol returnTypeSymbolVariable = mock(ITypeVariableSymbol.class);
@@ -146,7 +152,7 @@ public class PolymorphicFunctionTypeSymbolTest
         ITypeSymbol result1 = symbol.apply(asList(unionTypeSymbol, unionTypeSymbol));
         ITypeSymbol result2 = symbol.apply(asList(unionTypeSymbol, unionTypeSymbol, additionalArgument));
 
-        verify(constraintSolver, times(1)).solveConstraints(any(IReadOnlyTypeVariableCollection.class));
+        verify(constraintSolver, times(2)).solveConstraints(any(IReadOnlyTypeVariableCollection.class));
         assertThat(result1, is((ITypeSymbol) unionTypeSymbol));
         assertThat(result2, is(result1));
     }
