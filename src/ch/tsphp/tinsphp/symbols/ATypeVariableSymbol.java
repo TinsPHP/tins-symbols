@@ -11,13 +11,10 @@ import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public abstract class ATypeVariableSymbol extends ASymbol implements ITypeVariableSymbol
 {
     //Warning! start code duplication - same as in VariableSymbol
-    private final List<IConstraint> constraints = new ArrayList<>();
+    private IConstraint constraint;
     private boolean isByValue = true;
     //Warning! end code duplication - same as in VariableSymbol
 
@@ -33,13 +30,13 @@ public abstract class ATypeVariableSymbol extends ASymbol implements ITypeVariab
     }
 
     @Override
-    public void addConstraint(IConstraint constraint) {
-        constraints.add(constraint);
+    public void setConstraint(IConstraint theConstraint) {
+        constraint = theConstraint;
     }
 
     @Override
-    public List<IConstraint> getConstraints() {
-        return constraints;
+    public IConstraint getConstraint() {
+        return constraint;
     }
     //Warning! end code duplication - same as in VariableSymbol
 

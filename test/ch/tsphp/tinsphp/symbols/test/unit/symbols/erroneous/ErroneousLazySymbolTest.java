@@ -13,7 +13,6 @@ import ch.tsphp.common.exceptions.TSPHPException;
 import ch.tsphp.common.symbols.IForEvalReadyListener;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.IUnionTypeSymbol;
-import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousLazySymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.ILazySymbolResolver;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousLazySymbol;
@@ -129,26 +128,6 @@ public class ErroneousLazySymbolTest
         boolean result = lazySymbol.isPrivate();
 
         assertThat(result, is(false));
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void getConstraints_Standard_ThrowsUnsupportedOperationException() {
-        //no arrange necessary
-
-        IErroneousLazySymbol lazySymbol = createLazySymbol();
-        lazySymbol.getConstraints();
-
-        //assert in annotation
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void addConstraint_Standard_ThrowsUnsupportedOperationException() {
-        IConstraint constraint = mock(IConstraint.class);
-
-        IErroneousLazySymbol lazySymbol = createLazySymbol();
-        lazySymbol.addConstraint(constraint);
-
-        //assert in annotation
     }
 
     @Test(expected = UnsupportedOperationException.class)

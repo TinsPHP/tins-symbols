@@ -7,28 +7,26 @@
 package ch.tsphp.tinsphp.symbols;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
-import ch.tsphp.tinsphp.common.symbols.IFunctionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 
 import java.util.List;
 
-public class ConstantFunctionTypeSymbol extends AFunctionTypeSymbol implements IFunctionTypeSymbol
+public class AssignFunctionTypeSymbol extends AFunctionTypeSymbol
 {
     private final ITypeSymbol returnTypeSymbol;
 
-    public ConstantFunctionTypeSymbol(
+    public AssignFunctionTypeSymbol(
             String theName,
-            List<String> theParameterIds,
+            List<String> parameterId,
             ITypeSymbol theParentTypeSymbol,
             ITypeSymbol theReturnTypeSymbol) {
-
-        super(theName, theParameterIds, theParentTypeSymbol);
+        super(theName, parameterId, theParentTypeSymbol);
         returnTypeSymbol = theReturnTypeSymbol;
     }
 
     @Override
     public ITypeSymbol apply(List<ITypeVariableSymbol> arguments) {
+        arguments.get(0).setType(returnTypeSymbol);
         return returnTypeSymbol;
     }
-
 }

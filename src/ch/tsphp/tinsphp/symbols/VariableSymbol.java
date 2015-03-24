@@ -16,19 +16,25 @@ import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
+import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
+import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbolWithRef;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.TypeWithModifiersDto;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Stack;
 
 public class VariableSymbol extends ASymbolWithAccessModifier implements IVariableSymbol
 {
 
     //Warning! start code duplication - same as in ATypeVariableSymbol
-    private final List<IConstraint> constraints = new ArrayList<>();
+    private IConstraint constraint;
     private boolean isByValue = true;
     //Warning! end code duplication - same as in ATypeVariableSymbol
+
+    //Warning! start code duplication - same as in MinimalTypeVariableSymbolWithRef
+    private ITypeVariableSymbolWithRef definition;
+    private final Stack<ITypeVariableSymbol> referenceTypeVariables = new Stack<>();
+    //Warning! end code duplication - same as in MinimalTypeVariableSymbolWithRef
 
     public VariableSymbol(ITSPHPAst definitionAst, IModifierSet modifiers, String name) {
         super(definitionAst, modifiers, name);
@@ -72,13 +78,13 @@ public class VariableSymbol extends ASymbolWithAccessModifier implements IVariab
     }
 
     @Override
-    public void addConstraint(IConstraint constraint) {
-        constraints.add(constraint);
+    public void setConstraint(IConstraint theConstraint) {
+        constraint = theConstraint;
     }
 
     @Override
-    public List<IConstraint> getConstraints() {
-        return constraints;
+    public IConstraint getConstraint() {
+        return constraint;
     }
     //Warning! end code duplication - same as in ATypeVariableSymbol
 
@@ -93,4 +99,35 @@ public class VariableSymbol extends ASymbolWithAccessModifier implements IVariab
         return isByValue;
     }
     //Warning! end code duplication - same as in ATypeVariableSymbol
+
+
+    //Warning! start code duplication - same as in MinimalTypeVariableSymbolWithRef
+    @Override
+    public void setOriginal(ITypeVariableSymbolWithRef theVariableDeclaration) {
+        definition = theVariableDeclaration;
+    }
+
+    @Override
+    public void addRefVariable(ITypeVariableSymbol variableSymbol) {
+        referenceTypeVariables.push(variableSymbol);
+    }
+
+    @Override
+    public ITypeVariableSymbol getCurrentTypeVariable() {
+        if (referenceTypeVariables.size() > 0) {
+            return referenceTypeVariables.peek();
+        }
+        return this;
+    }
+
+    @Override
+    public void seal() {
+        IUnionTypeSymbol unionTypeSymbol = getType();
+        for (ITypeVariableSymbol typeVariableSymbol : referenceTypeVariables) {
+            unionTypeSymbol.merge(typeVariableSymbol.getType());
+        }
+        unionTypeSymbol.seal();
+    }
+    //Warning! end code duplication - same as in MinimalTypeVariableSymbolWithRef
+
 }

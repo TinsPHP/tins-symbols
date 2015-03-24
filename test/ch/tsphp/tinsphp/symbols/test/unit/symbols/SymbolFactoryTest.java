@@ -394,7 +394,7 @@ public class SymbolFactoryTest
         IFunctionTypeSymbol result = symbolFactory.createConstantFunctionTypeSymbol(
                 "+", parameters, mock(ITypeSymbol.class));
 
-        assertThat(result.getParametersConstraints().size(), is(parameters.size()));
+        assertThat(result.getInputConstraints().size(), is(parameters.size()));
     }
 
     @Test

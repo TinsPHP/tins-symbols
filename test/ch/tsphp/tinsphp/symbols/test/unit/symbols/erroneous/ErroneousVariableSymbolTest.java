@@ -72,21 +72,21 @@ public class ErroneousVariableSymbolTest
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void getConstraints_Standard_ThrowsUnsupportedOperationException() {
+    public void getConstraint_Standard_ThrowsUnsupportedOperationException() {
         //no arrange necessary
 
         IVariableSymbol variableSymbol = createVariableSymbol();
-        variableSymbol.getConstraints();
+        variableSymbol.getConstraint();
 
         //assert in annotation
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void addConstraint_Standard_ThrowsUnsupportedOperationException() {
+    public void setConstraint_Standard_ThrowsUnsupportedOperationException() {
         IConstraint constraint = mock(IConstraint.class);
 
         IVariableSymbol variableSymbol = createVariableSymbol();
-        variableSymbol.addConstraint(constraint);
+        variableSymbol.setConstraint(constraint);
 
         //assert in annotation
     }

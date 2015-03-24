@@ -19,15 +19,15 @@ import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
+import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbolWithRef;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.TypeWithModifiersDto;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
+import java.util.Deque;
 import java.util.List;
-import java.util.Map;
 
 public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
 {
@@ -35,8 +35,8 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
     private final List<IVariableSymbol> parameters = new ArrayList<>();
     private final IModifierSet returnTypeModifiers;
     //Warning! start code duplication - same as in GlobalNamespaceScope
-    private final Map<String, ITypeVariableSymbol> typeVariables = new LinkedHashMap<>();
-    private final Collection<ITypeVariableSymbol> typeVariablesWhichNeedToBeSealed = new ArrayDeque<>();
+    private final Deque<ITypeVariableSymbol> typeVariables = new ArrayDeque<>();
+    private final Collection<ITypeVariableSymbolWithRef> typeVariableSymbolWithRefs = new ArrayDeque<>();
     //Warning! end code duplication - same as in GlobalNamespaceScope
 
     @SuppressWarnings("checkstyle:parameternumber")
@@ -133,23 +133,23 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
 
     //Warning! start code duplication - same as in GlobalNamespaceScope
     @Override
-    public Map<String, ITypeVariableSymbol> getTypeVariables() {
+    public Deque<ITypeVariableSymbol> getTypeVariables() {
         return typeVariables;
     }
 
     @Override
+    public Collection<ITypeVariableSymbolWithRef> getTypeVariablesWithRef() {
+        return typeVariableSymbolWithRefs;
+    }
+
+    @Override
     public void addTypeVariable(ITypeVariableSymbol typeVariableSymbol) {
-        typeVariables.put(typeVariableSymbol.getAbsoluteName(), typeVariableSymbol);
+        typeVariables.addLast(typeVariableSymbol);
     }
 
     @Override
-    public void addTypeVariableWhichNeedToBeSealed(ITypeVariableSymbol typeVariableSymbol) {
-        typeVariablesWhichNeedToBeSealed.add(typeVariableSymbol);
-    }
-
-    @Override
-    public Collection<ITypeVariableSymbol> getTypeVariablesWhichNeedToBeSealed() {
-        return typeVariablesWhichNeedToBeSealed;
+    public void addTypeVariableWithRef(ITypeVariableSymbolWithRef typeVariableSymbol) {
+        typeVariableSymbolWithRefs.add(typeVariableSymbol);
     }
     //Warning! end code duplication - same as in GlobalNamespaceScope
 }

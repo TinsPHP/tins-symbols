@@ -16,10 +16,10 @@ import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
 import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
+import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
+import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbolWithRef;
 import ch.tsphp.tinsphp.common.symbols.TypeWithModifiersDto;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousVariableSymbol;
-
-import java.util.List;
 
 
 public class ErroneousVariableSymbol extends AErroneousSymbolWithAccessModifier implements IErroneousVariableSymbol
@@ -29,6 +29,16 @@ public class ErroneousVariableSymbol extends AErroneousSymbolWithAccessModifier 
 
     public ErroneousVariableSymbol(ITSPHPAst ast, String name, TSPHPException exception) {
         super(ast, name, exception);
+    }
+
+    @Override
+    public void setConstraint(IConstraint constraint) {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
+
+    @Override
+    public IConstraint getConstraint() {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
     @Override
@@ -77,12 +87,22 @@ public class ErroneousVariableSymbol extends AErroneousSymbolWithAccessModifier 
     }
 
     @Override
-    public void addConstraint(IConstraint constraint) {
+    public void setOriginal(ITypeVariableSymbolWithRef variableDeclaration) {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
     @Override
-    public List<IConstraint> getConstraints() {
+    public void addRefVariable(ITypeVariableSymbol variableSymbol) {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
+
+    @Override
+    public ITypeVariableSymbol getCurrentTypeVariable() {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
+
+    @Override
+    public void seal() {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 }

@@ -18,36 +18,49 @@ import java.util.Map;
 
 public abstract class AFunctionTypeSymbol extends ATypeSymbol implements IFunctionTypeSymbol
 {
-    protected final Map<String, Integer> nameToIndexMap = new HashMap<>();
-    protected final List<String> indexToName;
-    
-    private final List<List<IConstraint>> parameterConstraints = new ArrayList<>();
+    protected final Map<String, Integer> parameterNamesToIndexMap = new HashMap<>();
+
+    private final List<List<IConstraint>> inputConstraints = new ArrayList<>();
+    private final List<List<IConstraint>> outputConstraints = new ArrayList<>();
 
     public AFunctionTypeSymbol(String theName, List<String> theParameterIds, ITypeSymbol theParentTypeSymbol) {
         super(null, theName, theParentTypeSymbol);
 
-        indexToName = theParameterIds;
-
         int size = theParameterIds != null ? theParameterIds.size() : 0;
         for (int i = 0; i < size; ++i) {
-            nameToIndexMap.put(theParameterIds.get(i), i);
-            parameterConstraints.add(new ArrayList<IConstraint>());
+            parameterNamesToIndexMap.put(theParameterIds.get(i), i);
+            inputConstraints.add(new ArrayList<IConstraint>());
+            outputConstraints.add(new ArrayList<IConstraint>());
         }
     }
 
     @Override
-    public void addParameterConstraint(String parameterId, IConstraint constraint) {
-        if (!nameToIndexMap.containsKey(parameterId)) {
+    public void addInputConstraint(String parameterId, IConstraint constraint) {
+        addConstraint(parameterId, constraint, inputConstraints);
+    }
+
+    private void addConstraint(String parameterId, IConstraint constraint, List<List<IConstraint>> constraints) {
+        if (!parameterNamesToIndexMap.containsKey(parameterId)) {
             throw new IllegalArgumentException("parameterId " + parameterId + " not found for this function.");
         }
 
-        int index = nameToIndexMap.get(parameterId);
-        parameterConstraints.get(index).add(constraint);
+        int index = parameterNamesToIndexMap.get(parameterId);
+        constraints.get(index).add(constraint);
     }
 
     @Override
-    public List<List<IConstraint>> getParametersConstraints() {
-        return parameterConstraints;
+    public void addOutputConstraint(String parameterId, IConstraint constraint) {
+        addConstraint(parameterId, constraint, outputConstraints);
+    }
+
+    @Override
+    public List<List<IConstraint>> getInputConstraints() {
+        return inputConstraints;
+    }
+
+    @Override
+    public List<List<IConstraint>> getOutputConstraints() {
+        return outputConstraints;
     }
 
     @Override

@@ -7,9 +7,9 @@
 package ch.tsphp.tinsphp.symbols.test.unit.symbols;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
-import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.symbols.IFunctionTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 import ch.tsphp.tinsphp.symbols.AFunctionTypeSymbol;
 import org.junit.Test;
 
@@ -32,7 +32,7 @@ public class AFunctionTypeSymbolTest
         }
 
         @Override
-        public ITypeSymbol apply(List<IUnionTypeSymbol> arguments) {
+        public ITypeSymbol apply(List<ITypeVariableSymbol> arguments) {
             return null;
         }
     }
@@ -42,7 +42,7 @@ public class AFunctionTypeSymbolTest
         //no arrange necessary
 
         IFunctionTypeSymbol symbol = createFunctionTypeSymbol();
-        List<List<IConstraint>> result = symbol.getParametersConstraints();
+        List<List<IConstraint>> result = symbol.getInputConstraints();
 
         assertThat(result.size(), is(0));
     }
@@ -52,8 +52,8 @@ public class AFunctionTypeSymbolTest
         IConstraint constraint = mock(IConstraint.class);
 
         IFunctionTypeSymbol symbol = createFunctionTypeSymbol("$x");
-        symbol.addParameterConstraint("$x", constraint);
-        List<List<IConstraint>> result = symbol.getParametersConstraints();
+        symbol.addInputConstraint("$x", constraint);
+        List<List<IConstraint>> result = symbol.getInputConstraints();
 
         assertThat(result.size(), is(1));
         assertThat(result.get(0).size(), is(1));
@@ -65,8 +65,8 @@ public class AFunctionTypeSymbolTest
         IConstraint constraint = mock(IConstraint.class);
 
         IFunctionTypeSymbol symbol = createFunctionTypeSymbol();
-        symbol.addParameterConstraint("$nonExistingParameter", constraint);
-        symbol.getParametersConstraints();
+        symbol.addInputConstraint("$nonExistingParameter", constraint);
+        symbol.getInputConstraints();
 
         //assert in annotation
     }

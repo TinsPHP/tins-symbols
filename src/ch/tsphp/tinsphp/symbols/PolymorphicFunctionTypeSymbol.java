@@ -9,113 +9,111 @@ package ch.tsphp.tinsphp.symbols;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraintSolver;
-import ch.tsphp.tinsphp.common.inference.constraints.IReadOnlyTypeVariableCollection;
-import ch.tsphp.tinsphp.common.symbols.IFunctionTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IPolymorphicFunctionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
+import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbolWithRef;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Deque;
 import java.util.List;
-import java.util.Map;
 
-public class PolymorphicFunctionTypeSymbol extends AFunctionTypeSymbol
-        implements IFunctionTypeSymbol, IReadOnlyTypeVariableCollection
+public class PolymorphicFunctionTypeSymbol extends AFunctionTypeSymbol implements IPolymorphicFunctionTypeSymbol
 {
 
-    private final Map<String, ITypeVariableSymbol> typeVariables;
+    private final List<ITypeVariableSymbolWithRef> parameters;
+    private final ITypeVariableSymbolWithRef returnTypeVariableSymbol;
+    private final Deque<ITypeVariableSymbol> typeVariables;
     private final ISymbolFactory symbolFactory;
     private final IConstraintSolver constraintSolver;
-    private final Map<String, ITypeSymbol> cachedReturnTypes = new HashMap<>();
 
     public PolymorphicFunctionTypeSymbol(
             String theName,
-            List<String> theParameterIds,
+            List<ITypeVariableSymbolWithRef> theParameters,
             ITypeSymbol theParentTypeSymbol,
-            Map<String, ITypeVariableSymbol> theTypeVariables,
+            ITypeVariableSymbolWithRef theReturnTypeVariableSymbol,
+            Deque<ITypeVariableSymbol> theTypeVariables,
             ISymbolFactory theSymbolFactory,
             IConstraintSolver theConstraintSolver) {
 
-        super(theName, theParameterIds, theParentTypeSymbol);
+        super(theName, getParameterNames(theParameters), theParentTypeSymbol);
+        parameters = theParameters;
+        returnTypeVariableSymbol = theReturnTypeVariableSymbol;
         typeVariables = theTypeVariables;
         symbolFactory = theSymbolFactory;
         constraintSolver = theConstraintSolver;
     }
 
+    private static List<String> getParameterNames(List<ITypeVariableSymbolWithRef> theParameters) {
+        List<String> names = new ArrayList<>(theParameters.size());
+        for (ITypeVariableSymbol typeVariableSymbol : theParameters) {
+            names.add(typeVariableSymbol.getName());
+        }
+        return names;
+    }
+
     @Override
-    public Map<String, ITypeVariableSymbol> getTypeVariables() {
+    public Deque<ITypeVariableSymbol> getTypeVariables() {
         return typeVariables;
     }
 
     @Override
-    public Collection<ITypeVariableSymbol> getTypeVariablesWhichNeedToBeSealed() {
+    public Collection<ITypeVariableSymbolWithRef> getTypeVariablesWithRef() {
         return new ArrayDeque<>();
     }
 
     @Override
-    public ITypeSymbol apply(List<IUnionTypeSymbol> arguments) {
-        return solveConstraints(arguments);
-        //caching only works for functions without side effects. Before I do not have a flag which denotes that the
-        //current function does not have side effects, I cannot use the cache
-//        String key = getKey(arguments);
-//        ITypeSymbol returnTypeSymbol = cachedReturnTypes.get(key);
-//        if (returnTypeSymbol == null) {
-//            returnTypeSymbol = solveConstraints(arguments);
-//            cachedReturnTypes.put(key, returnTypeSymbol);
+    public ITypeSymbol apply(List<ITypeVariableSymbol> arguments) {
+        int numberOfParameters = parameters.size();
+//        Deque<ITypeVariableSymbol> instantiatedTypeVariables
+//                = new ArrayDeque<>(typeVariables.size() + numberOfParameters);
+
+//        for (ITypeVariableSymbol typeVariableSymbol : typeVariables) {
+//            ITypeVariableSymbol copy = symbolFactory.createMinimalTypeVariableSymbol(typeVariableSymbol.getName());
+//            IUnionTypeSymbol unionTypeSymbol = symbolFactory.createUnionTypeSymbol();
+//            unionTypeSymbol.merge(typeVariableSymbol.getType());
+//            copy.setType(unionTypeSymbol);
+//            instantiatedTypeVariables.add(copy);
+//            copy.setConstraint(typeVariableSymbol.getConstraint());
 //        }
-//        return returnTypeSymbol;
-    }
 
-    private String getKey(List<IUnionTypeSymbol> arguments) {
-        StringBuilder sb = new StringBuilder();
-
-        int size = indexToName.size();
-        if (size > 0) {
-            sb.append(arguments.get(0).getAbsoluteName());
+        for (int i = 0; i < numberOfParameters; ++i) {
+            IUnionTypeSymbol parameterType = parameters.get(i).getType();
+            parameterType.merge(arguments.get(i).getType());
+            parameterType.seal();
         }
-        for (int i = 1; i < size; ++i) {
-            sb.append(" x ").append(arguments.get(i).getAbsoluteName());
-        }
-        return sb.toString();
-    }
-
-    private ITypeSymbol solveConstraints(List<IUnionTypeSymbol> arguments) {
-        instantiateParameters(arguments);
+//        IReadOnlyTypeVariableCollection collection = new FunctionTemplate(typeVariables);
 
         constraintSolver.solveConstraints(this);
-        IUnionTypeSymbol returnType = typeVariables.get("return").getType();
+        IUnionTypeSymbol returnType = returnTypeVariableSymbol.getCurrentTypeVariable().getType();
+
+        returnType.seal();
 
         mergeByRefParameters(arguments);
-
-        resetParameters();
+        resetTypeVariables();
         return returnType;
     }
 
-    private void instantiateParameters(List<IUnionTypeSymbol> arguments) {
-        int size = indexToName.size();
+    private void mergeByRefParameters(List<ITypeVariableSymbol> arguments) {
+        int size = parameters.size();
         for (int i = 0; i < size; ++i) {
-            ITypeVariableSymbol parameter = typeVariables.get(indexToName.get(i));
-            parameter.getType().merge(arguments.get(i));
-        }
-    }
-
-    private void mergeByRefParameters(List<IUnionTypeSymbol> arguments) {
-        int size = indexToName.size();
-        for (int i = 0; i < size; ++i) {
-            ITypeVariableSymbol parameter = typeVariables.get(indexToName.get(i));
+            ITypeVariableSymbolWithRef parameter = parameters.get(i);
             if (!parameter.isByValue()) {
-                arguments.get(i).merge(parameter.getType());
+                IUnionTypeSymbol unionTypeSymbol = parameter.getCurrentTypeVariable().getType();
+                arguments.get(i).setType(unionTypeSymbol);
             }
         }
     }
 
-    private void resetParameters() {
-        for (String parameterId : nameToIndexMap.keySet()) {
-            typeVariables.get(parameterId).setType(symbolFactory.createUnionTypeSymbol());
+    private void resetTypeVariables() {
+        for (ITypeVariableSymbol typeVariableSymbol : parameters) {
+            typeVariableSymbol.setType(symbolFactory.createUnionTypeSymbol());
         }
-        typeVariables.get("return").setType(symbolFactory.createUnionTypeSymbol());
+        returnTypeVariableSymbol.setType(symbolFactory.createUnionTypeSymbol());
+        for (ITypeVariableSymbol typeVariableSymbol : typeVariables) {
+            typeVariableSymbol.setType(symbolFactory.createUnionTypeSymbol());
+        }
     }
-
-
 }

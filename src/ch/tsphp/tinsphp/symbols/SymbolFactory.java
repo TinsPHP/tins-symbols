@@ -30,10 +30,12 @@ import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IModifierHelper;
 import ch.tsphp.tinsphp.common.symbols.INullTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IOverloadSymbol;
+import ch.tsphp.tinsphp.common.symbols.IPolymorphicFunctionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IPseudoTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IScalarTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
+import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbolWithRef;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousLazySymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
@@ -45,6 +47,7 @@ import ch.tsphp.tinsphp.symbols.erroneous.ErroneousMethodSymbol;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousTypeSymbol;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousVariableSymbol;
 
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 
@@ -160,10 +163,14 @@ public class SymbolFactory implements ISymbolFactory
     }
 
     @Override
+    public ITypeVariableSymbolWithRef createMinimalTypeVariableSymbolWithRef(String name) {
+        return new MinimalTypeVariableSymbolWithRef(name);
+    }
+
+    @Override
     public ITypeVariableSymbol createExpressionTypeVariableSymbol(ITSPHPAst exprAst) {
         return new ExpressionTypeVariableSymbol(exprAst);
     }
-
 
     @Override
     public IUnionTypeSymbol createUnionTypeSymbol() {
@@ -187,14 +194,28 @@ public class SymbolFactory implements ISymbolFactory
     }
 
     @Override
-    public IFunctionTypeSymbol createPolymorphicFunctionTypeSymbol(
+    public IFunctionTypeSymbol createIdentityFunctionTypeSymbol(String name, String parameterId) {
+        return new IdentityFunctionTypeSymbol(name, parameterId, mixedTypeSymbol, this);
+    }
+
+    @Override
+    public IFunctionTypeSymbol createAssignFunctionTypeSymbol(
+            String name, List<String> parameterIds, ITypeSymbol returnTypeSymbol) {
+        return new AssignFunctionTypeSymbol(name, parameterIds, mixedTypeSymbol, returnTypeSymbol);
+    }
+
+    @Override
+    public IPolymorphicFunctionTypeSymbol createPolymorphicFunctionTypeSymbol(
             String name,
-            List<String> parameterIds,
-            Map<String, ITypeVariableSymbol> functionTypeVariables) {
+            List<ITypeVariableSymbolWithRef> parameterTypeVariables,
+            ITypeVariableSymbolWithRef returnTypeVariable,
+            Deque<ITypeVariableSymbol> functionTypeVariables) {
+
         return new PolymorphicFunctionTypeSymbol(
                 name,
-                parameterIds,
+                parameterTypeVariables,
                 mixedTypeSymbol,
+                returnTypeVariable,
                 functionTypeVariables,
                 this,
                 constraintSolver);

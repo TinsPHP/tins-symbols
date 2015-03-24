@@ -12,11 +12,9 @@ import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 import ch.tsphp.tinsphp.symbols.ATypeVariableSymbol;
 import org.junit.Test;
 
-import java.util.List;
-
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.mockito.Mockito.mock;
 
 public class ATypeVariableSymbolTest
@@ -30,25 +28,24 @@ public class ATypeVariableSymbolTest
     }
 
     @Test
-    public void getConstraints_NothingDefined_ReturnsEmptyList() {
+    public void getConstraints_NothingDefined_ReturnsNull() {
         //no arrange necessary
 
         ITypeVariableSymbol symbol = createExpressionTypeVariableSymbol();
-        List<IConstraint> result = symbol.getConstraints();
+        IConstraint result = symbol.getConstraint();
 
-        assertThat(result, is(empty()));
+        assertThat(result, is(nullValue()));
     }
 
     @Test
-    public void addAndGetConstraints_OneDefined_ReturnsListWithIt() {
+    public void setAndGetConstraints_OneSet_ReturnsIt() {
         IConstraint constraint = mock(IConstraint.class);
 
         ITypeVariableSymbol symbol = createExpressionTypeVariableSymbol();
-        symbol.addConstraint(constraint);
-        List<IConstraint> result = symbol.getConstraints();
+        symbol.setConstraint(constraint);
+        IConstraint result = symbol.getConstraint();
 
-        assertThat(result.size(), is(1));
-        assertThat(result.get(0), is(constraint));
+        assertThat(result, is(constraint));
     }
 
     @Test

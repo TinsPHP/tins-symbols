@@ -14,12 +14,13 @@ import ch.tsphp.common.symbols.ISymbol;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
+import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
+import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbolWithRef;
 import ch.tsphp.tinsphp.common.symbols.TypeWithModifiersDto;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousLazySymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.ILazySymbolResolver;
 import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -95,18 +96,34 @@ public class ErroneousLazySymbol extends AErroneousScopedSymbol implements IErro
         return this;
     }
 
+
+    @Override
+    public void setOriginal(ITypeVariableSymbolWithRef variableDeclaration) {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
+
+    @Override
+    public void addRefVariable(ITypeVariableSymbol variableSymbol) {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
+
+    @Override
+    public ITypeVariableSymbol getCurrentTypeVariable() {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
+
     @Override
     public TypeWithModifiersDto toTypeWithModifiersDto() {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
     @Override
-    public void addConstraint(IConstraint constraint) {
+    public void setConstraint(IConstraint constraint) {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
     @Override
-    public List<IConstraint> getConstraints() {
+    public IConstraint getConstraint() {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 

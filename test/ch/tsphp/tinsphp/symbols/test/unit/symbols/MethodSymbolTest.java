@@ -18,14 +18,14 @@ import ch.tsphp.tinsphp.symbols.MethodSymbol;
 import ch.tsphp.tinsphp.symbols.ModifierSet;
 import org.junit.Test;
 
+import java.util.Deque;
 import java.util.List;
-import java.util.Map;
 
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
-import static org.hamcrest.collection.IsMapContaining.hasKey;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -169,7 +169,7 @@ public class MethodSymbolTest
     public void getTypeVariables_NothingDefined_ReturnsEmptyMap() {
 
         IMethodSymbol methodSymbol = createMethodSymbol();
-        Map<String, ITypeVariableSymbol> result = methodSymbol.getTypeVariables();
+        Deque<ITypeVariableSymbol> result = methodSymbol.getTypeVariables();
 
         assertThat(result.size(), is(0));
     }
@@ -181,11 +181,10 @@ public class MethodSymbolTest
 
         IMethodSymbol methodSymbol = createMethodSymbol();
         methodSymbol.addTypeVariable($a);
-        Map<String, ITypeVariableSymbol> result = methodSymbol.getTypeVariables();
+        Deque<ITypeVariableSymbol> result = methodSymbol.getTypeVariables();
 
+        assertThat(result, hasItem($a));
         assertThat(result.size(), is(1));
-        assertThat(result, hasKey("$a"));
-        assertThat(result.get("$a"), is($a));
     }
 
     private IMethodSymbol createMethodSymbol() {

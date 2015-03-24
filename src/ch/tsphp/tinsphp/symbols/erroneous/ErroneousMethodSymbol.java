@@ -15,13 +15,14 @@ package ch.tsphp.tinsphp.symbols.erroneous;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
+import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbolWithRef;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.TypeWithModifiersDto;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
 
 import java.util.Collection;
+import java.util.Deque;
 import java.util.List;
-import java.util.Map;
 
 
 public class ErroneousMethodSymbol extends AErroneousScopedSymbol implements IErroneousMethodSymbol
@@ -94,12 +95,12 @@ public class ErroneousMethodSymbol extends AErroneousScopedSymbol implements IEr
     }
 
     @Override
-    public Map<String, ITypeVariableSymbol> getTypeVariables() {
+    public Deque<ITypeVariableSymbol> getTypeVariables() {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
     @Override
-    public Collection<ITypeVariableSymbol> getTypeVariablesWhichNeedToBeSealed() {
+    public Collection<ITypeVariableSymbolWithRef> getTypeVariablesWithRef() {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
@@ -109,7 +110,8 @@ public class ErroneousMethodSymbol extends AErroneousScopedSymbol implements IEr
     }
 
     @Override
-    public void addTypeVariableWhichNeedToBeSealed(ITypeVariableSymbol typeVariableSymbol) {
+    public void addTypeVariableWithRef(ITypeVariableSymbolWithRef typeVariableSymbol) {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
+
 }

@@ -14,35 +14,32 @@ import ch.tsphp.tinsphp.symbols.ModifierSet;
 import ch.tsphp.tinsphp.symbols.VariableSymbol;
 import org.junit.Test;
 
-import java.util.List;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsEmptyCollection.empty;
+import static org.hamcrest.core.IsNull.nullValue;
 import static org.mockito.Mockito.mock;
 
 public class VariableSymbolTest
 {
     @Test
-    public void getConstraints_NothingDefined_ReturnsEmptyList() {
+    public void getConstraints_NothingDefined_ReturnsNull() {
         //no arrange necessary
 
         IVariableSymbol variableSymbol = createVariableSymbol();
-        List<IConstraint> result = variableSymbol.getConstraints();
+        IConstraint result = variableSymbol.getConstraint();
 
-        assertThat(result, is(empty()));
+        assertThat(result, is(nullValue()));
     }
 
     @Test
-    public void addAndGetConstraints_OneDefined_ReturnsListWithIt() {
+    public void setAndGetConstraints_OneSet_ReturnsIt() {
         IConstraint constraint = mock(IConstraint.class);
 
         IVariableSymbol variableSymbol = createVariableSymbol();
-        variableSymbol.addConstraint(constraint);
-        List<IConstraint> result = variableSymbol.getConstraints();
+        variableSymbol.setConstraint(constraint);
+        IConstraint result = variableSymbol.getConstraint();
 
-        assertThat(result.size(), is(1));
-        assertThat(result.get(0), is(constraint));
+        assertThat(result, is(constraint));
     }
 
     @Test

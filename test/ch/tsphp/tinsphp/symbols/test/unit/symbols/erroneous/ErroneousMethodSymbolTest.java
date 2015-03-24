@@ -9,6 +9,7 @@ package ch.tsphp.tinsphp.symbols.test.unit.symbols.erroneous;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
+import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbolWithRef;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousMethodSymbol;
@@ -152,11 +153,11 @@ public class ErroneousMethodSymbolTest
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void getTypeVariablesWhichNeedToBeSealed_Standard_ThrowsUnsupportedOperationException() {
+    public void getTypeVariablesWithRef_Standard_ThrowsUnsupportedOperationException() {
         //no arrange necessary
 
         IErroneousMethodSymbol methodSymbol = createMethodSymbol();
-        methodSymbol.getTypeVariablesWhichNeedToBeSealed();
+        methodSymbol.getTypeVariablesWithRef();
 
         //assert in annotation
     }
@@ -176,7 +177,7 @@ public class ErroneousMethodSymbolTest
         //no arrange necessary
 
         IErroneousMethodSymbol methodSymbol = createMethodSymbol();
-        methodSymbol.addTypeVariableWhichNeedToBeSealed(mock(ITypeVariableSymbol.class));
+        methodSymbol.addTypeVariableWithRef(mock(ITypeVariableSymbolWithRef.class));
 
         //assert in annotation
     }
