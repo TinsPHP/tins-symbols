@@ -10,23 +10,23 @@ import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.symbols.ASymbol;
-import ch.tsphp.tinsphp.symbols.ModifierSet;
-import ch.tsphp.tinsphp.symbols.VariableSymbol;
+import ch.tsphp.tinsphp.symbols.MinimalTypeVariableSymbol;
 import ch.tsphp.tinsphp.symbols.test.unit.symbols.ASymbolTest;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 
-public class VariableSymbol_ASymbol_LSPTest extends ASymbolTest
+public class MinimalTypeVariableSymbol_ASymbol_LSPTest extends ASymbolTest
 {
 
     @Override
     @Test
     public void getType_OneSet_ReturnsTheOneWhichWasSet() {
-        // different behaviour - VariableSymbol only supports IUnionTypeSymbol, cast its ITypeSymbol to IUnionTypeSymbol
-        // respectively
+        // different behaviour - MinimalTypeVariable only supports IUnionTypeSymbol,
+        // cast its ITypeSymbol to IUnionTypeSymbol respectively
 
         ITypeSymbol typeSymbol = mock(IUnionTypeSymbol.class);
 //        ITypeSymbol typeSymbol = mock(ITypeSymbol.class);
@@ -40,12 +40,29 @@ public class VariableSymbol_ASymbol_LSPTest extends ASymbolTest
         // end same as in ASymbolTest
     }
 
+    @Override
+    public void getDefinitionAst_Standard_ReturnsOnePassedToConstructor() {
+        // different behaviour - MinimalTypeVariable is used for predefined types which do not have a definition Ast
+        // therefore it always returns null.
+
+        // start same as in ASymbolTest
+        ITSPHPAst ast = mock(ITSPHPAst.class);
+        String name = "foo";
+
+        ASymbol symbol = createSymbol(ast, name);
+        ITSPHPAst result = symbol.getDefinitionAst();
+        // end same as in ASymbolTest
+
+        //assertThat(result, is(ast));
+        assertThat(result, is(nullValue()));
+    }
+
     private ASymbol createSymbol() {
         return createSymbol(mock(ITSPHPAst.class), "foo");
     }
 
     @Override
     protected ASymbol createSymbol(ITSPHPAst definitionAst, String name) {
-        return new VariableSymbol(definitionAst, new ModifierSet(), name);
+        return new MinimalTypeVariableSymbol(name);
     }
 }

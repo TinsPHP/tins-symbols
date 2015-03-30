@@ -11,8 +11,9 @@ import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 import ch.tsphp.tinsphp.symbols.ExpressionTypeVariableSymbol;
 import ch.tsphp.tinsphp.symbols.test.unit.symbols.ATypeVariableSymbolTest;
 
-public class ExpressionTypeVariable_ATypeVariableSymbol_LSPTest extends ATypeVariableSymbolTest
+public class ExpressionTypeVariableSymbol_ATypeVariableSymbol_LSPTest extends ATypeVariableSymbolTest
 {
+    @Override
     protected ITypeVariableSymbol createExpressionTypeVariableSymbol(ITSPHPAst definitionAst, String name) {
         return new ExpressionTypeVariableSymbol(definitionAst);
     }

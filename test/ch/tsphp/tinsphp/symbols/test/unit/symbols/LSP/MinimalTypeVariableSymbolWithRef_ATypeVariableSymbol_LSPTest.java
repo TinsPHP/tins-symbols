@@ -8,12 +8,13 @@ package ch.tsphp.tinsphp.symbols.test.unit.symbols.LSP;
 
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
-import ch.tsphp.tinsphp.symbols.MinimalTypeVariableSymbol;
+import ch.tsphp.tinsphp.symbols.MinimalTypeVariableSymbolWithRef;
 import ch.tsphp.tinsphp.symbols.test.unit.symbols.ATypeVariableSymbolTest;
 
-public class MinimalTypeVariable_ATypeVariableSymbol_LSPTest extends ATypeVariableSymbolTest
+public class MinimalTypeVariableSymbolWithRef_ATypeVariableSymbol_LSPTest extends ATypeVariableSymbolTest
 {
+    @Override
     protected ITypeVariableSymbol createExpressionTypeVariableSymbol(ITSPHPAst definitionAst, String name) {
-        return new MinimalTypeVariableSymbol(name);
+        return new MinimalTypeVariableSymbolWithRef(name);
     }
 }
