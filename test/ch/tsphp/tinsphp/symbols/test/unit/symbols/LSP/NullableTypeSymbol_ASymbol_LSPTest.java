@@ -48,9 +48,10 @@ public class NullableTypeSymbol_ASymbol_LSPTest extends ASymbolTest
         // different behaviour - NullableTypeSymbol does always return null as type
 
         // start same as in ASymbolTest
+        ITSPHPAst ast = mock(ITSPHPAst.class);
         String name = "dummy";
 
-        ASymbol symbol = createSymbol(mock(ITSPHPAst.class), name);
+        ASymbol symbol = createSymbol(ast, name);
         String result = symbol.getAbsoluteName();
 
         // end same as in ASymbolTest
@@ -63,12 +64,13 @@ public class NullableTypeSymbol_ASymbol_LSPTest extends ASymbolTest
         // different behaviour - NullableTypeSymbol does always return null as type
 
         // start same as in ASymbolTest
+        ITSPHPAst ast = mock(ITSPHPAst.class);
         String scopeName = "\\";
         String name = "dummy";
         IScope scope = mock(IScope.class);
         when(scope.getScopeName()).thenReturn(scopeName);
 
-        ASymbol symbol = createSymbol(mock(ITSPHPAst.class), name);
+        ASymbol symbol = createSymbol(ast, name);
         symbol.setDefinitionScope(scope);
         String result = symbol.getAbsoluteName();
         // end same as in ASymbolTest

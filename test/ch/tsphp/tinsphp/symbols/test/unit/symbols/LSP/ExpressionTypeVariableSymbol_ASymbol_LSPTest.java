@@ -48,16 +48,18 @@ public class ExpressionTypeVariableSymbol_ASymbol_LSPTest extends ASymbolTest
     @Test
     public void getName_Standard_ReturnsOnePassedToConstructor() {
         // different behaviour - ExpressionTypeVariableSymbol creates an own name based on the definition ast
-        // start same as in ASymbolTest
 
         ITSPHPAst ast = mock(ITSPHPAst.class);
+        when(ast.getText()).thenReturn("+");
+//        ITSPHPAst ast = mock(ITSPHPAst.class);
+        // start same as in ASymbolTest
         String name = "foo";
 
         ASymbol symbol = createSymbol(ast, name);
         String result = symbol.getName();
         // end same as in ASymbolTest
 
-        assertThat(result, is("@0|0"));
+        assertThat(result, is("+@0|0"));
 //        assertThat(result, CoreMatchers.is(name));
     }
 
@@ -66,14 +68,17 @@ public class ExpressionTypeVariableSymbol_ASymbol_LSPTest extends ASymbolTest
     public void getAbsoluteName_DefinitionScopeIsNull_ReturnsName() {
         // different behaviour - ExpressionTypeVariableSymbol creates an own name based on the definition ast
 
+        ITSPHPAst ast = mock(ITSPHPAst.class);
+        when(ast.getText()).thenReturn("+");
+//        ITSPHPAst ast = mock(ITSPHPAst.class);
         // start same as in ASymbolTest
         String name = "dummy";
 
-        ASymbol symbol = createSymbol(mock(ITSPHPAst.class), name);
+        ASymbol symbol = createSymbol(ast, name);
         String result = symbol.getAbsoluteName();
         // end same as in ASymbolTest
 
-        assertThat(result, is("@0|0"));
+        assertThat(result, is("+@0|0"));
 //        assertThat(result, Is.is(name));
     }
 
@@ -81,18 +86,21 @@ public class ExpressionTypeVariableSymbol_ASymbol_LSPTest extends ASymbolTest
     public void getAbsoluteName_DefinitionScopeNotNull_ReturnsNameWithDefinitionScopeNameAsPrefix() {
         // different behaviour - ExpressionTypeVariableSymbol creates an own name based on the definition ast
 
+        ITSPHPAst ast = mock(ITSPHPAst.class);
+        when(ast.getText()).thenReturn("+");
+//        ITSPHPAst ast = mock(ITSPHPAst.class);
         // start same as in ASymbolTest
         String scopeName = "\\";
         String name = "dummy";
         IScope scope = mock(IScope.class);
         when(scope.getScopeName()).thenReturn(scopeName);
 
-        ASymbol symbol = createSymbol(mock(ITSPHPAst.class), name);
+        ASymbol symbol = createSymbol(ast, name);
         symbol.setDefinitionScope(scope);
         String result = symbol.getAbsoluteName();
         // end same as in ASymbolTest
 
-        assertThat(result, is(scopeName + "@0|0"));
+        assertThat(result, is(scopeName + "+@0|0"));
 //        assertThat(result, is(scopeName + name));
     }
 
@@ -100,15 +108,17 @@ public class ExpressionTypeVariableSymbol_ASymbol_LSPTest extends ASymbolTest
     public void toString_NoTypeDefined_ReturnsName() {
         // different behaviour - ExpressionTypeVariableSymbol creates an own name based on the definition ast
 
-        // start same as in ASymbolTest
         ITSPHPAst ast = mock(ITSPHPAst.class);
+        when(ast.getText()).thenReturn("+");
+//        ITSPHPAst ast = mock(ITSPHPAst.class);
+        // start same as in ASymbolTest
         String name = "foo";
 
         ASymbol symbol = createSymbol(ast, name);
         String result = symbol.toString();
         // end same as in ASymbolTest
 
-        assertThat(result, is("@0|0"));
+        assertThat(result, is("+@0|0"));
 //        assertThat(result, CoreMatchers.is(name));
     }
 
@@ -116,8 +126,10 @@ public class ExpressionTypeVariableSymbol_ASymbol_LSPTest extends ASymbolTest
     public void toString_TypeDefined_ReturnsNameColonTypeToString() {
         // different behaviour - ExpressionTypeVariableSymbol creates an own name based on the definition ast
 
-        // start same as in ASymbolTest
         ITSPHPAst ast = mock(ITSPHPAst.class);
+        when(ast.getText()).thenReturn("+");
+//        ITSPHPAst ast = mock(ITSPHPAst.class);
+        // start same as in ASymbolTest
         String name = "foo";
         String typeName = "bar";
         ITypeSymbol typeSymbol = mock(ITypeSymbol.class);
@@ -128,7 +140,7 @@ public class ExpressionTypeVariableSymbol_ASymbol_LSPTest extends ASymbolTest
         String result = symbol.toString();
         // end same as in ASymbolTest
 
-        assertThat(result, is("@0|0:" + typeName));
+        assertThat(result, is("+@0|0:" + typeName));
 //        assertThat(result, CoreMatchers.is(name + ":" + typeName));
     }
 

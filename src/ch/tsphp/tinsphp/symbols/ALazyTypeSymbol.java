@@ -69,6 +69,11 @@ public abstract class ALazyTypeSymbol implements ILazyTypeSymbol
         return null;
     }
 
+    @Override
+    public String toString() {
+        return getAbsoluteName();
+    }
+
     //--------------------------------------------------------------
     // Unsupported Methods
 

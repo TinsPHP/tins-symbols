@@ -44,12 +44,13 @@ public class PseudoTypeSymbol_ASymbol_LSPTest extends ASymbolTest
         // different behaviour - pseudo types do not belong to a namespace and thus are not prefix with its name
 
         // start same as in ASymbolTest
+        ITSPHPAst ast = mock(ITSPHPAst.class);
         String scopeName = "\\";
         String name = "dummy";
         IScope scope = mock(IScope.class);
         when(scope.getScopeName()).thenReturn(scopeName);
 
-        ASymbol symbol = createSymbol(mock(ITSPHPAst.class), name);
+        ASymbol symbol = createSymbol(ast, name);
         symbol.setDefinitionScope(scope);
         String result = symbol.getAbsoluteName();
         // end same as in ASymbolTest

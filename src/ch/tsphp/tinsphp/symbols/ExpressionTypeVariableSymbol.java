@@ -12,6 +12,8 @@ import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 public class ExpressionTypeVariableSymbol extends ATypeVariableSymbol implements ITypeVariableSymbol
 {
     public ExpressionTypeVariableSymbol(ITSPHPAst theDefinitionAst) {
-        super(theDefinitionAst, "@" + theDefinitionAst.getLine() + "|" + theDefinitionAst.getCharPositionInLine());
+        super(theDefinitionAst,
+                theDefinitionAst.getText() + "@"
+                        + theDefinitionAst.getLine() + "|" + theDefinitionAst.getCharPositionInLine());
     }
 }

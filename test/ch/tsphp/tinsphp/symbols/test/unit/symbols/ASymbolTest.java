@@ -53,9 +53,10 @@ public class ASymbolTest
 
     @Test
     public void getAbsoluteName_DefinitionScopeIsNull_ReturnsName() {
+        ITSPHPAst ast = mock(ITSPHPAst.class);
         String name = "dummy";
 
-        ASymbol symbol = createSymbol(mock(ITSPHPAst.class), name);
+        ASymbol symbol = createSymbol(ast, name);
         String result = symbol.getAbsoluteName();
 
         assertThat(result, Is.is(name));
@@ -63,12 +64,13 @@ public class ASymbolTest
 
     @Test
     public void getAbsoluteName_DefinitionScopeNotNull_ReturnsNameWithDefinitionScopeNameAsPrefix() {
+        ITSPHPAst ast = mock(ITSPHPAst.class);
         String scopeName = "\\";
         String name = "dummy";
         IScope scope = mock(IScope.class);
         when(scope.getScopeName()).thenReturn(scopeName);
 
-        ASymbol symbol = createSymbol(mock(ITSPHPAst.class), name);
+        ASymbol symbol = createSymbol(ast, name);
         symbol.setDefinitionScope(scope);
         String result = symbol.getAbsoluteName();
 
