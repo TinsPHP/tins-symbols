@@ -14,6 +14,7 @@ package ch.tsphp.tinsphp.symbols.erroneous;
 
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
+import ch.tsphp.tinsphp.common.inference.constraints.IBinding;
 import ch.tsphp.tinsphp.common.inference.constraints.IIntersectionConstraint;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.TypeWithModifiersDto;
@@ -102,12 +103,22 @@ public class ErroneousMethodSymbol extends AErroneousScopedSymbol implements IEr
     }
 
     @Override
+    public List<IBinding> getBindings() {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
+
+    @Override
     public void addLowerBoundConstraint(IIntersectionConstraint constraint) {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
     @Override
     public void addUpperBoundConstraint(IIntersectionConstraint constraint) {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
+
+    @Override
+    public void setBindings(List<IBinding> bindings) {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 }

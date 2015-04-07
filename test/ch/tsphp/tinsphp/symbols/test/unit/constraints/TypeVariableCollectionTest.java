@@ -6,14 +6,11 @@
 
 package ch.tsphp.tinsphp.symbols.test.unit.constraints;
 
-import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadResolver;
 import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableCollection;
-import ch.tsphp.tinsphp.common.inference.constraints.LowerBoundException;
-import ch.tsphp.tinsphp.common.inference.constraints.UpperBoundException;
-import ch.tsphp.tinsphp.symbols.constraints.TypeConstraint;
 import ch.tsphp.tinsphp.symbols.constraints.TypeVariableCollection;
+import ch.tsphp.tinsphp.symbols.test.unit.testutils.ATypeTest;
 import org.junit.Test;
 
 import java.util.Collection;
@@ -28,7 +25,7 @@ import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class TypeVariableCollectionTest
+public class TypeVariableCollectionTest extends ATypeTest
 {
 
     @Test
@@ -95,78 +92,6 @@ public class TypeVariableCollectionTest
 
         assertThat(result, hasItem(constraint));
         assertThat(result, hasSize(1));
-    }
-
-    @Test
-    public void addLowerBound_UpperBoundIsParentType_AddsLowerBound() {
-        String typeVariable = "T";
-        ITypeSymbol typeSymbol1 = mock(ITypeSymbol.class);
-        IConstraint constraint1 = new TypeConstraint(typeSymbol1);
-        ITypeSymbol typeSymbol2 = mock(ITypeSymbol.class);
-        IConstraint constraint2 = new TypeConstraint(typeSymbol2);
-        IOverloadResolver overloadResolver = mock(IOverloadResolver.class);
-        when(overloadResolver.isFirstSameOrSubTypeOfSecond(typeSymbol1, typeSymbol2)).thenReturn(true);
-
-        ITypeVariableCollection collection = createTypeVariableCollection(overloadResolver);
-        collection.addUpperBound(typeVariable, constraint2);
-        collection.addLowerBound(typeVariable, constraint1);
-        Collection<IConstraint> result = collection.getLowerBounds(typeVariable);
-
-        assertThat(result, hasItem(constraint1));
-        assertThat(result, hasSize(1));
-    }
-
-    @Test(expected = LowerBoundException.class)
-    public void addLowerBound_UpperBoundIsSubType_ThrowsLowerBoundException() {
-        String typeVariable = "T";
-        ITypeSymbol typeSymbol1 = mock(ITypeSymbol.class);
-        IConstraint constraint1 = new TypeConstraint(typeSymbol1);
-        ITypeSymbol typeSymbol2 = mock(ITypeSymbol.class);
-        IConstraint constraint2 = new TypeConstraint(typeSymbol2);
-        IOverloadResolver overloadResolver = mock(IOverloadResolver.class);
-        when(overloadResolver.isFirstSameOrSubTypeOfSecond(typeSymbol1, typeSymbol2)).thenReturn(false);
-
-        ITypeVariableCollection collection = createTypeVariableCollection(overloadResolver);
-        collection.addUpperBound(typeVariable, constraint2);
-        collection.addLowerBound(typeVariable, constraint1);
-
-        //assert in annotation
-    }
-
-    @Test
-    public void addUpperBound_LowerBoundIsSubType_AddsUpperBound() {
-        String typeVariable = "T";
-        ITypeSymbol typeSymbol1 = mock(ITypeSymbol.class);
-        IConstraint constraint1 = new TypeConstraint(typeSymbol1);
-        ITypeSymbol typeSymbol2 = mock(ITypeSymbol.class);
-        IConstraint constraint2 = new TypeConstraint(typeSymbol2);
-        IOverloadResolver overloadResolver = mock(IOverloadResolver.class);
-        when(overloadResolver.isFirstSameOrParentTypeOfSecond(typeSymbol1, typeSymbol2)).thenReturn(true);
-
-        ITypeVariableCollection collection = createTypeVariableCollection(overloadResolver);
-        collection.addLowerBound(typeVariable, constraint2);
-        collection.addUpperBound(typeVariable, constraint1);
-        Collection<IConstraint> result = collection.getUpperBounds(typeVariable);
-
-        assertThat(result, hasItem(constraint1));
-        assertThat(result, hasSize(1));
-    }
-
-    @Test(expected = UpperBoundException.class)
-    public void addUpperBound_LowerBoundIsParentType_ThrowsUpperBoundException() {
-        String typeVariable = "T";
-        ITypeSymbol typeSymbol1 = mock(ITypeSymbol.class);
-        IConstraint constraint1 = new TypeConstraint(typeSymbol1);
-        ITypeSymbol typeSymbol2 = mock(ITypeSymbol.class);
-        IConstraint constraint2 = new TypeConstraint(typeSymbol2);
-        IOverloadResolver overloadResolver = mock(IOverloadResolver.class);
-        when(overloadResolver.isFirstSameOrParentTypeOfSecond(typeSymbol1, typeSymbol2)).thenReturn(false);
-
-        ITypeVariableCollection collection = createTypeVariableCollection(overloadResolver);
-        collection.addLowerBound(typeVariable, constraint2);
-        collection.addUpperBound(typeVariable, constraint1);
-
-        //assert in annotation
     }
 
     @Test

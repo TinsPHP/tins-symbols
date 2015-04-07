@@ -30,9 +30,9 @@ public class MinimalTypeVariableSymbolWithRef extends ATypeVariableSymbol implem
 
     @Override
     public void addRefVariable(ITypeVariableSymbol variableSymbol) {
-        if (getType().isReadyForEval()) {
-            throw new IllegalStateException("cannot add further references if the type is already sealed");
-        }
+//        if (getType().isReadyForEval()) {
+//            throw new IllegalStateException("cannot add further references if the type is already sealed");
+//        }
         referenceTypeVariables.push(variableSymbol);
     }
 

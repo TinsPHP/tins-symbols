@@ -15,14 +15,11 @@ package ch.tsphp.tinsphp.symbols.erroneous;
 import ch.tsphp.common.AstHelperRegistry;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
-import ch.tsphp.common.symbols.IForEvalReadyListener;
 import ch.tsphp.common.symbols.ITypeSymbol;
-import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousTypeSymbol;
 import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
 
-import java.util.Map;
 import java.util.Set;
 
 public class ErroneousTypeSymbol extends AErroneousScopedSymbol implements IErroneousTypeSymbol
@@ -57,35 +54,5 @@ public class ErroneousTypeSymbol extends AErroneousScopedSymbol implements IErro
     @Override
     public ITypeSymbol evalSelf() {
         return this;
-    }
-
-    @Override
-    public Map<String, ITypeSymbol> getTypeSymbols() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public boolean addTypeSymbol(ITypeSymbol symbol) {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public boolean merge(IUnionTypeSymbol unionTypeSymbol) {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public void seal() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public void addForEvalReadyListener(IForEvalReadyListener typeSymbol) {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public boolean isReadyForEval() {
-        return true;
     }
 }

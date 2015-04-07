@@ -28,4 +28,8 @@ public class TypeConstraint implements IConstraint
         return typeSymbol.getAbsoluteName();
     }
 
+    @Override
+    public String toString() {
+        return typeSymbol.getAbsoluteName();
+    }
 }

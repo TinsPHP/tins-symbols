@@ -16,6 +16,7 @@ import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ISymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
+import ch.tsphp.tinsphp.common.inference.constraints.IBinding;
 import ch.tsphp.tinsphp.common.inference.constraints.IIntersectionConstraint;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
@@ -30,9 +31,11 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
 
     private final List<IVariableSymbol> parameters = new ArrayList<>();
     private final IModifierSet returnTypeModifiers;
+
     //Warning! start code duplication - same as in GlobalNamespaceScope
     private final List<IIntersectionConstraint> lowerBoundConstraints = new ArrayList<>();
     private final List<IIntersectionConstraint> upperBoundConstraints = new ArrayList<>();
+    private List<IBinding> bindings;
     //Warning! end code duplication - same as in GlobalNamespaceScope
 
     @SuppressWarnings("checkstyle:parameternumber")
@@ -146,6 +149,19 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
     @Override
     public void addUpperBoundConstraint(IIntersectionConstraint constraint) {
         upperBoundConstraints.add(constraint);
+    }
+    //Warning! end code duplication - same as in GlobalNamespaceScope
+
+
+    //Warning! start code duplication - same as in GlobalNamespaceScope
+    @Override
+    public List<IBinding> getBindings() {
+        return bindings;
+    }
+
+    @Override
+    public void setBindings(List<IBinding> theBindings) {
+        bindings = theBindings;
     }
     //Warning! end code duplication - same as in GlobalNamespaceScope
 }

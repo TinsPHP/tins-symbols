@@ -7,7 +7,6 @@
 package ch.tsphp.tinsphp.symbols;
 
 import ch.tsphp.common.ITSPHPAst;
-import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 
 public abstract class ATypeVariableSymbol extends ASymbol implements ITypeVariableSymbol
@@ -16,10 +15,4 @@ public abstract class ATypeVariableSymbol extends ASymbol implements ITypeVariab
         super(theDefinitionAst, theName);
     }
 
-    //Warning! start code duplication - same as in VariableSymbol
-    @Override
-    public IUnionTypeSymbol getType() {
-        return (IUnionTypeSymbol) super.getType();
-    }
-    //Warning! end code duplication - same as in VariableSymbol
 }
