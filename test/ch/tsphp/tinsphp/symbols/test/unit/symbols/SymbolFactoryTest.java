@@ -13,12 +13,14 @@ import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadResolver;
+import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableCollection;
 import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IAliasSymbol;
 import ch.tsphp.tinsphp.common.symbols.IAliasTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IArrayTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IClassTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IFunctionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IModifierHelper;
 import ch.tsphp.tinsphp.common.symbols.INullTypeSymbol;
@@ -37,8 +39,10 @@ import ch.tsphp.tinsphp.symbols.SymbolFactory;
 import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.hasItems;
@@ -361,6 +365,50 @@ public class SymbolFactoryTest
         IOverloadSymbol result = symbolFactory.createOverloadSymbol(name);
 
         assertThat(result.getName(), is(name));
+    }
+
+    @Test
+    public void createFunctionTypeSymbol_Standard_NameIsPassedName() {
+        String name = "+";
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IFunctionTypeSymbol result = symbolFactory.createFunctionTypeSymbol(
+                name, mock(ITypeVariableCollection.class), new ArrayList<String>(), "Treturn");
+
+        assertThat(result.getName(), is(name));
+    }
+
+    @Test
+    public void createFunctionTypeSymbol_Standard_TypeVariablesArePassedTypeVariables() {
+        ITypeVariableCollection typeVariables = mock(ITypeVariableCollection.class);
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IFunctionTypeSymbol result = symbolFactory.createFunctionTypeSymbol(
+                "+", typeVariables, new ArrayList<String>(), "Treturn");
+
+        assertThat(result.getTypeVariables(), is(typeVariables));
+    }
+
+    @Test
+    public void createFunctionTypeSymbol_Standard_ParametersArePassedParameters() {
+        List<String> parameters = new ArrayList<>();
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IFunctionTypeSymbol result = symbolFactory.createFunctionTypeSymbol(
+                "+", mock(ITypeVariableCollection.class), parameters, "Treturn");
+
+        assertThat(result.getParameterTypeVariables(), is(parameters));
+    }
+
+    @Test
+    public void createFunctionTypeSymbol_Standard_ReturnTypeVariableIsPassedTypeVariable() {
+        String returnTypeVariable = "Treturn";
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IFunctionTypeSymbol result = symbolFactory.createFunctionTypeSymbol(
+                "+", mock(ITypeVariableCollection.class), new ArrayList<String>(), returnTypeVariable);
+
+        assertThat(result.getReturnTypeVariable(), is(returnTypeVariable));
     }
 
     @Test
