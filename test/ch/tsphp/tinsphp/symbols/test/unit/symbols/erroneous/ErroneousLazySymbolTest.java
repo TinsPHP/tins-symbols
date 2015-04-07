@@ -130,15 +130,6 @@ public class ErroneousLazySymbolTest
         assertThat(result, is(false));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void setIsByRef_Standard_ThrowsUnsupportedOperationException() {
-
-        IErroneousLazySymbol lazySymbol = createLazySymbol();
-        lazySymbol.setIsByRef();
-
-        //assert in annotation
-    }
-
     @Test
     public void evalSelf_Standard_ReturnsThis() {
         //no arrange necessary
@@ -207,16 +198,6 @@ public class ErroneousLazySymbolTest
 
         IErroneousLazySymbol lazySymbol = createLazySymbol();
         boolean result = lazySymbol.isReadyForEval();
-
-        assertThat(result, is(true));
-    }
-
-    @Test
-    public void isByValue_Standard_ReturnsTrue() {
-        //no arrange necessary
-
-        IErroneousLazySymbol lazySymbol = createLazySymbol();
-        boolean result = lazySymbol.isByValue();
 
         assertThat(result, is(true));
     }

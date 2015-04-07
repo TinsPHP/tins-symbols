@@ -12,16 +12,13 @@ import ch.tsphp.common.symbols.ISymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
-import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.symbols.MethodSymbol;
 import ch.tsphp.tinsphp.symbols.ModifierSet;
 import org.junit.Test;
 
-import java.util.Deque;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
@@ -163,28 +160,6 @@ public class MethodSymbolTest
         String result = methodSymbol.toString();
 
         assertThat(result, is(name + "|" + modifier + "|" + returnTypeModifier));
-    }
-
-    @Test
-    public void getTypeVariables_NothingDefined_ReturnsEmptyMap() {
-
-        IMethodSymbol methodSymbol = createMethodSymbol();
-        Deque<ITypeVariableSymbol> result = methodSymbol.getTypeVariables();
-
-        assertThat(result.size(), is(0));
-    }
-
-    @Test
-    public void addAndGetTypeVariables_AddedOneFor$a_ReturnsMapWithCorrespondingConstraint() {
-        ITypeVariableSymbol $a = mock(ITypeVariableSymbol.class);
-        when($a.getAbsoluteName()).thenReturn("$a");
-
-        IMethodSymbol methodSymbol = createMethodSymbol();
-        methodSymbol.addTypeVariable($a);
-        Deque<ITypeVariableSymbol> result = methodSymbol.getTypeVariables();
-
-        assertThat(result, hasItem($a));
-        assertThat(result.size(), is(1));
     }
 
     private IMethodSymbol createMethodSymbol() {

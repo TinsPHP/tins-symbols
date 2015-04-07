@@ -14,8 +14,6 @@ package ch.tsphp.tinsphp.symbols.erroneous;
 
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
-import ch.tsphp.common.symbols.IUnionTypeSymbol;
-import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbolWithRef;
 import ch.tsphp.tinsphp.common.symbols.TypeWithModifiersDto;
@@ -29,31 +27,6 @@ public class ErroneousVariableSymbol extends AErroneousSymbolWithAccessModifier 
 
     public ErroneousVariableSymbol(ITSPHPAst ast, String name, TSPHPException exception) {
         super(ast, name, exception);
-    }
-
-    @Override
-    public void setConstraint(IConstraint constraint) {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public IConstraint getConstraint() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public IUnionTypeSymbol getType() {
-        return (IUnionTypeSymbol) super.getType();
-    }
-
-    @Override
-    public void setIsByRef() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public boolean isByValue() {
-        return true;
     }
 
     @Override
@@ -76,11 +49,6 @@ public class ErroneousVariableSymbol extends AErroneousSymbolWithAccessModifier 
         return true;
     }
 
-//    @Override
-//    public boolean isFinal() {
-//        return false;
-//    }
-
     @Override
     public TypeWithModifiersDto toTypeWithModifiersDto() {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
@@ -98,11 +66,6 @@ public class ErroneousVariableSymbol extends AErroneousSymbolWithAccessModifier 
 
     @Override
     public ITypeVariableSymbol getCurrentTypeVariable() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public void seal() {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 }

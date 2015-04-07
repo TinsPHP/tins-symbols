@@ -14,14 +14,11 @@ package ch.tsphp.tinsphp.symbols.erroneous;
 
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
-import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
-import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbolWithRef;
+import ch.tsphp.tinsphp.common.inference.constraints.IIntersectionConstraint;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.TypeWithModifiersDto;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
 
-import java.util.Collection;
-import java.util.Deque;
 import java.util.List;
 
 
@@ -95,23 +92,22 @@ public class ErroneousMethodSymbol extends AErroneousScopedSymbol implements IEr
     }
 
     @Override
-    public Deque<ITypeVariableSymbol> getTypeVariables() {
+    public List<IIntersectionConstraint> getLowerBoundConstraints() {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
     @Override
-    public Collection<ITypeVariableSymbolWithRef> getTypeVariablesWithRef() {
+    public List<IIntersectionConstraint> getUpperBoundConstraints() {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
     @Override
-    public void addTypeVariable(ITypeVariableSymbol typeVariableSymbol) {
+    public void addLowerBoundConstraint(IIntersectionConstraint constraint) {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
     @Override
-    public void addTypeVariableWithRef(ITypeVariableSymbolWithRef typeVariableSymbol) {
+    public void addUpperBoundConstraint(IIntersectionConstraint constraint) {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
-
 }

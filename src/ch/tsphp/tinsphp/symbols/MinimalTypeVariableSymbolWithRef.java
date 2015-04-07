@@ -6,7 +6,6 @@
 
 package ch.tsphp.tinsphp.symbols;
 
-import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbolWithRef;
 
@@ -43,15 +42,6 @@ public class MinimalTypeVariableSymbolWithRef extends ATypeVariableSymbol implem
             return referenceTypeVariables.peek();
         }
         return this;
-    }
-
-    @Override
-    public void seal() {
-        IUnionTypeSymbol unionTypeSymbol = getType();
-        for (ITypeVariableSymbol typeVariableSymbol : referenceTypeVariables) {
-            unionTypeSymbol.merge(typeVariableSymbol.getType());
-        }
-        unionTypeSymbol.seal();
     }
     //Warning! end code duplication - same as in VariableSymbol
 }

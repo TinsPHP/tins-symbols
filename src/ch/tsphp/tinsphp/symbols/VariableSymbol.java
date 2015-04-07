@@ -15,7 +15,6 @@ package ch.tsphp.tinsphp.symbols;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
-import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbolWithRef;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
@@ -26,11 +25,6 @@ import java.util.Stack;
 public class VariableSymbol extends ASymbolWithAccessModifier implements IVariableSymbol
 {
 
-    //Warning! start code duplication - same as in ATypeVariableSymbol
-    private IConstraint constraint;
-    private boolean isByValue = true;
-    //Warning! end code duplication - same as in ATypeVariableSymbol
-
     //Warning! start code duplication - same as in MinimalTypeVariableSymbolWithRef
     private ITypeVariableSymbolWithRef definition;
     private final Stack<ITypeVariableSymbol> referenceTypeVariables = new Stack<>();
@@ -39,11 +33,6 @@ public class VariableSymbol extends ASymbolWithAccessModifier implements IVariab
     public VariableSymbol(ITSPHPAst definitionAst, IModifierSet modifiers, String name) {
         super(definitionAst, modifiers, name);
     }
-
-//    @Override
-//    public boolean isFinal() {
-//        return modifiers.isFinal();
-//    }
 
     @Override
     public boolean isStatic() {
@@ -76,28 +65,6 @@ public class VariableSymbol extends ASymbolWithAccessModifier implements IVariab
     public IUnionTypeSymbol getType() {
         return (IUnionTypeSymbol) super.getType();
     }
-
-    @Override
-    public void setConstraint(IConstraint theConstraint) {
-        constraint = theConstraint;
-    }
-
-    @Override
-    public IConstraint getConstraint() {
-        return constraint;
-    }
-    //Warning! end code duplication - same as in ATypeVariableSymbol
-
-    //Warning! start code duplication - same as in ATypeVariableSymbol
-    @Override
-    public void setIsByRef() {
-        isByValue = false;
-    }
-
-    @Override
-    public boolean isByValue() {
-        return isByValue;
-    }
     //Warning! end code duplication - same as in ATypeVariableSymbol
 
 
@@ -118,15 +85,6 @@ public class VariableSymbol extends ASymbolWithAccessModifier implements IVariab
             return referenceTypeVariables.peek();
         }
         return this;
-    }
-
-    @Override
-    public void seal() {
-        IUnionTypeSymbol unionTypeSymbol = getType();
-        for (ITypeVariableSymbol typeVariableSymbol : referenceTypeVariables) {
-            unionTypeSymbol.merge(typeVariableSymbol.getType());
-        }
-        unionTypeSymbol.seal();
     }
     //Warning! end code duplication - same as in MinimalTypeVariableSymbolWithRef
 

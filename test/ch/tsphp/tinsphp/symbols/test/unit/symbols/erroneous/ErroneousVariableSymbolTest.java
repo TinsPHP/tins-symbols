@@ -8,8 +8,6 @@ package ch.tsphp.tinsphp.symbols.test.unit.symbols.erroneous;
 
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
-import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
-import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousVariableSymbol;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousVariableSymbol;
 import org.junit.Test;
@@ -69,45 +67,6 @@ public class ErroneousVariableSymbolTest
         variableSymbol.toTypeWithModifiersDto();
 
         //assert in annotation
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void getConstraint_Standard_ThrowsUnsupportedOperationException() {
-        //no arrange necessary
-
-        IVariableSymbol variableSymbol = createVariableSymbol();
-        variableSymbol.getConstraint();
-
-        //assert in annotation
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void setConstraint_Standard_ThrowsUnsupportedOperationException() {
-        IConstraint constraint = mock(IConstraint.class);
-
-        IVariableSymbol variableSymbol = createVariableSymbol();
-        variableSymbol.setConstraint(constraint);
-
-        //assert in annotation
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void setIsByRef_Standard_ThrowsUnsupportedOperationException() {
-
-        IVariableSymbol variableSymbol = createVariableSymbol();
-        variableSymbol.setIsByRef();
-
-        //assert in annotation
-    }
-
-    @Test
-    public void isByValue_Standard_ReturnsTrue() {
-        //no arrange necessary
-
-        IVariableSymbol variableSymbol = createVariableSymbol();
-        boolean result = variableSymbol.isByValue();
-
-        assertThat(result, is(true));
     }
 
     private IErroneousVariableSymbol createVariableSymbol() {

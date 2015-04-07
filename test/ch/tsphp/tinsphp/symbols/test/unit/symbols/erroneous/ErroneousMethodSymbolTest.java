@@ -8,8 +8,6 @@ package ch.tsphp.tinsphp.symbols.test.unit.symbols.erroneous;
 
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
-import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
-import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbolWithRef;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousMethodSymbol;
@@ -140,46 +138,6 @@ public class ErroneousMethodSymbolTest
         boolean result = methodSymbol.isPrivate();
 
         assertThat(result, is(false));
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void getTypeVariables_Standard_ThrowsUnsupportedOperationException() {
-        //no arrange necessary
-
-        IErroneousMethodSymbol methodSymbol = createMethodSymbol();
-        methodSymbol.getTypeVariables();
-
-        //assert in annotation
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void getTypeVariablesWithRef_Standard_ThrowsUnsupportedOperationException() {
-        //no arrange necessary
-
-        IErroneousMethodSymbol methodSymbol = createMethodSymbol();
-        methodSymbol.getTypeVariablesWithRef();
-
-        //assert in annotation
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void addTypeVariable_Standard_ThrowsUnsupportedOperationException() {
-        //no arrange necessary
-
-        IErroneousMethodSymbol methodSymbol = createMethodSymbol();
-        methodSymbol.addTypeVariable(mock(ITypeVariableSymbol.class));
-
-        //assert in annotation
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void addTypeVariableWhichNeedToBeSealed_Standard_ThrowsUnsupportedOperationException() {
-        //no arrange necessary
-
-        IErroneousMethodSymbol methodSymbol = createMethodSymbol();
-        methodSymbol.addTypeVariableWithRef(mock(ITypeVariableSymbolWithRef.class));
-
-        //assert in annotation
     }
 
     private IErroneousMethodSymbol createMethodSymbol() {

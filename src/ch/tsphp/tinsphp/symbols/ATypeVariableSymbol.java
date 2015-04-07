@@ -8,47 +8,18 @@ package ch.tsphp.tinsphp.symbols;
 
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.IUnionTypeSymbol;
-import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 
 public abstract class ATypeVariableSymbol extends ASymbol implements ITypeVariableSymbol
 {
-    //Warning! start code duplication - same as in VariableSymbol
-    private IConstraint constraint;
-    private boolean isByValue = true;
-    //Warning! end code duplication - same as in VariableSymbol
-
     protected ATypeVariableSymbol(ITSPHPAst theDefinitionAst, String theName) {
         super(theDefinitionAst, theName);
     }
-
 
     //Warning! start code duplication - same as in VariableSymbol
     @Override
     public IUnionTypeSymbol getType() {
         return (IUnionTypeSymbol) super.getType();
-    }
-
-    @Override
-    public void setConstraint(IConstraint theConstraint) {
-        constraint = theConstraint;
-    }
-
-    @Override
-    public IConstraint getConstraint() {
-        return constraint;
-    }
-    //Warning! end code duplication - same as in VariableSymbol
-
-    //Warning! start code duplication - same as in VariableSymbol
-    @Override
-    public void setIsByRef() {
-        isByValue = false;
-    }
-
-    @Override
-    public boolean isByValue() {
-        return isByValue;
     }
     //Warning! end code duplication - same as in VariableSymbol
 }

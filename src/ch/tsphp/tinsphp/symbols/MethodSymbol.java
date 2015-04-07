@@ -16,17 +16,13 @@ import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ISymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
+import ch.tsphp.tinsphp.common.inference.constraints.IIntersectionConstraint;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
-import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
-import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbolWithRef;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.TypeWithModifiersDto;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Deque;
 import java.util.List;
 
 public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
@@ -35,8 +31,8 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
     private final List<IVariableSymbol> parameters = new ArrayList<>();
     private final IModifierSet returnTypeModifiers;
     //Warning! start code duplication - same as in GlobalNamespaceScope
-    private final Deque<ITypeVariableSymbol> typeVariables = new ArrayDeque<>();
-    private final Collection<ITypeVariableSymbolWithRef> typeVariableSymbolWithRefs = new ArrayDeque<>();
+    private final List<IIntersectionConstraint> lowerBoundConstraints = new ArrayList<>();
+    private final List<IIntersectionConstraint> upperBoundConstraints = new ArrayList<>();
     //Warning! end code duplication - same as in GlobalNamespaceScope
 
     @SuppressWarnings("checkstyle:parameternumber")
@@ -133,23 +129,23 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
 
     //Warning! start code duplication - same as in GlobalNamespaceScope
     @Override
-    public Deque<ITypeVariableSymbol> getTypeVariables() {
-        return typeVariables;
+    public List<IIntersectionConstraint> getLowerBoundConstraints() {
+        return lowerBoundConstraints;
     }
 
     @Override
-    public Collection<ITypeVariableSymbolWithRef> getTypeVariablesWithRef() {
-        return typeVariableSymbolWithRefs;
+    public List<IIntersectionConstraint> getUpperBoundConstraints() {
+        return upperBoundConstraints;
     }
 
     @Override
-    public void addTypeVariable(ITypeVariableSymbol typeVariableSymbol) {
-        typeVariables.addLast(typeVariableSymbol);
+    public void addLowerBoundConstraint(IIntersectionConstraint constraint) {
+        lowerBoundConstraints.add(constraint);
     }
 
     @Override
-    public void addTypeVariableWithRef(ITypeVariableSymbolWithRef typeVariableSymbol) {
-        typeVariableSymbolWithRefs.add(typeVariableSymbol);
+    public void addUpperBoundConstraint(IIntersectionConstraint constraint) {
+        upperBoundConstraints.add(constraint);
     }
     //Warning! end code duplication - same as in GlobalNamespaceScope
 }

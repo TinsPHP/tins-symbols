@@ -13,7 +13,6 @@ import ch.tsphp.common.symbols.IForEvalReadyListener;
 import ch.tsphp.common.symbols.ISymbol;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.IUnionTypeSymbol;
-import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbolWithRef;
 import ch.tsphp.tinsphp.common.symbols.TypeWithModifiersDto;
@@ -76,11 +75,6 @@ public class ErroneousLazySymbol extends AErroneousScopedSymbol implements IErro
         return true;
     }
 
-//    @Override
-//    public boolean isFinal() {
-//        return false;
-//    }
-
     @Override
     public Set<ITypeSymbol> getParentTypeSymbols() {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
@@ -95,7 +89,6 @@ public class ErroneousLazySymbol extends AErroneousScopedSymbol implements IErro
     public ITypeSymbol evalSelf() {
         return this;
     }
-
 
     @Override
     public void setOriginal(ITypeVariableSymbolWithRef variableDeclaration) {
@@ -118,28 +111,8 @@ public class ErroneousLazySymbol extends AErroneousScopedSymbol implements IErro
     }
 
     @Override
-    public void setConstraint(IConstraint constraint) {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public IConstraint getConstraint() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
     public IUnionTypeSymbol getType() {
         return (IUnionTypeSymbol) super.getType();
-    }
-
-    @Override
-    public void setIsByRef() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public boolean isByValue() {
-        return true;
     }
 
     @Override

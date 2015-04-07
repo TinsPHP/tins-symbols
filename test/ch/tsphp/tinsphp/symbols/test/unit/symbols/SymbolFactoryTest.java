@@ -13,12 +13,12 @@ import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadResolver;
+import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IAliasSymbol;
 import ch.tsphp.tinsphp.common.symbols.IAliasTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IArrayTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IClassTypeSymbol;
-import ch.tsphp.tinsphp.common.symbols.IFunctionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IModifierHelper;
 import ch.tsphp.tinsphp.common.symbols.INullTypeSymbol;
@@ -26,7 +26,6 @@ import ch.tsphp.tinsphp.common.symbols.IOverloadSymbol;
 import ch.tsphp.tinsphp.common.symbols.IPseudoTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IScalarTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
-import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousLazySymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
@@ -40,7 +39,6 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.hasItems;
@@ -325,21 +323,11 @@ public class SymbolFactoryTest
     }
 
     @Test
-    public void createExpressionTypeVariableSymbol_Standard_DefinitionAstIsPassedAst() {
-        ITSPHPAst ast = mock(ITSPHPAst.class);
-
-        ISymbolFactory symbolFactory = createSymbolFactory();
-        ITypeVariableSymbol result = symbolFactory.createExpressionTypeVariableSymbol(ast);
-
-        assertThat(result.getDefinitionAst(), is(ast));
-    }
-
-    @Test
     public void createMinimalTypeVariableSymbol_Standard_NameIsPassedName() {
         String name = "foo";
 
         ISymbolFactory symbolFactory = createSymbolFactory();
-        ITypeVariableSymbol result = symbolFactory.createMinimalTypeVariableSymbol(name);
+        IVariable result = symbolFactory.createMinimalTypeVariableSymbol(name);
 
         assertThat(result.getName(), is(name));
     }
@@ -373,39 +361,6 @@ public class SymbolFactoryTest
         IOverloadSymbol result = symbolFactory.createOverloadSymbol(name);
 
         assertThat(result.getName(), is(name));
-    }
-
-    @Test
-    public void createConstantFunctionTypeSymbol_Standard_NameIsPassedName() {
-        String name = "+";
-
-        ISymbolFactory symbolFactory = createSymbolFactory();
-        IFunctionTypeSymbol result = symbolFactory.createConstantFunctionTypeSymbol(name, null,
-                mock(ITypeSymbol.class));
-
-        assertThat(result.getName(), is(name));
-    }
-
-    @Test
-    public void createConstantFunctionTypeSymbol_Standard_ParametersConstraintSameSizeAsPassedParameters() {
-        List<String> parameters = Arrays.asList("$x", "$y");
-
-        ISymbolFactory symbolFactory = createSymbolFactory();
-        IFunctionTypeSymbol result = symbolFactory.createConstantFunctionTypeSymbol(
-                "+", parameters, mock(ITypeSymbol.class));
-
-        assertThat(result.getInputConstraints().size(), is(parameters.size()));
-    }
-
-    @Test
-    public void createConstantFunctionTypeSymbol_Standard_ReturnTypeIsPassedReturnType() {
-        ITypeSymbol returnTypeSymbol = mock(ITypeSymbol.class);
-
-        ISymbolFactory symbolFactory = createSymbolFactory();
-        IFunctionTypeSymbol result = symbolFactory.createConstantFunctionTypeSymbol(
-                "+", null, returnTypeSymbol);
-
-        assertThat(result.apply(null), is(returnTypeSymbol));
     }
 
     @Test

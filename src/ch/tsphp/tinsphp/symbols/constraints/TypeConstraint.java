@@ -18,8 +18,14 @@ public class TypeConstraint implements IConstraint
         typeSymbol = theTypeSymbol;
     }
 
+
     public ITypeSymbol getTypeSymbol() {
         return typeSymbol;
+    }
+
+    @Override
+    public String getId() {
+        return typeSymbol.getAbsoluteName();
     }
 
 }

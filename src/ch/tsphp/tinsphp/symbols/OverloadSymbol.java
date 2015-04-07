@@ -6,6 +6,7 @@
 
 package ch.tsphp.tinsphp.symbols;
 
+
 import ch.tsphp.tinsphp.common.symbols.IFunctionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IOverloadSymbol;
 

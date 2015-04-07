@@ -15,8 +15,18 @@ import java.util.Set;
 public class OverloadResolver implements IOverloadResolver
 {
     @Override
+    public boolean isFirstSubTypeOfSecond(ITypeSymbol potentialSubType, ITypeSymbol typeSymbol) {
+        return getPromotionLevelFromTo(potentialSubType, typeSymbol) > 0;
+    }
+
+    @Override
     public boolean isFirstSameOrSubTypeOfSecond(ITypeSymbol potentialSubType, ITypeSymbol typeSymbol) {
         return getPromotionLevelFromTo(potentialSubType, typeSymbol) != -1;
+    }
+
+    @Override
+    public boolean isFirstParentTypeOfSecond(ITypeSymbol potentialParentType, ITypeSymbol typeSymbol) {
+        return getPromotionLevelFromTo(typeSymbol, potentialParentType) > 0;
     }
 
     @Override
