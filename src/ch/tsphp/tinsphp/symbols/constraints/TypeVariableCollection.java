@@ -44,14 +44,28 @@ public class TypeVariableCollection implements ITypeVariableCollection
 
     @Override
     public void addLowerBound(String typeVariable, IConstraint newLowerBoundConstraint) throws LowerBoundException {
-        if (isNotAlreadyLowerBoundAndHasUpperBounds(typeVariable, newLowerBoundConstraint)) {
-            if (newLowerBoundConstraint instanceof TypeConstraint) {
-                checkUpperBounds(typeVariable, newLowerBoundConstraint);
-            } else if (newLowerBoundConstraint instanceof TypeVariableConstraint) {
-                addConstraintsToRef(typeVariable, (TypeVariableConstraint) newLowerBoundConstraint);
+        if (isNotAlreadyLowerBound(typeVariable, newLowerBoundConstraint)) {
+            if (upperBounds.containsKey(typeVariable)) {
+                if (newLowerBoundConstraint instanceof TypeConstraint) {
+                    checkUpperBounds(typeVariable, newLowerBoundConstraint);
+                } else if (newLowerBoundConstraint instanceof TypeVariableConstraint) {
+                    TypeVariableConstraint typeVariableConstraint = (TypeVariableConstraint) newLowerBoundConstraint;
+                    if (isNotSelfReference(typeVariable, typeVariableConstraint)) {
+                        addConstraintsToRef(typeVariable, typeVariableConstraint);
+                    }
+                }
             }
+            addToMapMap(lowerBounds, typeVariable, newLowerBoundConstraint);
         }
-        addToMapMap(lowerBounds, typeVariable, newLowerBoundConstraint);
+    }
+
+    private boolean isNotAlreadyLowerBound(String typeVariable, IConstraint newLowerBoundConstraint) {
+        return (!lowerBounds.containsKey(typeVariable)
+                || !lowerBounds.get(typeVariable).containsKey(newLowerBoundConstraint.getId()));
+    }
+
+    private boolean isNotSelfReference(String typeVariable, TypeVariableConstraint typeVariableConstraint) {
+        return !typeVariable.equals(typeVariableConstraint.getTypeVariable());
     }
 
     private void addConstraintsToRef(String typeVariable, TypeVariableConstraint newLowerBoundConstraint) {
@@ -59,8 +73,10 @@ public class TypeVariableCollection implements ITypeVariableCollection
         // not narrow the refTypeVariable. Yet, if it is not within the bounds then it is narrowed and
         // ultimately a BoundException is thrown when narrowing is not possible.
         String refTypeVariable = newLowerBoundConstraint.getTypeVariable();
-        for (IConstraint upperBoundConstraint : upperBounds.get(typeVariable).values()) {
-            addUpperBound(refTypeVariable, upperBoundConstraint);
+        if (upperBounds.containsKey(typeVariable)) {
+            for (IConstraint upperBoundConstraint : upperBounds.get(typeVariable).values()) {
+                addUpperBound(refTypeVariable, upperBoundConstraint);
+            }
         }
         if (lowerBounds.containsKey(typeVariable)) {
             for (IConstraint lowerBoundConstraint : lowerBounds.get(typeVariable).values()) {
@@ -81,13 +97,6 @@ public class TypeVariableCollection implements ITypeVariableCollection
         }
     }
 
-    private boolean isNotAlreadyLowerBoundAndHasUpperBounds(String typeVariable,
-            IConstraint newLowerBoundConstraint) {
-        return (!lowerBounds.containsKey(typeVariable)
-                || !lowerBounds.get(typeVariable).containsKey(newLowerBoundConstraint.getId()))
-                && upperBounds.containsKey(typeVariable);
-    }
-
     private void addToMapMap(Map<String, Map<String, IConstraint>> map, String typeVariable, IConstraint constraint) {
         Map<String, IConstraint> mapInMap;
         if (map.containsKey(typeVariable)) {
@@ -101,10 +110,17 @@ public class TypeVariableCollection implements ITypeVariableCollection
 
     @Override
     public void addUpperBound(String typeVariable, IConstraint newUpperBoundConstraint) throws UpperBoundException {
-        if (isNotAlreadyUpperBoundAndHasLowerBounds(typeVariable, newUpperBoundConstraint)) {
-            checkLowerBounds(typeVariable, newUpperBoundConstraint);
+        if (isNotAlreadyUpperBound(typeVariable, newUpperBoundConstraint)) {
+            if (lowerBounds.containsKey(typeVariable)) {
+                checkLowerBounds(typeVariable, newUpperBoundConstraint);
+            }
+            addToMapMap(upperBounds, typeVariable, newUpperBoundConstraint);
         }
-        addToMapMap(upperBounds, typeVariable, newUpperBoundConstraint);
+    }
+
+    private boolean isNotAlreadyUpperBound(String typeVariable, IConstraint newUpperBoundConstraint) {
+        return (!upperBounds.containsKey(typeVariable)
+                || !upperBounds.get(typeVariable).containsKey(newUpperBoundConstraint.getId()));
     }
 
     private void checkLowerBounds(String typeVariable, IConstraint newUpperBoundConstraint) {
@@ -119,19 +135,21 @@ public class TypeVariableCollection implements ITypeVariableCollection
                     throw new UpperBoundException(newUpperType, lowerTypeSymbol);
                 }
             } else if (lowerBoundConstraint instanceof TypeVariableConstraint) {
-                //looks like the current type variable has other type variable(s) as its lower bound.
-                //Hence we need to make sure that the other type variables are updated as well
-                String refTypeVariable = ((TypeVariableConstraint) lowerBoundConstraint).getTypeVariable();
-                addUpperBound(refTypeVariable, newUpperBoundConstraint);
+                TypeVariableConstraint typeVariableConstraint = (TypeVariableConstraint) lowerBoundConstraint;
+                if (isNotSelfReference(typeVariable, typeVariableConstraint)) {
+                    //looks like the current type variable has another type variable as its lower bound.
+                    //Hence we need to make sure that the other type variable is updated as well.
+                    String refTypeVariable = typeVariableConstraint.getTypeVariable();
+                    addUpperBound(refTypeVariable, newUpperBoundConstraint);
+                } else {
+                    // we need to check whether the new upper bound clashes with the current upper bounds,
+                    // since they are used as lower bounds as well. Following an example: T x T -> T \ T < num, T > T
+                    // we are not allowed to add bool to the upper bound since it clashes with num,
+                    // bool is not the same or a subtype of num respectively.
+                    checkUpperBounds(typeVariable, newUpperBoundTypeConstraint);
+                }
             }
         }
-    }
-
-    private boolean isNotAlreadyUpperBoundAndHasLowerBounds(
-            String typeVariable, IConstraint newUpperBoundConstraint) {
-        return (!upperBounds.containsKey(typeVariable)
-                || !upperBounds.get(typeVariable).containsKey(newUpperBoundConstraint.getId()))
-                && lowerBounds.containsKey(typeVariable);
     }
 
     @Override

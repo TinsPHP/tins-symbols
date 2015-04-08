@@ -9,6 +9,7 @@ package ch.tsphp.tinsphp.symbols.test.unit.constraints;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadResolver;
 import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableCollection;
+import ch.tsphp.tinsphp.symbols.constraints.TypeConstraint;
 import ch.tsphp.tinsphp.symbols.constraints.TypeVariableCollection;
 import ch.tsphp.tinsphp.symbols.test.unit.testutils.ATypeTest;
 import org.junit.Test;
@@ -31,14 +32,17 @@ public class TypeVariableCollectionTest extends ATypeTest
     @Test
     public void copyConstructor_Standard_TransfersLowerAndUpperBounds() {
         String typeVariable = "T";
-        IConstraint lowerConstraint = mock(IConstraint.class);
-        IConstraint upperConstraint = mock(IConstraint.class);
+        IConstraint lowerConstraint = new TypeConstraint(intType);
+        IConstraint upperConstraint = new TypeConstraint(intType);
 
-        TypeVariableCollection collection1 = new TypeVariableCollection(mock(IOverloadResolver.class));
+        IOverloadResolver overloadResolver = mock(IOverloadResolver.class);
+        when(overloadResolver.isFirstSameOrParentTypeOfSecond(intType, intType)).thenReturn(true);
+
+        TypeVariableCollection collection1 = new TypeVariableCollection(overloadResolver);
         collection1.addLowerBound(typeVariable, lowerConstraint);
         collection1.addUpperBound(typeVariable, upperConstraint);
 
-        ITypeVariableCollection collection = createTypeVariableCollection(mock(IOverloadResolver.class), collection1);
+        ITypeVariableCollection collection = createTypeVariableCollection(overloadResolver, collection1);
         Collection<IConstraint> lowerResult = collection.getLowerBounds(typeVariable);
         Collection<IConstraint> upperResult = collection.getUpperBounds(typeVariable);
 
@@ -226,6 +230,34 @@ public class TypeVariableCollectionTest extends ATypeTest
         Set<String> result = collection.getUpperBoundConstraintIds(typeVariable);
 
         assertThat(result, hasItem("id"));
+        assertThat(result, hasSize(1));
+    }
+
+    @Test
+    public void addLowerBound_DoesAlreadyExists_NotAdded() {
+        String typeVariable = "T";
+        IConstraint constraint = mock(IConstraint.class);
+
+        ITypeVariableCollection collection = createTypeVariableCollection();
+        collection.addLowerBound(typeVariable, constraint);
+        collection.addLowerBound(typeVariable, constraint);
+        Collection<IConstraint> result = collection.getLowerBounds(typeVariable);
+
+        assertThat(result, hasItem(constraint));
+        assertThat(result, hasSize(1));
+    }
+
+    @Test
+    public void addUpperBound_DoesAlreadyExists_NotAdded() {
+        String typeVariable = "T";
+        IConstraint constraint = mock(IConstraint.class);
+
+        ITypeVariableCollection collection = createTypeVariableCollection();
+        collection.addUpperBound(typeVariable, constraint);
+        collection.addUpperBound(typeVariable, constraint);
+        Collection<IConstraint> result = collection.getUpperBounds(typeVariable);
+
+        assertThat(result, hasItem(constraint));
         assertThat(result, hasSize(1));
     }
 

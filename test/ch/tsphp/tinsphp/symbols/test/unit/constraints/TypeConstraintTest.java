@@ -38,6 +38,17 @@ public class TypeConstraintTest
         assertThat(result, is(typeSymbol));
     }
 
+    @Test
+    public void toString_Standard_ReturnsAbsoluteNameOfTypeSymbol() {
+        ITypeSymbol typeSymbol = mock(ITypeSymbol.class);
+        when(typeSymbol.getAbsoluteName()).thenReturn("dummy");
+
+        TypeConstraint constraint = createTypeConstraint(typeSymbol);
+        String result = constraint.toString();
+
+        assertThat(result, is("dummy"));
+    }
+
     protected TypeConstraint createTypeConstraint(ITypeSymbol typeSymbol) {
         return new TypeConstraint(typeSymbol);
     }

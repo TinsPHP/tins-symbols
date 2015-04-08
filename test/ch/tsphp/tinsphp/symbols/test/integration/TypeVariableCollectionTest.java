@@ -144,6 +144,20 @@ public class TypeVariableCollectionTest extends ATypeTest
     }
 
     @Test
+    public void addLowerBound_SelfRef_AddsLowerBound() {
+        String typeVariable = "T";
+        IConstraint constraint1 = new TypeConstraint(numType);
+        TypeVariableConstraint selfRef = new TypeVariableConstraint(typeVariable);
+
+        ITypeVariableCollection collection = createTypeVariableCollection();
+        collection.addUpperBound(typeVariable, constraint1);
+        collection.addLowerBound(typeVariable, selfRef);
+
+        Collection<IConstraint> resultLhsLower = collection.getLowerBounds(typeVariable);
+        assertThat(resultLhsLower, hasItem(selfRef));
+    }
+
+    @Test
     public void addUpperBound_LowerBoundIsSubType_AddsUpperBound() {
         String typeVariable = "T";
         IConstraint constraint1 = new TypeConstraint(intType);
@@ -196,6 +210,55 @@ public class TypeVariableCollectionTest extends ATypeTest
         assertThat(resultRhsUpper, hasSize(3));
     }
 
+    @Test
+    public void addUpperBound_hasSelfRefLowerAndIsSameAsCurrentUpper_AddsUpperBound() {
+        String typeVariable = "T";
+        IConstraint constraint1 = new TypeConstraint(numType);
+        IConstraint constraint2 = new TypeConstraint(numType);
+        TypeVariableConstraint selfRef = new TypeVariableConstraint(typeVariable);
+
+        ITypeVariableCollection collection = createTypeVariableCollection();
+        collection.addUpperBound(typeVariable, constraint1);
+        collection.addLowerBound(typeVariable, selfRef);
+        collection.addUpperBound(typeVariable, constraint2);
+        Collection<IConstraint> resultUpper = collection.getUpperBounds(typeVariable);
+
+        assertThat(resultUpper, hasItem(constraint1));
+        assertThat(resultUpper, hasSize(1));
+    }
+
+    @Test
+    public void addUpperBound_hasSelfRefLowerAndIsSubtypeOfCurrentUpper_AddsUpperBound() {
+        String typeVariable = "T";
+        IConstraint constraint1 = new TypeConstraint(numType);
+        IConstraint constraint2 = new TypeConstraint(intType);
+        TypeVariableConstraint selfRef = new TypeVariableConstraint(typeVariable);
+
+        ITypeVariableCollection collection = createTypeVariableCollection();
+        collection.addUpperBound(typeVariable, constraint1);
+        collection.addLowerBound(typeVariable, selfRef);
+        collection.addUpperBound(typeVariable, constraint2);
+        Collection<IConstraint> resultUpper = collection.getUpperBounds(typeVariable);
+
+        assertThat(resultUpper, hasItem(constraint1));
+        assertThat(resultUpper, hasItem(constraint2));
+        assertThat(resultUpper, hasSize(2));
+    }
+
+    @Test(expected = BoundException.class)
+    public void addUpperBound_hasSelfRefLowerAndIsParentOfCurrentUpper_AddsUpperBound() {
+        String typeVariable = "T";
+        IConstraint constraint1 = new TypeConstraint(intType);
+        IConstraint constraint2 = new TypeConstraint(numType);
+        TypeVariableConstraint selfRef = new TypeVariableConstraint(typeVariable);
+
+        ITypeVariableCollection collection = createTypeVariableCollection();
+        collection.addUpperBound(typeVariable, constraint1);
+        collection.addLowerBound(typeVariable, selfRef);
+        collection.addUpperBound(typeVariable, constraint2);
+
+        //assert in annotation
+    }
 
     private ITypeVariableCollection createTypeVariableCollection() {
         return createTypeVariableCollection(new OverloadResolver());
