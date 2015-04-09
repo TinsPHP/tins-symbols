@@ -9,12 +9,15 @@ package ch.tsphp.tinsphp.symbols.test.unit.constraints;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadResolver;
 import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableCollection;
+import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableConstraint;
 import ch.tsphp.tinsphp.symbols.constraints.TypeConstraint;
 import ch.tsphp.tinsphp.symbols.constraints.TypeVariableCollection;
 import ch.tsphp.tinsphp.symbols.test.unit.testutils.ATypeTest;
 import org.junit.Test;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -42,7 +45,8 @@ public class TypeVariableCollectionTest extends ATypeTest
         collection1.addLowerBound(typeVariable, lowerConstraint);
         collection1.addUpperBound(typeVariable, upperConstraint);
 
-        ITypeVariableCollection collection = createTypeVariableCollection(overloadResolver, collection1);
+        ITypeVariableCollection collection = createTypeVariableCollection(
+                overloadResolver, collection1, new HashMap<String, TypeVariableConstraint>());
         Collection<IConstraint> lowerResult = collection.getLowerBounds(typeVariable);
         Collection<IConstraint> upperResult = collection.getUpperBounds(typeVariable);
 
@@ -63,7 +67,7 @@ public class TypeVariableCollectionTest extends ATypeTest
     @Test
     public void getUpperBounds_OneDefined_ReturnsSetWithId() {
         String typeVariable = "T";
-        IConstraint constraint = mock(IConstraint.class);
+        IConstraint constraint = new TypeConstraint(intType);
         when(constraint.getId()).thenReturn("id");
 
         ITypeVariableCollection collection = createTypeVariableCollection();
@@ -87,7 +91,7 @@ public class TypeVariableCollectionTest extends ATypeTest
     @Test
     public void getLowerBounds_OneDefined_ReturnsSetWithId() {
         String typeVariable = "T";
-        IConstraint constraint = mock(IConstraint.class);
+        IConstraint constraint = new TypeConstraint(intType);
         when(constraint.getId()).thenReturn("id");
 
         ITypeVariableCollection collection = createTypeVariableCollection();
@@ -113,7 +117,7 @@ public class TypeVariableCollectionTest extends ATypeTest
         String typeVariable = "T";
 
         ITypeVariableCollection collection = createTypeVariableCollection();
-        collection.addLowerBound(typeVariable, mock(IConstraint.class));
+        collection.addLowerBound(typeVariable, new TypeConstraint(intType));
         boolean result = collection.hasLowerBounds(typeVariable);
 
         assertThat(result, is(true));
@@ -135,7 +139,7 @@ public class TypeVariableCollectionTest extends ATypeTest
         String typeVariable = "T";
 
         ITypeVariableCollection collection = createTypeVariableCollection();
-        collection.addUpperBound(typeVariable, mock(IConstraint.class));
+        collection.addUpperBound(typeVariable, new TypeConstraint(intType));
         boolean result = collection.hasUpperBounds(typeVariable);
 
         assertThat(result, is(true));
@@ -156,7 +160,7 @@ public class TypeVariableCollectionTest extends ATypeTest
         String typeVariable = "T";
 
         ITypeVariableCollection collection = createTypeVariableCollection();
-        collection.addLowerBound(typeVariable, mock(IConstraint.class));
+        collection.addLowerBound(typeVariable, new TypeConstraint(intType));
         Set<String> result = collection.getTypeVariablesWithLowerBounds();
 
         assertThat(result, hasItem(typeVariable));
@@ -178,7 +182,7 @@ public class TypeVariableCollectionTest extends ATypeTest
         String typeVariable = "T";
 
         ITypeVariableCollection collection = createTypeVariableCollection();
-        collection.addUpperBound(typeVariable, mock(IConstraint.class));
+        collection.addUpperBound(typeVariable, new TypeConstraint(intType));
         Set<String> result = collection.getTypeVariablesWithUpperBounds();
 
         assertThat(result, hasItem(typeVariable));
@@ -198,7 +202,7 @@ public class TypeVariableCollectionTest extends ATypeTest
     @Test
     public void getLowerBoundConstraintIds_OneDefined_ReturnsSetWithId() {
         String typeVariable = "T";
-        IConstraint constraint = mock(IConstraint.class);
+        IConstraint constraint = new TypeConstraint(intType);
         when(constraint.getId()).thenReturn("id");
 
         ITypeVariableCollection collection = createTypeVariableCollection();
@@ -222,7 +226,7 @@ public class TypeVariableCollectionTest extends ATypeTest
     @Test
     public void getUpperBoundConstraintIds_OneDefined_ReturnsSetWithId() {
         String typeVariable = "T";
-        IConstraint constraint = mock(IConstraint.class);
+        IConstraint constraint = new TypeConstraint(intType);
         when(constraint.getId()).thenReturn("id");
 
         ITypeVariableCollection collection = createTypeVariableCollection();
@@ -236,7 +240,7 @@ public class TypeVariableCollectionTest extends ATypeTest
     @Test
     public void addLowerBound_DoesAlreadyExists_NotAdded() {
         String typeVariable = "T";
-        IConstraint constraint = mock(IConstraint.class);
+        IConstraint constraint = new TypeConstraint(intType);
 
         ITypeVariableCollection collection = createTypeVariableCollection();
         collection.addLowerBound(typeVariable, constraint);
@@ -247,10 +251,21 @@ public class TypeVariableCollectionTest extends ATypeTest
         assertThat(result, hasSize(1));
     }
 
+    @Test(expected = UnsupportedOperationException.class)
+    public void addLowerBound_notTypeNorTypeVariableConstraint_ThrowsClassCastException() {
+        String typeVariable = "T";
+        IConstraint constraint = mock(IConstraint.class);
+
+        ITypeVariableCollection collection = createTypeVariableCollection();
+        collection.addLowerBound(typeVariable, constraint);
+
+        //assert in annotation
+    }
+
     @Test
     public void addUpperBound_DoesAlreadyExists_NotAdded() {
         String typeVariable = "T";
-        IConstraint constraint = mock(IConstraint.class);
+        IConstraint constraint = new TypeConstraint(intType);
 
         ITypeVariableCollection collection = createTypeVariableCollection();
         collection.addUpperBound(typeVariable, constraint);
@@ -259,6 +274,17 @@ public class TypeVariableCollectionTest extends ATypeTest
 
         assertThat(result, hasItem(constraint));
         assertThat(result, hasSize(1));
+    }
+
+    @Test(expected = ClassCastException.class)
+    public void addUpperBound_notTypeConstraint_ThrowsClassCastException() {
+        String typeVariable = "T";
+        IConstraint constraint = mock(IConstraint.class);
+
+        ITypeVariableCollection collection = createTypeVariableCollection();
+        collection.addUpperBound(typeVariable, constraint);
+
+        //assert in annotation
     }
 
     private ITypeVariableCollection createTypeVariableCollection() {
@@ -270,7 +296,9 @@ public class TypeVariableCollectionTest extends ATypeTest
     }
 
     protected ITypeVariableCollection createTypeVariableCollection(
-            IOverloadResolver overloadResolver, TypeVariableCollection typeVariableCollection) {
-        return new TypeVariableCollection(overloadResolver, typeVariableCollection);
+            IOverloadResolver overloadResolver,
+            TypeVariableCollection typeVariableCollection,
+            Map<String, TypeVariableConstraint> mapping) {
+        return new TypeVariableCollection(overloadResolver, typeVariableCollection, mapping);
     }
 }

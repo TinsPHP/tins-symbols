@@ -13,7 +13,6 @@
 package ch.tsphp.tinsphp.symbols;
 
 import ch.tsphp.common.ITSPHPAst;
-import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbolWithRef;
@@ -58,15 +57,6 @@ public class VariableSymbol extends ASymbolWithAccessModifier implements IVariab
     public TypeWithModifiersDto toTypeWithModifiersDto() {
         return new TypeWithModifiersDto(getType(), modifiers);
     }
-
-
-    //Warning! start code duplication - same as in ATypeVariableSymbol
-    @Override
-    public IUnionTypeSymbol getType() {
-        return (IUnionTypeSymbol) super.getType();
-    }
-    //Warning! end code duplication - same as in ATypeVariableSymbol
-
 
     //Warning! start code duplication - same as in MinimalTypeVariableSymbolWithRef
     @Override

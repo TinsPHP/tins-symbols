@@ -6,15 +6,15 @@
 
 package ch.tsphp.tinsphp.symbols.test.integration;
 
-import ch.tsphp.tinsphp.common.inference.constraints.BoundException;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadResolver;
 import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableCollection;
-import ch.tsphp.tinsphp.common.inference.constraints.LowerBoundException;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableConstraint;
-import ch.tsphp.tinsphp.common.inference.constraints.UpperBoundException;
+import ch.tsphp.tinsphp.symbols.constraints.BoundException;
+import ch.tsphp.tinsphp.symbols.constraints.LowerBoundException;
 import ch.tsphp.tinsphp.symbols.constraints.TypeConstraint;
 import ch.tsphp.tinsphp.symbols.constraints.TypeVariableCollection;
+import ch.tsphp.tinsphp.symbols.constraints.UpperBoundException;
 import ch.tsphp.tinsphp.symbols.test.unit.testutils.ATypeTest;
 import ch.tsphp.tinsphp.symbols.utils.OverloadResolver;
 import org.junit.Test;
@@ -24,6 +24,7 @@ import java.util.Collection;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.IsCollectionContaining.hasItem;
+import static org.hamcrest.core.IsCollectionContaining.hasItems;
 
 public class TypeVariableCollectionTest extends ATypeTest
 {
@@ -258,6 +259,38 @@ public class TypeVariableCollectionTest extends ATypeTest
         collection.addUpperBound(typeVariable, constraint2);
 
         //assert in annotation
+    }
+
+    @Test
+    public void addUpperBound_RefWithCycle_AddUpperBoundAndNoEndlessLoop() {
+        //Corresponds to $a = 1; $b = $a; $b = 1.2; $a = $b;
+        String e1 = "e1";
+        IConstraint constraintE1 = new TypeConstraint(intType);
+        String e2 = "e2";
+        IConstraint constraintE2 = new TypeConstraint(floatType);
+
+        String $a = "Ta";
+        String $b = "Tb";
+        TypeVariableConstraint assign1 = new TypeVariableConstraint(e1);
+        assign1.setIsConstant();
+        IConstraint assign2 = new TypeVariableConstraint($a);
+        TypeVariableConstraint assign3 = new TypeVariableConstraint(e2);
+        assign3.setIsConstant();
+        IConstraint assign4 = new TypeVariableConstraint($b);
+
+        //act
+        ITypeVariableCollection collection = createTypeVariableCollection();
+        collection.addLowerBound(e1, constraintE1);
+        collection.addLowerBound(e2, constraintE2);
+        collection.addLowerBound($a, assign1);
+        collection.addLowerBound($b, assign2);
+        collection.addLowerBound($b, assign3);
+        collection.addLowerBound($a, assign4);
+
+        Collection<IConstraint> resultLowerA = collection.getLowerBounds($a);
+        assertThat(resultLowerA, hasItems(constraintE1, assign4));
+        Collection<IConstraint> resultLowerB = collection.getLowerBounds($b);
+        assertThat(resultLowerB, hasItems(constraintE1, constraintE2));
     }
 
     private ITypeVariableCollection createTypeVariableCollection() {
