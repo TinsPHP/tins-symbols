@@ -55,21 +55,17 @@ public class TypeVariableCollection implements ITypeVariableCollection
 
     @Override
     public void addLowerBound(String typeVariable, IConstraint newLowerBoundConstraint) {
-        addLowerBound(typeVariable, typeVariable, newLowerBoundConstraint);
-    }
-
-    private void addLowerBound(String originalTypeVariable, String typeVariable, IConstraint newLowerBoundConstraint) {
         if (isNotAlreadyLowerBound(typeVariable, newLowerBoundConstraint)) {
             if (newLowerBoundConstraint instanceof TypeConstraint) {
                 checkUpperBounds(typeVariable, newLowerBoundConstraint);
                 addToMapMap(lowerBounds, typeVariable, newLowerBoundConstraint);
             } else if (newLowerBoundConstraint instanceof TypeVariableConstraint) {
                 TypeVariableConstraint typeVariableConstraint = (TypeVariableConstraint) newLowerBoundConstraint;
-                if (typeVariableConstraint.hasNotFixedType()) {
-                    checkReferenceTypeVariable(originalTypeVariable, typeVariable, typeVariableConstraint);
-                    addToMapMap(lowerBounds, typeVariable, newLowerBoundConstraint);
-                } else {
+                if (typeVariableConstraint.hasFixedType()) {
                     transferLowerBoundOfConstant(typeVariable, typeVariableConstraint);
+                } else {
+                    checkReferenceTypeVariable(typeVariable, typeVariableConstraint);
+                    addToMapMap(lowerBounds, typeVariable, newLowerBoundConstraint);
                 }
             } else {
                 throw new UnsupportedOperationException(newLowerBoundConstraint.getClass().getName()
@@ -84,15 +80,17 @@ public class TypeVariableCollection implements ITypeVariableCollection
         }
     }
 
-    private void checkReferenceTypeVariable(
-            String originalTypeVariable, String typeVariable, TypeVariableConstraint typeVariableConstraint) {
+    private void checkReferenceTypeVariable(String typeVariable, TypeVariableConstraint typeVariableConstraint) {
         String refTypeVariable = typeVariableConstraint.getTypeVariable();
         if (isNotSelfReference(typeVariable, refTypeVariable)) {
-            addConstraintsToRef(originalTypeVariable, typeVariable, refTypeVariable);
+            addConstraintsToRef(typeVariable, refTypeVariable);
         } else if (hasUpperBounds(typeVariable) && upperBounds.get(typeVariable).size() > 1) {
             // self reference is not possible if there is more than one upper - otherwise we have incompatible
             // intersection types which cannot be used as lower bound in a signature
             throw new LowerBoundTypeVariableException(typeVariable, upperBounds.get(typeVariable).values());
+            //TODO rstoll TINS-369 intersection type
+            // I do not think this is entirely correct, I can have multiple upper bounds but the new added lower type
+            // needs to fulfil all upper bounds.
         }
     }
 
@@ -119,7 +117,7 @@ public class TypeVariableCollection implements ITypeVariableCollection
         return !typeVariable.equals(refTypeVariable);
     }
 
-    private void addConstraintsToRef(String originalTypeVariable, String typeVariable, String refTypeVariable) {
+    private void addConstraintsToRef(String typeVariable, String refTypeVariable) {
         // if the refTypeVariable is within the bounds of the typeVariable, then the newly added constraints do
         // not narrow the refTypeVariable. Yet, if it is not within the bounds then it is narrowed and
         // ultimately a BoundException is thrown when narrowing is not possible.
@@ -130,7 +128,9 @@ public class TypeVariableCollection implements ITypeVariableCollection
         }
         if (hasLowerBounds(typeVariable)) {
             for (IConstraint lowerBoundConstraint : lowerBounds.get(typeVariable).values()) {
-                addLowerBound(originalTypeVariable, refTypeVariable, lowerBoundConstraint);
+                if (lowerBoundConstraint instanceof TypeConstraint) {
+                    addLowerBound(refTypeVariable, lowerBoundConstraint);
+                }
             }
         }
     }
@@ -178,7 +178,7 @@ public class TypeVariableCollection implements ITypeVariableCollection
                 if (isNotSelfReference(typeVariable, refTypeVariable)) {
                     //looks like the current type variable has another type variable as its lower bound.
                     //Hence we need to make sure that the other type variable is updated as well.
-                    if (typeVariableConstraint.hasNotFixedType()) {
+                    if (!typeVariableConstraint.hasFixedType()) {
                         addUpperBound(refTypeVariable, newUpperBoundConstraint);
                     }
                 } else {

@@ -33,4 +33,9 @@ public class ExpressionTypeVariableSymbol extends ATypeVariableSymbol implements
     public String getTypeVariable() {
         return null;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + (hasFixedType ? "#" : "");
+    }
 }

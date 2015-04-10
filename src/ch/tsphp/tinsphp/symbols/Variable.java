@@ -49,4 +49,9 @@ public class Variable implements IVariable
     public String getTypeVariable() {
         return typeVariable;
     }
+
+    @Override
+    public String toString() {
+        return typeVariable + (hasFixedType ? "#" : "");
+    }
 }
