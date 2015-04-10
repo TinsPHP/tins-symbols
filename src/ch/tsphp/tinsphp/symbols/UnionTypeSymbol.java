@@ -134,7 +134,7 @@ public class UnionTypeSymbol extends ALazyTypeSymbol implements IUnionTypeSymbol
                 sb.append(iterator.next());
             }
             while (iterator.hasNext()) {
-                sb.append(" V ").append(iterator.next());
+                sb.append(" | ").append(iterator.next());
             }
             if (typeSymbols.size() != 1) {
                 sb.insert(0, "{");
