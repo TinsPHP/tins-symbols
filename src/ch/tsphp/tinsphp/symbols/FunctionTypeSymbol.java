@@ -8,6 +8,7 @@ package ch.tsphp.tinsphp.symbols;
 
 
 import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableCollection;
+import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
 import ch.tsphp.tinsphp.common.symbols.IFunctionTypeSymbol;
 
 import java.util.List;
@@ -15,32 +16,32 @@ import java.util.List;
 public class FunctionTypeSymbol extends ASymbol implements IFunctionTypeSymbol
 {
     private ITypeVariableCollection typeVariableCollection;
-    private List<String> parameterTypeVariables;
-    private String returnTypeVariable;
+    private List<IVariable> parameters;
+    private IVariable returnVariable;
 
     public FunctionTypeSymbol(String theName,
             ITypeVariableCollection theTypeVariableCollection,
-            List<String> theParameterTypeVariables,
-            String theReturnTypeVariable) {
+            List<IVariable> theParameterVariables,
+            IVariable theReturnVariable) {
         super(null, theName);
         typeVariableCollection = theTypeVariableCollection;
-        parameterTypeVariables = theParameterTypeVariables;
-        returnTypeVariable = theReturnTypeVariable;
+        parameters = theParameterVariables;
+        returnVariable = theReturnVariable;
     }
 
     @Override
     public int getNumberOfNonOptionalParameters() {
-        return parameterTypeVariables.size();
+        return parameters.size();
     }
 
     @Override
-    public List<String> getParameterTypeVariables() {
-        return parameterTypeVariables;
+    public List<IVariable> getParameters() {
+        return parameters;
     }
 
     @Override
-    public String getReturnTypeVariable() {
-        return returnTypeVariable;
+    public IVariable getReturnVariable() {
+        return returnVariable;
     }
 
     @Override

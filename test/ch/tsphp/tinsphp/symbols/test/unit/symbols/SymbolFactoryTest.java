@@ -326,15 +326,6 @@ public class SymbolFactoryTest
         assertThat(result.getModifiers(), is(set));
     }
 
-    @Test
-    public void createMinimalTypeVariableSymbol_Standard_NameIsPassedName() {
-        String name = "foo";
-
-        ISymbolFactory symbolFactory = createSymbolFactory();
-        IVariable result = symbolFactory.createMinimalTypeVariableSymbol(name);
-
-        assertThat(result.getName(), is(name));
-    }
 
     @Test
     public void createUnionTypeSymbol_WithoutHashMap_StillReturnsAnEmptyMap() {
@@ -373,7 +364,7 @@ public class SymbolFactoryTest
 
         ISymbolFactory symbolFactory = createSymbolFactory();
         IFunctionTypeSymbol result = symbolFactory.createFunctionTypeSymbol(
-                name, mock(ITypeVariableCollection.class), new ArrayList<String>(), "Treturn");
+                name, mock(ITypeVariableCollection.class), new ArrayList<IVariable>(), mock(IVariable.class));
 
         assertThat(result.getName(), is(name));
     }
@@ -384,31 +375,31 @@ public class SymbolFactoryTest
 
         ISymbolFactory symbolFactory = createSymbolFactory();
         IFunctionTypeSymbol result = symbolFactory.createFunctionTypeSymbol(
-                "+", typeVariables, new ArrayList<String>(), "Treturn");
+                "+", typeVariables, new ArrayList<IVariable>(), mock(IVariable.class));
 
         assertThat(result.getTypeVariables(), is(typeVariables));
     }
 
     @Test
     public void createFunctionTypeSymbol_Standard_ParametersArePassedParameters() {
-        List<String> parameters = new ArrayList<>();
+        List<IVariable> parameters = new ArrayList<>();
 
         ISymbolFactory symbolFactory = createSymbolFactory();
         IFunctionTypeSymbol result = symbolFactory.createFunctionTypeSymbol(
-                "+", mock(ITypeVariableCollection.class), parameters, "Treturn");
+                "+", mock(ITypeVariableCollection.class), parameters, mock(IVariable.class));
 
-        assertThat(result.getParameterTypeVariables(), is(parameters));
+        assertThat(result.getParameters(), is(parameters));
     }
 
     @Test
     public void createFunctionTypeSymbol_Standard_ReturnTypeVariableIsPassedTypeVariable() {
-        String returnTypeVariable = "Treturn";
+        IVariable returnVariable = mock(IVariable.class);
 
         ISymbolFactory symbolFactory = createSymbolFactory();
         IFunctionTypeSymbol result = symbolFactory.createFunctionTypeSymbol(
-                "+", mock(ITypeVariableCollection.class), new ArrayList<String>(), returnTypeVariable);
+                "+", mock(ITypeVariableCollection.class), new ArrayList<IVariable>(), returnVariable);
 
-        assertThat(result.getReturnTypeVariable(), is(returnTypeVariable));
+        assertThat(result.getReturnVariable(), is(returnVariable));
     }
 
     @Test

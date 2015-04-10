@@ -29,6 +29,8 @@ public class VariableSymbol extends ASymbolWithAccessModifier implements IVariab
     private final Stack<ITypeVariableSymbol> referenceTypeVariables = new Stack<>();
     //Warning! end code duplication - same as in MinimalTypeVariableSymbolWithRef
 
+    private boolean hasFixedType = false;
+
     public VariableSymbol(ITSPHPAst definitionAst, IModifierSet modifiers, String name) {
         super(definitionAst, modifiers, name);
     }
@@ -78,4 +80,19 @@ public class VariableSymbol extends ASymbolWithAccessModifier implements IVariab
     }
     //Warning! end code duplication - same as in MinimalTypeVariableSymbolWithRef
 
+
+    @Override
+    public void setHasFixedType() {
+        hasFixedType = true;
+    }
+
+    @Override
+    public boolean hasFixedType() {
+        return hasFixedType;
+    }
+
+    @Override
+    public String getTypeVariable() {
+        return null;
+    }
 }

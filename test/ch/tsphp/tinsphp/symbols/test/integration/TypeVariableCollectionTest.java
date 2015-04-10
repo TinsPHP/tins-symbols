@@ -272,10 +272,10 @@ public class TypeVariableCollectionTest extends ATypeTest
         String $a = "Ta";
         String $b = "Tb";
         TypeVariableConstraint assign1 = new TypeVariableConstraint(e1);
-        assign1.setIsConstant();
+        assign1.setHasFixedType();
         IConstraint assign2 = new TypeVariableConstraint($a);
         TypeVariableConstraint assign3 = new TypeVariableConstraint(e2);
-        assign3.setIsConstant();
+        assign3.setHasFixedType();
         IConstraint assign4 = new TypeVariableConstraint($b);
 
         //act

@@ -21,6 +21,7 @@ import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraintSolver;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadResolver;
 import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableCollection;
+import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IAliasSymbol;
 import ch.tsphp.tinsphp.common.symbols.IAliasTypeSymbol;
@@ -35,7 +36,6 @@ import ch.tsphp.tinsphp.common.symbols.IPseudoTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IScalarTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
-import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbolWithRef;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousLazySymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
@@ -157,13 +157,8 @@ public class SymbolFactory implements ISymbolFactory
     }
 
     @Override
-    public ITypeVariableSymbol createMinimalTypeVariableSymbol(String name) {
-        return new MinimalTypeVariableSymbol(name);
-    }
-
-    @Override
-    public ITypeVariableSymbolWithRef createMinimalTypeVariableSymbolWithRef(String name) {
-        return new MinimalTypeVariableSymbolWithRef(name);
+    public IVariable createVariable(String name, String typeVariable) {
+        return new Variable(name, typeVariable);
     }
 
     @Override
@@ -190,8 +185,8 @@ public class SymbolFactory implements ISymbolFactory
     public IFunctionTypeSymbol createFunctionTypeSymbol(
             String name,
             ITypeVariableCollection typeVariableCollection,
-            List<String> parameterTypeVariables,
-            String returnTypeVariable) {
+            List<IVariable> parameterTypeVariables,
+            IVariable returnTypeVariable) {
         return new FunctionTypeSymbol(name, typeVariableCollection, parameterTypeVariables, returnTypeVariable);
     }
 
