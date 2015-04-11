@@ -13,6 +13,7 @@ import ch.tsphp.tinsphp.symbols.ModifierSet;
 import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
 import org.junit.Test;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -75,7 +76,7 @@ public class ANullableTypeSymbolTest
     public void isNullable_NothingDefinedParents_ReturnsTrue() {
         //no arrange necessary
 
-        ANullableTypeSymbol symbol = createNullableTypeSymbol("foo", mock(Set.class));
+        ANullableTypeSymbol symbol = createNullableTypeSymbol("foo", new HashSet<ITypeSymbol>());
         boolean result = symbol.isNullable();
 
         assertThat(result, is(true));

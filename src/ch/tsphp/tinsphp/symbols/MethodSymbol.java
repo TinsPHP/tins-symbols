@@ -17,12 +17,12 @@ import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ISymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.inference.constraints.IBinding;
+import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IIntersectionConstraint;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMinimalVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
-import ch.tsphp.tinsphp.common.symbols.TypeWithModifiersDto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +33,7 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
     private final List<IVariableSymbol> parameters = new ArrayList<>();
     private final IMinimalVariableSymbol returnVariable;
     private final IModifierSet returnTypeModifiers;
+    private final List<IFunctionType> overloads = new ArrayList<>();
 
     //Warning! start code duplication - same as in GlobalNamespaceScope
     private final List<IIntersectionConstraint> lowerBoundConstraints = new ArrayList<>();
@@ -115,11 +116,6 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
     }
 
     @Override
-    public TypeWithModifiersDto toTypeWithModifiersDto() {
-        return new TypeWithModifiersDto(getType(), returnTypeModifiers);
-    }
-
-    @Override
     public String toString() {
         return super.toString() + ModifierHelper.getModifiersAsString(returnTypeModifiers);
     }
@@ -174,5 +170,15 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
     }
     //Warning! end code duplication - same as in GlobalNamespaceScope
 
+
+    @Override
+    public void addOverload(IFunctionType overload) {
+        overloads.add(overload);
+    }
+
+    @Override
+    public List<IFunctionType> getOverloads() {
+        return overloads;
+    }
 
 }

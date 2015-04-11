@@ -6,9 +6,9 @@
 
 package ch.tsphp.tinsphp.symbols.test.unit.constraints;
 
+import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IIntersectionConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
-import ch.tsphp.tinsphp.common.symbols.IFunctionTypeSymbol;
 import ch.tsphp.tinsphp.symbols.constraints.IntersectionConstraint;
 import org.junit.Test;
 
@@ -26,7 +26,7 @@ public class IntersectionConstraintTest
         IVariable leftHandSide = mock(IVariable.class);
 
         IIntersectionConstraint intersectionConstraint = createIntersectionConstraint(
-                leftHandSide, new ArrayList<IVariable>(), new ArrayList<IFunctionTypeSymbol>());
+                leftHandSide, new ArrayList<IVariable>(), new ArrayList<IFunctionType>());
         IVariable result = intersectionConstraint.getLeftHandSide();
 
         assertThat(result, is(leftHandSide));
@@ -37,7 +37,7 @@ public class IntersectionConstraintTest
         List<IVariable> arguments = new ArrayList<>();
 
         IIntersectionConstraint intersectionConstraint = createIntersectionConstraint(
-                mock(IVariable.class), arguments, new ArrayList<IFunctionTypeSymbol>());
+                mock(IVariable.class), arguments, new ArrayList<IFunctionType>());
         List<IVariable> result = intersectionConstraint.getArguments();
 
         assertThat(result, is(arguments));
@@ -45,11 +45,11 @@ public class IntersectionConstraintTest
 
     @Test
     public void getOverloads_Standard_IsOnePassedByConstructor() {
-        List<IFunctionTypeSymbol> overloads = new ArrayList<>();
+        List<IFunctionType> overloads = new ArrayList<>();
 
         IIntersectionConstraint intersectionConstraint = createIntersectionConstraint(
                 mock(IVariable.class), new ArrayList<IVariable>(), overloads);
-        List<IFunctionTypeSymbol> result = intersectionConstraint.getOverloads();
+        List<IFunctionType> result = intersectionConstraint.getOverloads();
 
         assertThat(result, is(overloads));
     }
@@ -57,7 +57,7 @@ public class IntersectionConstraintTest
     protected IIntersectionConstraint createIntersectionConstraint(
             IVariable theLeftHandSideVariable,
             List<IVariable> theVariables,
-            List<IFunctionTypeSymbol> theOverloads) {
+            List<IFunctionType> theOverloads) {
         return new IntersectionConstraint(theLeftHandSideVariable, theVariables, theOverloads);
     }
 }

@@ -15,10 +15,10 @@ package ch.tsphp.tinsphp.symbols.erroneous;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
 import ch.tsphp.tinsphp.common.inference.constraints.IBinding;
+import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IIntersectionConstraint;
 import ch.tsphp.tinsphp.common.symbols.IMinimalVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
-import ch.tsphp.tinsphp.common.symbols.TypeWithModifiersDto;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
 
 import java.util.List;
@@ -45,11 +45,6 @@ public class ErroneousMethodSymbol extends AErroneousScopedSymbol implements IEr
 
     @Override
     public IMinimalVariableSymbol getReturnVariable() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public TypeWithModifiersDto toTypeWithModifiersDto() {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
@@ -125,6 +120,16 @@ public class ErroneousMethodSymbol extends AErroneousScopedSymbol implements IEr
 
     @Override
     public void setBindings(List<IBinding> bindings) {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
+
+    @Override
+    public void addOverload(IFunctionType overload) {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
+
+    @Override
+    public List<IFunctionType> getOverloads() {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 }

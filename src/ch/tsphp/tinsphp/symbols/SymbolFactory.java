@@ -18,7 +18,7 @@ import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.IUnionTypeSymbol;
-import ch.tsphp.tinsphp.common.inference.constraints.IConstraintSolver;
+import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadResolver;
 import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableCollection;
 import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
@@ -27,11 +27,10 @@ import ch.tsphp.tinsphp.common.symbols.IAliasSymbol;
 import ch.tsphp.tinsphp.common.symbols.IAliasTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IArrayTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IClassTypeSymbol;
-import ch.tsphp.tinsphp.common.symbols.IFunctionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
+import ch.tsphp.tinsphp.common.symbols.IMinimalMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IModifierHelper;
 import ch.tsphp.tinsphp.common.symbols.INullTypeSymbol;
-import ch.tsphp.tinsphp.common.symbols.IOverloadSymbol;
 import ch.tsphp.tinsphp.common.symbols.IPseudoTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IScalarTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
@@ -42,6 +41,8 @@ import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.ILazySymbolResolver;
+import ch.tsphp.tinsphp.symbols.constraints.FunctionType;
+import ch.tsphp.tinsphp.symbols.constraints.Variable;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousLazySymbol;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousMethodSymbol;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousTypeSymbol;
@@ -55,7 +56,6 @@ public class SymbolFactory implements ISymbolFactory
     private final IScopeHelper scopeHelper;
     private final IModifierHelper modifierHelper;
     private final IOverloadResolver overloadResolver;
-    private IConstraintSolver constraintSolver;
     private ITypeSymbol mixedTypeSymbol = null;
     private INullTypeSymbol nullTypeSymbol;
 
@@ -66,18 +66,12 @@ public class SymbolFactory implements ISymbolFactory
         scopeHelper = theScopeHelper;
         modifierHelper = theModifierHelper;
         overloadResolver = theOverloadResolver;
-
     }
 
     @Override
     public void setMixedTypeSymbol(ITypeSymbol typeSymbol) {
         mixedTypeSymbol = typeSymbol;
         nullTypeSymbol = new NullTypeSymbol(mixedTypeSymbol);
-    }
-
-    @Override
-    public void setConstraintSolver(IConstraintSolver theConstraintSolver) {
-        constraintSolver = theConstraintSolver;
     }
 
     public ITypeSymbol getMixedTypeSymbol() {
@@ -177,17 +171,17 @@ public class SymbolFactory implements ISymbolFactory
     }
 
     @Override
-    public IOverloadSymbol createOverloadSymbol(String name) {
-        return new OverloadSymbol(name);
+    public IMinimalMethodSymbol createMinimalMethodSymbol(String name) {
+        return new MinimalMethodSymbol(name);
     }
 
     @Override
-    public IFunctionTypeSymbol createFunctionTypeSymbol(
+    public IFunctionType createFunctionType(
             String name,
             ITypeVariableCollection typeVariableCollection,
             List<IVariable> parameterTypeVariables,
             IVariable returnTypeVariable) {
-        return new FunctionTypeSymbol(name, typeVariableCollection, parameterTypeVariables, returnTypeVariable);
+        return new FunctionType(name, typeVariableCollection, parameterTypeVariables, returnTypeVariable);
     }
 
     @Override
@@ -212,11 +206,6 @@ public class SymbolFactory implements ISymbolFactory
     public IVariableSymbol createVariableSymbol(ITSPHPAst typeModifier, ITSPHPAst variableId) {
         return new VariableSymbol(variableId, modifierHelper.getModifiers(typeModifier), variableId.getText());
     }
-
-//    @Override
-//    public ILazyTypeSymbol createLazyTypeSymbol() {
-//        return new LazyTypeSymbol();
-//    }
 
     @Override
     public IErroneousTypeSymbol createErroneousTypeSymbol(ITSPHPAst ast, TSPHPException exception) {

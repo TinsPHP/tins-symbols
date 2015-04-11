@@ -4,29 +4,35 @@
  * root folder or visit the project's website http://tsphp.ch/wiki/display/TINS/License
  */
 
-package ch.tsphp.tinsphp.symbols;
+package ch.tsphp.tinsphp.symbols.constraints;
 
 
+import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableCollection;
 import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
-import ch.tsphp.tinsphp.common.symbols.IFunctionTypeSymbol;
 
 import java.util.List;
 
-public class FunctionTypeSymbol extends ASymbol implements IFunctionTypeSymbol
+public class FunctionType implements IFunctionType
 {
+    protected final String name;
     private ITypeVariableCollection typeVariableCollection;
     private List<IVariable> parameters;
     private IVariable returnVariable;
 
-    public FunctionTypeSymbol(String theName,
+    public FunctionType(String theName,
             ITypeVariableCollection theTypeVariableCollection,
             List<IVariable> theParameterVariables,
             IVariable theReturnVariable) {
-        super(null, theName);
+        name = theName;
         typeVariableCollection = theTypeVariableCollection;
         parameters = theParameterVariables;
         returnVariable = theReturnVariable;
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     @Override
@@ -47,5 +53,10 @@ public class FunctionTypeSymbol extends ASymbol implements IFunctionTypeSymbol
     @Override
     public ITypeVariableCollection getTypeVariables() {
         return typeVariableCollection;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

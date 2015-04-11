@@ -6,9 +6,9 @@
 
 package ch.tsphp.tinsphp.symbols.test.unit.symbols;
 
-import ch.tsphp.tinsphp.common.symbols.IFunctionTypeSymbol;
-import ch.tsphp.tinsphp.common.symbols.IOverloadSymbol;
-import ch.tsphp.tinsphp.symbols.OverloadSymbol;
+import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
+import ch.tsphp.tinsphp.common.symbols.IMinimalMethodSymbol;
+import ch.tsphp.tinsphp.symbols.MinimalMethodSymbol;
 import org.junit.Test;
 
 import java.util.List;
@@ -17,32 +17,32 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 
-public class OverloadSymbolTest
+public class MinimalMethodSymbolTest
 {
 
     @Test
     public void getOverloads_NothingDefined_ReturnsEmptyList() {
         //no arrange necessary
 
-        IOverloadSymbol symbol = createOverloadSymbol("foo");
-        List<IFunctionTypeSymbol> result = symbol.getOverloads();
+        IMinimalMethodSymbol symbol = createMinimalMethodSymbol("foo");
+        List<IFunctionType> result = symbol.getOverloads();
 
         assertThat(result.size(), is(0));
     }
 
     @Test
     public void addAndGetOverloads_OneDefined_ReturnsListWithIt() {
-        IFunctionTypeSymbol functionTypeSymbol = mock(IFunctionTypeSymbol.class);
+        IFunctionType functionTypeSymbol = mock(IFunctionType.class);
 
-        IOverloadSymbol symbol = createOverloadSymbol("foo");
+        IMinimalMethodSymbol symbol = createMinimalMethodSymbol("foo");
         symbol.addOverload(functionTypeSymbol);
-        List<IFunctionTypeSymbol> result = symbol.getOverloads();
+        List<IFunctionType> result = symbol.getOverloads();
 
         assertThat(result.size(), is(1));
         assertThat(result.get(0), is(functionTypeSymbol));
     }
 
-    protected IOverloadSymbol createOverloadSymbol(String name) {
-        return new OverloadSymbol(name);
+    protected IMinimalMethodSymbol createMinimalMethodSymbol(String name) {
+        return new MinimalMethodSymbol(name);
     }
 }

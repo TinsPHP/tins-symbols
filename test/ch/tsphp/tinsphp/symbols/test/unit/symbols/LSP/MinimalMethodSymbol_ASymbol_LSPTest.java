@@ -8,7 +8,7 @@ package ch.tsphp.tinsphp.symbols.test.unit.symbols.LSP;
 
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.tinsphp.symbols.ASymbol;
-import ch.tsphp.tinsphp.symbols.FunctionTypeSymbol;
+import ch.tsphp.tinsphp.symbols.MinimalMethodSymbol;
 import ch.tsphp.tinsphp.symbols.test.unit.symbols.ASymbolTest;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -16,11 +16,12 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 
-public class FunctionTypeSymbol_ASymbol_LSPTest extends ASymbolTest
+public class MinimalMethodSymbol_ASymbol_LSPTest extends ASymbolTest
 {
+
     @Override
     public void getDefinitionAst_Standard_ReturnsOnePassedToConstructor() {
-        // different behaviour - FunctionTypeSymbol does not have a definition ast
+        // different behaviour - overload symbols are pre-defined which do not have a definition Ast
         // therefore it always returns null.
 
         // start same as in ASymbolTest
@@ -37,6 +38,6 @@ public class FunctionTypeSymbol_ASymbol_LSPTest extends ASymbolTest
 
     @Override
     protected ASymbol createSymbol(ITSPHPAst definitionAst, String name) {
-        return new FunctionTypeSymbol(name, null, null, null);
+        return new MinimalMethodSymbol(name);
     }
 }

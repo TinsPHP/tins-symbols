@@ -40,16 +40,6 @@ public class ErroneousMethodSymbolTest
         //assert in annotation
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void toTypeWithModifiersDto_Standard_ThrowsUnsupportedOperationException() {
-        //no arrange necessary
-
-        IErroneousMethodSymbol methodSymbol = createMethodSymbol();
-        methodSymbol.toTypeWithModifiersDto();
-
-        //assert in annotation
-    }
-
     @Test
     public void isFinal_Standard_ReturnsFalse() {
         //no arrange necessary

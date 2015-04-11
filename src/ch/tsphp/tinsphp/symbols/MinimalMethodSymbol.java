@@ -7,27 +7,27 @@
 package ch.tsphp.tinsphp.symbols;
 
 
-import ch.tsphp.tinsphp.common.symbols.IFunctionTypeSymbol;
-import ch.tsphp.tinsphp.common.symbols.IOverloadSymbol;
+import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
+import ch.tsphp.tinsphp.common.symbols.IMinimalMethodSymbol;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class OverloadSymbol extends ASymbol implements IOverloadSymbol
+public class MinimalMethodSymbol extends ASymbol implements IMinimalMethodSymbol
 {
-    private final List<IFunctionTypeSymbol> overloads = new ArrayList<>();
+    private final List<IFunctionType> overloads = new ArrayList<>();
 
-    public OverloadSymbol(String name) {
+    public MinimalMethodSymbol(String name) {
         super(null, name);
     }
 
     @Override
-    public void addOverload(IFunctionTypeSymbol overload) {
+    public void addOverload(IFunctionType overload) {
         overloads.add(overload);
     }
 
     @Override
-    public List<IFunctionTypeSymbol> getOverloads() {
+    public List<IFunctionType> getOverloads() {
         return overloads;
     }
 }
