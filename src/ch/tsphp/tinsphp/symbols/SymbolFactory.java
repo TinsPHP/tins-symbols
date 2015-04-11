@@ -191,13 +191,14 @@ public class SymbolFactory implements ISymbolFactory
     }
 
     @Override
-    public IMethodSymbol createMethodSymbol(ITSPHPAst methodModifier, ITSPHPAst returnTypeModifier,
-            ITSPHPAst identifier, IScope currentScope) {
+    public IMethodSymbol createMethodSymbol(
+            ITSPHPAst methodModifier, ITSPHPAst returnTypeModifier, ITSPHPAst identifier, IScope currentScope) {
         return new MethodSymbol(
                 scopeHelper,
                 identifier,
                 modifierHelper.getModifiers(methodModifier),
                 modifierHelper.getModifiers(returnTypeModifier),
+                new MinimalVariableSymbol(identifier, "rtn", "T"),
                 identifier.getText(),
                 currentScope);
     }

@@ -11,6 +11,7 @@ import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
+import ch.tsphp.tinsphp.common.symbols.IMinimalVariableSymbol;
 import ch.tsphp.tinsphp.symbols.MethodSymbol;
 import ch.tsphp.tinsphp.symbols.ModifierSet;
 import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
@@ -89,19 +90,26 @@ public class MethodSymbolModifierTest
                 mock(ITSPHPAst.class),
                 set,
                 mock(IModifierSet.class),
+                mock(IMinimalVariableSymbol.class),
                 "foo",
                 mock(IScope.class));
     }
 
-    protected IMethodSymbol createMethodSymbol(
-            IScopeHelper scopeHelper,
+    protected IMethodSymbol createMethodSymbol(IScopeHelper scopeHelper,
             ITSPHPAst definitionAst,
             IModifierSet methodModifiers,
             IModifierSet returnTypeModifiers,
+            IMinimalVariableSymbol returnVariable,
             String name,
             IScope enclosingScope) {
-        return new MethodSymbol(scopeHelper, definitionAst, methodModifiers, returnTypeModifiers, name, enclosingScope);
+        return new MethodSymbol(
+                scopeHelper,
+                definitionAst,
+                methodModifiers,
+                returnTypeModifiers,
+                returnVariable,
+                name,
+                enclosingScope);
     }
-
 
 }

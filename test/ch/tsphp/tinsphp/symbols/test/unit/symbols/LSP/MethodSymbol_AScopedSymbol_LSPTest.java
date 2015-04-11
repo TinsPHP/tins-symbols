@@ -10,6 +10,7 @@ import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
+import ch.tsphp.tinsphp.common.symbols.IMinimalVariableSymbol;
 import ch.tsphp.tinsphp.symbols.AScopedSymbol;
 import ch.tsphp.tinsphp.symbols.MethodSymbol;
 import ch.tsphp.tinsphp.symbols.test.unit.symbols.AScopedSymbolTest;
@@ -22,6 +23,12 @@ public class MethodSymbol_AScopedSymbol_LSPTest extends AScopedSymbolTest
     protected AScopedSymbol createScopedSymbol(IScopeHelper scopeHelper, ITSPHPAst definitionAst,
             IModifierSet modifiers, String name, IScope enclosingScope) {
         return new MethodSymbol(
-                scopeHelper, definitionAst, modifiers, mock(IModifierSet.class), name, enclosingScope);
+                scopeHelper,
+                definitionAst,
+                modifiers,
+                mock(IModifierSet.class),
+                mock(IMinimalVariableSymbol.class),
+                name,
+                enclosingScope);
     }
 }

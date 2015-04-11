@@ -20,6 +20,7 @@ import ch.tsphp.tinsphp.common.inference.constraints.IBinding;
 import ch.tsphp.tinsphp.common.inference.constraints.IIntersectionConstraint;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
+import ch.tsphp.tinsphp.common.symbols.IMinimalVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.TypeWithModifiersDto;
 
@@ -30,6 +31,7 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
 {
 
     private final List<IVariableSymbol> parameters = new ArrayList<>();
+    private final IMinimalVariableSymbol returnVariable;
     private final IModifierSet returnTypeModifiers;
 
     //Warning! start code duplication - same as in GlobalNamespaceScope
@@ -44,10 +46,12 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
             ITSPHPAst definitionAst,
             IModifierSet methodModifiers,
             IModifierSet theReturnTypeModifiers,
+            IMinimalVariableSymbol theReturnVariable,
             String name,
             IScope enclosingScope) {
         super(scopeHelper, definitionAst, methodModifiers, name, enclosingScope);
         returnTypeModifiers = theReturnTypeModifiers;
+        returnVariable = theReturnVariable;
     }
 
     @Override
@@ -58,6 +62,11 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
     @Override
     public List<IVariableSymbol> getParameters() {
         return parameters;
+    }
+
+    @Override
+    public IMinimalVariableSymbol getReturnVariable() {
+        return returnVariable;
     }
 
     @Override
@@ -164,4 +173,6 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
         bindings = theBindings;
     }
     //Warning! end code duplication - same as in GlobalNamespaceScope
+
+
 }

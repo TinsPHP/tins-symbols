@@ -10,6 +10,7 @@ import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
+import ch.tsphp.tinsphp.common.symbols.IMinimalVariableSymbol;
 import ch.tsphp.tinsphp.symbols.ASymbol;
 import ch.tsphp.tinsphp.symbols.MethodSymbol;
 import ch.tsphp.tinsphp.symbols.ModifierSet;
@@ -52,6 +53,7 @@ public class MethodSymbol_ASymbol_LSPTest extends ASymbolTest
                 definitionAst,
                 modifiersSet,
                 modifiersSet,
+                mock(IMinimalVariableSymbol.class),
                 name,
                 mock(IScope.class));
     }
