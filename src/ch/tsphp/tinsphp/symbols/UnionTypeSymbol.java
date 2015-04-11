@@ -136,10 +136,14 @@ public class UnionTypeSymbol extends ALazyTypeSymbol implements IUnionTypeSymbol
             while (iterator.hasNext()) {
                 sb.append(" | ").append(iterator.next());
             }
-            if (typeSymbols.size() != 1) {
-                sb.insert(0, "{");
-                sb.append("}");
+            if (typeSymbols.size() == 0) {
+                sb.append("nothing");
             }
+            if (typeSymbols.size() > 1) {
+                sb.insert(0, "(");
+                sb.append(")");
+            }
+
             return sb.toString();
         }
         return super.getAbsoluteName();

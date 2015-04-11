@@ -366,7 +366,7 @@ public class UnionTypeSymbolTest extends ATypeTest
         unionTypeSymbol.seal();
         String result = unionTypeSymbol.getName();
 
-        assertThat(result, is("{}"));
+        assertThat(result, is("nothing"));
     }
 
     @Test
@@ -377,7 +377,7 @@ public class UnionTypeSymbolTest extends ATypeTest
         unionTypeSymbol.seal();
         String result = unionTypeSymbol.getName();
 
-        assertThat(result, anyOf(is("{int | float}"), is("{float | int}")));
+        assertThat(result, anyOf(is("(int | float)"), is("(float | int)")));
     }
 
     private IUnionTypeSymbol createUnionTypeSymbol() {
