@@ -7,9 +7,9 @@
 package ch.tsphp.tinsphp.symbols.constraints;
 
 
-import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IIntersectionConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
+import ch.tsphp.tinsphp.common.symbols.IMinimalMethodSymbol;
 
 import java.util.List;
 
@@ -17,15 +17,15 @@ public class IntersectionConstraint implements IIntersectionConstraint
 {
     private IVariable assignTypeVariable;
     private List<IVariable> arguments;
-    private List<IFunctionType> overloads;
+    private IMinimalMethodSymbol methodSymbol;
 
     public IntersectionConstraint(
             IVariable theLeftHandSideVariable,
             List<IVariable> theVariables,
-            List<IFunctionType> theOverloads) {
+            IMinimalMethodSymbol theMethodSymbol) {
         assignTypeVariable = theLeftHandSideVariable;
         arguments = theVariables;
-        overloads = theOverloads;
+        methodSymbol = theMethodSymbol;
     }
 
     @Override
@@ -39,7 +39,7 @@ public class IntersectionConstraint implements IIntersectionConstraint
     }
 
     @Override
-    public List<IFunctionType> getOverloads() {
-        return overloads;
+    public IMinimalMethodSymbol getMethodSymbol() {
+        return methodSymbol;
     }
 }
