@@ -76,7 +76,9 @@ public class TypeVariableCollection implements ITypeVariableCollection
 
     private void transferLowerBoundOfConstant(String typeVariable, TypeVariableConstraint typeVariableConstraint) {
         for (IConstraint constraint : lowerBounds.get(typeVariableConstraint.getTypeVariable()).values()) {
-            addLowerBound(typeVariable, constraint);
+            if (constraint instanceof TypeConstraint) {
+                addLowerBound(typeVariable, constraint);
+            }
         }
     }
 
