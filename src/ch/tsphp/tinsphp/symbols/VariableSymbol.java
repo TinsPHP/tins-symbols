@@ -14,22 +14,22 @@ package ch.tsphp.tinsphp.symbols;
 
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
-import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
-import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbolWithRef;
+import ch.tsphp.tinsphp.common.symbols.IMinimalVariableSymbol;
+import ch.tsphp.tinsphp.common.symbols.IMinimalVariableSymbolWithRef;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
-import ch.tsphp.tinsphp.common.symbols.TypeWithModifiersDto;
 
 import java.util.Stack;
 
 public class VariableSymbol extends ASymbolWithAccessModifier implements IVariableSymbol
 {
 
-    //Warning! start code duplication - same as in MinimalTypeVariableSymbolWithRef
-    private ITypeVariableSymbolWithRef definition;
-    private final Stack<ITypeVariableSymbol> referenceTypeVariables = new Stack<>();
-    //Warning! end code duplication - same as in MinimalTypeVariableSymbolWithRef
+    private IMinimalVariableSymbolWithRef definition;
+    private final Stack<IMinimalVariableSymbol> referenceTypeVariables = new Stack<>();
 
-    private boolean hasFixedType = false;
+    //Warning! start code duplication - same as in Variable and AMinimalVariableSymbol
+    private boolean hasFixedType;
+    //Warning! end code duplication - same as in Variable and AMinimalVariableSymbol
+
 
     public VariableSymbol(ITSPHPAst definitionAst, IModifierSet modifiers, String name) {
         super(definitionAst, modifiers, name);
@@ -56,31 +56,24 @@ public class VariableSymbol extends ASymbolWithAccessModifier implements IVariab
     }
 
     @Override
-    public TypeWithModifiersDto toTypeWithModifiersDto() {
-        return new TypeWithModifiersDto(getType(), modifiers);
-    }
-
-    //Warning! start code duplication - same as in MinimalTypeVariableSymbolWithRef
-    @Override
-    public void setOriginal(ITypeVariableSymbolWithRef theVariableDeclaration) {
+    public void setOriginal(IMinimalVariableSymbolWithRef theVariableDeclaration) {
         definition = theVariableDeclaration;
     }
 
     @Override
-    public void addRefVariable(ITypeVariableSymbol variableSymbol) {
+    public void addRefVariable(IMinimalVariableSymbol variableSymbol) {
         referenceTypeVariables.push(variableSymbol);
     }
 
     @Override
-    public ITypeVariableSymbol getCurrentTypeVariable() {
+    public IMinimalVariableSymbol getCurrentTypeVariable() {
         if (referenceTypeVariables.size() > 0) {
             return referenceTypeVariables.peek();
         }
         return this;
     }
-    //Warning! end code duplication - same as in MinimalTypeVariableSymbolWithRef
 
-
+    //Warning! start code duplication - same as in Variable and AMinimalVariableSymbol
     @Override
     public void setHasFixedType() {
         hasFixedType = true;
@@ -90,6 +83,7 @@ public class VariableSymbol extends ASymbolWithAccessModifier implements IVariab
     public boolean hasFixedType() {
         return hasFixedType;
     }
+    //Warning! end code duplication - same as in Variable and AMinimalVariableSymbol
 
     @Override
     public String getTypeVariable() {

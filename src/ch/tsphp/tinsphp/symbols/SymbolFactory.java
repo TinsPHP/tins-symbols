@@ -29,12 +29,12 @@ import ch.tsphp.tinsphp.common.symbols.IArrayTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IClassTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMinimalMethodSymbol;
+import ch.tsphp.tinsphp.common.symbols.IMinimalVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.IModifierHelper;
 import ch.tsphp.tinsphp.common.symbols.INullTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IPseudoTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IScalarTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
-import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousLazySymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
@@ -156,8 +156,8 @@ public class SymbolFactory implements ISymbolFactory
     }
 
     @Override
-    public ITypeVariableSymbol createExpressionTypeVariableSymbol(ITSPHPAst exprAst) {
-        return new ExpressionTypeVariableSymbol(exprAst);
+    public IMinimalVariableSymbol createExpressionTypeVariableSymbol(ITSPHPAst exprAst) {
+        return new ExpressionVariableSymbol(exprAst);
     }
 
     @Override

@@ -46,16 +46,6 @@ public class ErroneousLazySymbolTest
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void toTypeWithModifiersDto_Standard_ThrowsUnsupportedOperationException() {
-        //no arrange necessary
-
-        IErroneousLazySymbol lazySymbol = createLazySymbol();
-        lazySymbol.toTypeWithModifiersDto();
-
-        //assert in annotation
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
     public void getParentTypeSymbols_Standard_ThrowsUnsupportedOeprationException() {
         //no arrange necessary
 

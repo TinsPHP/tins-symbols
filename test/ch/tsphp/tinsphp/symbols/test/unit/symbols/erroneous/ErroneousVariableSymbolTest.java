@@ -59,16 +59,6 @@ public class ErroneousVariableSymbolTest
         assertThat(result, is(true));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void toTypeWithModifiersDto_Standard_ThrowsUnsupportedOperationException() {
-        //no arrange necessary
-
-        IErroneousVariableSymbol variableSymbol = createVariableSymbol();
-        variableSymbol.toTypeWithModifiersDto();
-
-        //assert in annotation
-    }
-
     private IErroneousVariableSymbol createVariableSymbol() {
         return createVariableSymbol(mock(ITSPHPAst.class), "foo", new TSPHPException());
     }

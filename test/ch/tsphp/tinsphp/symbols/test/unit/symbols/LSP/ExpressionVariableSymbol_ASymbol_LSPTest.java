@@ -11,7 +11,7 @@ import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.symbols.ASymbol;
-import ch.tsphp.tinsphp.symbols.ExpressionTypeVariableSymbol;
+import ch.tsphp.tinsphp.symbols.ExpressionVariableSymbol;
 import ch.tsphp.tinsphp.symbols.test.unit.symbols.ASymbolTest;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
@@ -21,7 +21,7 @@ import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class ExpressionTypeVariableSymbol_ASymbol_LSPTest extends ASymbolTest
+public class ExpressionVariableSymbol_ASymbol_LSPTest extends ASymbolTest
 {
     @Override
     @Test
@@ -146,6 +146,6 @@ public class ExpressionTypeVariableSymbol_ASymbol_LSPTest extends ASymbolTest
 
     @Override
     protected ASymbol createSymbol(ITSPHPAst definitionAst, String name) {
-        return new ExpressionTypeVariableSymbol(definitionAst);
+        return new ExpressionVariableSymbol(definitionAst);
     }
 }

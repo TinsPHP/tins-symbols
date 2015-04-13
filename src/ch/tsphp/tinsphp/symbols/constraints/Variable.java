@@ -13,7 +13,10 @@ public class Variable implements IVariable
 {
     private final String name;
     private final String typeVariable;
+
+    //Warning! start code duplication - same as in VariableSymbol and AMinimalVariableSymbol
     private boolean hasFixedType;
+    //Warning! end code duplication - same as in VariableSymbol and AMinimalVariableSymbol
 
     public Variable(String theName, String theTypeVariable) {
         name = theName;
@@ -35,6 +38,8 @@ public class Variable implements IVariable
         return null;
     }
 
+
+    //Warning! start code duplication - same as in VariableSymbol and AMinimalVariableSymbol
     @Override
     public void setHasFixedType() {
         hasFixedType = true;
@@ -44,6 +49,7 @@ public class Variable implements IVariable
     public boolean hasFixedType() {
         return hasFixedType;
     }
+    //Warning! end code duplication - same as in VariableSymbol and AMinimalVariableSymbol
 
     @Override
     public String getTypeVariable() {

@@ -180,6 +180,7 @@ public class TypeVariableCollection implements ITypeVariableCollection
                 if (isNotSelfReference(typeVariable, refTypeVariable)) {
                     //looks like the current type variable has another type variable as its lower bound.
                     //Hence we need to make sure that the other type variable is updated as well.
+                    //no need to do this if the other type variable has already a fixed type
                     if (!typeVariableConstraint.hasFixedType()) {
                         addUpperBound(refTypeVariable, newUpperBoundConstraint);
                     }

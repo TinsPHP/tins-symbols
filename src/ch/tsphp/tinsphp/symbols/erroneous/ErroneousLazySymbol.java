@@ -12,9 +12,8 @@ import ch.tsphp.common.exceptions.TSPHPException;
 import ch.tsphp.common.symbols.ISymbol;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.IUnionTypeSymbol;
-import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
-import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbolWithRef;
-import ch.tsphp.tinsphp.common.symbols.TypeWithModifiersDto;
+import ch.tsphp.tinsphp.common.symbols.IMinimalVariableSymbol;
+import ch.tsphp.tinsphp.common.symbols.IMinimalVariableSymbolWithRef;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousLazySymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.ILazySymbolResolver;
 import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
@@ -89,22 +88,17 @@ public class ErroneousLazySymbol extends AErroneousScopedSymbol implements IErro
     }
 
     @Override
-    public void setOriginal(ITypeVariableSymbolWithRef variableDeclaration) {
+    public void setOriginal(IMinimalVariableSymbolWithRef variableDeclaration) {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
     @Override
-    public void addRefVariable(ITypeVariableSymbol variableSymbol) {
+    public void addRefVariable(IMinimalVariableSymbol variableSymbol) {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
     @Override
-    public ITypeVariableSymbol getCurrentTypeVariable() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public TypeWithModifiersDto toTypeWithModifiersDto() {
+    public IMinimalVariableSymbol getCurrentTypeVariable() {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 

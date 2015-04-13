@@ -14,9 +14,8 @@ package ch.tsphp.tinsphp.symbols.erroneous;
 
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
-import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbol;
-import ch.tsphp.tinsphp.common.symbols.ITypeVariableSymbolWithRef;
-import ch.tsphp.tinsphp.common.symbols.TypeWithModifiersDto;
+import ch.tsphp.tinsphp.common.symbols.IMinimalVariableSymbol;
+import ch.tsphp.tinsphp.common.symbols.IMinimalVariableSymbolWithRef;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousVariableSymbol;
 
 
@@ -50,22 +49,17 @@ public class ErroneousVariableSymbol extends AErroneousSymbolWithAccessModifier 
     }
 
     @Override
-    public TypeWithModifiersDto toTypeWithModifiersDto() {
+    public void setOriginal(IMinimalVariableSymbolWithRef variableDeclaration) {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
     @Override
-    public void setOriginal(ITypeVariableSymbolWithRef variableDeclaration) {
+    public void addRefVariable(IMinimalVariableSymbol variableSymbol) {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
     @Override
-    public void addRefVariable(ITypeVariableSymbol variableSymbol) {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public ITypeVariableSymbol getCurrentTypeVariable() {
+    public IMinimalVariableSymbol getCurrentTypeVariable() {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
