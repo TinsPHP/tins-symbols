@@ -45,7 +45,7 @@ public class OverloadBindings implements IOverloadBindings
 
         Map<String, ITypeVariableConstraint> mapping = new HashMap<>();
         for (Map.Entry<String, ITypeVariableConstraint> entry : bindings.variable2TypeVariable.entrySet()) {
-            ITypeVariableConstraint constraint = createOrGetConstraint(mapping, entry);
+            ITypeVariableConstraint constraint = createOrGetConstraint(mapping, entry.getValue());
             variable2TypeVariable.put(entry.getKey(), constraint);
         }
 
@@ -69,23 +69,19 @@ public class OverloadBindings implements IOverloadBindings
 
     private ITypeVariableConstraint createOrGetConstraint(
             Map<String, ITypeVariableConstraint> mapping,
-            Map.Entry<String, ITypeVariableConstraint> entry) {
-        ITypeVariableConstraint value = entry.getValue();
+            ITypeVariableConstraint typeVariableConstraint) {
         ITypeVariableConstraint constraint;
-        String constraintId = value.getId();
+        String constraintId = typeVariableConstraint.getId();
         boolean containsKey = mapping.containsKey(constraintId);
         if (containsKey) {
             constraint = mapping.get(constraintId);
         } else {
-            constraint = new TypeVariableConstraint(value.getTypeVariable());
-        }
-
-        if (value.hasFixedType() && !constraint.hasFixedType()) {
-            constraint = new FixedTypeVariableConstraint((TypeVariableConstraint) constraint);
-        }
-
-        if (!containsKey) {
+            constraint = new TypeVariableConstraint(typeVariableConstraint.getTypeVariable());
             mapping.put(constraintId, constraint);
+        }
+
+        if (typeVariableConstraint.hasFixedType()) {
+            constraint = new FixedTypeVariableConstraint((TypeVariableConstraint) constraint);
         }
         return constraint;
     }
@@ -107,7 +103,12 @@ public class OverloadBindings implements IOverloadBindings
                 String constraintId = constraint.getId();
                 if (typeVariableLowerBounds.containsKey(constraintId)) {
                     //remove self ref, no longer needed
-                    typeVariableLowerBounds.remove(constraintId);
+                    if (typeVariableLowerBounds.size() == 1) {
+                        //only lower bound, can remove the whole list
+                        lowerBounds.remove(typeVariable);
+                    } else {
+                        typeVariableLowerBounds.remove(constraintId);
+                    }
                 }
             }
         } else {
@@ -227,8 +228,9 @@ public class OverloadBindings implements IOverloadBindings
 
     @Override
     public void renameTypeVariable(ITypeVariableConstraint typeVariableConstraint, String newName) {
-        transferConstraintsFromTo(typeVariableConstraint.getTypeVariable(), newName);
-        //TODO remove unused lower and upper bounds to free memory?
+        String typeVariable = typeVariableConstraint.getTypeVariable();
+        transferConstraintsFromTo(typeVariable, newName);
+
         String oldConstraintId = typeVariableConstraint.getId();
         typeVariableConstraint.setTypeVariable(newName);
         if (upperBoundDependencies.containsKey(oldConstraintId)) {
@@ -239,17 +241,20 @@ public class OverloadBindings implements IOverloadBindings
                 //no need to use addLowerBound, is only a renaming, bound does not change
                 refLowerBounds.put(newConstraintId, lowerBound);
             }
+            upperBoundDependencies.remove(oldConstraintId);
         }
     }
 
     private void transferConstraintsFromTo(String rhs, String lhs) {
         if (hasUpperBounds(rhs)) {
-            for (IConstraint upperBound : getUpperBounds(rhs)) {
+            Map<String, IConstraint> rhsUpperBounds = upperBounds.remove(rhs);
+            for (IConstraint upperBound : rhsUpperBounds.values()) {
                 addUpperBound(lhs, upperBound);
             }
         }
         if (hasLowerBounds(rhs)) {
-            for (IConstraint upperBound : getLowerBounds(rhs)) {
+            Map<String, IConstraint> rhsLowerBounds = lowerBounds.remove(rhs);
+            for (IConstraint upperBound : rhsLowerBounds.values()) {
                 addLowerBound(lhs, upperBound);
             }
         }
