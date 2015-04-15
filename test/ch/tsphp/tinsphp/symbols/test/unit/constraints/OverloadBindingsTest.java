@@ -7,17 +7,14 @@
 package ch.tsphp.tinsphp.symbols.test.unit.constraints;
 
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
+import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadResolver;
-import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableCollection;
-import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableConstraint;
+import ch.tsphp.tinsphp.symbols.constraints.OverloadBindings;
 import ch.tsphp.tinsphp.symbols.constraints.TypeConstraint;
-import ch.tsphp.tinsphp.symbols.constraints.TypeVariableCollection;
 import ch.tsphp.tinsphp.symbols.test.unit.testutils.ATypeTest;
 import org.junit.Test;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -29,7 +26,7 @@ import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class TypeVariableCollectionTest extends ATypeTest
+public class OverloadBindingsTest extends ATypeTest
 {
 
     @Test
@@ -41,12 +38,11 @@ public class TypeVariableCollectionTest extends ATypeTest
         IOverloadResolver overloadResolver = mock(IOverloadResolver.class);
         when(overloadResolver.isFirstSameOrParentTypeOfSecond(intType, intType)).thenReturn(true);
 
-        TypeVariableCollection collection1 = new TypeVariableCollection(overloadResolver);
+        OverloadBindings collection1 = new OverloadBindings(overloadResolver);
         collection1.addLowerBound(typeVariable, lowerConstraint);
         collection1.addUpperBound(typeVariable, upperConstraint);
 
-        ITypeVariableCollection collection = createTypeVariableCollection(
-                overloadResolver, collection1, new HashMap<String, TypeVariableConstraint>());
+        IOverloadBindings collection = createTypeVariableCollection(overloadResolver, collection1);
         Collection<IConstraint> lowerResult = collection.getLowerBounds(typeVariable);
         Collection<IConstraint> upperResult = collection.getUpperBounds(typeVariable);
 
@@ -58,7 +54,7 @@ public class TypeVariableCollectionTest extends ATypeTest
     public void getUpperBounds_NothingDefined_ReturnsNull() {
         String typeVariable = "T";
 
-        ITypeVariableCollection collection = createTypeVariableCollection();
+        IOverloadBindings collection = createOverloadBindings();
         collection.getUpperBounds(typeVariable);
 
         //assert in annotation
@@ -70,7 +66,7 @@ public class TypeVariableCollectionTest extends ATypeTest
         IConstraint constraint = new TypeConstraint(intType);
         when(constraint.getId()).thenReturn("id");
 
-        ITypeVariableCollection collection = createTypeVariableCollection();
+        IOverloadBindings collection = createOverloadBindings();
         collection.addUpperBound(typeVariable, constraint);
         Collection<IConstraint> result = collection.getUpperBounds(typeVariable);
 
@@ -82,7 +78,7 @@ public class TypeVariableCollectionTest extends ATypeTest
     public void getLowerBounds_NothingDefined_ReturnsNull() {
         String typeVariable = "T";
 
-        ITypeVariableCollection collection = createTypeVariableCollection();
+        IOverloadBindings collection = createOverloadBindings();
         collection.getLowerBounds(typeVariable);
 
         //assert in annotation
@@ -94,7 +90,7 @@ public class TypeVariableCollectionTest extends ATypeTest
         IConstraint constraint = new TypeConstraint(intType);
         when(constraint.getId()).thenReturn("id");
 
-        ITypeVariableCollection collection = createTypeVariableCollection();
+        IOverloadBindings collection = createOverloadBindings();
         collection.addLowerBound(typeVariable, constraint);
         Collection<IConstraint> result = collection.getLowerBounds(typeVariable);
 
@@ -106,7 +102,7 @@ public class TypeVariableCollectionTest extends ATypeTest
     public void hasLowerBounds_NothingDefined_ReturnsFalse() {
         String typeVariable = "T";
 
-        ITypeVariableCollection collection = createTypeVariableCollection();
+        IOverloadBindings collection = createOverloadBindings();
         boolean result = collection.hasLowerBounds(typeVariable);
 
         assertThat(result, is(false));
@@ -116,7 +112,7 @@ public class TypeVariableCollectionTest extends ATypeTest
     public void hasLowerBounds_OneDefined_ReturnsTrue() {
         String typeVariable = "T";
 
-        ITypeVariableCollection collection = createTypeVariableCollection();
+        IOverloadBindings collection = createOverloadBindings();
         collection.addLowerBound(typeVariable, new TypeConstraint(intType));
         boolean result = collection.hasLowerBounds(typeVariable);
 
@@ -127,7 +123,7 @@ public class TypeVariableCollectionTest extends ATypeTest
     public void hasUpperBounds_NothingDefined_ReturnsFalse() {
         String typeVariable = "T";
 
-        ITypeVariableCollection collection = createTypeVariableCollection();
+        IOverloadBindings collection = createOverloadBindings();
         boolean result = collection.hasUpperBounds(typeVariable);
 
         assertThat(result, is(false));
@@ -138,7 +134,7 @@ public class TypeVariableCollectionTest extends ATypeTest
     public void hasUpperBounds_OneDefined_ReturnsTrue() {
         String typeVariable = "T";
 
-        ITypeVariableCollection collection = createTypeVariableCollection();
+        IOverloadBindings collection = createOverloadBindings();
         collection.addUpperBound(typeVariable, new TypeConstraint(intType));
         boolean result = collection.hasUpperBounds(typeVariable);
 
@@ -149,7 +145,7 @@ public class TypeVariableCollectionTest extends ATypeTest
     public void getTypeVariablesWithLowerBounds_NothingDefined_ReturnsEmptySet() {
         //no arrange necessary
 
-        ITypeVariableCollection collection = createTypeVariableCollection();
+        IOverloadBindings collection = createOverloadBindings();
         Set<String> result = collection.getTypeVariablesWithLowerBounds();
 
         assertThat(result, is(empty()));
@@ -159,7 +155,7 @@ public class TypeVariableCollectionTest extends ATypeTest
     public void getTypeVariablesWithLowerBounds_OneDefined_ReturnsTypeVariable() {
         String typeVariable = "T";
 
-        ITypeVariableCollection collection = createTypeVariableCollection();
+        IOverloadBindings collection = createOverloadBindings();
         collection.addLowerBound(typeVariable, new TypeConstraint(intType));
         Set<String> result = collection.getTypeVariablesWithLowerBounds();
 
@@ -171,7 +167,7 @@ public class TypeVariableCollectionTest extends ATypeTest
     public void getTypeVariablesWithUpperBounds_NothingDefined_ReturnsEmptySet() {
         //no arrange necessary
 
-        ITypeVariableCollection collection = createTypeVariableCollection();
+        IOverloadBindings collection = createOverloadBindings();
         Set<String> result = collection.getTypeVariablesWithUpperBounds();
 
         assertThat(result, is(empty()));
@@ -181,7 +177,7 @@ public class TypeVariableCollectionTest extends ATypeTest
     public void getTypeVariablesWithUpperBounds_OneDefined_ReturnsTypeVariable() {
         String typeVariable = "T";
 
-        ITypeVariableCollection collection = createTypeVariableCollection();
+        IOverloadBindings collection = createOverloadBindings();
         collection.addUpperBound(typeVariable, new TypeConstraint(intType));
         Set<String> result = collection.getTypeVariablesWithUpperBounds();
 
@@ -193,7 +189,7 @@ public class TypeVariableCollectionTest extends ATypeTest
     public void getLowerBoundConstraintIds_NothingDefined_ReturnsNull() {
         String typeVariable = "T";
 
-        ITypeVariableCollection collection = createTypeVariableCollection();
+        IOverloadBindings collection = createOverloadBindings();
         collection.getLowerBoundConstraintIds(typeVariable);
 
         //assert in annotation
@@ -205,7 +201,7 @@ public class TypeVariableCollectionTest extends ATypeTest
         IConstraint constraint = new TypeConstraint(intType);
         when(constraint.getId()).thenReturn("id");
 
-        ITypeVariableCollection collection = createTypeVariableCollection();
+        IOverloadBindings collection = createOverloadBindings();
         collection.addLowerBound(typeVariable, constraint);
         Set<String> result = collection.getLowerBoundConstraintIds(typeVariable);
 
@@ -217,7 +213,7 @@ public class TypeVariableCollectionTest extends ATypeTest
     public void getUpperBoundConstraintIds_NothingDefined_ReturnsNull() {
         String typeVariable = "T";
 
-        ITypeVariableCollection collection = createTypeVariableCollection();
+        IOverloadBindings collection = createOverloadBindings();
         collection.getUpperBoundConstraintIds(typeVariable);
 
         //assert in annotation
@@ -229,7 +225,7 @@ public class TypeVariableCollectionTest extends ATypeTest
         IConstraint constraint = new TypeConstraint(intType);
         when(constraint.getId()).thenReturn("id");
 
-        ITypeVariableCollection collection = createTypeVariableCollection();
+        IOverloadBindings collection = createOverloadBindings();
         collection.addUpperBound(typeVariable, constraint);
         Set<String> result = collection.getUpperBoundConstraintIds(typeVariable);
 
@@ -242,7 +238,7 @@ public class TypeVariableCollectionTest extends ATypeTest
         String typeVariable = "T";
         IConstraint constraint = new TypeConstraint(intType);
 
-        ITypeVariableCollection collection = createTypeVariableCollection();
+        IOverloadBindings collection = createOverloadBindings();
         collection.addLowerBound(typeVariable, constraint);
         collection.addLowerBound(typeVariable, constraint);
         Collection<IConstraint> result = collection.getLowerBounds(typeVariable);
@@ -256,7 +252,7 @@ public class TypeVariableCollectionTest extends ATypeTest
         String typeVariable = "T";
         IConstraint constraint = mock(IConstraint.class);
 
-        ITypeVariableCollection collection = createTypeVariableCollection();
+        IOverloadBindings collection = createOverloadBindings();
         collection.addLowerBound(typeVariable, constraint);
 
         //assert in annotation
@@ -267,7 +263,7 @@ public class TypeVariableCollectionTest extends ATypeTest
         String typeVariable = "T";
         IConstraint constraint = new TypeConstraint(intType);
 
-        ITypeVariableCollection collection = createTypeVariableCollection();
+        IOverloadBindings collection = createOverloadBindings();
         collection.addUpperBound(typeVariable, constraint);
         collection.addUpperBound(typeVariable, constraint);
         Collection<IConstraint> result = collection.getUpperBounds(typeVariable);
@@ -281,24 +277,23 @@ public class TypeVariableCollectionTest extends ATypeTest
         String typeVariable = "T";
         IConstraint constraint = mock(IConstraint.class);
 
-        ITypeVariableCollection collection = createTypeVariableCollection();
+        IOverloadBindings collection = createOverloadBindings();
         collection.addUpperBound(typeVariable, constraint);
 
         //assert in annotation
     }
 
-    private ITypeVariableCollection createTypeVariableCollection() {
+    private IOverloadBindings createOverloadBindings() {
         return createTypeVariableCollection(mock(IOverloadResolver.class));
     }
 
-    protected ITypeVariableCollection createTypeVariableCollection(IOverloadResolver overloadResolver) {
-        return new TypeVariableCollection(overloadResolver);
+    protected IOverloadBindings createTypeVariableCollection(IOverloadResolver overloadResolver) {
+        return new OverloadBindings(overloadResolver);
     }
 
-    protected ITypeVariableCollection createTypeVariableCollection(
+    protected IOverloadBindings createTypeVariableCollection(
             IOverloadResolver overloadResolver,
-            TypeVariableCollection typeVariableCollection,
-            Map<String, TypeVariableConstraint> mapping) {
-        return new TypeVariableCollection(overloadResolver, typeVariableCollection, mapping);
+            OverloadBindings typeVariableCollection) {
+        return new OverloadBindings(overloadResolver, typeVariableCollection);
     }
 }

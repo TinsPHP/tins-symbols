@@ -13,8 +13,8 @@ import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
+import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadResolver;
-import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableCollection;
 import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IAliasSymbol;
@@ -363,20 +363,20 @@ public class SymbolFactoryTest
 
         ISymbolFactory symbolFactory = createSymbolFactory();
         IFunctionType result = symbolFactory.createFunctionType(
-                name, mock(ITypeVariableCollection.class), new ArrayList<IVariable>(), mock(IVariable.class));
+                name, mock(IOverloadBindings.class), new ArrayList<IVariable>(), mock(IVariable.class));
 
         assertThat(result.getName(), is(name));
     }
 
     @Test
     public void createFunctionType_Standard_TypeVariablesArePassedTypeVariables() {
-        ITypeVariableCollection typeVariables = mock(ITypeVariableCollection.class);
+        IOverloadBindings typeVariables = mock(IOverloadBindings.class);
 
         ISymbolFactory symbolFactory = createSymbolFactory();
         IFunctionType result = symbolFactory.createFunctionType(
                 "+", typeVariables, new ArrayList<IVariable>(), mock(IVariable.class));
 
-        assertThat(result.getTypeVariables(), is(typeVariables));
+        assertThat(result.getBindings(), is(typeVariables));
     }
 
     @Test
@@ -385,7 +385,7 @@ public class SymbolFactoryTest
 
         ISymbolFactory symbolFactory = createSymbolFactory();
         IFunctionType result = symbolFactory.createFunctionType(
-                "+", mock(ITypeVariableCollection.class), parameters, mock(IVariable.class));
+                "+", mock(IOverloadBindings.class), parameters, mock(IVariable.class));
 
         assertThat(result.getParameters(), is(parameters));
     }
@@ -396,7 +396,7 @@ public class SymbolFactoryTest
 
         ISymbolFactory symbolFactory = createSymbolFactory();
         IFunctionType result = symbolFactory.createFunctionType(
-                "+", mock(ITypeVariableCollection.class), new ArrayList<IVariable>(), returnVariable);
+                "+", mock(IOverloadBindings.class), new ArrayList<IVariable>(), returnVariable);
 
         assertThat(result.getReturnVariable(), is(returnVariable));
     }

@@ -19,8 +19,8 @@ import ch.tsphp.common.exceptions.TSPHPException;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
+import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadResolver;
-import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableCollection;
 import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IAliasSymbol;
@@ -178,10 +178,10 @@ public class SymbolFactory implements ISymbolFactory
     @Override
     public IFunctionType createFunctionType(
             String name,
-            ITypeVariableCollection typeVariableCollection,
+            IOverloadBindings overloadBindings,
             List<IVariable> parameterTypeVariables,
             IVariable returnTypeVariable) {
-        return new FunctionType(name, typeVariableCollection, parameterTypeVariables, returnTypeVariable);
+        return new FunctionType(name, overloadBindings, parameterTypeVariables, returnTypeVariable);
     }
 
     @Override

@@ -8,24 +8,26 @@ package ch.tsphp.tinsphp.symbols.constraints;
 
 
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
-import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableCollection;
+import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
+import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
 
 import java.util.List;
+import java.util.Map;
 
 public class FunctionType implements IFunctionType
 {
     protected final String name;
-    private ITypeVariableCollection typeVariableCollection;
+    private IOverloadBindings bindings;
     private List<IVariable> parameters;
     private IVariable returnVariable;
 
     public FunctionType(String theName,
-            ITypeVariableCollection theTypeVariableCollection,
+            IOverloadBindings theOverloadBindings,
             List<IVariable> theParameterVariables,
             IVariable theReturnVariable) {
         name = theName;
-        typeVariableCollection = theTypeVariableCollection;
+        bindings = theOverloadBindings;
         parameters = theParameterVariables;
         returnVariable = theReturnVariable;
     }
@@ -51,12 +53,40 @@ public class FunctionType implements IFunctionType
     }
 
     @Override
-    public ITypeVariableCollection getTypeVariables() {
-        return typeVariableCollection;
+    public IOverloadBindings getBindings() {
+        return bindings;
     }
 
     @Override
     public String toString() {
-        return name;
+        StringBuilder sb = new StringBuilder();
+        sb.append(name).append("{").append(getNumberOfNonOptionalParameters()).append("}").append("[");
+        Map<String, ITypeVariableConstraint> variable2TypeVariable = bindings.getVariable2TypeVariable();
+        for (IVariable parameter : parameters) {
+            toString(sb, variable2TypeVariable, parameter).append(", ");
+        }
+        toString(sb, variable2TypeVariable, returnVariable);
+        sb.append("]");
+        return sb.toString();
+    }
+
+    private StringBuilder toString(
+            StringBuilder sb, Map<String, ITypeVariableConstraint> variable2TypeVariable, IVariable parameter) {
+        String absoluteName = parameter.getAbsoluteName();
+        sb.append(absoluteName).append(":");
+        ITypeVariableConstraint constraint = variable2TypeVariable.get(absoluteName);
+        String typeVariable = constraint.getTypeVariable();
+        sb.append(typeVariable)
+                .append("<")
+                .append(bindings.hasLowerBounds(typeVariable)
+                        ? bindings.getLowerBoundConstraintIds(typeVariable).toString() : "[]")
+                .append(",")
+                .append(bindings.hasUpperBounds(typeVariable)
+                        ? bindings.getUpperBoundConstraintIds(typeVariable).toString() : "[]")
+                .append(">");
+        if (constraint.hasFixedType()) {
+            sb.append("#");
+        }
+        return sb;
     }
 }

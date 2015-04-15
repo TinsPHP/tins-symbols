@@ -16,9 +16,9 @@ import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ISymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
-import ch.tsphp.tinsphp.common.inference.constraints.IBinding;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IIntersectionConstraint;
+import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMinimalVariableSymbol;
@@ -38,7 +38,7 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
     //Warning! start code duplication - same as in GlobalNamespaceScope
     private final List<IIntersectionConstraint> lowerBoundConstraints = new ArrayList<>();
     private final List<IIntersectionConstraint> upperBoundConstraints = new ArrayList<>();
-    private List<IBinding> bindings;
+    private List<IOverloadBindings> bindings;
     //Warning! end code duplication - same as in GlobalNamespaceScope
 
     @SuppressWarnings("checkstyle:parameternumber")
@@ -160,12 +160,12 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
 
     //Warning! start code duplication - same as in GlobalNamespaceScope
     @Override
-    public List<IBinding> getBindings() {
+    public List<IOverloadBindings> getBindings() {
         return bindings;
     }
 
     @Override
-    public void setBindings(List<IBinding> theBindings) {
+    public void setBindings(List<IOverloadBindings> theBindings) {
         bindings = theBindings;
     }
     //Warning! end code duplication - same as in GlobalNamespaceScope
