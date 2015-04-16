@@ -10,7 +10,6 @@ import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
 import ch.tsphp.common.symbols.ITypeSymbol;
-import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
@@ -28,6 +27,7 @@ import ch.tsphp.tinsphp.common.symbols.INullTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IPseudoTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IScalarTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
+import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousLazySymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
@@ -41,9 +41,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -335,16 +333,6 @@ public class SymbolFactoryTest
 
         assertThat(result.getTypeSymbols(), is(not(nullValue())));
         assertThat(result.getTypeSymbols().size(), is(0));
-    }
-
-    @Test
-    public void createUnionTypeSymbol_Standard_TypesArePassedTypes() {
-        Map<String, ITypeSymbol> types = new HashMap<>();
-
-        ISymbolFactory symbolFactory = createSymbolFactory();
-        IUnionTypeSymbol result = symbolFactory.createUnionTypeSymbol(types);
-
-        assertThat(result.getTypeSymbols(), is(types));
     }
 
     @Test

@@ -7,8 +7,8 @@
 package ch.tsphp.tinsphp.symbols.utils;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
-import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadResolver;
+import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 
 import java.util.Set;
 

@@ -7,8 +7,8 @@
 package ch.tsphp.tinsphp.symbols.test.unit.utils;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
-import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadResolver;
+import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.symbols.test.unit.testutils.ATypeTest;
 import ch.tsphp.tinsphp.symbols.utils.OverloadResolver;
 import org.junit.Test;

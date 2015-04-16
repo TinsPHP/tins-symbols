@@ -12,6 +12,8 @@ import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadResolver;
 import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableConstraint;
+import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
+import ch.tsphp.tinsphp.symbols.UnionTypeSymbol;
 import ch.tsphp.tinsphp.symbols.constraints.BoundException;
 import ch.tsphp.tinsphp.symbols.constraints.LowerBoundException;
 import ch.tsphp.tinsphp.symbols.constraints.OverloadBindings;
@@ -19,7 +21,10 @@ import ch.tsphp.tinsphp.symbols.constraints.TypeConstraint;
 import ch.tsphp.tinsphp.symbols.constraints.UpperBoundException;
 import ch.tsphp.tinsphp.symbols.test.unit.testutils.ATypeTest;
 import ch.tsphp.tinsphp.symbols.utils.OverloadResolver;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -35,21 +40,36 @@ import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.hamcrest.core.IsNot.not;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class OverloadBindingsTest extends ATypeTest
 {
+    private static ISymbolFactory symbolFactory;
+    private static IOverloadResolver overloadResolver;
+
+    @BeforeClass
+    public static void init() {
+        overloadResolver = new OverloadResolver();
+        symbolFactory = mock(ISymbolFactory.class);
+        when(symbolFactory.createUnionTypeSymbol()).then(new Answer<Object>()
+        {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                return new UnionTypeSymbol(overloadResolver);
+            }
+        });
+    }
 
     @Test
     public void copyConstructor_HasTwoVariablesW_CopyBoth() {
-        IOverloadResolver overloadResolver = mock(IOverloadResolver.class);
-        OverloadBindings bindings1 = new OverloadBindings(overloadResolver);
+        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, overloadResolver);
         Map<String, ITypeVariableConstraint> variable2TypeVariable = bindings1.getVariable2TypeVariable();
         ITypeVariableConstraint t1 = new TypeVariableConstraint("T1");
         variable2TypeVariable.put("$a", t1);
         ITypeVariableConstraint t2 = new TypeVariableConstraint("T2");
         variable2TypeVariable.put("$b", t2);
 
-        IOverloadBindings collection = createOverloadBindings(overloadResolver, bindings1);
+        IOverloadBindings collection = createOverloadBindings(bindings1);
         Map<String, ITypeVariableConstraint> result = collection.getVariable2TypeVariable();
 
         assertThat(result, hasKey("$a"));
@@ -60,13 +80,12 @@ public class OverloadBindingsTest extends ATypeTest
 
     @Test
     public void copyConstructor_HasTwoVariablesWithSameTypeVariable_ReferToSameTypeVariableConstraintAfterwards() {
-        IOverloadResolver overloadResolver = mock(IOverloadResolver.class);
-        OverloadBindings bindings1 = new OverloadBindings(overloadResolver);
+        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, overloadResolver);
         Map<String, ITypeVariableConstraint> variable2TypeVariable = bindings1.getVariable2TypeVariable();
         variable2TypeVariable.put("$a", new TypeVariableConstraint("T"));
         variable2TypeVariable.put("$b", new TypeVariableConstraint("T"));
 
-        IOverloadBindings collection = createOverloadBindings(overloadResolver, bindings1);
+        IOverloadBindings collection = createOverloadBindings(bindings1);
         Map<String, ITypeVariableConstraint> result = collection.getVariable2TypeVariable();
 
         assertThat(result, hasKey("$a"));
@@ -76,13 +95,12 @@ public class OverloadBindingsTest extends ATypeTest
 
     @Test
     public void copyConstructor_HasTwoVariablesOneIsFixed_TheOneIsStillFixedAfterwards() {
-        IOverloadResolver overloadResolver = mock(IOverloadResolver.class);
-        OverloadBindings bindings1 = new OverloadBindings(overloadResolver);
+        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, overloadResolver);
         Map<String, ITypeVariableConstraint> variable2TypeVariable = bindings1.getVariable2TypeVariable();
         variable2TypeVariable.put("$a", new FixedTypeVariableConstraint(new TypeVariableConstraint("T")));
         variable2TypeVariable.put("$b", new TypeVariableConstraint("T"));
 
-        IOverloadBindings collection = createOverloadBindings(overloadResolver, bindings1);
+        IOverloadBindings collection = createOverloadBindings(bindings1);
         Map<String, ITypeVariableConstraint> result = collection.getVariable2TypeVariable();
 
         assertThat(result, hasKey("$a"));
@@ -94,13 +112,12 @@ public class OverloadBindingsTest extends ATypeTest
 
     @Test
     public void copyConstructor_HasTwoVariablesFirstIsFixed_ReferToSameAndOnlyFirstIsFixed() {
-        IOverloadResolver overloadResolver = mock(IOverloadResolver.class);
-        OverloadBindings bindings1 = new OverloadBindings(overloadResolver);
+        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, overloadResolver);
         Map<String, ITypeVariableConstraint> variable2TypeVariable = bindings1.getVariable2TypeVariable();
         variable2TypeVariable.put("$a", new FixedTypeVariableConstraint(new TypeVariableConstraint("T")));
         variable2TypeVariable.put("$b", new TypeVariableConstraint("T"));
 
-        IOverloadBindings collection = createOverloadBindings(overloadResolver, bindings1);
+        IOverloadBindings collection = createOverloadBindings(bindings1);
         Map<String, ITypeVariableConstraint> result = collection.getVariable2TypeVariable();
 
         assertThat(result, hasKey("$a"));
@@ -114,13 +131,12 @@ public class OverloadBindingsTest extends ATypeTest
 
     @Test
     public void copyConstructor_HasTwoVariablesFirstIsSecond_ReferToSameAndOnlySecondIsFixed() {
-        IOverloadResolver overloadResolver = mock(IOverloadResolver.class);
-        OverloadBindings bindings1 = new OverloadBindings(overloadResolver);
+        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, overloadResolver);
         Map<String, ITypeVariableConstraint> variable2TypeVariable = bindings1.getVariable2TypeVariable();
         variable2TypeVariable.put("$a", new TypeVariableConstraint("T"));
         variable2TypeVariable.put("$b", new FixedTypeVariableConstraint(new TypeVariableConstraint("T")));
 
-        IOverloadBindings collection = createOverloadBindings(overloadResolver, bindings1);
+        IOverloadBindings collection = createOverloadBindings(bindings1);
         Map<String, ITypeVariableConstraint> result = collection.getVariable2TypeVariable();
 
         assertThat(result, hasKey("$a"));
@@ -134,8 +150,7 @@ public class OverloadBindingsTest extends ATypeTest
 
     @Test
     public void copyConstructor_HasTwoLowerBoundsWithSameTypeVariableRef_ReferToSameTypeVariableConstraintAfterwards() {
-        IOverloadResolver overloadResolver = mock(IOverloadResolver.class);
-        OverloadBindings bindings1 = new OverloadBindings(overloadResolver);
+        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, overloadResolver);
         Map<String, ITypeVariableConstraint> variable2TypeVariable = bindings1.getVariable2TypeVariable();
         variable2TypeVariable.put("$a", new TypeVariableConstraint("T1"));
         variable2TypeVariable.put("$b", new TypeVariableConstraint("T2"));
@@ -143,7 +158,7 @@ public class OverloadBindingsTest extends ATypeTest
         bindings1.addLowerBound("T1", new TypeVariableConstraint("T3"));
         bindings1.addLowerBound("T2", new TypeVariableConstraint("T3"));
 
-        IOverloadBindings collection = createOverloadBindings(overloadResolver, bindings1);
+        IOverloadBindings collection = createOverloadBindings(bindings1);
         Map<String, ITypeVariableConstraint> result = collection.getVariable2TypeVariable();
 
         assertThat(result, hasKey("$a"));
@@ -158,7 +173,7 @@ public class OverloadBindingsTest extends ATypeTest
     }
 
     @Test
-    public void tryToFixateType_IsAlreadyFixedNoLowerBounds_ReturnsTrue() {
+    public void tryToFixType_IsAlreadyFixedNoLowerBounds_ReturnsTrue() {
         //pre act - necessary for arrange
         IOverloadBindings collection = createOverloadBindings();
 
@@ -167,14 +182,14 @@ public class OverloadBindingsTest extends ATypeTest
         variable2TypeVariable.put("$a", new FixedTypeVariableConstraint(new TypeVariableConstraint("T")));
 
         //act
-        boolean result = collection.tryToFixateType("$a");
+        boolean result = collection.tryToFixType("$a");
 
         assertThat(result, is(true));
         assertThat(collection.hasLowerBounds("T"), is(false));
     }
 
     @Test
-    public void tryToFixateType_IsAlreadyFixedSomeLowerBounds_DoesNotRemoveLowerBounds() {
+    public void tryToFixType_IsAlreadyFixedSomeLowerBounds_DoesNotRemoveLowerBounds() {
         //pre act - necessary for arrange
         IOverloadBindings collection = createOverloadBindings();
 
@@ -184,7 +199,7 @@ public class OverloadBindingsTest extends ATypeTest
         collection.addLowerBound("T", new TypeConstraint(intType));
 
         //act
-        boolean result = collection.tryToFixateType("$a");
+        boolean result = collection.tryToFixType("$a");
 
         assertThat(result, is(true));
         assertThat(collection.hasLowerBounds("T"), is(true));
@@ -192,7 +207,7 @@ public class OverloadBindingsTest extends ATypeTest
     }
 
     @Test
-    public void tryToFixateType_IsAlreadyFixedOnlySelfAsLowerBound_RemovesAllLowerBounds() {
+    public void tryToFixType_IsAlreadyFixedOnlySelfAsLowerBound_RemovesAllLowerBounds() {
         //pre act - necessary for arrange
         IOverloadBindings collection = createOverloadBindings();
 
@@ -202,14 +217,14 @@ public class OverloadBindingsTest extends ATypeTest
         collection.addLowerBound("T", new TypeVariableConstraint("T"));
 
         //act
-        boolean result = collection.tryToFixateType("$a");
+        boolean result = collection.tryToFixType("$a");
 
         assertThat(result, is(true));
         assertThat(collection.hasLowerBounds("T"), is(false));
     }
 
     @Test
-    public void tryToFixateType_IsAlreadyFixedSelfAndTypeAsLowerBound_RemoveSelfRefButNotType() {
+    public void tryToFixType_IsAlreadyFixedSelfAndTypeAsLowerBound_RemoveSelfRefButNotType() {
         //pre act - necessary for arrange
         IOverloadBindings collection = createOverloadBindings();
 
@@ -221,7 +236,7 @@ public class OverloadBindingsTest extends ATypeTest
         collection.addLowerBound("T", new TypeConstraint(floatType));
 
         //act
-        boolean result = collection.tryToFixateType("$a");
+        boolean result = collection.tryToFixType("$a");
 
         assertThat(result, is(true));
         assertThat(collection.hasLowerBounds("T"), is(true));
@@ -422,11 +437,10 @@ public class OverloadBindingsTest extends ATypeTest
 
     @Test
     public void getNextTypeVariable_SecondCallAfterCopy_ReturnsT2() {
-        IOverloadResolver overloadResolver = mock(IOverloadResolver.class);
-        OverloadBindings bindings1 = new OverloadBindings(overloadResolver);
+        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, overloadResolver);
         bindings1.getNextTypeVariable();
 
-        IOverloadBindings collection = createOverloadBindings(overloadResolver, bindings1);
+        IOverloadBindings collection = createOverloadBindings(bindings1);
         TypeVariableConstraint result = collection.getNextTypeVariable();
 
         assertThat(result.getTypeVariable(), is("T2"));
@@ -695,16 +709,20 @@ public class OverloadBindingsTest extends ATypeTest
     }
 
     private IOverloadBindings createOverloadBindings() {
-        return createOverloadBindings(new OverloadResolver());
+        return createOverloadBindings(symbolFactory, overloadResolver);
     }
 
-
-    protected IOverloadBindings createOverloadBindings(IOverloadResolver overloadResolver) {
-        return new OverloadBindings(overloadResolver);
+    private IOverloadBindings createOverloadBindings(OverloadBindings bindings) {
+        return createOverloadBindings(symbolFactory, overloadResolver, bindings);
     }
 
     protected IOverloadBindings createOverloadBindings(
-            IOverloadResolver overloadResolver, OverloadBindings bindings) {
-        return new OverloadBindings(overloadResolver, bindings);
+            ISymbolFactory symbolFactory, IOverloadResolver overloadResolver) {
+        return new OverloadBindings(symbolFactory, overloadResolver);
+    }
+
+    protected IOverloadBindings createOverloadBindings(
+            ISymbolFactory symbolFactory, IOverloadResolver overloadResolver, OverloadBindings bindings) {
+        return new OverloadBindings(symbolFactory, overloadResolver, bindings);
     }
 }

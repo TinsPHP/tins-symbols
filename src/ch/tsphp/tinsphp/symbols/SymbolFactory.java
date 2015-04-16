@@ -17,7 +17,6 @@ import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
 import ch.tsphp.common.symbols.ITypeSymbol;
-import ch.tsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadResolver;
@@ -35,6 +34,7 @@ import ch.tsphp.tinsphp.common.symbols.INullTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IPseudoTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IScalarTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
+import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousLazySymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
@@ -49,7 +49,6 @@ import ch.tsphp.tinsphp.symbols.erroneous.ErroneousTypeSymbol;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousVariableSymbol;
 
 import java.util.List;
-import java.util.Map;
 
 public class SymbolFactory implements ISymbolFactory
 {
@@ -163,11 +162,6 @@ public class SymbolFactory implements ISymbolFactory
     @Override
     public IUnionTypeSymbol createUnionTypeSymbol() {
         return new UnionTypeSymbol(overloadResolver);
-    }
-
-    @Override
-    public IUnionTypeSymbol createUnionTypeSymbol(Map<String, ITypeSymbol> types) {
-        return new UnionTypeSymbol(overloadResolver, types);
     }
 
     @Override

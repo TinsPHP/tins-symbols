@@ -8,60 +8,62 @@ package ch.tsphp.tinsphp.symbols;
 
 import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
-import ch.tsphp.common.symbols.IForEvalReadyListener;
-import ch.tsphp.common.symbols.ILazyTypeSymbol;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
+import ch.tsphp.tinsphp.common.inference.constraints.IOverloadResolver;
+import ch.tsphp.tinsphp.common.symbols.IContainerTypeSymbol;
 
-import java.util.ArrayDeque;
-import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
-public abstract class ALazyTypeSymbol implements ILazyTypeSymbol
+public abstract class AContainerTypeSymbol implements IContainerTypeSymbol
 {
-    private static final String ERROR_MESSAGE = "You are dealing with an ILazyTypeSymbol.";
+    private static final String ERROR_MESSAGE = "You are dealing with an AContainerTypeSymbol.";
 
-    private Collection<IForEvalReadyListener> listeners = new ArrayDeque<>();
-    private boolean isReadyForEval = false;
+    protected static enum ETypeRelation
+    {
+        NO_RELATION,
+        PARENT_TYPE,
+        SUB_TYPE
+    }
+
+    protected final IOverloadResolver overloadResolver;
+    protected final Map<String, ITypeSymbol> typeSymbols;
+
+    public AContainerTypeSymbol(IOverloadResolver theOverloadResolver) {
+        super();
+        overloadResolver = theOverloadResolver;
+        typeSymbols = new HashMap<>();
+    }
 
     @Override
     public abstract ITypeSymbol evalSelf();
 
     @Override
-    public void addForEvalReadyListener(IForEvalReadyListener listener) {
-        if (!isReadyForEval()) {
-            listeners.add(listener);
-        } else {
-            listener.notifyReadyForEval();
-        }
-    }
+    public abstract String getName();
 
-    protected void notifyForEvalReadyListeners() {
-        if (isReadyForEval) {
-            throw new IllegalStateException("LazyTypeSymbol is already ready for eval");
-        }
+    @Override
+    public abstract String getAbsoluteName();
 
-        isReadyForEval = true;
-        for (IForEvalReadyListener listener : listeners) {
-            listener.notifyReadyForEval();
+    protected abstract boolean addAndSimplify(String absoluteName, ITypeSymbol newTypeSymbol);
+
+    @Override
+    public boolean addTypeSymbol(ITypeSymbol typeSymbol) {
+        boolean hasChanged = false;
+
+        String absoluteName = typeSymbol.getAbsoluteName();
+
+        //no need to add it if it already exists in the container; ergo simplification = do not insert
+        if (!typeSymbols.containsKey(absoluteName)) {
+            hasChanged = addAndSimplify(absoluteName, typeSymbol);
         }
-        //free space
-        listeners = null;
+        return hasChanged;
     }
 
     @Override
-    public boolean isReadyForEval() {
-        return isReadyForEval;
-    }
-
-    @Override
-    public String getName() {
-        return "?";
-    }
-
-    @Override
-    public String getAbsoluteName() {
-        return "?";
+    public Map<String, ITypeSymbol> getTypeSymbols() {
+        return typeSymbols;
     }
 
     @Override

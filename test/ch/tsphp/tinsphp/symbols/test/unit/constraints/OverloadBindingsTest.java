@@ -9,6 +9,7 @@ package ch.tsphp.tinsphp.symbols.test.unit.constraints;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadResolver;
+import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.symbols.constraints.OverloadBindings;
 import ch.tsphp.tinsphp.symbols.constraints.TypeConstraint;
 import ch.tsphp.tinsphp.symbols.test.unit.testutils.ATypeTest;
@@ -35,14 +36,15 @@ public class OverloadBindingsTest extends ATypeTest
         IConstraint lowerConstraint = new TypeConstraint(intType);
         IConstraint upperConstraint = new TypeConstraint(intType);
 
+        ISymbolFactory symbolFactory = mock(ISymbolFactory.class);
         IOverloadResolver overloadResolver = mock(IOverloadResolver.class);
         when(overloadResolver.isFirstSameOrParentTypeOfSecond(intType, intType)).thenReturn(true);
 
-        OverloadBindings collection1 = new OverloadBindings(overloadResolver);
+        OverloadBindings collection1 = new OverloadBindings(symbolFactory, overloadResolver);
         collection1.addLowerBound(typeVariable, lowerConstraint);
         collection1.addUpperBound(typeVariable, upperConstraint);
 
-        IOverloadBindings collection = createTypeVariableCollection(overloadResolver, collection1);
+        IOverloadBindings collection = createTypeVariableCollection(symbolFactory, overloadResolver, collection1);
         Collection<IConstraint> lowerResult = collection.getLowerBounds(typeVariable);
         Collection<IConstraint> upperResult = collection.getUpperBounds(typeVariable);
 
@@ -284,16 +286,18 @@ public class OverloadBindingsTest extends ATypeTest
     }
 
     private IOverloadBindings createOverloadBindings() {
-        return createTypeVariableCollection(mock(IOverloadResolver.class));
-    }
-
-    protected IOverloadBindings createTypeVariableCollection(IOverloadResolver overloadResolver) {
-        return new OverloadBindings(overloadResolver);
+        return createTypeVariableCollection(mock(ISymbolFactory.class), mock(IOverloadResolver.class));
     }
 
     protected IOverloadBindings createTypeVariableCollection(
+            ISymbolFactory symbolFactory, IOverloadResolver overloadResolver) {
+        return new OverloadBindings(symbolFactory, overloadResolver);
+    }
+
+    protected IOverloadBindings createTypeVariableCollection(
+            ISymbolFactory symbolFactory,
             IOverloadResolver overloadResolver,
             OverloadBindings typeVariableCollection) {
-        return new OverloadBindings(overloadResolver, typeVariableCollection);
+        return new OverloadBindings(symbolFactory, overloadResolver, typeVariableCollection);
     }
 }

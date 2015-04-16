@@ -8,7 +8,7 @@ package ch.tsphp.tinsphp.symbols.test.unit.symbols.LSP;
 
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ITypeSymbol;
-import ch.tsphp.common.symbols.IUnionTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.symbols.ASymbol;
 import ch.tsphp.tinsphp.symbols.ModifierSet;
 import ch.tsphp.tinsphp.symbols.VariableSymbol;
