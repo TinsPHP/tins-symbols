@@ -10,8 +10,8 @@ import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
-import ch.tsphp.tinsphp.common.inference.constraints.IOverloadResolver;
 import ch.tsphp.tinsphp.common.symbols.IContainerTypeSymbol;
+import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
 
 import java.util.HashMap;
 import java.util.Map;

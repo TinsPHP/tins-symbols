@@ -7,8 +7,8 @@
 package ch.tsphp.tinsphp.symbols.test.unit.symbols;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
-import ch.tsphp.tinsphp.common.inference.constraints.IOverloadResolver;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
+import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
 import ch.tsphp.tinsphp.symbols.UnionTypeSymbol;
 import ch.tsphp.tinsphp.symbols.test.unit.testutils.ATypeTest;
 import ch.tsphp.tinsphp.symbols.utils.OverloadResolver;
@@ -20,6 +20,8 @@ import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 public class UnionTypeSymbolTest extends ATypeTest
 {
@@ -141,9 +143,9 @@ public class UnionTypeSymbolTest extends ATypeTest
 //    @Test
 //    public void merge_EmptyMergeWithIntAndFloat_ReturnsTrueAndUnionContainsIntAndFloat() {
 //        Map<String, ITypeSymbol> map2 = createMapWithTypes(intType, floatType);
-//        IUnionTypeSymbol unionTypeSymbol2 = createUnionTypeSymbol(map2);
+//        IUnionTypeSymbol unionTypeSymbol2 = createIntersectionTypeSymbol(map2);
 //
-//        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol();
+//        IUnionTypeSymbol unionTypeSymbol = createIntersectionTypeSymbol();
 //        boolean result = unionTypeSymbol.merge(unionTypeSymbol2);
 //        Map<String, ITypeSymbol> symbols = unionTypeSymbol.getTypeSymbols();
 //
@@ -155,9 +157,9 @@ public class UnionTypeSymbolTest extends ATypeTest
 //    public void merge_IntAndFloatMergeWithFloatAndInt_ReturnsFalseAndUnionContainsIntAndFloat() {
 //        Map<String, ITypeSymbol> map = createMapWithTypes(intType, floatType);
 //        Map<String, ITypeSymbol> map2 = createMapWithTypes(intType, floatType);
-//        IUnionTypeSymbol unionTypeSymbol2 = createUnionTypeSymbol(map2);
+//        IUnionTypeSymbol unionTypeSymbol2 = createIntersectionTypeSymbol(map2);
 //
-//        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(map);
+//        IUnionTypeSymbol unionTypeSymbol = createIntersectionTypeSymbol(map);
 //        boolean result = unionTypeSymbol.merge(unionTypeSymbol2);
 //        Map<String, ITypeSymbol> symbols = unionTypeSymbol.getTypeSymbols();
 //
@@ -169,9 +171,9 @@ public class UnionTypeSymbolTest extends ATypeTest
 //    public void merge_NumAndStringMergeWithFloatAndInt_ReturnsFalseAndUnionContainsNumAndString() {
 //        Map<String, ITypeSymbol> map = createMapWithTypes(numType, stringType);
 //        Map<String, ITypeSymbol> map2 = createMapWithTypes(intType, floatType);
-//        IUnionTypeSymbol unionTypeSymbol2 = createUnionTypeSymbol(map2);
+//        IUnionTypeSymbol unionTypeSymbol2 = createIntersectionTypeSymbol(map2);
 //
-//        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(map);
+//        IUnionTypeSymbol unionTypeSymbol = createIntersectionTypeSymbol(map);
 //        boolean result = unionTypeSymbol.merge(unionTypeSymbol2);
 //        Map<String, ITypeSymbol> symbols = unionTypeSymbol.getTypeSymbols();
 //
@@ -183,9 +185,9 @@ public class UnionTypeSymbolTest extends ATypeTest
 //    public void merge_BoolAndIntAndFloatAndFooMergeWithNumAndIA_ReturnsTrueAndUnionContainsBoolAndNumAndIA() {
 //        Map<String, ITypeSymbol> map = createMapWithTypes(boolType, intType, floatType);
 //        Map<String, ITypeSymbol> map2 = createMapWithTypes(numType, interfaceAType);
-//        IUnionTypeSymbol unionTypeSymbol2 = createUnionTypeSymbol(map2);
+//        IUnionTypeSymbol unionTypeSymbol2 = createIntersectionTypeSymbol(map2);
 //
-//        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(map);
+//        IUnionTypeSymbol unionTypeSymbol = createIntersectionTypeSymbol(map);
 //        boolean result = unionTypeSymbol.merge(unionTypeSymbol2);
 //        Map<String, ITypeSymbol> symbols = unionTypeSymbol.getTypeSymbols();
 //
@@ -232,6 +234,28 @@ public class UnionTypeSymbolTest extends ATypeTest
 
         //assert
         assertThat(result, anyOf(is("(int | float)"), is("(float | int)")));
+    }
+
+    @Test
+    public void getAbsoluteName_IsEmpty_ReturnsNothingUsedGetName() {
+        //no arrange necessary
+
+        IUnionTypeSymbol unionTypeSymbol = spy(createUnionTypeSymbol());
+        String result = unionTypeSymbol.getAbsoluteName();
+
+        assertThat(result, is("nothing"));
+        verify(unionTypeSymbol).getName();
+    }
+
+    @Test
+    public void toString_IsEmpty_ReturnsNothingUsedGetAbsoluteName() {
+        //no arrange necessary
+
+        IUnionTypeSymbol unionTypeSymbol = spy(createUnionTypeSymbol());
+        String result = unionTypeSymbol.toString();
+
+        assertThat(result, is("nothing"));
+        verify(unionTypeSymbol).getAbsoluteName();
     }
 
     private IUnionTypeSymbol createUnionTypeSymbol() {

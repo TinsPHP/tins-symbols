@@ -11,9 +11,7 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -97,13 +95,4 @@ public abstract class ATypeTest
         return new HashSet<>(Arrays.asList(symbols));
     }
     //Warning! end code duplication - same as in ConstraintSolverTest from the inference component
-
-
-    protected Map<String, ITypeSymbol> createMapWithTypes(ITypeSymbol... typeSymbols) {
-        Map<String, ITypeSymbol> map = new HashMap<>();
-        for (ITypeSymbol typeSymbol : typeSymbols) {
-            map.put(typeSymbol.getAbsoluteName(), typeSymbol);
-        }
-        return map;
-    }
 }

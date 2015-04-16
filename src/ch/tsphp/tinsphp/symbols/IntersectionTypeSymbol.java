@@ -7,68 +7,57 @@
 package ch.tsphp.tinsphp.symbols;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
-import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
 
 import java.util.Iterator;
 import java.util.Map;
 
-public class UnionTypeSymbol extends AContainerTypeSymbol implements IUnionTypeSymbol
+public class IntersectionTypeSymbol extends AContainerTypeSymbol implements IIntersectionTypeSymbol
 {
 
-    public UnionTypeSymbol(IOverloadResolver theOverloadResolver) {
+    public IntersectionTypeSymbol(IOverloadResolver theOverloadResolver) {
         super(theOverloadResolver);
-    }
-
-    @Override
-    public ITypeSymbol evalSelf() {
-        return this;
     }
 
     @Override
     protected boolean addAndSimplify(String absoluteName, ITypeSymbol newTypeSymbol) {
         boolean changedUnion = false;
 
-        //Warning! start code duplication - almost the same as in IntersectionTypeSymbol
+        //Warning! start code duplication - almost the same as in UnionTypeSymbol
 
         ETypeRelation status = ETypeRelation.NO_RELATION;
         Iterator<Map.Entry<String, ITypeSymbol>> iterator = typeSymbols.entrySet().iterator();
         while (iterator.hasNext()) {
             ITypeSymbol existingTypeInUnion = iterator.next().getValue();
-            if ((status == ETypeRelation.NO_RELATION || status == ETypeRelation.PARENT_TYPE)
-                    && overloadResolver.isFirstSameOrSubTypeOfSecond(existingTypeInUnion, newTypeSymbol)) {
-                //remove sub-type, it does no longer add information to the union type
-                status = ETypeRelation.PARENT_TYPE;
+            if ((status == ETypeRelation.NO_RELATION || status == ETypeRelation.SUB_TYPE)
+                    && overloadResolver.isFirstSameOrParentTypeOfSecond(existingTypeInUnion, newTypeSymbol)) {
+                //remove parent type, it does no longer add information to the intersection type
+                status = ETypeRelation.SUB_TYPE;
                 iterator.remove();
             } else if (status == ETypeRelation.NO_RELATION
-                    && overloadResolver.isFirstSameOrParentTypeOfSecond(existingTypeInUnion, newTypeSymbol)) {
-                //new type is a sub type of an existing and hence it does not add new information to the union
-                status = ETypeRelation.SUB_TYPE;
+                    && overloadResolver.isFirstSameOrSubTypeOfSecond(existingTypeInUnion, newTypeSymbol)) {
+                //new type is a parent type of an existing and hence it does not add new information to the union
+                status = ETypeRelation.PARENT_TYPE;
                 break;
             }
         }
 
-        if (status == ETypeRelation.NO_RELATION || status == ETypeRelation.PARENT_TYPE) {
+        if (status == ETypeRelation.NO_RELATION || status == ETypeRelation.SUB_TYPE) {
             changedUnion = true;
             typeSymbols.put(absoluteName, newTypeSymbol);
         }
 
-        //Warning! start code duplication - almost the same as in IntersectionTypeSymbol
+        //Warning! end code duplication - almost the same as in UnionTypeSymbol
 
         return changedUnion;
     }
 
-//    @Override
-//    public boolean merge(IUnionTypeSymbol unionTypeSymbol) {
-//        boolean changedUnion = false;
-//
-//        for (ITypeSymbol typeSymbol : unionTypeSymbol.getTypeSymbols().values()) {
-//            boolean hasUnionChanged = addTypeSymbol(typeSymbol);
-//            changedUnion = changedUnion || hasUnionChanged;
-//        }
-//
-//        return changedUnion;
-//    }
+
+    @Override
+    public ITypeSymbol evalSelf() {
+        return null;
+    }
 
     @Override
     public String getName() {
@@ -77,21 +66,24 @@ public class UnionTypeSymbol extends AContainerTypeSymbol implements IUnionTypeS
 
     @Override
     public String getAbsoluteName() {
+
         StringBuilder sb = new StringBuilder();
         Iterator<String> iterator = typeSymbols.keySet().iterator();
         if (iterator.hasNext()) {
             sb.append(iterator.next());
         }
         while (iterator.hasNext()) {
-            sb.append(" | ").append(iterator.next());
+            sb.append(" & ").append(iterator.next());
         }
         if (typeSymbols.size() == 0) {
-            sb.append("nothing");
+            sb.append("mixed");
         }
         if (typeSymbols.size() > 1) {
             sb.insert(0, "(");
             sb.append(")");
         }
+
         return sb.toString();
+
     }
 }

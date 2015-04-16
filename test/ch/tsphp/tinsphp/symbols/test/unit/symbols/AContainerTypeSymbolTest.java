@@ -8,7 +8,7 @@ package ch.tsphp.tinsphp.symbols.test.unit.symbols;
 
 import ch.tsphp.common.IScope;
 import ch.tsphp.common.symbols.ITypeSymbol;
-import ch.tsphp.tinsphp.common.inference.constraints.IOverloadResolver;
+import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
 import ch.tsphp.tinsphp.symbols.AContainerTypeSymbol;
 import ch.tsphp.tinsphp.symbols.ModifierSet;
 import org.junit.Test;
