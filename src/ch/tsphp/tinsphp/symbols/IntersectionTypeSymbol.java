@@ -13,11 +13,30 @@ import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
 import java.util.Iterator;
 import java.util.Map;
 
-public class IntersectionTypeSymbol extends AContainerTypeSymbol implements IIntersectionTypeSymbol
+public class IntersectionTypeSymbol extends AContainerTypeSymbol<IIntersectionTypeSymbol>
+        implements IIntersectionTypeSymbol
 {
 
     public IntersectionTypeSymbol(IOverloadResolver theOverloadResolver) {
         super(theOverloadResolver);
+    }
+
+    @Override
+    public boolean addTypeSymbol(ITypeSymbol typeSymbol) {
+        boolean hasChanged;
+        if (typeSymbol instanceof IIntersectionTypeSymbol) {
+            hasChanged = merge((IIntersectionTypeSymbol) typeSymbol);
+        } else {
+            hasChanged = super.addTypeSymbol(typeSymbol);
+        }
+        return hasChanged;
+    }
+
+    @Override
+    public IIntersectionTypeSymbol copy() {
+        IntersectionTypeSymbol copy = new IntersectionTypeSymbol(overloadResolver);
+        copy.typeSymbols.putAll(typeSymbols);
+        return copy;
     }
 
     @Override

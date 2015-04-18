@@ -25,6 +25,7 @@ import ch.tsphp.tinsphp.common.symbols.IAliasSymbol;
 import ch.tsphp.tinsphp.common.symbols.IAliasTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IArrayTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IClassTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMinimalMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMinimalVariableSymbol;
@@ -162,6 +163,11 @@ public class SymbolFactory implements ISymbolFactory
     @Override
     public IUnionTypeSymbol createUnionTypeSymbol() {
         return new UnionTypeSymbol(overloadResolver);
+    }
+
+    @Override
+    public IIntersectionTypeSymbol createIntersectionTypeSymbol() {
+        return new IntersectionTypeSymbol(overloadResolver);
     }
 
     @Override

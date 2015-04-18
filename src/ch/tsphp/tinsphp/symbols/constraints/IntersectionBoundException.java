@@ -9,23 +9,10 @@ package ch.tsphp.tinsphp.symbols.constraints;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 
-public class UpperBoundException extends BoundException
+public class IntersectionBoundException extends UpperBoundException
 {
-    private IIntersectionTypeSymbol upperTypeBound;
-    private ITypeSymbol newLowerType;
-
-    public UpperBoundException(
+    public IntersectionBoundException(
             String message, IIntersectionTypeSymbol theUpperTypeBound, ITypeSymbol theNewLowerType) {
-        super(message);
-        upperTypeBound = theUpperTypeBound;
-        newLowerType = theNewLowerType;
-    }
-
-    public IIntersectionTypeSymbol getUpperTypeBound() {
-        return upperTypeBound;
-    }
-
-    public ITypeSymbol getNewLowerType() {
-        return newLowerType;
+        super(message, theUpperTypeBound, theNewLowerType);
     }
 }

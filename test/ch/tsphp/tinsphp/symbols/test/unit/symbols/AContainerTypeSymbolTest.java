@@ -8,6 +8,7 @@ package ch.tsphp.tinsphp.symbols.test.unit.symbols;
 
 import ch.tsphp.common.IScope;
 import ch.tsphp.common.symbols.ITypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IContainerTypeSymbol;
 import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
 import ch.tsphp.tinsphp.symbols.AContainerTypeSymbol;
 import ch.tsphp.tinsphp.symbols.ModifierSet;
@@ -20,8 +21,13 @@ import static org.mockito.Mockito.mock;
 
 public class AContainerTypeSymbolTest
 {
-    class DummyAContainerTypeSymbol extends AContainerTypeSymbol
+    private interface IDummyContainerTypeSymbol extends IContainerTypeSymbol<IDummyContainerTypeSymbol>
     {
+    }
+
+    private class DummyAContainerTypeSymbol extends AContainerTypeSymbol<IDummyContainerTypeSymbol>
+    {
+
         public DummyAContainerTypeSymbol(IOverloadResolver theOverloadResolver) {
             super(theOverloadResolver);
         }
@@ -46,6 +52,10 @@ public class AContainerTypeSymbolTest
             return false;
         }
 
+        @Override
+        public IDummyContainerTypeSymbol copy() {
+            return null;
+        }
     }
 
     @Test

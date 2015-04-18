@@ -13,7 +13,7 @@ import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
 import java.util.Iterator;
 import java.util.Map;
 
-public class UnionTypeSymbol extends AContainerTypeSymbol implements IUnionTypeSymbol
+public class UnionTypeSymbol extends AContainerTypeSymbol<IUnionTypeSymbol> implements IUnionTypeSymbol
 {
 
     public UnionTypeSymbol(IOverloadResolver theOverloadResolver) {
@@ -23,6 +23,24 @@ public class UnionTypeSymbol extends AContainerTypeSymbol implements IUnionTypeS
     @Override
     public ITypeSymbol evalSelf() {
         return this;
+    }
+
+    @Override
+    public boolean addTypeSymbol(ITypeSymbol typeSymbol) {
+        boolean hasChanged;
+        if (typeSymbol instanceof IUnionTypeSymbol) {
+            hasChanged = merge((IUnionTypeSymbol) typeSymbol);
+        } else {
+            hasChanged = super.addTypeSymbol(typeSymbol);
+        }
+        return hasChanged;
+    }
+
+    @Override
+    public IUnionTypeSymbol copy() {
+        UnionTypeSymbol copy = new UnionTypeSymbol(overloadResolver);
+        copy.typeSymbols.putAll(typeSymbols);
+        return copy;
     }
 
     @Override
@@ -57,18 +75,6 @@ public class UnionTypeSymbol extends AContainerTypeSymbol implements IUnionTypeS
 
         return changedUnion;
     }
-
-//    @Override
-//    public boolean merge(IUnionTypeSymbol unionTypeSymbol) {
-//        boolean changedUnion = false;
-//
-//        for (ITypeSymbol typeSymbol : unionTypeSymbol.getTypeSymbols().values()) {
-//            boolean hasUnionChanged = addTypeSymbol(typeSymbol);
-//            changedUnion = changedUnion || hasUnionChanged;
-//        }
-//
-//        return changedUnion;
-//    }
 
     @Override
     public String getName() {

@@ -17,7 +17,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class AContainerTypeSymbol implements IContainerTypeSymbol
+public abstract class AContainerTypeSymbol<TContainer extends IContainerTypeSymbol<? super TContainer>>
+        implements IContainerTypeSymbol<TContainer>
 {
     private static final String ERROR_MESSAGE = "You are dealing with an AContainerTypeSymbol.";
 
@@ -48,6 +49,21 @@ public abstract class AContainerTypeSymbol implements IContainerTypeSymbol
 
     protected abstract boolean addAndSimplify(String absoluteName, ITypeSymbol newTypeSymbol);
 
+    /**
+     * Returns true if all types in the container can be used in an intersection.
+     */
+    @Override
+    public boolean canBeUsedInIntersection() {
+        boolean canBeUsed = true;
+        for (ITypeSymbol typeSymbol : typeSymbols.values()) {
+            if (!typeSymbol.canBeUsedInIntersection()) {
+                canBeUsed = false;
+                break;
+            }
+        }
+        return canBeUsed;
+    }
+
     @Override
     public boolean addTypeSymbol(ITypeSymbol typeSymbol) {
         boolean hasChanged = false;
@@ -59,6 +75,17 @@ public abstract class AContainerTypeSymbol implements IContainerTypeSymbol
             hasChanged = addAndSimplify(absoluteName, typeSymbol);
         }
         return hasChanged;
+    }
+
+    protected boolean merge(IContainerTypeSymbol<TContainer> containerTypeSymbol) {
+        boolean changedUnion = false;
+
+        for (ITypeSymbol typeSymbol : containerTypeSymbol.getTypeSymbols().values()) {
+            boolean hasUnionChanged = addTypeSymbol(typeSymbol);
+            changedUnion = changedUnion || hasUnionChanged;
+        }
+
+        return changedUnion;
     }
 
     @Override

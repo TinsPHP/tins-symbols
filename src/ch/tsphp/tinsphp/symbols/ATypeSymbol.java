@@ -64,4 +64,12 @@ public abstract class ATypeSymbol extends ASymbolWithModifier implements ITypeSy
         return this;
     }
 
+    /**
+     * Returns false, override in sub-classes for another behaviour.
+     */
+    @Override
+    public boolean canBeUsedInIntersection() {
+        return false;
+    }
+
 }

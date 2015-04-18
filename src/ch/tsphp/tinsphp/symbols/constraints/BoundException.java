@@ -8,4 +8,8 @@ package ch.tsphp.tinsphp.symbols.constraints;
 
 public class BoundException extends RuntimeException
 {
+
+    public BoundException(String message) {
+        super(message);
+    }
 }

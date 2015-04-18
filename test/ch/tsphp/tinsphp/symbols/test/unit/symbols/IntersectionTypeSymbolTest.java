@@ -150,25 +150,120 @@ public class IntersectionTypeSymbolTest extends ATypeTest
         unionTypeSymbol.addTypeSymbol(boolType);
 
         //act
-        boolean result = intersectionTypeSymbol.addTypeSymbol(unionTypeSymbol);
-        Map<String, ITypeSymbol> symbols = intersectionTypeSymbol.getTypeSymbols();
+        boolean result = unionTypeSymbol.addTypeSymbol(unionTypeSymbol);
+        Map<String, ITypeSymbol> symbols = unionTypeSymbol.getTypeSymbols();
 
         assertThat(result, is(false));
         assertThat(symbols.keySet(), hasItems("int"));
     }
 
+    //--------- merging intersection types tests
+
     @Test
-    public void getName_IsEmpty_ReturnsMixed() {
+    public void addTypeSymbol_EmptyAndIsIntersectionContainingIntAndFloat_ReturnsTrueAndIntersectionContainsUnion() {
+        //pre-act necessary for arrange
+        IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol();
+
+        //arrange
+        IIntersectionTypeSymbol intersectionTypeSymbol2 = createIntersectionTypeSymbol();
+        intersectionTypeSymbol2.addTypeSymbol(intType);
+        intersectionTypeSymbol2.addTypeSymbol(floatType);
+
+        //act
+        boolean result = intersectionTypeSymbol.addTypeSymbol(intersectionTypeSymbol2);
+        Map<String, ITypeSymbol> symbols = intersectionTypeSymbol.getTypeSymbols();
+
+        assertThat(result, is(true));
+        assertThat(symbols.keySet(), hasItems("int", "float"));
+    }
+
+    @Test
+    public void addTypeSymbol_IntMergeWithIntAndFloat_ReturnsTrueAndIntersectionContainsIntAndFloat() {
+        //pre-act necessary for arrange
+        IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol();
+        intersectionTypeSymbol.addTypeSymbol(intType);
+
+        //arrange
+        IIntersectionTypeSymbol intersectionTypeSymbol2 = createIntersectionTypeSymbol();
+        intersectionTypeSymbol2.addTypeSymbol(intType);
+        intersectionTypeSymbol2.addTypeSymbol(floatType);
+
+        boolean result = intersectionTypeSymbol.addTypeSymbol(intersectionTypeSymbol2);
+        Map<String, ITypeSymbol> symbols = intersectionTypeSymbol.getTypeSymbols();
+
+        assertThat(result, is(true));
+        assertThat(symbols.keySet(), hasItems("int", "float"));
+    }
+
+    @Test
+    public void addTypeSymbol_IntAndFloatMergeWithFloatAndInt_ReturnsFalseAndIntersectionContainsIntAndFloat() {
+        //pre-act necessary for arrange
+        IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol();
+        intersectionTypeSymbol.addTypeSymbol(intType);
+        intersectionTypeSymbol.addTypeSymbol(floatType);
+
+        //arrange
+        IIntersectionTypeSymbol intersectionTypeSymbol2 = createIntersectionTypeSymbol();
+        intersectionTypeSymbol2.addTypeSymbol(floatType);
+        intersectionTypeSymbol2.addTypeSymbol(intType);
+
+        boolean result = intersectionTypeSymbol.addTypeSymbol(intersectionTypeSymbol2);
+        Map<String, ITypeSymbol> symbols = intersectionTypeSymbol.getTypeSymbols();
+
+        assertThat(result, is(false));
+        assertThat(symbols.keySet(), hasItems("int", "float"));
+    }
+
+    @Test
+    public void addTypeSymbol_NumAndStringMergeWithFloat_ReturnsTrueAndIntersectionContainsFloatAndString() {
+        //pre-act necessary for arrange
+        IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol();
+        intersectionTypeSymbol.addTypeSymbol(numType);
+        intersectionTypeSymbol.addTypeSymbol(stringType);
+
+        //arrange
+        IIntersectionTypeSymbol intersectionTypeSymbol2 = createIntersectionTypeSymbol();
+        intersectionTypeSymbol2.addTypeSymbol(floatType);
+
+        boolean result = intersectionTypeSymbol.addTypeSymbol(intersectionTypeSymbol2);
+        Map<String, ITypeSymbol> symbols = intersectionTypeSymbol.getTypeSymbols();
+
+        assertThat(result, is(true));
+        assertThat(symbols.keySet(), hasItems("float", "string"));
+    }
+
+    @Test
+    public void addTypeSymbol_IBAndIAAndBoolMergeWithFooAndInt_ReturnsTrueAndIntersectionContainsFooAndBoolAndInt() {
+        //pre-act necessary for arrange
+        IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol();
+        intersectionTypeSymbol.addTypeSymbol(interfaceAType);
+        intersectionTypeSymbol.addTypeSymbol(interfaceBType);
+        intersectionTypeSymbol.addTypeSymbol(boolType);
+
+        //arrange
+        IIntersectionTypeSymbol intersectionTypeSymbol2 = createIntersectionTypeSymbol();
+        intersectionTypeSymbol2.addTypeSymbol(fooType);
+        intersectionTypeSymbol2.addTypeSymbol(intType);
+
+        boolean result = intersectionTypeSymbol.addTypeSymbol(intersectionTypeSymbol2);
+        Map<String, ITypeSymbol> symbols = intersectionTypeSymbol.getTypeSymbols();
+
+        assertThat(result, is(true));
+        assertThat(symbols.keySet(), hasItems("Foo", "bool", "int"));
+    }
+
+    @Test
+    public void getAbsoluteName_IsEmpty_ReturnsMixed() {
         //no arrange necessary
 
         IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol();
-        String result = intersectionTypeSymbol.getName();
+        String result = intersectionTypeSymbol.getAbsoluteName();
 
         assertThat(result, is("mixed"));
     }
 
     @Test
-    public void getName_OneTypeOnly_ReturnsTypeWithoutParenthesis() {
+    public void getAbsoluteName_OneTypeOnly_ReturnsTypeWithoutParenthesis() {
         //pre-act
         IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol();
 
@@ -176,14 +271,14 @@ public class IntersectionTypeSymbolTest extends ATypeTest
         intersectionTypeSymbol.addTypeSymbol(intType);
 
         //act
-        String result = intersectionTypeSymbol.getName();
+        String result = intersectionTypeSymbol.getAbsoluteName();
 
         //assert
         assertThat(result, is("int"));
     }
 
     @Test
-    public void getName_IntAndFloat_ReturnsEmptyParenthesis() {
+    public void getAbsoluteName_IntAndFloat_ReturnsEmptyParenthesis() {
         //pre-act
         IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol();
 
@@ -192,21 +287,21 @@ public class IntersectionTypeSymbolTest extends ATypeTest
         intersectionTypeSymbol.addTypeSymbol(floatType);
 
         //act
-        String result = intersectionTypeSymbol.getName();
+        String result = intersectionTypeSymbol.getAbsoluteName();
 
         //assert
         assertThat(result, anyOf(is("(int & float)"), is("(float & int)")));
     }
 
     @Test
-    public void getAbsoluteName_IsEmpty_ReturnsMixedUsedGetName() {
+    public void getName_IsEmpty_ReturnsMixedUsedGetAbsoluteName() {
         //no arrange necessary
 
         IIntersectionTypeSymbol intersectionTypeSymbol = spy(createIntersectionTypeSymbol());
-        String result = intersectionTypeSymbol.getAbsoluteName();
+        String result = intersectionTypeSymbol.getName();
 
         assertThat(result, is("mixed"));
-        verify(intersectionTypeSymbol).getName();
+        verify(intersectionTypeSymbol).getAbsoluteName();
     }
 
     @Test

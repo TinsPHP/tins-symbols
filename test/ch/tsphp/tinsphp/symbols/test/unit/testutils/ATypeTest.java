@@ -75,14 +75,17 @@ public abstract class ATypeTest
         interfaceAType = mock(ITypeSymbol.class);
         when(interfaceAType.getParentTypeSymbols()).thenReturn(set(mixedType));
         when(interfaceAType.getAbsoluteName()).thenReturn("IA");
+        when(interfaceAType.canBeUsedInIntersection()).thenReturn(true);
 
         interfaceSubAType = mock(ITypeSymbol.class);
         when(interfaceSubAType.getParentTypeSymbols()).thenReturn(set(interfaceAType));
         when(interfaceSubAType.getAbsoluteName()).thenReturn("ISubA");
+        when(interfaceSubAType.canBeUsedInIntersection()).thenReturn(true);
 
         interfaceBType = mock(ITypeSymbol.class);
         when(interfaceBType.getParentTypeSymbols()).thenReturn(set(mixedType));
         when(interfaceBType.getAbsoluteName()).thenReturn("IB");
+        when(interfaceBType.canBeUsedInIntersection()).thenReturn(true);
 
         fooType = mock(ITypeSymbol.class);
         when(fooType.getParentTypeSymbols()).thenReturn(set(interfaceSubAType, interfaceBType));

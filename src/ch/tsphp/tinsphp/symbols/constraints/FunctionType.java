@@ -13,7 +13,6 @@ import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
 
 import java.util.List;
-import java.util.Map;
 
 public class FunctionType implements IFunctionType
 {
@@ -61,28 +60,25 @@ public class FunctionType implements IFunctionType
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(name).append("{").append(getNumberOfNonOptionalParameters()).append("}").append("[");
-        Map<String, ITypeVariableConstraint> variable2TypeVariable = bindings.getVariable2TypeVariable();
         for (IVariable parameter : parameters) {
-            toString(sb, variable2TypeVariable, parameter).append(", ");
+            toString(sb, parameter).append(", ");
         }
-        toString(sb, variable2TypeVariable, returnVariable);
+        toString(sb, returnVariable);
         sb.append("]");
         return sb.toString();
     }
 
     private StringBuilder toString(
-            StringBuilder sb, Map<String, ITypeVariableConstraint> variable2TypeVariable, IVariable parameter) {
+            StringBuilder sb, IVariable parameter) {
         String absoluteName = parameter.getAbsoluteName();
         sb.append(absoluteName).append(":");
-        ITypeVariableConstraint constraint = variable2TypeVariable.get(absoluteName);
+        ITypeVariableConstraint constraint = bindings.getTypeVariableConstraint(absoluteName);
         String typeVariable = constraint.getTypeVariable();
         sb.append(typeVariable)
                 .append("<")
-                .append(bindings.hasLowerBounds(typeVariable)
-                        ? bindings.getLowerBoundConstraintIds(typeVariable).toString() : "[]")
+                .append(bindings.getLowerBoundConstraintIds(typeVariable))
                 .append(",")
-                .append(bindings.hasUpperBounds(typeVariable)
-                        ? bindings.getUpperBoundConstraintIds(typeVariable).toString() : "[]")
+                .append(bindings.getUpperBoundConstraintIds(typeVariable))
                 .append(">");
         if (constraint.hasFixedType()) {
             sb.append("#");
