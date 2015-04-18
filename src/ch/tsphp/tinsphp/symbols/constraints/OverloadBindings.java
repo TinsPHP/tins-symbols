@@ -99,7 +99,8 @@ public class OverloadBindings implements IOverloadBindings
     @Override
     public void addVariable(String variableId, ITypeVariableConstraint constraint) {
         if (variable2TypeVariable.containsKey(variableId)) {
-            throw new IllegalArgumentException("variable with id " + variableId + " was already added to this binding");
+            throw new IllegalArgumentException(
+                    "variable with id " + variableId + " was already added to this binding.");
         }
         variable2TypeVariable.put(variableId, constraint);
         addToSetInMap(typeVariable2Variables, constraint.getTypeVariable(), variableId);
@@ -123,14 +124,14 @@ public class OverloadBindings implements IOverloadBindings
     @Override
     public void addLowerRefBound(String typeVariable, ITypeVariableConstraint refTypeVariableConstraint) {
         if (!typeVariable2Variables.containsKey(typeVariable)) {
-            throw new IllegalArgumentException("no variable has a binding for type variable \"" + typeVariable + "\"");
+            throw new IllegalArgumentException("no variable has a binding for type variable \"" + typeVariable + "\".");
         }
 
         String refTypeVariable = refTypeVariableConstraint.getTypeVariable();
 
         if (!typeVariable2Variables.containsKey(refTypeVariable)) {
             throw new IllegalArgumentException(
-                    "no variable has a binding for type variable \"" + refTypeVariable + "\"");
+                    "no variable has a binding for type variable \"" + refTypeVariable + "\".");
         }
 
         boolean hasNotFixedType = !refTypeVariableConstraint.hasFixedType();
@@ -178,7 +179,7 @@ public class OverloadBindings implements IOverloadBindings
     @Override
     public void addLowerTypeBound(String typeVariable, ITypeSymbol typeSymbol) {
         if (!typeVariable2Variables.containsKey(typeVariable)) {
-            throw new IllegalArgumentException("no variable has a binding for type variable \"" + typeVariable + "\"");
+            throw new IllegalArgumentException("no variable has a binding for type variable \"" + typeVariable + "\".");
         }
 
         addLowerTypeBoundAfterContainsCheck(typeVariable, typeSymbol);
@@ -242,7 +243,7 @@ public class OverloadBindings implements IOverloadBindings
     @Override
     public void addUpperTypeBound(String typeVariable, ITypeSymbol typeSymbol) {
         if (!typeVariable2Variables.containsKey(typeVariable)) {
-            throw new IllegalArgumentException("no variable has a binding for type variable \"" + typeVariable + "\"");
+            throw new IllegalArgumentException("no variable has a binding for type variable \"" + typeVariable + "\".");
         }
 
         addUpperTypeBoundAfterContainsCheck(typeVariable, typeSymbol);
@@ -280,7 +281,7 @@ public class OverloadBindings implements IOverloadBindings
         if (hasLowerTypeBounds(typeVariable)) {
             IUnionTypeSymbol lowerTypeSymbol = lowerTypeBounds.get(typeVariable);
             if (!overloadResolver.isFirstSameOrSubTypeOfSecond(lowerTypeSymbol, newUpperTypeBound)) {
-                throw new LowerBoundException("newUpperTypeBound is not a parent type of the lower bound",
+                throw new LowerBoundException("newUpperTypeBound is not a parent type of the lower bound.",
                         lowerTypeSymbol, newUpperTypeBound);
             }
         }
@@ -328,28 +329,89 @@ public class OverloadBindings implements IOverloadBindings
         return upperRefBounds.get(typeVariable);
     }
 
+    @Override
+    public void fixType(String variableId) {
+        if (!variable2TypeVariable.containsKey(variableId)) {
+            throw new IllegalArgumentException("variable with id " + variableId + " does not exist in this binding.");
+        }
+        fixTypeAfterContainsCheck(variableId);
+    }
+
+    private void fixTypeAfterContainsCheck(String variableId) {
+        ITypeVariableConstraint constraint = variable2TypeVariable.get(variableId);
+        if (!constraint.hasFixedType()) {
+            variable2TypeVariable.put(variableId, new FixedTypeVariableConstraint((TypeVariableConstraint) constraint));
+        }
+    }
 
     @Override
-    public boolean tryToFixType(String variableId) {
-//        ITypeVariableConstraint constraint = variable2TypeVariable.get(variableId);
-//        String typeVariable = constraint.getTypeVariable();
-//        boolean canTypeBeFixed;
-//        if (constraint.hasFixedType()) {
-//            canTypeBeFixed = true;
-//            if (hasLowerBounds(typeVariable)) {
-//                Map<String, IConstraint> typeVariableLowerBounds = lowerBounds.get(typeVariable);
-//                String constraintId = constraint.getId();
-//                if (typeVariableLowerBounds.containsKey(constraintId)) {
-//                    //remove self ref, no longer needed
-//                    if (typeVariableLowerBounds.size() == 1) {
-//                        //only lower bound, can remove the whole list
-//                        lowerBounds.remove(typeVariable);
-//                    } else {
-//                        typeVariableLowerBounds.remove(constraintId);
+    public void tryToFix(Set<String> typeVariablesToIgnore) {
+
+        propagateParametersUpwards(typeVariablesToIgnore);
+
+        for (String variableId : variable2TypeVariable.keySet()) {
+            ITypeVariableConstraint constraint = variable2TypeVariable.get(variableId);
+            if (!constraint.hasFixedType()) {
+                String typeVariable = constraint.getTypeVariable();
+                if (!typeVariablesToIgnore.contains(typeVariable)) {
+                    fixTypeAfterContainsCheck(variableId);
+                    lowerRefBounds.remove(typeVariable);
+                    upperRefBounds.remove(typeVariable);
+                }
+            }
+        }
+    }
+
+    private void propagateParametersUpwards(Set<String> parameterTypeVariables) {
+        for (String parameterTypeVariable : parameterTypeVariables) {
+            for (String refTypeVariable : upperRefBounds.get(parameterTypeVariable)) {
+                propagateTypeVariableUpwards(refTypeVariable, parameterTypeVariable);
+            }
+        }
+    }
+
+    private void propagateTypeVariableUpwards(String refTypeVariable, String parameterTypeVariable) {
+        if (hasUpperRefBounds(refTypeVariable)) {
+            for (String refRefTypeVariable : upperRefBounds.get(refTypeVariable)) {
+                Set<String> refRefLowerBounds = lowerRefBounds.get(refRefTypeVariable);
+                if (!refRefLowerBounds.contains(parameterTypeVariable)) {
+                    refRefLowerBounds.remove(refTypeVariable);
+                    refRefLowerBounds.add(parameterTypeVariable);
+                    propagateTypeVariableUpwards(refRefTypeVariable, parameterTypeVariable);
+                }
+            }
+        }
+    }
+
+//    private void resolveDependencies(Set<String> typeVariablesToIgnore, Set<String> variablesToVisit) {
+//        for (String typeVariableToIgnore : typeVariablesToIgnore) {
+//            Set<String> refTypeVariables = lowerRefBounds.get(typeVariableToIgnore);
+//            do {
+//                for (String refTypeVariable : refTypeVariables) {
+//                    if (!typeVariablesToIgnore.contains(refTypeVariable)) {
+//                        refTypeVariables.remove(refTypeVariable);
+//                        upperRefBounds.get(refTypeVariable).remove(typeVariableToIgnore);
+//                        renameTypeVariableAfterContainsCheck(refTypeVariable, typeVariableToIgnore);
 //                    }
 //                }
+//            } while (!refTypeVariables.isEmpty() && !typeVariablesToIgnore.containsAll(refTypeVariables));
+//
+//            if (refTypeVariables.isEmpty()) {
+//                for (String variableId : typeVariable2Variables.get(typeVariableToIgnore)) {
+//                    fixTypeAfterContainsCheck(variableId);
+//                    variablesToVisit.remove(variableId);
+//                }
 //            }
-//        } else {
+//        }
+//    }
+//
+//    @Override
+//    public boolean tryToFixType(String variableId) {
+//        ITypeVariableConstraint constraint = variable2TypeVariable.get(variableId);
+//        String typeVariable = constraint.getTypeVariable();
+//        boolean canTypeBeFixed = constraint.hasFixedType();
+//
+//        if (!hasLowerRefBounds(typeVariable)) {
 //            canTypeBeFixed = false;
 //            if (!hasLowerBounds(typeVariable) && hasUpperBounds(typeVariable)) {
 //                canTypeBeFixed = true;
@@ -359,10 +421,9 @@ public class OverloadBindings implements IOverloadBindings
 //            }
 //        }
 //        return canTypeBeFixed;
-        return true;
-    }
+//    }
 
-    private void updateUpperBoundDependencies(ITypeVariableConstraint constraint) {
+//    private void updateUpperBoundDependencies(ITypeVariableConstraint constraint) {
 //        String constraintId = constraint.getId();
 //        if (hasUpperRefBounds(constraintId)) {
 //            // there are other type variables which have this type variable as lower bound.
@@ -383,10 +444,10 @@ public class OverloadBindings implements IOverloadBindings
 //                refLowerBounds.put(newLowerBound.getId(), newLowerBound);
 //            }
 //        }
-    }
+//    }
 
-    @Override
-    public void resolveDependencies(String variableId, Set<String> parameterTypeVariables) {
+//    @Override
+//    public void resolveDependencies(String variableId, Set<String> parameterTypeVariables) {
 //        String typeVariable = variable2TypeVariable.get(variableId).getTypeVariable();
 //        if (hasLowerBounds(typeVariable)) {
 //
@@ -405,7 +466,7 @@ public class OverloadBindings implements IOverloadBindings
 //
 //            typeVariableLowerBounds.putAll(constraintsToAdd);
 //        }
-    }
+//    }
 
 
 //    private boolean isNotSelfRefOrParameter(
@@ -464,7 +525,9 @@ public class OverloadBindings implements IOverloadBindings
                     "no variable has a binding for type variable \"" + newTypeVariable + "\"");
         }
 
-        renameTypeVariableAfterContainsCheck(typeVariable, newTypeVariable);
+        if (isNotSelfReference(typeVariable, newTypeVariable)) {
+            renameTypeVariableAfterContainsCheck(typeVariable, newTypeVariable);
+        }
     }
 
     private void renameTypeVariableAfterContainsCheck(String typeVariable, String newTypeVariable) {
@@ -474,6 +537,7 @@ public class OverloadBindings implements IOverloadBindings
         if (hasUpperTypeBounds(typeVariable)) {
             addToUpperIntersectionTypeSymbol(newTypeVariable, upperTypeBounds.remove(typeVariable));
         }
+
 
         if (hasLowerRefBounds(typeVariable)) {
             for (String lowerRefTypeVariable : lowerRefBounds.remove(typeVariable)) {
@@ -489,9 +553,13 @@ public class OverloadBindings implements IOverloadBindings
             }
         }
 
-        for (String variableId : typeVariable2Variables.get(typeVariable)) {
+
+        Set<String> variables = typeVariable2Variables.get(newTypeVariable);
+        for (String variableId : typeVariable2Variables.remove(typeVariable)) {
             variable2TypeVariable.get(variableId).setTypeVariable(newTypeVariable);
+            variables.add(variableId);
         }
+
     }
 
 

@@ -55,8 +55,7 @@ public class OverloadBindingsMatcher extends BaseMatcher<IOverloadBindings>
     public boolean matches(IOverloadBindings bindings) {
         Set<String> variableIds = bindings.getVariableIds();
         boolean ok = true;
-        for (int i = 0; i < dtos.length; ++i) {
-            BindingMatcherDto dto = dtos[i];
+        for (BindingMatcherDto dto : dtos) {
             ok = variableIds.contains(dto.variableId);
             if (ok) {
                 ITypeVariableConstraint typeVariableConstraint = bindings.getTypeVariableConstraint(dto.variableId);
@@ -89,6 +88,7 @@ public class OverloadBindingsMatcher extends BaseMatcher<IOverloadBindings>
                 }
 
             }
+
             if (!ok) {
                 break;
             }
@@ -101,10 +101,18 @@ public class OverloadBindingsMatcher extends BaseMatcher<IOverloadBindings>
     //Warning! start code duplication - same as in tins-inference-engine
     @Override
     public void describeMismatch(Object item, org.hamcrest.Description description) {
-        IOverloadBindings bindings = (IOverloadBindings) item;
+        describeMismatch((IOverloadBindings) item, description, true, true);
+    }
+
+    public void describeMismatch(
+            IOverloadBindings bindings, Description description,
+            boolean withBeginningNewLine, boolean reportAdditionalBindings) {
         boolean variableMissing = false;
 
         StringBuilder sb = new StringBuilder();
+        if (withBeginningNewLine) {
+            description.appendText("\n");
+        }
         description.appendText("[");
 
         boolean notFirst = false;
@@ -129,22 +137,30 @@ public class OverloadBindingsMatcher extends BaseMatcher<IOverloadBindings>
             sb.append("]\n");
         }
         if (!variableIds.isEmpty()) {
-            if (!variableMissing) {
-                sb.append("\n");
+            if (reportAdditionalBindings) {
+                if (!variableMissing) {
+                    sb.append("\n");
+                }
+                sb.append("The following variables where defined additionally in the bindings: [");
             }
-            sb.append("The following variables where defined additionally in the bindings: [");
             Iterator<String> iterator = variableIds.iterator();
             if (iterator.hasNext()) {
                 String variableId = iterator.next();
-                sb.append(variableId);
+                if (reportAdditionalBindings) {
+                    sb.append(variableId);
+                }
                 notFirst = appendVariable(bindings, description, notFirst, variableId);
             }
             while (iterator.hasNext()) {
                 String variableId = iterator.next();
-                sb.append(", ").append(variableId);
+                if (reportAdditionalBindings) {
+                    sb.append(", ").append(variableId);
+                }
                 notFirst = appendVariable(bindings, description, notFirst, variableId);
             }
-            sb.append("]\n");
+            if (reportAdditionalBindings) {
+                sb.append("]\n");
+            }
         }
         description.appendText("]");
         description.appendText(sb.toString());
@@ -177,6 +193,13 @@ public class OverloadBindingsMatcher extends BaseMatcher<IOverloadBindings>
     //Warning! start code duplication - same as in tins-inference-engine
     @Override
     public void describeTo(Description description) {
+        describeTo(description, true);
+    }
+
+    public void describeTo(Description description, boolean withBeginningNewLine) {
+        if (withBeginningNewLine) {
+            description.appendText("\n");
+        }
         description.appendText("[");
         for (int i = 0; i < dtos.length; ++i) {
             if (i != 0) {
