@@ -32,6 +32,11 @@ public class APolymorphicSymbol_ASymbol_LSPTest extends ASymbolTest
                 String name, IScope enclosingScope, ITypeSymbol theParentTypeSymbol) {
             super(scopeHelper, definitionAst, modifiers, name, enclosingScope, theParentTypeSymbol);
         }
+
+        @Override
+        public boolean canBeUsedInIntersection() {
+            return false;
+        }
     }
 
     @Override

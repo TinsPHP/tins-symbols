@@ -88,6 +88,11 @@ public class ErroneousLazySymbol extends AErroneousScopedSymbol implements IErro
     }
 
     @Override
+    public boolean canBeUsedInIntersection() {
+        return false;
+    }
+
+    @Override
     public void setOriginal(IMinimalVariableSymbolWithRef variableDeclaration) {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }

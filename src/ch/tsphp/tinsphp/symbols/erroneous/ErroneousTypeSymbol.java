@@ -55,4 +55,9 @@ public class ErroneousTypeSymbol extends AErroneousScopedSymbol implements IErro
     public ITypeSymbol evalSelf() {
         return this;
     }
+
+    @Override
+    public boolean canBeUsedInIntersection() {
+        return false;
+    }
 }

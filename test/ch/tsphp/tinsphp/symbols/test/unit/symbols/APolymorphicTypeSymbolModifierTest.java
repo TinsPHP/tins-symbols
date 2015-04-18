@@ -38,6 +38,11 @@ public class APolymorphicTypeSymbolModifierTest
                 String name, IScope enclosingScope, ITypeSymbol theParentTypeSymbol) {
             super(scopeHelper, definitionAst, modifiers, name, enclosingScope, theParentTypeSymbol);
         }
+
+        @Override
+        public boolean canBeUsedInIntersection() {
+            return false;
+        }
     }
 
     private String methodName;

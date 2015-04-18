@@ -73,4 +73,9 @@ public class ClassTypeSymbol extends APolymorphicTypeSymbol implements IClassTyp
     public boolean isFinal() {
         return modifiers.isFinal();
     }
+
+    @Override
+    public boolean canBeUsedInIntersection() {
+        return false;
+    }
 }
