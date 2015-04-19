@@ -201,9 +201,10 @@ public class OverloadBindings implements IOverloadBindings
         if (hasUpperTypeBounds(typeVariable)) {
             IIntersectionTypeSymbol upperTypeSymbol = upperTypeBounds.get(typeVariable);
             if (!overloadResolver.isFirstSameOrSubTypeOfSecond(newLowerType, upperTypeSymbol)) {
-                throw new UpperBoundException(
-                        "The newLowerType is not the same or a subtype of the upper bound.",
-                        upperTypeSymbol, newLowerType);
+                throw new UpperBoundException("The new lower type " + newLowerType.getAbsoluteName() + " is not the "
+                        + "same or a subtype of " + upperTypeSymbol.getAbsoluteName(),
+                        upperTypeSymbol,
+                        newLowerType);
             }
         }
     }
@@ -243,7 +244,7 @@ public class OverloadBindings implements IOverloadBindings
     @Override
     public void addUpperTypeBound(String typeVariable, ITypeSymbol typeSymbol) {
         if (!typeVariable2Variables.containsKey(typeVariable)) {
-            throw new IllegalArgumentException("no variable has a binding for type variable \"" + typeVariable + "\".");
+            throw new IllegalArgumentException("No variable has a binding for type variable \"" + typeVariable + "\".");
         }
 
         addUpperTypeBoundAfterContainsCheck(typeVariable, typeSymbol);
@@ -256,7 +257,8 @@ public class OverloadBindings implements IOverloadBindings
             IIntersectionTypeSymbol upperBound = upperTypeBounds.get(typeVariable);
             if (areNotInSameTypeHierarchyAndOneCannotBeUsedInIntersection(typeSymbol, upperBound)) {
                 throw new IntersectionBoundException(
-                        "The newLowerType or the upper bound cannot be used in an intersection.",
+                        "Either the new upper bound " + typeSymbol.getAbsoluteName() + " or the existing upper bound "
+                                + upperBound.getAbsoluteName() + " cannot be used in an intersection type.",
                         upperBound, typeSymbol);
             }
         }
@@ -281,7 +283,9 @@ public class OverloadBindings implements IOverloadBindings
         if (hasLowerTypeBounds(typeVariable)) {
             IUnionTypeSymbol lowerTypeSymbol = lowerTypeBounds.get(typeVariable);
             if (!overloadResolver.isFirstSameOrSubTypeOfSecond(lowerTypeSymbol, newUpperTypeBound)) {
-                throw new LowerBoundException("newUpperTypeBound is not a parent type of the lower bound.",
+                throw new LowerBoundException(
+                        "The new upper bound " + newUpperTypeBound.getAbsoluteName() + " is not the same or a parent "
+                                + "type of the current lower bound " + lowerTypeSymbol.getAbsoluteName(),
                         lowerTypeSymbol, newUpperTypeBound);
             }
         }

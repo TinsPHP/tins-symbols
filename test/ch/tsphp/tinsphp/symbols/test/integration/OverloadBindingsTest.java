@@ -9,6 +9,7 @@ package ch.tsphp.tinsphp.symbols.test.integration;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.FixedTypeVariableConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
+import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableConstraint;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
@@ -38,8 +39,10 @@ import static ch.tsphp.tinsphp.symbols.test.integration.testutils.OverloadBindin
 import static ch.tsphp.tinsphp.symbols.test.integration.testutils.OverloadBindingsMatcher.withVariableBindings;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.core.IsNull.nullValue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -112,6 +115,47 @@ public class OverloadBindingsTest extends ATypeTest
         assertThat(collection.getVariableIds(), containsInAnyOrder("$a", "$b"));
         assertThat(collection.getTypeVariableConstraint("$a").hasFixedType(), is(false));
         assertThat(collection.getTypeVariableConstraint("$b").hasFixedType(), is(true));
+    }
+
+    @Test
+    public void copyConstructor_HasLowerTypeBound_IsCopied() {
+        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, overloadResolver);
+        bindings1.addVariable("$a", new TypeVariableConstraint("T"));
+        bindings1.addLowerTypeBound("T", intType);
+
+        IOverloadBindings collection = createOverloadBindings(bindings1);
+        bindings1.addLowerTypeBound("T", floatType);
+
+        assertThat(collection, withVariableBindings(varBinding("$a", "T", asList("int"), null, false)));
+    }
+
+    @Test
+    public void copyConstructor_HasUpperTypeBound_IsCopied() {
+        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, overloadResolver);
+        bindings1.addVariable("$a", new TypeVariableConstraint("T"));
+        bindings1.addUpperTypeBound("T", interfaceAType);
+
+        IOverloadBindings collection = createOverloadBindings(bindings1);
+        bindings1.addUpperTypeBound("T", interfaceBType);
+        bindings1.addLowerTypeBound("T", fooType);
+
+        assertThat(collection, withVariableBindings(varBinding("$a", "T", null, asList("IA"), false)));
+    }
+
+    @Test
+    public void copyConstructor_HasLowerRefBound_IsCopied() {
+        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, overloadResolver);
+        bindings1.addVariable("$a", new TypeVariableConstraint("T1"));
+        bindings1.addVariable("$b", new TypeVariableConstraint("T2"));
+        bindings1.addLowerRefBound("T1", new TypeVariableConstraint("T2"));
+
+        IOverloadBindings collection = createOverloadBindings(bindings1);
+        bindings1.addLowerRefBound("T2", new TypeVariableConstraint("T1"));
+
+        assertThat(collection, withVariableBindings(
+                varBinding("$a", "T1", asList("@T2"), null, false),
+                varBinding("$b", "T2", null, asList("@T1"), false)
+        ));
     }
 
     @Test
@@ -389,6 +433,27 @@ public class OverloadBindingsTest extends ATypeTest
         collection.renameTypeVariable(lhs, "T");
 
         //assert in annotation
+    }
+
+    @Test
+    public void renameTypeVariable_IsSelfReference_DoesNotCallSetTypeVariableOnConstraint() {
+        //pre act - necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String lhs = "Tlhs";
+        TypeVariableConstraint constraint = spy(new TypeVariableConstraint(lhs));
+        collection.addVariable("$lhs", constraint);
+
+        //act
+        collection.renameTypeVariable(lhs, lhs);
+
+        try {
+            verify(constraint).setTypeVariable(anyString());
+            Assert.fail("should not rename a self reference");
+        } catch (MockitoAssertionError ex) {
+            //should be thrown
+        }
     }
 
     @Test
@@ -1347,6 +1412,106 @@ public class OverloadBindingsTest extends ATypeTest
                 varBinding("$b", "T2", asList("int"), null, true),
                 varBinding(RETURN_VARIABLE_NAME, "Treturn", asList("int"), null, true)
         ));
+    }
+
+    @Test
+    public void getLowerRefBounds_NothingDefined_ReturnsNull() {
+        //no arrange necessary
+
+        IOverloadBindings collection = createOverloadBindings();
+        Set<String> result = collection.getLowerRefBounds("T");
+
+        assertThat(result, is(nullValue()));
+    }
+
+    @Test
+    public void getLowerRefBounds_OneDefined_ReturnsTheOne() {
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String t1 = "T1";
+        String t2 = "T2";
+        collection.addVariable("$a", new TypeVariableConstraint(t1));
+        collection.addVariable("$b", new TypeVariableConstraint(t2));
+        collection.addLowerRefBound(t1, new TypeVariableConstraint(t2));
+
+        //act
+        Set<String> result = collection.getLowerRefBounds(t1);
+
+        assertThat(result, contains(t2));
+    }
+
+    @Test
+    public void getUpperRefBounds_NothingDefined_ReturnsNull() {
+        //no arrange necessary
+
+        IOverloadBindings collection = createOverloadBindings();
+        Set<String> result = collection.getUpperRefBounds("T");
+
+        assertThat(result, is(nullValue()));
+    }
+
+    @Test
+    public void getUpperRefBounds_OneDefined_ReturnsTheOne() {
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String t1 = "T1";
+        String t2 = "T2";
+        collection.addVariable("$a", new TypeVariableConstraint(t1));
+        collection.addVariable("$b", new TypeVariableConstraint(t2));
+        collection.addLowerRefBound(t1, new TypeVariableConstraint(t2));
+
+        //act
+        Set<String> result = collection.getUpperRefBounds(t2);
+
+        assertThat(result, contains(t1));
+    }
+
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fixType_VariableNotDefined_ThrowsIllegalArgumentException() {
+        //no arrange necessary
+
+        IOverloadBindings collection = createOverloadBindings();
+        collection.fixType("$a");
+
+        //assert in annotation
+    }
+
+    @Test
+    public void fixType_NotFixed_IsFixedAfterwards() {
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String t1 = "T1";
+        collection.addVariable("$a", new TypeVariableConstraint(t1));
+
+        //act
+        collection.fixType("$a");
+        boolean result = collection.getTypeVariableConstraint("$a").hasFixedType();
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void fixType_AlreadyFixed_DoesNotWrapItAgain() {
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String t1 = "T1";
+        ITypeVariableConstraint constraint = new FixedTypeVariableConstraint(new TypeVariableConstraint(t1));
+        collection.addVariable("$a", constraint);
+
+        //act
+        collection.fixType("$a");
+        ITypeVariableConstraint result = collection.getTypeVariableConstraint("$a");
+
+        assertThat(result, is(constraint));
     }
 
     private IOverloadBindings createOverloadBindings() {
