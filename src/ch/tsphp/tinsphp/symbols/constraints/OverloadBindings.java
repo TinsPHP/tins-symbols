@@ -88,7 +88,11 @@ public class OverloadBindings implements IOverloadBindings
             variable2TypeVariable.put(entry.getKey(), copy);
         }
 
-        typeVariable2Variables = new HashMap<>(bindings.typeVariable2Variables);
+
+        typeVariable2Variables = new HashMap<>();
+        for (Map.Entry<String, Set<String>> entry : bindings.typeVariable2Variables.entrySet()) {
+            typeVariable2Variables.put(entry.getKey(), new HashSet<>(entry.getValue()));
+        }
     }
 
     @Override
