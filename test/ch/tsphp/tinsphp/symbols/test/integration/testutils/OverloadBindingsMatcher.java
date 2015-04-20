@@ -136,31 +136,25 @@ public class OverloadBindingsMatcher extends BaseMatcher<IOverloadBindings>
         if (variableMissing) {
             sb.append("]\n");
         }
-        if (!variableIds.isEmpty()) {
-            if (reportAdditionalBindings) {
-                if (!variableMissing) {
-                    sb.append("\n");
-                }
-                sb.append("The following variables where defined additionally in the bindings: [");
+        if (reportAdditionalBindings && !variableIds.isEmpty()) {
+
+            if (!variableMissing) {
+                sb.append("\n");
             }
+            sb.append("The following variables where defined additionally in the bindings: [");
+
             Iterator<String> iterator = variableIds.iterator();
             if (iterator.hasNext()) {
                 String variableId = iterator.next();
-                if (reportAdditionalBindings) {
-                    sb.append(variableId);
-                }
+                sb.append(variableId);
                 notFirst = appendVariable(bindings, description, notFirst, variableId);
             }
             while (iterator.hasNext()) {
                 String variableId = iterator.next();
-                if (reportAdditionalBindings) {
-                    sb.append(", ").append(variableId);
-                }
+                sb.append(", ").append(variableId);
                 notFirst = appendVariable(bindings, description, notFirst, variableId);
             }
-            if (reportAdditionalBindings) {
-                sb.append("]\n");
-            }
+            sb.append("]\n");
         }
         description.appendText("]");
         description.appendText(sb.toString());
