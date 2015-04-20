@@ -159,6 +159,26 @@ public class OverloadBindingsTest extends ATypeTest
     }
 
     @Test
+    public void copyConstructor_HasVariablesAndRenameOneAfterCopying_DoesOnlyRenameOldBinding() {
+        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, overloadResolver);
+        bindings1.addVariable("$a", new TypeVariableConstraint("T1"));
+        bindings1.addVariable("$b", new TypeVariableConstraint("T2"));
+        bindings1.addVariable("$c", new TypeVariableConstraint("T3"));
+
+
+        IOverloadBindings collection = createOverloadBindings(bindings1);
+        bindings1.renameTypeVariable("T1", "T3");
+        collection.renameTypeVariable("T3", "T2");
+
+        assertThat(collection, withVariableBindings(
+                varBinding("$a", "T1", null, null, false),
+                varBinding("$b", "T2", null, null, false),
+                varBinding("$c", "T2", null, null, false)
+
+        ));
+    }
+
+    @Test
     public void getNextTypeVariable_FirstCall_ReturnsT1() {
         //no arrange necessary
 
