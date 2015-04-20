@@ -24,6 +24,11 @@ public class OverloadResolver implements IOverloadResolver
     }
 
     @Override
+    public boolean areSame(ITypeSymbol firstType, ITypeSymbol secondType) {
+        return getPromotionLevelFromTo(firstType, secondType) == 0;
+    }
+
+    @Override
     public boolean isFirstSameOrSubTypeOfSecond(ITypeSymbol potentialSubType, ITypeSymbol typeSymbol) {
         return getPromotionLevelFromTo(potentialSubType, typeSymbol) != -1;
     }

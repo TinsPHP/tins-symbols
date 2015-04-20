@@ -17,6 +17,36 @@ import static org.hamcrest.core.Is.is;
 public class OverloadResolverTest extends ATypeTest
 {
 
+    @Test
+    public void areSameType_AreSame_ReturnsTrue() {
+        //no arrange necessary
+
+        IOverloadResolver solver = createOverloadResolver();
+        boolean result = solver.areSame(intType, intType);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void areSameType_SecondIsParentType_ReturnsFalse() {
+        //no arrange necessary
+
+        IOverloadResolver solver = createOverloadResolver();
+        boolean result = solver.areSame(intType, numType);
+
+        assertThat(result, is(false));
+    }
+
+    @Test
+    public void areSameType_SecondIsSubtype_ReturnsFalse() {
+        //no arrange necessary
+
+        IOverloadResolver solver = createOverloadResolver();
+        boolean result = solver.areSame(numType, intType);
+
+        assertThat(result, is(false));
+    }
+
 //    @Test
 //    public void isFirstSubTypeOfSecond_IntAndInt_ReturnsFalse() {
 //        //no arrange necessary

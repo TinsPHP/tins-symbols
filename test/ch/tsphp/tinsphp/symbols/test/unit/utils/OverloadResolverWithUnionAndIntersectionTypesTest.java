@@ -26,6 +26,50 @@ public class OverloadResolverWithUnionAndIntersectionTypesTest extends ATypeTest
 {
 
     @Test
+    public void areSameType_IntInIntersectionToIntInUnion_ReturnsTrue() {
+        ITypeSymbol actual = createIntersectionType(intType);
+        ITypeSymbol formal = createUnion(intType);
+
+        IOverloadResolver solver = createOverloadResolverAndSetMixed();
+        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void areSameType_IntInUnionToIntInIntersection_ReturnsTrue() {
+        ITypeSymbol actual = createUnion(intType);
+        ITypeSymbol formal = createIntersectionType(intType);
+
+        IOverloadResolver solver = createOverloadResolverAndSetMixed();
+        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void areSameType_IntInIntersectionToMixedInUnion_ReturnsFalse() {
+        ITypeSymbol actual = createIntersectionType(intType);
+        ITypeSymbol formal = createUnion(mixedType);
+
+        IOverloadResolver solver = createOverloadResolverAndSetMixed();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(false));
+    }
+
+    @Test
+    public void areSameType_IntInUnionToMixedInIntersection_ReturnsFalse() {
+        ITypeSymbol actual = createUnion(intType);
+        ITypeSymbol formal = createIntersectionType(mixedType);
+
+        IOverloadResolver solver = createOverloadResolverAndSetMixed();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(false));
+    }
+
+    @Test
     public void isFirstSameOrSubTypeOfSecond_FooOrBarToInterfaceBAndInterfaceA_ReturnsTrue() {
         ITypeSymbol barType = mock(ITypeSymbol.class);
         when(barType.getParentTypeSymbols()).thenReturn(set(interfaceAType, interfaceBType));
@@ -53,6 +97,29 @@ public class OverloadResolverWithUnionAndIntersectionTypesTest extends ATypeTest
 
 
     //--------------------  special case empty union and intersection
+
+    @Test
+    public void areSameType_EmptyUnionToEmptyIntersection_ReturnsFalse() {
+        ITypeSymbol actual = createUnion();
+        ITypeSymbol formal = createIntersectionType();
+
+        IOverloadResolver solver = createOverloadResolverAndSetMixed();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(false));
+    }
+
+
+    @Test
+    public void areSameType_EmptyIntersectionToEmptyUnion_ReturnsFalse() {
+        ITypeSymbol actual = createIntersectionType();
+        ITypeSymbol formal = createUnion();
+
+        IOverloadResolver solver = createOverloadResolverAndSetMixed();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(false));
+    }
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_EmptyUnionToEmptyIntersection_ReturnsTrue() {
@@ -99,19 +166,51 @@ public class OverloadResolverWithUnionAndIntersectionTypesTest extends ATypeTest
     }
 
 
+    //--------------------  special case union with mixed only and intersection with mixed only
+
     @Test
-    public void isFirstSameOrParentTypeOfSecond_EmptyToEmpty_ReturnsTrue() {
-        ITypeSymbol actual = createUnion();
-        ITypeSymbol formal = createUnion();
+    public void areSame_UnionWithMixedToIntersectionWithMixed_ReturnsTrue() {
+        ITypeSymbol actual = createUnion(mixedType);
+        ITypeSymbol formal = createIntersectionType(mixedType);
 
         IOverloadResolver solver = createOverloadResolverAndSetMixed();
-        boolean result = solver.isFirstSameOrParentTypeOfSecond(actual, formal);
+        boolean result = solver.areSame(actual, formal);
 
         assertThat(result, is(true));
     }
 
+    @Test
+    public void areSame_IntersectionWithMixedToUnionWithMixed_ReturnsTrue() {
+        ITypeSymbol actual = createIntersectionType(mixedType);
+        ITypeSymbol formal = createUnion(mixedType);
 
-    //--------------------  special case union with mixed only and intersection with mixed only
+        IOverloadResolver solver = createOverloadResolverAndSetMixed();
+        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void areSame_EmptyIntersectionToUnionWithMixed_ReturnsTrue() {
+        ITypeSymbol actual = createIntersectionType();
+        ITypeSymbol formal = createUnion(mixedType);
+
+        IOverloadResolver solver = createOverloadResolverAndSetMixed();
+        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void areSame_UnionWithMixedToEmptyIntersection_ReturnsTrue() {
+        ITypeSymbol actual = createUnion(mixedType);
+        ITypeSymbol formal = createIntersectionType();
+
+        IOverloadResolver solver = createOverloadResolverAndSetMixed();
+        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result, is(true));
+    }
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_UnionWithMixedToIntersectionWithMixed_ReturnsTrue() {

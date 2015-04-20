@@ -27,6 +27,39 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
     //--------------------  tests with unions on the left
 
     @Test
+    public void areSameType_IntInUnionToInt_ReturnsTrue() {
+        ITypeSymbol actual = createUnion(intType);
+        ITypeSymbol formal = intType;
+
+        IOverloadResolver solver = createOverloadResolver();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void areSameType_IntInUnionToMixed_ReturnsFalse() {
+        ITypeSymbol actual = createUnion(intType);
+        ITypeSymbol formal = mixedType;
+
+        IOverloadResolver solver = createOverloadResolver();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(false));
+    }
+
+    @Test
+    public void areSameType_MixedInUnionToInt_ReturnsFalse() {
+        ITypeSymbol actual = createUnion(mixedType);
+        ITypeSymbol formal = intType;
+
+        IOverloadResolver solver = createOverloadResolver();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(false));
+    }
+
+    @Test
     public void isFirstSameOrSubTypeOfSecond_IntOrFloatToNum_ReturnsTrue() {
         ITypeSymbol actual = createUnion(intType, floatType);
         ITypeSymbol formal = numType;
@@ -106,6 +139,17 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
     //--------------------  tests with empty union on the left
 
     @Test
+    public void areSameType_EmptyUnionToMixed_ReturnsFalse() {
+        ITypeSymbol actual = createUnion();
+        ITypeSymbol formal = mixedType;
+
+        IOverloadResolver solver = createOverloadResolver();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(false));
+    }
+
+    @Test
     public void isFirstSameOrSubTypeOfSecond_EmptyToInt_ReturnsTrue() {
         ITypeSymbol actual = createUnion();
         ITypeSymbol formal = intType;
@@ -172,6 +216,39 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
 //    }
 
     //--------------------  tests with unions on the right
+
+    @Test
+    public void areSameType_IntToIntInUnion_ReturnsTrue() {
+        ITypeSymbol actual = intType;
+        ITypeSymbol formal = createUnion(intType);
+
+        IOverloadResolver solver = createOverloadResolver();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void areSameType_MixedToIntInUnion_ReturnsFalse() {
+        ITypeSymbol actual = mixedType;
+        ITypeSymbol formal = createUnion(intType);
+
+        IOverloadResolver solver = createOverloadResolver();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(false));
+    }
+
+    @Test
+    public void areSameType_IntToMixedInUnion_ReturnsFalse() {
+        ITypeSymbol actual = intType;
+        ITypeSymbol formal = createUnion(mixedType);
+
+        IOverloadResolver solver = createOverloadResolver();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(false));
+    }
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_IntToIntOrFloat_ReturnsTrue() {
@@ -242,6 +319,17 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
     //--------------------  tests with empty union on the right
 
     @Test
+    public void areSameType_MixedToEmptyUnion_ReturnsFalse() {
+        ITypeSymbol actual = mixedType;
+        ITypeSymbol formal = createUnion();
+
+        IOverloadResolver solver = createOverloadResolver();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(false));
+    }
+
+    @Test
     public void isFirstSameOrSubTypeOfSecond_IntToEmpty_ReturnsFalse() {
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createUnion();
@@ -309,6 +397,74 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
 
     //--------------------  tests with unions on the left and on the right
 
+
+    @Test
+    public void areSameType_IntToInt_ReturnsTrue() {
+        ITypeSymbol actual = createUnion(intType);
+        ITypeSymbol formal = createUnion(intType);
+
+        IOverloadResolver solver = createOverloadResolver();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void areSameType_IntAndFloatToIntAndFloat_ReturnsTrue() {
+        ITypeSymbol actual = createUnion(intType, floatType);
+        ITypeSymbol formal = createUnion(intType, floatType);
+
+        IOverloadResolver solver = createOverloadResolver();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void areSameType_IntAndFloatToFloatAndInt_ReturnsTrue() {
+        ITypeSymbol actual = createUnion(intType, floatType);
+        ITypeSymbol formal = createUnion(floatType, intType);
+
+        IOverloadResolver solver = createOverloadResolver();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(true));
+    }
+
+
+    @Test
+    public void areSameType_IntAndBoolToIntAndFloat_ReturnsFalse() {
+        ITypeSymbol actual = createUnion(intType, boolType);
+        ITypeSymbol formal = createUnion(intType, floatType);
+
+        IOverloadResolver solver = createOverloadResolver();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(false));
+    }
+
+    @Test
+    public void areSameType_IntAndFloatToMixedInUnion_ReturnsFalse() {
+        ITypeSymbol actual = createUnion(intType, floatType);
+        ITypeSymbol formal = createUnion(mixedType);
+
+        IOverloadResolver solver = createOverloadResolver();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(false));
+    }
+
+    @Test
+    public void areSameType_MixedInUnionToIntAndFloat_ReturnsFalse() {
+        ITypeSymbol actual = createUnion(mixedType);
+        ITypeSymbol formal = createUnion(intType, floatType);
+
+        IOverloadResolver solver = createOverloadResolver();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(false));
+    }
+
     @Test
     public void isFirstSameOrSubTypeOfSecond_IntOrFloatToNumOrString_ReturnsTrue() {
         ITypeSymbol actual = createUnion(intType, floatType);
@@ -366,6 +522,18 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
 
     //--------------------  special case empty union on the left and on the right
 
+    @Test
+    public void areSameType_EmptyToEmpty_ReturnsTrue() {
+        ITypeSymbol actual = createUnion();
+        ITypeSymbol formal = createUnion();
+
+        IOverloadResolver solver = createOverloadResolver();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(true));
+    }
+
+
 //    @Test
 //    public void isFirstSubTypeOfSecond_EmptyToEmpty_ReturnsFalse() {
 //        ITypeSymbol actual = createUnion();
@@ -412,6 +580,16 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
 
     //--------------------  special case union with mixed only on the left and on the right
 
+    @Test
+    public void areSameType_MixedToMixed_ReturnsTrue() {
+        ITypeSymbol actual = createUnion(mixedType);
+        ITypeSymbol formal = createUnion(mixedType);
+
+        IOverloadResolver solver = createOverloadResolver();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(true));
+    }
 
 //    @Test
 //    public void isFirstSubTypeOfSecond_MixedToMixed_ReturnsFalse() {

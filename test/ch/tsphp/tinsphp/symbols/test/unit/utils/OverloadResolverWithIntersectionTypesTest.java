@@ -27,6 +27,39 @@ public class OverloadResolverWithIntersectionTypesTest extends ATypeTest
     //--------------------  tests with intersection types on the left
 
     @Test
+    public void areSameType_IntInIntersectionToInt_ReturnsTrue() {
+        ITypeSymbol actual = createIntersectionType(intType);
+        ITypeSymbol formal = intType;
+
+        IOverloadResolver solver = createOverloadResolverAndSetMixed();
+        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void areSameType_IntInIntersectionToMixed_ReturnsFalse() {
+        ITypeSymbol actual = createIntersectionType(intType);
+        ITypeSymbol formal = mixedType;
+
+        IOverloadResolver solver = createOverloadResolverAndSetMixed();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(false));
+    }
+
+    @Test
+    public void areSameType_MixedInIntersectionToInt_ReturnsFalse() {
+        ITypeSymbol actual = createIntersectionType(mixedType);
+        ITypeSymbol formal = intType;
+
+        IOverloadResolver solver = createOverloadResolverAndSetMixed();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(false));
+    }
+
+    @Test
     public void isFirstSameOrSubTypeOfSecond_IntAndFloatToNum_ReturnsTrue() {
         ITypeSymbol actual = createIntersectionType(intType, floatType);
         ITypeSymbol formal = numType;
@@ -128,6 +161,28 @@ public class OverloadResolverWithIntersectionTypesTest extends ATypeTest
     //--------------------  tests with empty intersection on the left
 
     @Test
+    public void areSameType_EmptyIntersectionToInt_ReturnsFalse() {
+        ITypeSymbol actual = createIntersectionType();
+        ITypeSymbol formal = intType;
+
+        IOverloadResolver solver = createOverloadResolverAndSetMixed();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(false));
+    }
+
+    @Test
+    public void areSameType_EmptyIntersectionToMixed_ReturnsTrue() {
+        ITypeSymbol actual = createIntersectionType();
+        ITypeSymbol formal = mixedType;
+
+        IOverloadResolver solver = createOverloadResolverAndSetMixed();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
     public void isFirstSameOrSubTypeOfSecond_EmptyToInt_ReturnsFalse() {
         ITypeSymbol actual = createIntersectionType();
         ITypeSymbol formal = intType;
@@ -218,6 +273,39 @@ public class OverloadResolverWithIntersectionTypesTest extends ATypeTest
     //--------------------  tests with intersection types on the right
 
     @Test
+    public void areSameType_IntToIntInIntersection_ReturnsTrue() {
+        ITypeSymbol actual = intType;
+        ITypeSymbol formal = createIntersectionType(intType);
+
+        IOverloadResolver solver = createOverloadResolverAndSetMixed();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void areSameType_MixedToIntInIntersection_ReturnsFalse() {
+        ITypeSymbol actual = mixedType;
+        ITypeSymbol formal = createIntersectionType(intType);
+
+        IOverloadResolver solver = createOverloadResolverAndSetMixed();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(false));
+    }
+
+    @Test
+    public void areSameType_IntToMixedInIntersection_ReturnsFalse() {
+        ITypeSymbol actual = intType;
+        ITypeSymbol formal = createIntersectionType(mixedType);
+
+        IOverloadResolver solver = createOverloadResolverAndSetMixed();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(false));
+    }
+
+    @Test
     public void isFirstSameOrSubTypeOfSecond_FooToInterfaceBAndInterfaceA_ReturnsTrue() {
         ITypeSymbol actual = fooType;
         ITypeSymbol formal = createIntersectionType(interfaceBType, interfaceAType);
@@ -262,6 +350,28 @@ public class OverloadResolverWithIntersectionTypesTest extends ATypeTest
     }
 
     //--------------------  tests with empty intersection on the right
+
+    @Test
+    public void areSameType_IntToEmptyIntersection_ReturnsFalse() {
+        ITypeSymbol actual = intType;
+        ITypeSymbol formal = createIntersectionType();
+
+        IOverloadResolver solver = createOverloadResolverAndSetMixed();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(false));
+    }
+
+    @Test
+    public void areSameType_MixedToEmptyIntersection_ReturnsTrue() {
+        ITypeSymbol actual = mixedType;
+        ITypeSymbol formal = createIntersectionType();
+
+        IOverloadResolver solver = createOverloadResolverAndSetMixed();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(true));
+    }
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_IntToEmpty_ReturnsTrue() {
@@ -331,6 +441,72 @@ public class OverloadResolverWithIntersectionTypesTest extends ATypeTest
 
     //--------------------  tests with intersection types on the left and on the right
 
+    @Test
+    public void areSameType_IntToInt_ReturnsTrue() {
+        ITypeSymbol actual = createIntersectionType(intType);
+        ITypeSymbol formal = createIntersectionType(intType);
+
+        IOverloadResolver solver = createOverloadResolverAndSetMixed();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void areSameType_IAAndIBToIAAndIB_ReturnsTrue() {
+        ITypeSymbol actual = createIntersectionType(interfaceAType, interfaceBType);
+        ITypeSymbol formal = createIntersectionType(interfaceAType, interfaceBType);
+
+        IOverloadResolver solver = createOverloadResolverAndSetMixed();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void areSameType_IAndIBToIBAndIA_ReturnsTrue() {
+        ITypeSymbol actual = createIntersectionType(interfaceAType, interfaceBType);
+        ITypeSymbol formal = createIntersectionType(interfaceBType, interfaceAType);
+
+        IOverloadResolver solver = createOverloadResolverAndSetMixed();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void areSameType_ISubAndIBToIBAndIA_ReturnsFalse() {
+        ITypeSymbol actual = createIntersectionType(interfaceSubAType, interfaceBType);
+        ITypeSymbol formal = createIntersectionType(interfaceBType, interfaceAType);
+
+        IOverloadResolver solver = createOverloadResolverAndSetMixed();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(false));
+    }
+
+
+    @Test
+    public void areSameType_IAndIBToMixedInIntersection_ReturnsFalse() {
+        ITypeSymbol actual = createIntersectionType(interfaceAType, interfaceBType);
+        ITypeSymbol formal = createIntersectionType(mixedType);
+
+        IOverloadResolver solver = createOverloadResolverAndSetMixed();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(false));
+    }
+
+    @Test
+    public void areSameType_MixedInIntersectionToIAAndIB_ReturnsFalse() {
+        ITypeSymbol actual = createIntersectionType(mixedType);
+        ITypeSymbol formal = createIntersectionType(interfaceBType, interfaceAType);
+
+        IOverloadResolver solver = createOverloadResolverAndSetMixed();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(false));
+    }
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_IntAndFloatAndBoolToIntAndFloat_ReturnsTrue() {
@@ -410,6 +586,18 @@ public class OverloadResolverWithIntersectionTypesTest extends ATypeTest
 //    }
 
     //--------------------  special case empty intersection on the left and on the right
+
+    @Test
+    public void areSameType_EmptyToEmpty_ReturnsTrue() {
+        ITypeSymbol actual = createIntersectionType();
+        ITypeSymbol formal = createIntersectionType();
+
+        IOverloadResolver solver = createOverloadResolverAndSetMixed();
+        boolean result = solver.areSame(actual, formal);
+
+        assertThat(result, is(true));
+    }
+
 
 //    @Test
 //    public void isFirstSubTypeOfSecond_EmptyToEmpty_ReturnsFalse() {

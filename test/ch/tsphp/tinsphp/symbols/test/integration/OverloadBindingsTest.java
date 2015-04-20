@@ -1331,25 +1331,25 @@ public class OverloadBindingsTest extends ATypeTest
         IOverloadBindings collection = createOverloadBindings();
 
         //arrange
-        String t1 = "T1";
-        String t2 = "T2";
+        String ta = "Ta";
+        String tb = "Tb";
         String tReturn = "Treturn";
 
-        collection.addVariable("$a", new TypeVariableConstraint(t1));
-        collection.addVariable("$b", new TypeVariableConstraint(t2));
+        collection.addVariable("$a", new TypeVariableConstraint(ta));
+        collection.addVariable("$b", new TypeVariableConstraint(tb));
         collection.addVariable(
                 RETURN_VARIABLE_NAME, new FixedTypeVariableConstraint(new TypeVariableConstraint(tReturn)));
-        collection.addLowerTypeBound(t1, intType);
-        collection.addLowerTypeBound(t2, floatType);
+        collection.addLowerTypeBound(ta, intType);
+        collection.addLowerTypeBound(tb, floatType);
         collection.addLowerTypeBound(tReturn, boolType);
 
         //act
         collection.tryToFix(new HashSet<String>());
 
         assertThat(collection, withVariableBindings(
-                varBinding("$a", "T1", asList("int"), null, true),
-                varBinding("$b", "T2", asList("float"), null, true),
-                varBinding(RETURN_VARIABLE_NAME, "Treturn", asList("bool"), null, true)
+                varBinding("$a", ta, asList("int"), null, true),
+                varBinding("$b", tb, asList("float"), null, true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("bool"), null, true)
         ));
     }
 
@@ -1362,25 +1362,25 @@ public class OverloadBindingsTest extends ATypeTest
         IOverloadBindings collection = createOverloadBindings();
 
         //arrange
-        String t1 = "T1";
-        String t2 = "T2";
+        String ta = "Ta";
+        String tb = "Tb";
         String tReturn = "Treturn";
 
-        collection.addVariable("$a", new TypeVariableConstraint(t1));
-        collection.addVariable("$b", new TypeVariableConstraint(t2));
+        collection.addVariable("$a", new TypeVariableConstraint(ta));
+        collection.addVariable("$b", new TypeVariableConstraint(tb));
         collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
-        collection.addLowerTypeBound(t1, intType);
-        collection.addLowerTypeBound(t2, floatType);
-        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(t2));
+        collection.addLowerTypeBound(ta, intType);
+        collection.addLowerTypeBound(tb, floatType);
+        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(tb));
         Set<String> parameterTypeVariables = new HashSet<>();
 
         //act
         collection.tryToFix(parameterTypeVariables);
 
         assertThat(collection, withVariableBindings(
-                varBinding("$a", "T1", asList("int"), null, true),
-                varBinding("$b", "T2", asList("float"), null, true),
-                varBinding(RETURN_VARIABLE_NAME, "Treturn", asList("float"), null, true)
+                varBinding("$a", ta, asList("int"), null, true),
+                varBinding("$b", tb, asList("float"), null, true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("float"), null, true)
         ));
     }
 
@@ -1392,25 +1392,397 @@ public class OverloadBindingsTest extends ATypeTest
         IOverloadBindings collection = createOverloadBindings();
 
         //arrange
-        String t1 = "T1";
-        String t2 = "T2";
+        String ta = "Ta";
+        String tb = "Tb";
         String tReturn = "Treturn";
 
-        collection.addVariable("$a", new TypeVariableConstraint(t1));
-        collection.addVariable("$b", new TypeVariableConstraint(t2));
+        collection.addVariable("$a", new TypeVariableConstraint(ta));
+        collection.addVariable("$b", new TypeVariableConstraint(tb));
         collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
-        collection.addLowerTypeBound(t1, intType);
-        collection.addLowerRefBound(t2, new TypeVariableConstraint(t1));
-        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(t2));
+        collection.addLowerTypeBound(ta, intType);
+        collection.addLowerRefBound(tb, new TypeVariableConstraint(ta));
+        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(tb));
         Set<String> parameterTypeVariables = new HashSet<>();
 
         //act
         collection.tryToFix(parameterTypeVariables);
 
         assertThat(collection, withVariableBindings(
-                varBinding("$a", "T1", asList("int"), null, true),
-                varBinding("$b", "T2", asList("int"), null, true),
-                varBinding(RETURN_VARIABLE_NAME, "Treturn", asList("int"), null, true)
+                varBinding("$a", ta, asList("int"), null, true),
+                varBinding("$b", tb, asList("int"), null, true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
+        ));
+    }
+
+    //see TINS-386 function with constant return via indirection
+    @Test
+    public void tryToFix_NoParamsReturnViaMultipleIndirection_AllVariablesAreConstant() {
+        //corresponds: function foo(){ $a = 1; $b = $a; $c = $b; $d = $c; return $d;}
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String ta = "Ta";
+        String tb = "Tb";
+        String tc = "Tc";
+        String td = "Td";
+        String tReturn = "Treturn";
+
+        collection.addVariable("$a", new TypeVariableConstraint(ta));
+        collection.addVariable("$b", new TypeVariableConstraint(tb));
+        collection.addVariable("$c", new TypeVariableConstraint(tc));
+        collection.addVariable("$d", new TypeVariableConstraint(td));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
+        collection.addLowerTypeBound(ta, intType);
+        collection.addLowerRefBound(tb, new TypeVariableConstraint(ta));
+        collection.addLowerRefBound(tc, new TypeVariableConstraint(tb));
+        collection.addLowerRefBound(td, new TypeVariableConstraint(tc));
+        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(td));
+        Set<String> parameterTypeVariables = new HashSet<>();
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding("$a", ta, asList("int"), null, true),
+                varBinding("$b", tb, asList("int"), null, true),
+                varBinding("$c", tc, asList("int"), null, true),
+                varBinding("$d", td, asList("int"), null, true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
+        ));
+    }
+
+    @Test
+    public void tryToFix_YisLowerRefOfXAndConstantReturn_AllVariablesAreFixed() {
+        //corresponds: function foo($x, $y){ $x + 1; $x = $y; return 1;}
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+
+        String $x = "$x";
+        String $y = "$y";
+        String tx = "Tx";
+        String ty = "Ty";
+        String tReturn = "Treturn";
+
+        collection.addVariable($x, new TypeVariableConstraint(tx));
+        collection.addVariable($y, new TypeVariableConstraint(ty));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
+        collection.addLowerTypeBound(tx, intType);
+        collection.addUpperTypeBound(tx, numType);
+        collection.addLowerRefBound(tx, new TypeVariableConstraint(ty));
+        collection.addLowerTypeBound(tReturn, intType);
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+        parameterTypeVariables.add(ty);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, tx, null, asList("num"), true),
+                varBinding($y, ty, null, asList("num"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
+        ));
+    }
+
+    @Test
+    public void tryToFix_YisLowerRefOfXAndXIsReturned_ReturnIsTxAndHasTyAsLowerRef() {
+        //corresponds: function foo($x, $y){ $x + 1; $x = $y; return $x;}
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String $y = "$y";
+        String tx = "Tx";
+        String ty = "Ty";
+        String tReturn = "Treturn";
+
+        collection.addVariable($x, new TypeVariableConstraint(tx));
+        collection.addVariable($y, new TypeVariableConstraint(ty));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
+        collection.addLowerTypeBound(tx, intType);
+        collection.addUpperTypeBound(tx, numType);
+        collection.addLowerRefBound(tx, new TypeVariableConstraint(ty));
+        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(tx));
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+        parameterTypeVariables.add(ty);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, tx, asList("int", "@" + ty), asList("num"), false),
+                varBinding($y, ty, null, asList("@" + tx, "num"), false),
+                varBinding(RETURN_VARIABLE_NAME, tx, asList("int", "@" + ty), asList("num"), false)
+        ));
+    }
+
+    @Test
+    public void tryToFix_YisLowerRefOfBAndBIsLowerRefOfXAndXIsReturned_ReturnIsTxAndHasTyAsLowerRefAndBIsTy() {
+        //corresponds: function foo($x, $y){ $x + 1; $b = $y; $x = $b; return $x;}
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String $y = "$y";
+        String $b = "$b";
+        String tx = "Tx";
+        String ty = "Ty";
+        String tb = "Tb";
+        String tReturn = "Treturn";
+
+        collection.addVariable($x, new TypeVariableConstraint(tx));
+        collection.addVariable($y, new TypeVariableConstraint(ty));
+        collection.addVariable($b, new TypeVariableConstraint(tb));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
+        collection.addLowerTypeBound(tx, intType);
+        collection.addUpperTypeBound(tx, numType);
+        collection.addLowerRefBound(tx, new TypeVariableConstraint(tb));
+        collection.addLowerRefBound(tb, new TypeVariableConstraint(ty));
+        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(tx));
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+        parameterTypeVariables.add(ty);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, tx, asList("int", "@" + ty), asList("num"), false),
+                varBinding($y, ty, null, asList("@" + tx, "num"), false),
+                varBinding($b, ty, null, asList("@" + tx, "num"), false),
+                varBinding(RETURN_VARIABLE_NAME, tx, asList("int", "@" + ty), asList("num"), false)
+        ));
+    }
+
+    @Test
+    public void tryToFix_HasTwoParamsDoesNothing_AllAreConstant() {
+        //corresponds: function foo($x, $y){ return 1;}
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String $y = "$y";
+        String tx = "Tx";
+        String ty = "Ty";
+        String tReturn = "Treturn";
+
+        collection.addVariable($x, new TypeVariableConstraint(tx));
+        collection.addVariable($y, new TypeVariableConstraint(ty));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
+        collection.addLowerTypeBound(tReturn, intType);
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+        parameterTypeVariables.add(ty);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, tx, null, null, true),
+                varBinding($y, ty, null, null, true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
+        ));
+    }
+
+    @Test
+    public void tryToFix_VariableHasParamAsLowerConstantReturn_AllAreConstant() {
+        //corresponds: function foo($x){ $a = $x; return 1;}
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String $a = "$a";
+        String tx = "Tx";
+        String ta = "Ta";
+        String tReturn = "Treturn";
+
+        collection.addVariable($x, new TypeVariableConstraint(tx));
+        collection.addVariable($a, new TypeVariableConstraint(ta));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
+        collection.addLowerRefBound(ta, new TypeVariableConstraint(tx));
+        collection.addLowerTypeBound(tReturn, intType);
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, tx, null, null, true),
+                varBinding($a, ta, null, null, true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
+        ));
+    }
+
+    @Test
+    public void tryToFix_VariableHasParamAsLowerAndParamReturned_VariableUnifiesWithParam() {
+        //corresponds: function foo($x){ $a = $x; return $x;}
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String $a = "$a";
+        String tx = "Tx";
+        String ta = "Ta";
+        String tReturn = "Treturn";
+
+        collection.addVariable($x, new TypeVariableConstraint(tx));
+        collection.addVariable($a, new TypeVariableConstraint(ta));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
+        collection.addLowerRefBound(ta, new TypeVariableConstraint(tx));
+        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(tx));
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, tx, null, null, false),
+                varBinding($a, tx, null, null, false),
+                varBinding(RETURN_VARIABLE_NAME, tx, null, null, false)
+        ));
+    }
+
+    @Test
+    public void tryToFix_VariableHasParamAsLowerAndSameLowerTypeAndParamReturned_UnifiesWithParameter() {
+        //corresponds: function foo($x){ $a = 1; $x = 1; $a = $x; return $x;}
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String $a = "$a";
+        String tx = "Tx";
+        String ta = "Ta";
+        String tReturn = "Treturn";
+
+        collection.addVariable($x, new TypeVariableConstraint(tx));
+        collection.addVariable($a, new TypeVariableConstraint(ta));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
+        collection.addLowerRefBound(ta, new TypeVariableConstraint(tx));
+        collection.addLowerTypeBound(tx, intType);
+        collection.addLowerTypeBound(ta, intType);
+        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(tx));
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, tx, asList("int"), null, false),
+                varBinding($a, tx, asList("int"), null, false),
+                varBinding(RETURN_VARIABLE_NAME, tx, asList("int"), null, false)
+        ));
+    }
+
+
+    @Test
+    public void tryToFix_VariableHasParamAsLowerAndDifferentLowerTypeAndParamReturned_DoesNotUnifyWithParameter() {
+        //corresponds: function foo($x){ $a = 1.3; $x = 1; $a = $x; return $x;}
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String $a = "$a";
+        String tx = "Tx";
+        String ta = "Ta";
+        String tReturn = "Treturn";
+
+        collection.addVariable($x, new TypeVariableConstraint(tx));
+        collection.addVariable($a, new TypeVariableConstraint(ta));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
+        collection.addLowerRefBound(ta, new TypeVariableConstraint(tx));
+        collection.addLowerTypeBound(tx, intType);
+        collection.addLowerTypeBound(ta, floatType);
+        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(tx));
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, tx, asList("int"), asList("@" + ta), false),
+                varBinding($a, ta, asList("float", "int", "@" + tx), null, false),
+                varBinding(RETURN_VARIABLE_NAME, tx, asList("int"), asList("@" + ta), false)
+        ));
+    }
+
+    @Test
+    public void tryToFix_ParamXAndYAndBothAreReturned_ReturnHasBothAsLowerRef() {
+        //corresponds: function foo($x, $y){ if($x){return $x;} return $y;}
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String $y = "$y";
+        String tx = "Tx";
+        String ty = "Ty";
+        String tReturn = "Treturn";
+
+        collection.addVariable($x, new TypeVariableConstraint(tx));
+        collection.addVariable($y, new TypeVariableConstraint(ty));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
+        collection.addUpperTypeBound(tx, boolType);
+        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(tx));
+        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(ty));
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+        parameterTypeVariables.add(ty);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, tx, null, asList("@" + tReturn, "bool"), false),
+                varBinding($y, ty, null, asList("@" + tReturn), false),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("@" + tx, "@" + ty), null, false)
+        ));
+    }
+
+    @Test
+    public void tryToFix_SemiConstantReturn_ReturnHasTypeAndParamAsLowerBound() {
+        //corresponds: function foo($x, $y){ if($x){return 1;} return $y;}
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String $y = "$y";
+        String tx = "Tx";
+        String ty = "Ty";
+        String tReturn = "Treturn";
+
+        collection.addVariable($x, new TypeVariableConstraint(tx));
+        collection.addVariable($y, new TypeVariableConstraint(ty));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
+        collection.addUpperTypeBound(tx, boolType);
+        collection.addLowerTypeBound(tReturn, intType);
+        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(ty));
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+        parameterTypeVariables.add(ty);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, tx, null, asList("bool"), true),
+                varBinding($y, ty, null, asList("@" + tReturn), false),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int", "@" + ty), null, false)
         ));
     }
 
