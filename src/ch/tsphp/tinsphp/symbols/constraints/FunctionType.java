@@ -12,7 +12,9 @@ import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FunctionType implements IFunctionType
 {
@@ -20,6 +22,7 @@ public class FunctionType implements IFunctionType
     private IOverloadBindings bindings;
     private List<IVariable> parameters;
     private IVariable returnVariable;
+    private final Map<String, String> nameChanges = new HashMap<>(2);
 
     public FunctionType(String theName,
             IOverloadBindings theOverloadBindings,
@@ -34,6 +37,19 @@ public class FunctionType implements IFunctionType
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public String getRewrittenName(String translatorId) {
+        if (nameChanges.containsKey(translatorId)) {
+            return nameChanges.get(translatorId);
+        }
+        return name;
+    }
+
+    @Override
+    public void addRewrittenName(String translatorId, String newName) {
+        nameChanges.put(translatorId, newName);
     }
 
     @Override
