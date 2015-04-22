@@ -9,7 +9,7 @@ package ch.tsphp.tinsphp.symbols.constraints;
 
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
-import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableConstraint;
+import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
 
 import java.util.HashMap;
@@ -88,7 +88,7 @@ public class FunctionType implements IFunctionType
             StringBuilder sb, IVariable parameter) {
         String absoluteName = parameter.getAbsoluteName();
         sb.append(absoluteName).append(":");
-        ITypeVariableConstraint constraint = bindings.getTypeVariableConstraint(absoluteName);
+        ITypeVariableReference constraint = bindings.getTypeVariableReference(absoluteName);
         String typeVariable = constraint.getTypeVariable();
         sb.append(typeVariable)
                 .append("<")

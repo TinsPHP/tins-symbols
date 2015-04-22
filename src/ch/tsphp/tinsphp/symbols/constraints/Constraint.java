@@ -7,19 +7,19 @@
 package ch.tsphp.tinsphp.symbols.constraints;
 
 
-import ch.tsphp.tinsphp.common.inference.constraints.IIntersectionConstraint;
+import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
 import ch.tsphp.tinsphp.common.symbols.IMinimalMethodSymbol;
 
 import java.util.List;
 
-public class IntersectionConstraint implements IIntersectionConstraint
+public class Constraint implements IConstraint
 {
     private IVariable assignTypeVariable;
     private List<IVariable> arguments;
     private IMinimalMethodSymbol methodSymbol;
 
-    public IntersectionConstraint(
+    public Constraint(
             IVariable theLeftHandSideVariable,
             List<IVariable> theVariables,
             IMinimalMethodSymbol theMethodSymbol) {

@@ -14,8 +14,8 @@ package ch.tsphp.tinsphp.symbols.erroneous;
 
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
+import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
-import ch.tsphp.tinsphp.common.inference.constraints.IIntersectionConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.symbols.IMinimalVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
@@ -94,12 +94,7 @@ public class ErroneousMethodSymbol extends AErroneousScopedSymbol implements IEr
     }
 
     @Override
-    public List<IIntersectionConstraint> getLowerBoundConstraints() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public List<IIntersectionConstraint> getUpperBoundConstraints() {
+    public List<IConstraint> getConstraints() {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
@@ -109,12 +104,7 @@ public class ErroneousMethodSymbol extends AErroneousScopedSymbol implements IEr
     }
 
     @Override
-    public void addLowerBoundConstraint(IIntersectionConstraint constraint) {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public void addUpperBoundConstraint(IIntersectionConstraint constraint) {
+    public void addConstraint(IConstraint constraint) {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 

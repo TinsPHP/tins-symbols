@@ -6,11 +6,11 @@
 
 package ch.tsphp.tinsphp.symbols.test.unit.constraints;
 
-import ch.tsphp.tinsphp.common.inference.constraints.IIntersectionConstraint;
+import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMinimalMethodSymbol;
-import ch.tsphp.tinsphp.symbols.constraints.IntersectionConstraint;
+import ch.tsphp.tinsphp.symbols.constraints.Constraint;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ public class IntersectionConstraintTest
     public void getLeftHandSide_Standard_IsOnePassedByConstructor() {
         IVariable leftHandSide = mock(IVariable.class);
 
-        IIntersectionConstraint intersectionConstraint = createIntersectionConstraint(
+        IConstraint intersectionConstraint = createIntersectionConstraint(
                 leftHandSide, new ArrayList<IVariable>(), mock(IMinimalMethodSymbol.class));
         IVariable result = intersectionConstraint.getLeftHandSide();
 
@@ -37,7 +37,7 @@ public class IntersectionConstraintTest
     public void getArguments_Standard_IsOnePassedByConstructor() {
         List<IVariable> arguments = new ArrayList<>();
 
-        IIntersectionConstraint intersectionConstraint = createIntersectionConstraint(
+        IConstraint intersectionConstraint = createIntersectionConstraint(
                 mock(IVariable.class), arguments, mock(IMinimalMethodSymbol.class));
         List<IVariable> result = intersectionConstraint.getArguments();
 
@@ -48,17 +48,17 @@ public class IntersectionConstraintTest
     public void getMethodSymbol_Standard_IsOnePassedByConstructor() {
         IMinimalMethodSymbol methodSymbol = mock(IMethodSymbol.class);
 
-        IIntersectionConstraint intersectionConstraint = createIntersectionConstraint(
+        IConstraint intersectionConstraint = createIntersectionConstraint(
                 mock(IVariable.class), new ArrayList<IVariable>(), methodSymbol);
         IMinimalMethodSymbol result = intersectionConstraint.getMethodSymbol();
 
         assertThat(result, is(methodSymbol));
     }
 
-    protected IIntersectionConstraint createIntersectionConstraint(
+    protected IConstraint createIntersectionConstraint(
             IVariable theLeftHandSideVariable,
             List<IVariable> theVariables,
             IMinimalMethodSymbol theMethodSymbol) {
-        return new IntersectionConstraint(theLeftHandSideVariable, theVariables, theMethodSymbol);
+        return new Constraint(theLeftHandSideVariable, theVariables, theMethodSymbol);
     }
 }

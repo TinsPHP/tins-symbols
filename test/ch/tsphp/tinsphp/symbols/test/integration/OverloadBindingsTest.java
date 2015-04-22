@@ -7,10 +7,10 @@
 package ch.tsphp.tinsphp.symbols.test.integration;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
-import ch.tsphp.tinsphp.common.inference.constraints.FixedTypeVariableConstraint;
+import ch.tsphp.tinsphp.common.inference.constraints.FixedTypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
-import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableConstraint;
-import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableConstraint;
+import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableReference;
+import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
@@ -81,46 +81,46 @@ public class OverloadBindingsTest extends ATypeTest
     @Test
     public void copyConstructor_HasTwoVariables_CopyBoth() {
         OverloadBindings bindings1 = new OverloadBindings(symbolFactory, overloadResolver);
-        bindings1.addVariable("$a", new TypeVariableConstraint("T1"));
-        bindings1.addVariable("$b", new TypeVariableConstraint("T2"));
+        bindings1.addVariable("$a", new TypeVariableReference("T1"));
+        bindings1.addVariable("$b", new TypeVariableReference("T2"));
 
         IOverloadBindings collection = createOverloadBindings(bindings1);
 
         assertThat(collection.getVariableIds(), containsInAnyOrder("$a", "$b"));
-        assertThat(collection.getTypeVariableConstraint("$a").hasFixedType(), is(false));
-        assertThat(collection.getTypeVariableConstraint("$b").hasFixedType(), is(false));
+        assertThat(collection.getTypeVariableReference("$a").hasFixedType(), is(false));
+        assertThat(collection.getTypeVariableReference("$b").hasFixedType(), is(false));
     }
 
     @Test
     public void copyConstructor_HasTwoVariablesFirstIsFixed_OnlyFirstIsFixed() {
         OverloadBindings bindings1 = new OverloadBindings(symbolFactory, overloadResolver);
-        bindings1.addVariable("$a", new FixedTypeVariableConstraint(new TypeVariableConstraint("T")));
-        bindings1.addVariable("$b", new TypeVariableConstraint("T"));
+        bindings1.addVariable("$a", new FixedTypeVariableReference(new TypeVariableReference("T")));
+        bindings1.addVariable("$b", new TypeVariableReference("T"));
 
         IOverloadBindings collection = createOverloadBindings(bindings1);
 
         assertThat(collection.getVariableIds(), containsInAnyOrder("$a", "$b"));
-        assertThat(collection.getTypeVariableConstraint("$a").hasFixedType(), is(true));
-        assertThat(collection.getTypeVariableConstraint("$b").hasFixedType(), is(false));
+        assertThat(collection.getTypeVariableReference("$a").hasFixedType(), is(true));
+        assertThat(collection.getTypeVariableReference("$b").hasFixedType(), is(false));
     }
 
     @Test
     public void copyConstructor_HasTwoVariablesSecondIsFixed_OnlySecondIsFixed() {
         OverloadBindings bindings1 = new OverloadBindings(symbolFactory, overloadResolver);
-        bindings1.addVariable("$a", new TypeVariableConstraint("T"));
-        bindings1.addVariable("$b", new FixedTypeVariableConstraint(new TypeVariableConstraint("T")));
+        bindings1.addVariable("$a", new TypeVariableReference("T"));
+        bindings1.addVariable("$b", new FixedTypeVariableReference(new TypeVariableReference("T")));
 
         IOverloadBindings collection = createOverloadBindings(bindings1);
 
         assertThat(collection.getVariableIds(), containsInAnyOrder("$a", "$b"));
-        assertThat(collection.getTypeVariableConstraint("$a").hasFixedType(), is(false));
-        assertThat(collection.getTypeVariableConstraint("$b").hasFixedType(), is(true));
+        assertThat(collection.getTypeVariableReference("$a").hasFixedType(), is(false));
+        assertThat(collection.getTypeVariableReference("$b").hasFixedType(), is(true));
     }
 
     @Test
     public void copyConstructor_HasLowerTypeBound_IsCopied() {
         OverloadBindings bindings1 = new OverloadBindings(symbolFactory, overloadResolver);
-        bindings1.addVariable("$a", new TypeVariableConstraint("T"));
+        bindings1.addVariable("$a", new TypeVariableReference("T"));
         bindings1.addLowerTypeBound("T", intType);
 
         IOverloadBindings collection = createOverloadBindings(bindings1);
@@ -132,7 +132,7 @@ public class OverloadBindingsTest extends ATypeTest
     @Test
     public void copyConstructor_HasUpperTypeBound_IsCopied() {
         OverloadBindings bindings1 = new OverloadBindings(symbolFactory, overloadResolver);
-        bindings1.addVariable("$a", new TypeVariableConstraint("T"));
+        bindings1.addVariable("$a", new TypeVariableReference("T"));
         bindings1.addUpperTypeBound("T", interfaceAType);
 
         IOverloadBindings collection = createOverloadBindings(bindings1);
@@ -145,12 +145,12 @@ public class OverloadBindingsTest extends ATypeTest
     @Test
     public void copyConstructor_HasLowerRefBound_IsCopied() {
         OverloadBindings bindings1 = new OverloadBindings(symbolFactory, overloadResolver);
-        bindings1.addVariable("$a", new TypeVariableConstraint("T1"));
-        bindings1.addVariable("$b", new TypeVariableConstraint("T2"));
-        bindings1.addLowerRefBound("T1", new TypeVariableConstraint("T2"));
+        bindings1.addVariable("$a", new TypeVariableReference("T1"));
+        bindings1.addVariable("$b", new TypeVariableReference("T2"));
+        bindings1.addLowerRefBound("T1", new TypeVariableReference("T2"));
 
         IOverloadBindings collection = createOverloadBindings(bindings1);
-        bindings1.addLowerRefBound("T2", new TypeVariableConstraint("T1"));
+        bindings1.addLowerRefBound("T2", new TypeVariableReference("T1"));
 
         assertThat(collection, withVariableBindings(
                 varBinding("$a", "T1", asList("@T2"), null, false),
@@ -161,9 +161,9 @@ public class OverloadBindingsTest extends ATypeTest
     @Test
     public void copyConstructor_HasVariablesAndRenameOneAfterCopying_DoesOnlyRenameOldBinding() {
         OverloadBindings bindings1 = new OverloadBindings(symbolFactory, overloadResolver);
-        bindings1.addVariable("$a", new TypeVariableConstraint("T1"));
-        bindings1.addVariable("$b", new TypeVariableConstraint("T2"));
-        bindings1.addVariable("$c", new TypeVariableConstraint("T3"));
+        bindings1.addVariable("$a", new TypeVariableReference("T1"));
+        bindings1.addVariable("$b", new TypeVariableReference("T2"));
+        bindings1.addVariable("$c", new TypeVariableReference("T3"));
 
 
         IOverloadBindings collection = createOverloadBindings(bindings1);
@@ -183,7 +183,7 @@ public class OverloadBindingsTest extends ATypeTest
         //no arrange necessary
 
         IOverloadBindings collection = createOverloadBindings();
-        TypeVariableConstraint result = collection.getNextTypeVariable();
+        TypeVariableReference result = collection.getNextTypeVariable();
 
         assertThat(result.getTypeVariable(), is("T1"));
     }
@@ -194,7 +194,7 @@ public class OverloadBindingsTest extends ATypeTest
         bindings1.getNextTypeVariable();
 
         IOverloadBindings collection = createOverloadBindings(bindings1);
-        TypeVariableConstraint result = collection.getNextTypeVariable();
+        TypeVariableReference result = collection.getNextTypeVariable();
 
         assertThat(result.getTypeVariable(), is("T2"));
     }
@@ -204,7 +204,7 @@ public class OverloadBindingsTest extends ATypeTest
         //no arrange necessary
 
         IOverloadBindings collection = createOverloadBindings();
-        collection.addVariable("$a", new TypeVariableConstraint("T"));
+        collection.addVariable("$a", new TypeVariableReference("T"));
 
         assertThat(collection.containsVariable("$a"), is(true));
     }
@@ -215,10 +215,10 @@ public class OverloadBindingsTest extends ATypeTest
         IOverloadBindings collection = createOverloadBindings();
 
         //arrange
-        collection.addVariable("$a", new TypeVariableConstraint("T1"));
+        collection.addVariable("$a", new TypeVariableReference("T1"));
 
         //act
-        collection.addVariable("$a", new TypeVariableConstraint("T2"));
+        collection.addVariable("$a", new TypeVariableReference("T2"));
 
         //assert in annotation
     }
@@ -432,7 +432,7 @@ public class OverloadBindingsTest extends ATypeTest
 
         //arrange
         String lhs = "Tlhs";
-        collection.addVariable("$lhs", new TypeVariableConstraint(lhs));
+        collection.addVariable("$lhs", new TypeVariableReference(lhs));
 
         //act
         collection.renameTypeVariable("T", lhs);
@@ -447,7 +447,7 @@ public class OverloadBindingsTest extends ATypeTest
 
         //arrange
         String lhs = "Tlhs";
-        collection.addVariable("$lhs", new TypeVariableConstraint(lhs));
+        collection.addVariable("$lhs", new TypeVariableReference(lhs));
 
         //act
         collection.renameTypeVariable(lhs, "T");
@@ -462,7 +462,7 @@ public class OverloadBindingsTest extends ATypeTest
 
         //arrange
         String lhs = "Tlhs";
-        TypeVariableConstraint constraint = spy(new TypeVariableConstraint(lhs));
+        TypeVariableReference constraint = spy(new TypeVariableReference(lhs));
         collection.addVariable("$lhs", constraint);
 
         //act
@@ -484,8 +484,8 @@ public class OverloadBindingsTest extends ATypeTest
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        collection.addVariable("$lhs", new TypeVariableConstraint(lhs));
-        collection.addVariable("$rhs", new TypeVariableConstraint(rhs));
+        collection.addVariable("$lhs", new TypeVariableReference(lhs));
+        collection.addVariable("$rhs", new TypeVariableReference(rhs));
         collection.addLowerTypeBound(lhs, intType);
         collection.addUpperTypeBound(lhs, numType);
 
@@ -506,14 +506,14 @@ public class OverloadBindingsTest extends ATypeTest
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        collection.addVariable("$lhs", new TypeVariableConstraint(lhs));
-        collection.addVariable("$rhs", new TypeVariableConstraint(rhs));
+        collection.addVariable("$lhs", new TypeVariableReference(lhs));
+        collection.addVariable("$rhs", new TypeVariableReference(rhs));
         String t1 = "T1";
-        collection.addVariable("$t1", new TypeVariableConstraint(t1));
+        collection.addVariable("$t1", new TypeVariableReference(t1));
         String t2 = "T2";
-        collection.addVariable("$t2", new TypeVariableConstraint(t2));
-        collection.addLowerRefBound(lhs, new TypeVariableConstraint(t1));
-        collection.addLowerRefBound(t2, new TypeVariableConstraint(lhs));
+        collection.addVariable("$t2", new TypeVariableReference(t2));
+        collection.addLowerRefBound(lhs, new TypeVariableReference(t1));
+        collection.addLowerRefBound(t2, new TypeVariableReference(lhs));
 
         //act
         collection.renameTypeVariable(lhs, rhs);
@@ -545,7 +545,7 @@ public class OverloadBindingsTest extends ATypeTest
 
         //arrange
         String typeVariable = "T";
-        collection.addVariable("$a", new TypeVariableConstraint("T"));
+        collection.addVariable("$a", new TypeVariableReference("T"));
         collection.addUpperTypeBound(typeVariable, numType);
 
         //act
@@ -562,7 +562,7 @@ public class OverloadBindingsTest extends ATypeTest
 
         //arrange
         String typeVariable = "T";
-        collection.addVariable("$a", new TypeVariableConstraint("T"));
+        collection.addVariable("$a", new TypeVariableReference("T"));
         collection.addUpperTypeBound(typeVariable, intType);
 
         //act
@@ -579,7 +579,7 @@ public class OverloadBindingsTest extends ATypeTest
 
         //arrange
         String typeVariable = "T";
-        collection.addVariable("$a", new TypeVariableConstraint("T"));
+        collection.addVariable("$a", new TypeVariableReference("T"));
         collection.addUpperTypeBound(typeVariable, intType);
 
         //act
@@ -596,7 +596,7 @@ public class OverloadBindingsTest extends ATypeTest
 
         //arrange
         String typeVariable = "T";
-        collection.addVariable("$a", new TypeVariableConstraint("T"));
+        collection.addVariable("$a", new TypeVariableReference("T"));
         collection.addLowerTypeBound(typeVariable, intType);
 
         //act
@@ -613,7 +613,7 @@ public class OverloadBindingsTest extends ATypeTest
 
         //arrange
         String typeVariable = "T";
-        collection.addVariable("$a", new TypeVariableConstraint("T"));
+        collection.addVariable("$a", new TypeVariableReference("T"));
         collection.addLowerTypeBound(typeVariable, numType);
 
         //act
@@ -630,7 +630,7 @@ public class OverloadBindingsTest extends ATypeTest
 
         //arrange
         String typeVariable = "T";
-        collection.addVariable("$a", new TypeVariableConstraint("T"));
+        collection.addVariable("$a", new TypeVariableReference("T"));
         collection.addLowerTypeBound(typeVariable, intType);
 
         //act
@@ -647,7 +647,7 @@ public class OverloadBindingsTest extends ATypeTest
 
         //arrange
         String typeVariable = "T";
-        collection.addVariable("$a", new TypeVariableConstraint("T"));
+        collection.addVariable("$a", new TypeVariableReference("T"));
         collection.addLowerTypeBound(typeVariable, intType);
 
         //act
@@ -675,7 +675,7 @@ public class OverloadBindingsTest extends ATypeTest
 
         //arrange
         String typeVariable = "T";
-        collection.addVariable("$a", new TypeVariableConstraint("T"));
+        collection.addVariable("$a", new TypeVariableReference("T"));
         collection.addLowerTypeBound(typeVariable, intType);
 
         //act
@@ -692,7 +692,7 @@ public class OverloadBindingsTest extends ATypeTest
 
         //arrange
         String typeVariable = "T";
-        collection.addVariable("$a", new TypeVariableConstraint("T"));
+        collection.addVariable("$a", new TypeVariableReference("T"));
         collection.addLowerTypeBound(typeVariable, intType);
 
         //act
@@ -709,7 +709,7 @@ public class OverloadBindingsTest extends ATypeTest
 
         //arrange
         String typeVariable = "T";
-        collection.addVariable("$a", new TypeVariableConstraint("T"));
+        collection.addVariable("$a", new TypeVariableReference("T"));
         collection.addLowerTypeBound(typeVariable, numType);
 
         //act
@@ -725,7 +725,7 @@ public class OverloadBindingsTest extends ATypeTest
 
         //arrange
         String typeVariable = "T";
-        collection.addVariable("$a", new TypeVariableConstraint("T"));
+        collection.addVariable("$a", new TypeVariableReference("T"));
         collection.addUpperTypeBound(typeVariable, intType);
 
         //act
@@ -742,7 +742,7 @@ public class OverloadBindingsTest extends ATypeTest
 
         //arrange
         String typeVariable = "T";
-        collection.addVariable("$a", new TypeVariableConstraint("T"));
+        collection.addVariable("$a", new TypeVariableReference("T"));
         collection.addUpperTypeBound(typeVariable, numType);
 
         //act
@@ -759,7 +759,7 @@ public class OverloadBindingsTest extends ATypeTest
 
         //arrange
         String typeVariable = "T";
-        collection.addVariable("$a", new TypeVariableConstraint("T"));
+        collection.addVariable("$a", new TypeVariableReference("T"));
         collection.addUpperTypeBound(typeVariable, intType);
 
         //act
@@ -777,7 +777,7 @@ public class OverloadBindingsTest extends ATypeTest
 
         //arrange
         String typeVariable = "T";
-        collection.addVariable("$a", new TypeVariableConstraint("T"));
+        collection.addVariable("$a", new TypeVariableReference("T"));
         collection.addUpperTypeBound(typeVariable, interfaceAType);
 
         //act
@@ -794,7 +794,7 @@ public class OverloadBindingsTest extends ATypeTest
 
         //arrange
         String typeVariable = "T";
-        collection.addVariable("$a", new TypeVariableConstraint("T"));
+        collection.addVariable("$a", new TypeVariableReference("T"));
         collection.addUpperTypeBound(typeVariable, intType);
 
         //act
@@ -810,7 +810,7 @@ public class OverloadBindingsTest extends ATypeTest
 
         //arrange
         String typeVariable = "T";
-        collection.addVariable("$a", new TypeVariableConstraint("T"));
+        collection.addVariable("$a", new TypeVariableReference("T"));
         collection.addUpperTypeBound(typeVariable, interfaceAType);
 
         //act
@@ -827,7 +827,7 @@ public class OverloadBindingsTest extends ATypeTest
 
         //arrange
         String typeVariable = "T";
-        collection.addVariable("$a", new TypeVariableConstraint("T"));
+        collection.addVariable("$a", new TypeVariableReference("T"));
         collection.addUpperTypeBound(typeVariable, interfaceAType);
         collection.addUpperTypeBound(typeVariable, interfaceBType);
 
@@ -844,7 +844,7 @@ public class OverloadBindingsTest extends ATypeTest
 
         //act
         IOverloadBindings collection = createOverloadBindings();
-        collection.addLowerRefBound("T", new TypeVariableConstraint("T2"));
+        collection.addLowerRefBound("T", new TypeVariableReference("T2"));
 
         //assert in annotation
     }
@@ -855,8 +855,8 @@ public class OverloadBindingsTest extends ATypeTest
 
         //act
         IOverloadBindings collection = createOverloadBindings();
-        collection.addVariable("$a", new TypeVariableConstraint("T"));
-        collection.addLowerRefBound("T", new TypeVariableConstraint("T2"));
+        collection.addVariable("$a", new TypeVariableReference("T"));
+        collection.addLowerRefBound("T", new TypeVariableReference("T2"));
 
         //assert in annotation
     }
@@ -869,11 +869,11 @@ public class OverloadBindingsTest extends ATypeTest
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        collection.addVariable("$lhs", new TypeVariableConstraint(lhs));
-        collection.addVariable("$rhs", new TypeVariableConstraint(rhs));
+        collection.addVariable("$lhs", new TypeVariableReference(lhs));
+        collection.addVariable("$rhs", new TypeVariableReference(rhs));
 
         //act
-        collection.addLowerRefBound(lhs, new TypeVariableConstraint(rhs));
+        collection.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
         assertThat(collection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("@Trhs"), null, false),
@@ -889,12 +889,12 @@ public class OverloadBindingsTest extends ATypeTest
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        collection.addVariable("$lhs", new TypeVariableConstraint(lhs));
-        collection.addVariable("$rhs", new TypeVariableConstraint(rhs));
+        collection.addVariable("$lhs", new TypeVariableReference(lhs));
+        collection.addVariable("$rhs", new TypeVariableReference(rhs));
         collection.addUpperTypeBound(lhs, intType);
 
         //act
-        collection.addLowerRefBound(lhs, new TypeVariableConstraint(rhs));
+        collection.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
         assertThat(collection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("@Trhs"), asList("int"), false),
@@ -910,13 +910,13 @@ public class OverloadBindingsTest extends ATypeTest
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        collection.addVariable("$lhs", new TypeVariableConstraint(lhs));
-        collection.addVariable("$rhs", new TypeVariableConstraint(rhs));
+        collection.addVariable("$lhs", new TypeVariableReference(lhs));
+        collection.addVariable("$rhs", new TypeVariableReference(rhs));
         collection.addUpperTypeBound(lhs, intType);
         collection.addUpperTypeBound(rhs, intType);
 
         //act
-        collection.addLowerRefBound(lhs, new TypeVariableConstraint(rhs));
+        collection.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
         assertThat(collection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("@Trhs"), asList("int"), false),
@@ -932,13 +932,13 @@ public class OverloadBindingsTest extends ATypeTest
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        collection.addVariable("$lhs", new TypeVariableConstraint(lhs));
-        collection.addVariable("$rhs", new TypeVariableConstraint(rhs));
+        collection.addVariable("$lhs", new TypeVariableReference(lhs));
+        collection.addVariable("$rhs", new TypeVariableReference(rhs));
         collection.addUpperTypeBound(lhs, numType);
         collection.addUpperTypeBound(rhs, intType);
 
         //act
-        collection.addLowerRefBound(lhs, new TypeVariableConstraint(rhs));
+        collection.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
         assertThat(collection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("@Trhs"), asList("num"), false),
@@ -954,13 +954,13 @@ public class OverloadBindingsTest extends ATypeTest
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        collection.addVariable("$lhs", new TypeVariableConstraint(lhs));
-        collection.addVariable("$rhs", new TypeVariableConstraint(rhs));
+        collection.addVariable("$lhs", new TypeVariableReference(lhs));
+        collection.addVariable("$rhs", new TypeVariableReference(rhs));
         collection.addUpperTypeBound(lhs, intType);
         collection.addUpperTypeBound(rhs, numType);
 
         //act
-        collection.addLowerRefBound(lhs, new TypeVariableConstraint(rhs));
+        collection.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
         assertThat(collection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("@Trhs"), asList("int"), false),
@@ -976,13 +976,13 @@ public class OverloadBindingsTest extends ATypeTest
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        collection.addVariable("$lhs", new TypeVariableConstraint(lhs));
-        collection.addVariable("$rhs", new TypeVariableConstraint(rhs));
+        collection.addVariable("$lhs", new TypeVariableReference(lhs));
+        collection.addVariable("$rhs", new TypeVariableReference(rhs));
         collection.addUpperTypeBound(lhs, intType);
         collection.addLowerTypeBound(rhs, intType);
 
         //act
-        collection.addLowerRefBound(lhs, new TypeVariableConstraint(rhs));
+        collection.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
         assertThat(collection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("int", "@Trhs"), asList("int"), false),
@@ -998,13 +998,13 @@ public class OverloadBindingsTest extends ATypeTest
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        collection.addVariable("$lhs", new TypeVariableConstraint(lhs));
-        collection.addVariable("$rhs", new TypeVariableConstraint(rhs));
+        collection.addVariable("$lhs", new TypeVariableReference(lhs));
+        collection.addVariable("$rhs", new TypeVariableReference(rhs));
         collection.addUpperTypeBound(lhs, numType);
         collection.addLowerTypeBound(rhs, intType);
 
         //act
-        collection.addLowerRefBound(lhs, new TypeVariableConstraint(rhs));
+        collection.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
         assertThat(collection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("int", "@Trhs"), asList("num"), false),
@@ -1020,13 +1020,13 @@ public class OverloadBindingsTest extends ATypeTest
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        collection.addVariable("$lhs", new TypeVariableConstraint(lhs));
-        collection.addVariable("$rhs", new TypeVariableConstraint(rhs));
+        collection.addVariable("$lhs", new TypeVariableReference(lhs));
+        collection.addVariable("$rhs", new TypeVariableReference(rhs));
         collection.addUpperTypeBound(lhs, intType);
         collection.addLowerTypeBound(rhs, numType);
 
         //act
-        collection.addLowerRefBound(lhs, new TypeVariableConstraint(rhs));
+        collection.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
         //assert in annotation
     }
@@ -1039,12 +1039,12 @@ public class OverloadBindingsTest extends ATypeTest
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        collection.addVariable("$lhs", new TypeVariableConstraint(lhs));
-        collection.addVariable("$rhs", new TypeVariableConstraint(rhs));
+        collection.addVariable("$lhs", new TypeVariableReference(lhs));
+        collection.addVariable("$rhs", new TypeVariableReference(rhs));
         collection.addLowerTypeBound(rhs, intType);
 
         //act
-        collection.addLowerRefBound(lhs, new TypeVariableConstraint(rhs));
+        collection.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
         assertThat(collection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("int", "@Trhs"), null, false),
@@ -1060,13 +1060,13 @@ public class OverloadBindingsTest extends ATypeTest
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        collection.addVariable("$lhs", new TypeVariableConstraint(lhs));
-        collection.addVariable("$rhs", new TypeVariableConstraint(rhs));
+        collection.addVariable("$lhs", new TypeVariableReference(lhs));
+        collection.addVariable("$rhs", new TypeVariableReference(rhs));
         collection.addLowerTypeBound(lhs, intType);
         collection.addLowerTypeBound(rhs, intType);
 
         //act
-        collection.addLowerRefBound(lhs, new TypeVariableConstraint(rhs));
+        collection.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
 
         assertThat(collection, withVariableBindings(
@@ -1083,13 +1083,13 @@ public class OverloadBindingsTest extends ATypeTest
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        collection.addVariable("$lhs", new TypeVariableConstraint(lhs));
-        collection.addVariable("$rhs", new TypeVariableConstraint(rhs));
+        collection.addVariable("$lhs", new TypeVariableReference(lhs));
+        collection.addVariable("$rhs", new TypeVariableReference(rhs));
         collection.addLowerTypeBound(lhs, numType);
         collection.addLowerTypeBound(rhs, intType);
 
         //act
-        collection.addLowerRefBound(lhs, new TypeVariableConstraint(rhs));
+        collection.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
 
         assertThat(collection, withVariableBindings(
@@ -1106,13 +1106,13 @@ public class OverloadBindingsTest extends ATypeTest
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        collection.addVariable("$lhs", new TypeVariableConstraint(lhs));
-        collection.addVariable("$rhs", new TypeVariableConstraint(rhs));
+        collection.addVariable("$lhs", new TypeVariableReference(lhs));
+        collection.addVariable("$rhs", new TypeVariableReference(rhs));
         collection.addLowerTypeBound(lhs, intType);
         collection.addLowerTypeBound(rhs, numType);
 
         //act
-        collection.addLowerRefBound(lhs, new TypeVariableConstraint(rhs));
+        collection.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
 
         assertThat(collection, withVariableBindings(
@@ -1129,12 +1129,12 @@ public class OverloadBindingsTest extends ATypeTest
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        collection.addVariable("$lhs", new TypeVariableConstraint(lhs));
-        collection.addVariable("$rhs", new TypeVariableConstraint(rhs));
+        collection.addVariable("$lhs", new TypeVariableReference(lhs));
+        collection.addVariable("$rhs", new TypeVariableReference(rhs));
         collection.addLowerTypeBound(rhs, numType);
 
         //act
-        collection.addLowerRefBound(lhs, new FixedTypeVariableConstraint(new TypeVariableConstraint(rhs)));
+        collection.addLowerRefBound(lhs, new FixedTypeVariableReference(new TypeVariableReference(rhs)));
 
         assertThat(collection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("num"), null, false),
@@ -1150,10 +1150,10 @@ public class OverloadBindingsTest extends ATypeTest
 
         //arrange
         String lhs = "Tlhs";
-        collection.addVariable("$lhs", new TypeVariableConstraint(lhs));
+        collection.addVariable("$lhs", new TypeVariableReference(lhs));
 
         //act
-        collection.addLowerRefBound(lhs, new TypeVariableConstraint(lhs));
+        collection.addLowerRefBound(lhs, new TypeVariableReference(lhs));
 
         assertThat(collection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("@Tlhs"), asList("@Tlhs"), false)
@@ -1167,11 +1167,11 @@ public class OverloadBindingsTest extends ATypeTest
 
         //arrange
         String lhs = "Tlhs";
-        collection.addVariable("$lhs", new TypeVariableConstraint(lhs));
+        collection.addVariable("$lhs", new TypeVariableReference(lhs));
         collection.addUpperTypeBound(lhs, intType);
 
         //act
-        collection.addLowerRefBound(lhs, new TypeVariableConstraint(lhs));
+        collection.addLowerRefBound(lhs, new TypeVariableReference(lhs));
 
         assertThat(collection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("@Tlhs"), asList("@Tlhs", "int"), false)
@@ -1191,11 +1191,11 @@ public class OverloadBindingsTest extends ATypeTest
 
         //arrange
         String lhs = "Tlhs";
-        collection.addVariable("$lhs", new TypeVariableConstraint(lhs));
+        collection.addVariable("$lhs", new TypeVariableReference(lhs));
         collection.addLowerTypeBound(lhs, intType);
 
         //act
-        collection.addLowerRefBound(lhs, new TypeVariableConstraint(lhs));
+        collection.addLowerRefBound(lhs, new TypeVariableReference(lhs));
 
         assertThat(collection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("@Tlhs", "int"), asList("@Tlhs"), false)
@@ -1215,12 +1215,12 @@ public class OverloadBindingsTest extends ATypeTest
 
         //arrange
         String lhs = "Tlhs";
-        collection.addVariable("$lhs", new TypeVariableConstraint(lhs));
+        collection.addVariable("$lhs", new TypeVariableReference(lhs));
         collection.addUpperTypeBound(lhs, intType);
-        collection.addLowerRefBound(lhs, new TypeVariableConstraint(lhs));
+        collection.addLowerRefBound(lhs, new TypeVariableReference(lhs));
 
         //act
-        collection.addLowerRefBound(lhs, new TypeVariableConstraint(lhs));
+        collection.addLowerRefBound(lhs, new TypeVariableReference(lhs));
 
         assertThat(collection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("@Tlhs"), asList("@Tlhs", "int"), false)
@@ -1236,16 +1236,16 @@ public class OverloadBindingsTest extends ATypeTest
         String t1 = "T1";
         String t2 = "T2";
         String t3 = "T3";
-        collection.addVariable("$a", new TypeVariableConstraint(t1));
-        collection.addVariable("$b", new TypeVariableConstraint(t2));
-        collection.addVariable("$c", new TypeVariableConstraint(t3));
-        collection.addLowerRefBound(t2, new TypeVariableConstraint(t1));
+        collection.addVariable("$a", new TypeVariableReference(t1));
+        collection.addVariable("$b", new TypeVariableReference(t2));
+        collection.addVariable("$c", new TypeVariableReference(t3));
+        collection.addLowerRefBound(t2, new TypeVariableReference(t1));
         collection.addLowerTypeBound(t2, intType);
         collection.addUpperTypeBound(t3, numType);
-        collection.addLowerRefBound(t2, new TypeVariableConstraint(t3));
+        collection.addLowerRefBound(t2, new TypeVariableReference(t3));
 
         //act
-        collection.addLowerRefBound(t1, new TypeVariableConstraint(t2));
+        collection.addLowerRefBound(t1, new TypeVariableReference(t2));
 
 
         assertThat(collection, withVariableBindings(
@@ -1264,14 +1264,14 @@ public class OverloadBindingsTest extends ATypeTest
         String t1 = "T1";
         String t2 = "T2";
         String t3 = "T3";
-        collection.addVariable("$a", new TypeVariableConstraint(t1));
-        collection.addVariable("$b", new TypeVariableConstraint(t2));
-        collection.addVariable("$c", new TypeVariableConstraint(t3));
-        collection.addLowerRefBound(t2, new TypeVariableConstraint(t3));
-        collection.addLowerRefBound(t3, new TypeVariableConstraint(t1));
+        collection.addVariable("$a", new TypeVariableReference(t1));
+        collection.addVariable("$b", new TypeVariableReference(t2));
+        collection.addVariable("$c", new TypeVariableReference(t3));
+        collection.addLowerRefBound(t2, new TypeVariableReference(t3));
+        collection.addLowerRefBound(t3, new TypeVariableReference(t1));
 
         //act
-        collection.addLowerRefBound(t1, new TypeVariableConstraint(t2));
+        collection.addLowerRefBound(t1, new TypeVariableReference(t2));
 
         assertThat(collection, withVariableBindings(
                 varBinding("$a", "T1", asList("@T2"), asList("@T3"), false),
@@ -1290,16 +1290,16 @@ public class OverloadBindingsTest extends ATypeTest
         String t1 = "T1";
         String t2 = "T2";
         String t3 = "T3";
-        collection.addVariable("$a", new TypeVariableConstraint(t1));
-        collection.addVariable("$b", new TypeVariableConstraint(t2));
-        collection.addVariable("$c", new TypeVariableConstraint(t3));
-        collection.addLowerRefBound(t2, new TypeVariableConstraint(t3));
+        collection.addVariable("$a", new TypeVariableReference(t1));
+        collection.addVariable("$b", new TypeVariableReference(t2));
+        collection.addVariable("$c", new TypeVariableReference(t3));
+        collection.addLowerRefBound(t2, new TypeVariableReference(t3));
         collection.addLowerTypeBound(t2, intType);
-        collection.addLowerRefBound(t3, new TypeVariableConstraint(t1));
+        collection.addLowerRefBound(t3, new TypeVariableReference(t1));
         collection.addUpperTypeBound(t2, numType);
 
         //act
-        collection.addLowerRefBound(t1, new TypeVariableConstraint(t2));
+        collection.addLowerRefBound(t1, new TypeVariableReference(t2));
 
         assertThat(collection, withVariableBindings(
                 varBinding("$a", "T1", asList("int", "@T2"), asList("num", "@T3"), false),
@@ -1319,20 +1319,20 @@ public class OverloadBindingsTest extends ATypeTest
         String t3 = "T3";
         String t4 = "T4";
         String t5 = "T5";
-        collection.addVariable("$a", new TypeVariableConstraint(t1));
-        collection.addVariable("$b", new TypeVariableConstraint(t2));
-        collection.addVariable("$c", new TypeVariableConstraint(t3));
-        collection.addVariable("$d", new TypeVariableConstraint(t4));
-        collection.addVariable("$e", new TypeVariableConstraint(t5));
-        collection.addLowerRefBound(t2, new TypeVariableConstraint(t3));
+        collection.addVariable("$a", new TypeVariableReference(t1));
+        collection.addVariable("$b", new TypeVariableReference(t2));
+        collection.addVariable("$c", new TypeVariableReference(t3));
+        collection.addVariable("$d", new TypeVariableReference(t4));
+        collection.addVariable("$e", new TypeVariableReference(t5));
+        collection.addLowerRefBound(t2, new TypeVariableReference(t3));
         collection.addLowerTypeBound(t2, intType);
-        collection.addLowerRefBound(t3, new TypeVariableConstraint(t1));
+        collection.addLowerRefBound(t3, new TypeVariableReference(t1));
         collection.addUpperTypeBound(t3, numType);
-        collection.addLowerRefBound(t1, new TypeVariableConstraint(t4));
-        collection.addLowerRefBound(t3, new TypeVariableConstraint(t5));
+        collection.addLowerRefBound(t1, new TypeVariableReference(t4));
+        collection.addLowerRefBound(t3, new TypeVariableReference(t5));
 
         //act
-        collection.addLowerRefBound(t1, new TypeVariableConstraint(t2));
+        collection.addLowerRefBound(t1, new TypeVariableReference(t2));
 
         assertThat(collection, withVariableBindings(
                 varBinding("$a", "T1", asList("int", "@T2", "@T4"), asList("num", "@T3"), false),
@@ -1355,10 +1355,10 @@ public class OverloadBindingsTest extends ATypeTest
         String tb = "Tb";
         String tReturn = "Treturn";
 
-        collection.addVariable("$a", new TypeVariableConstraint(ta));
-        collection.addVariable("$b", new TypeVariableConstraint(tb));
+        collection.addVariable("$a", new TypeVariableReference(ta));
+        collection.addVariable("$b", new TypeVariableReference(tb));
         collection.addVariable(
-                RETURN_VARIABLE_NAME, new FixedTypeVariableConstraint(new TypeVariableConstraint(tReturn)));
+                RETURN_VARIABLE_NAME, new FixedTypeVariableReference(new TypeVariableReference(tReturn)));
         collection.addLowerTypeBound(ta, intType);
         collection.addLowerTypeBound(tb, floatType);
         collection.addLowerTypeBound(tReturn, boolType);
@@ -1386,12 +1386,12 @@ public class OverloadBindingsTest extends ATypeTest
         String tb = "Tb";
         String tReturn = "Treturn";
 
-        collection.addVariable("$a", new TypeVariableConstraint(ta));
-        collection.addVariable("$b", new TypeVariableConstraint(tb));
-        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
+        collection.addVariable("$a", new TypeVariableReference(ta));
+        collection.addVariable("$b", new TypeVariableReference(tb));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
         collection.addLowerTypeBound(ta, intType);
         collection.addLowerTypeBound(tb, floatType);
-        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(tb));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tb));
         Set<String> parameterTypeVariables = new HashSet<>();
 
         //act
@@ -1417,12 +1417,12 @@ public class OverloadBindingsTest extends ATypeTest
         String tb = "Tb";
         String tReturn = "Treturn";
 
-        collection.addVariable("$a", new TypeVariableConstraint(ta));
-        collection.addVariable("$b", new TypeVariableConstraint(tb));
-        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
+        collection.addVariable("$a", new TypeVariableReference(ta));
+        collection.addVariable("$b", new TypeVariableReference(tb));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
         collection.addLowerTypeBound(ta, intType);
-        collection.addLowerRefBound(tb, new TypeVariableConstraint(ta));
-        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(tb));
+        collection.addLowerRefBound(tb, new TypeVariableReference(ta));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tb));
         Set<String> parameterTypeVariables = new HashSet<>();
 
         //act
@@ -1450,16 +1450,16 @@ public class OverloadBindingsTest extends ATypeTest
         String td = "Td";
         String tReturn = "Treturn";
 
-        collection.addVariable("$a", new TypeVariableConstraint(ta));
-        collection.addVariable("$b", new TypeVariableConstraint(tb));
-        collection.addVariable("$c", new TypeVariableConstraint(tc));
-        collection.addVariable("$d", new TypeVariableConstraint(td));
-        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
+        collection.addVariable("$a", new TypeVariableReference(ta));
+        collection.addVariable("$b", new TypeVariableReference(tb));
+        collection.addVariable("$c", new TypeVariableReference(tc));
+        collection.addVariable("$d", new TypeVariableReference(td));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
         collection.addLowerTypeBound(ta, intType);
-        collection.addLowerRefBound(tb, new TypeVariableConstraint(ta));
-        collection.addLowerRefBound(tc, new TypeVariableConstraint(tb));
-        collection.addLowerRefBound(td, new TypeVariableConstraint(tc));
-        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(td));
+        collection.addLowerRefBound(tb, new TypeVariableReference(ta));
+        collection.addLowerRefBound(tc, new TypeVariableReference(tb));
+        collection.addLowerRefBound(td, new TypeVariableReference(tc));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(td));
         Set<String> parameterTypeVariables = new HashSet<>();
 
         //act
@@ -1489,12 +1489,12 @@ public class OverloadBindingsTest extends ATypeTest
         String ty = "Ty";
         String tReturn = "Treturn";
 
-        collection.addVariable($x, new TypeVariableConstraint(tx));
-        collection.addVariable($y, new TypeVariableConstraint(ty));
-        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($y, new TypeVariableReference(ty));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
         collection.addLowerTypeBound(tx, intType);
         collection.addUpperTypeBound(tx, numType);
-        collection.addLowerRefBound(tx, new TypeVariableConstraint(ty));
+        collection.addLowerRefBound(tx, new TypeVariableReference(ty));
         collection.addLowerTypeBound(tReturn, intType);
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
@@ -1524,13 +1524,13 @@ public class OverloadBindingsTest extends ATypeTest
         String ty = "Ty";
         String tReturn = "Treturn";
 
-        collection.addVariable($x, new TypeVariableConstraint(tx));
-        collection.addVariable($y, new TypeVariableConstraint(ty));
-        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($y, new TypeVariableReference(ty));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
         collection.addLowerTypeBound(tx, intType);
         collection.addUpperTypeBound(tx, numType);
-        collection.addLowerRefBound(tx, new TypeVariableConstraint(ty));
-        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(tx));
+        collection.addLowerRefBound(tx, new TypeVariableReference(ty));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
@@ -1561,15 +1561,15 @@ public class OverloadBindingsTest extends ATypeTest
         String tb = "Tb";
         String tReturn = "Treturn";
 
-        collection.addVariable($x, new TypeVariableConstraint(tx));
-        collection.addVariable($y, new TypeVariableConstraint(ty));
-        collection.addVariable($b, new TypeVariableConstraint(tb));
-        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($y, new TypeVariableReference(ty));
+        collection.addVariable($b, new TypeVariableReference(tb));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
         collection.addLowerTypeBound(tx, intType);
         collection.addUpperTypeBound(tx, numType);
-        collection.addLowerRefBound(tx, new TypeVariableConstraint(tb));
-        collection.addLowerRefBound(tb, new TypeVariableConstraint(ty));
-        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(tx));
+        collection.addLowerRefBound(tx, new TypeVariableReference(tb));
+        collection.addLowerRefBound(tb, new TypeVariableReference(ty));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
@@ -1603,15 +1603,15 @@ public class OverloadBindingsTest extends ATypeTest
         String tb = "Tb";
         String tReturn = "Treturn";
 
-        collection.addVariable($x, new TypeVariableConstraint(tx));
-        collection.addVariable($y, new TypeVariableConstraint(ty));
-        collection.addVariable($a, new TypeVariableConstraint(ta));
-        collection.addVariable($b, new TypeVariableConstraint(tb));
-        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
-        collection.addLowerRefBound(ta, new TypeVariableConstraint(ty));
-        collection.addLowerRefBound(tx, new TypeVariableConstraint(ta));
-        collection.addLowerRefBound(tb, new TypeVariableConstraint(tx));
-        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(tb));
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($y, new TypeVariableReference(ty));
+        collection.addVariable($a, new TypeVariableReference(ta));
+        collection.addVariable($b, new TypeVariableReference(tb));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        collection.addLowerRefBound(ta, new TypeVariableReference(ty));
+        collection.addLowerRefBound(tx, new TypeVariableReference(ta));
+        collection.addLowerRefBound(tb, new TypeVariableReference(tx));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tb));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
@@ -1646,16 +1646,16 @@ public class OverloadBindingsTest extends ATypeTest
         String tb = "Tb";
         String tReturn = "Treturn";
 
-        collection.addVariable($x, new TypeVariableConstraint(tx));
-        collection.addVariable($y, new TypeVariableConstraint(ty));
-        collection.addVariable($a, new TypeVariableConstraint(ta));
-        collection.addVariable($b, new TypeVariableConstraint(tb));
-        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($y, new TypeVariableReference(ty));
+        collection.addVariable($a, new TypeVariableReference(ta));
+        collection.addVariable($b, new TypeVariableReference(tb));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
         collection.addLowerTypeBound(ta, intType);
-        collection.addLowerRefBound(ta, new TypeVariableConstraint(ty));
-        collection.addLowerRefBound(tx, new TypeVariableConstraint(ta));
-        collection.addLowerRefBound(tb, new TypeVariableConstraint(tx));
-        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(tb));
+        collection.addLowerRefBound(ta, new TypeVariableReference(ty));
+        collection.addLowerRefBound(tx, new TypeVariableReference(ta));
+        collection.addLowerRefBound(tb, new TypeVariableReference(tx));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tb));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
@@ -1691,18 +1691,18 @@ public class OverloadBindingsTest extends ATypeTest
         String tc = "Tc";
         String tReturn = "Treturn";
 
-        collection.addVariable($x, new TypeVariableConstraint(tx));
-        collection.addVariable($y, new TypeVariableConstraint(ty));
-        collection.addVariable($a, new TypeVariableConstraint(ta));
-        collection.addVariable($b, new TypeVariableConstraint(tb));
-        collection.addVariable($c, new TypeVariableConstraint(tc));
-        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($y, new TypeVariableReference(ty));
+        collection.addVariable($a, new TypeVariableReference(ta));
+        collection.addVariable($b, new TypeVariableReference(tb));
+        collection.addVariable($c, new TypeVariableReference(tc));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
         collection.addLowerTypeBound(ta, intType);
-        collection.addLowerRefBound(ta, new TypeVariableConstraint(ty));
-        collection.addLowerRefBound(tc, new TypeVariableConstraint(ta));
-        collection.addLowerRefBound(tx, new TypeVariableConstraint(tc));
-        collection.addLowerRefBound(tb, new TypeVariableConstraint(tx));
-        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(tb));
+        collection.addLowerRefBound(ta, new TypeVariableReference(ty));
+        collection.addLowerRefBound(tc, new TypeVariableReference(ta));
+        collection.addLowerRefBound(tx, new TypeVariableReference(tc));
+        collection.addLowerRefBound(tb, new TypeVariableReference(tx));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tb));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
@@ -1739,18 +1739,18 @@ public class OverloadBindingsTest extends ATypeTest
         String tc = "Tc";
         String tReturn = "Treturn";
 
-        collection.addVariable($x, new TypeVariableConstraint(tx));
-        collection.addVariable($y, new TypeVariableConstraint(ty));
-        collection.addVariable($a, new TypeVariableConstraint(ta));
-        collection.addVariable($b, new TypeVariableConstraint(tb));
-        collection.addVariable($c, new TypeVariableConstraint(tc));
-        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($y, new TypeVariableReference(ty));
+        collection.addVariable($a, new TypeVariableReference(ta));
+        collection.addVariable($b, new TypeVariableReference(tb));
+        collection.addVariable($c, new TypeVariableReference(tc));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
         collection.addLowerTypeBound(tc, intType);
-        collection.addLowerRefBound(ta, new TypeVariableConstraint(ty));
-        collection.addLowerRefBound(tc, new TypeVariableConstraint(ta));
-        collection.addLowerRefBound(tx, new TypeVariableConstraint(tc));
-        collection.addLowerRefBound(tb, new TypeVariableConstraint(tx));
-        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(tb));
+        collection.addLowerRefBound(ta, new TypeVariableReference(ty));
+        collection.addLowerRefBound(tc, new TypeVariableReference(ta));
+        collection.addLowerRefBound(tx, new TypeVariableReference(tc));
+        collection.addLowerRefBound(tb, new TypeVariableReference(tx));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tb));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
@@ -1788,16 +1788,16 @@ public class OverloadBindingsTest extends ATypeTest
         String tb = "Tb";
         String tReturn = "Treturn";
 
-        collection.addVariable($x, new TypeVariableConstraint(tx));
-        collection.addVariable($y, new TypeVariableConstraint(ty));
-        collection.addVariable($a, new TypeVariableConstraint(ta));
-        collection.addVariable($b, new TypeVariableConstraint(tb));
-        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($y, new TypeVariableReference(ty));
+        collection.addVariable($a, new TypeVariableReference(ta));
+        collection.addVariable($b, new TypeVariableReference(tb));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
         collection.addLowerTypeBound(ta, intType);
-        collection.addLowerRefBound(ta, new TypeVariableConstraint(ty));
-        collection.addLowerRefBound(tx, new TypeVariableConstraint(ta));
-        collection.addLowerRefBound(tb, new TypeVariableConstraint(tx));
-        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(tb));
+        collection.addLowerRefBound(ta, new TypeVariableReference(ty));
+        collection.addLowerRefBound(tx, new TypeVariableReference(ta));
+        collection.addLowerRefBound(tb, new TypeVariableReference(tx));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tb));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
@@ -1828,9 +1828,9 @@ public class OverloadBindingsTest extends ATypeTest
         String ty = "Ty";
         String tReturn = "Treturn";
 
-        collection.addVariable($x, new TypeVariableConstraint(tx));
-        collection.addVariable($y, new TypeVariableConstraint(ty));
-        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($y, new TypeVariableReference(ty));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
         collection.addLowerTypeBound(tReturn, intType);
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
@@ -1859,10 +1859,10 @@ public class OverloadBindingsTest extends ATypeTest
         String ta = "Ta";
         String tReturn = "Treturn";
 
-        collection.addVariable($x, new TypeVariableConstraint(tx));
-        collection.addVariable($a, new TypeVariableConstraint(ta));
-        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
-        collection.addLowerRefBound(ta, new TypeVariableConstraint(tx));
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($a, new TypeVariableReference(ta));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        collection.addLowerRefBound(ta, new TypeVariableReference(tx));
         collection.addLowerTypeBound(tReturn, intType);
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
@@ -1890,11 +1890,11 @@ public class OverloadBindingsTest extends ATypeTest
         String ta = "Ta";
         String tReturn = "Treturn";
 
-        collection.addVariable($x, new TypeVariableConstraint(tx));
-        collection.addVariable($a, new TypeVariableConstraint(ta));
-        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
-        collection.addLowerRefBound(ta, new TypeVariableConstraint(tx));
-        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(tx));
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($a, new TypeVariableReference(ta));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        collection.addLowerRefBound(ta, new TypeVariableReference(tx));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
 
@@ -1921,13 +1921,13 @@ public class OverloadBindingsTest extends ATypeTest
         String ta = "Ta";
         String tReturn = "Treturn";
 
-        collection.addVariable($x, new TypeVariableConstraint(tx));
-        collection.addVariable($a, new TypeVariableConstraint(ta));
-        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
-        collection.addLowerRefBound(ta, new TypeVariableConstraint(tx));
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($a, new TypeVariableReference(ta));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        collection.addLowerRefBound(ta, new TypeVariableReference(tx));
         collection.addLowerTypeBound(tx, intType);
         collection.addLowerTypeBound(ta, intType);
-        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(tx));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
 
@@ -1955,13 +1955,13 @@ public class OverloadBindingsTest extends ATypeTest
         String ta = "Ta";
         String tReturn = "Treturn";
 
-        collection.addVariable($x, new TypeVariableConstraint(tx));
-        collection.addVariable($a, new TypeVariableConstraint(ta));
-        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
-        collection.addLowerRefBound(ta, new TypeVariableConstraint(tx));
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($a, new TypeVariableReference(ta));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        collection.addLowerRefBound(ta, new TypeVariableReference(tx));
         collection.addLowerTypeBound(tx, intType);
         collection.addLowerTypeBound(ta, floatType);
-        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(tx));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
 
@@ -1988,12 +1988,12 @@ public class OverloadBindingsTest extends ATypeTest
         String ty = "Ty";
         String tReturn = "Treturn";
 
-        collection.addVariable($x, new TypeVariableConstraint(tx));
-        collection.addVariable($y, new TypeVariableConstraint(ty));
-        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($y, new TypeVariableReference(ty));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
         collection.addUpperTypeBound(tx, boolType);
-        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(tx));
-        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(ty));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(ty));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
@@ -2021,12 +2021,12 @@ public class OverloadBindingsTest extends ATypeTest
         String ty = "Ty";
         String tReturn = "Treturn";
 
-        collection.addVariable($x, new TypeVariableConstraint(tx));
-        collection.addVariable($y, new TypeVariableConstraint(ty));
-        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableConstraint(tReturn));
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($y, new TypeVariableReference(ty));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
         collection.addUpperTypeBound(tx, boolType);
         collection.addLowerTypeBound(tReturn, intType);
-        collection.addLowerRefBound(tReturn, new TypeVariableConstraint(ty));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(ty));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
@@ -2059,9 +2059,9 @@ public class OverloadBindingsTest extends ATypeTest
         //arrange
         String t1 = "T1";
         String t2 = "T2";
-        collection.addVariable("$a", new TypeVariableConstraint(t1));
-        collection.addVariable("$b", new TypeVariableConstraint(t2));
-        collection.addLowerRefBound(t1, new TypeVariableConstraint(t2));
+        collection.addVariable("$a", new TypeVariableReference(t1));
+        collection.addVariable("$b", new TypeVariableReference(t2));
+        collection.addLowerRefBound(t1, new TypeVariableReference(t2));
 
         //act
         Set<String> result = collection.getLowerRefBounds(t1);
@@ -2087,9 +2087,9 @@ public class OverloadBindingsTest extends ATypeTest
         //arrange
         String t1 = "T1";
         String t2 = "T2";
-        collection.addVariable("$a", new TypeVariableConstraint(t1));
-        collection.addVariable("$b", new TypeVariableConstraint(t2));
-        collection.addLowerRefBound(t1, new TypeVariableConstraint(t2));
+        collection.addVariable("$a", new TypeVariableReference(t1));
+        collection.addVariable("$b", new TypeVariableReference(t2));
+        collection.addLowerRefBound(t1, new TypeVariableReference(t2));
 
         //act
         Set<String> result = collection.getUpperRefBounds(t2);
@@ -2115,11 +2115,11 @@ public class OverloadBindingsTest extends ATypeTest
 
         //arrange
         String t1 = "T1";
-        collection.addVariable("$a", new TypeVariableConstraint(t1));
+        collection.addVariable("$a", new TypeVariableReference(t1));
 
         //act
         collection.fixType("$a");
-        boolean result = collection.getTypeVariableConstraint("$a").hasFixedType();
+        boolean result = collection.getTypeVariableReference("$a").hasFixedType();
 
         assertThat(result, is(true));
     }
@@ -2131,12 +2131,12 @@ public class OverloadBindingsTest extends ATypeTest
 
         //arrange
         String t1 = "T1";
-        ITypeVariableConstraint constraint = new FixedTypeVariableConstraint(new TypeVariableConstraint(t1));
+        ITypeVariableReference constraint = new FixedTypeVariableReference(new TypeVariableReference(t1));
         collection.addVariable("$a", constraint);
 
         //act
         collection.fixType("$a");
-        ITypeVariableConstraint result = collection.getTypeVariableConstraint("$a");
+        ITypeVariableReference result = collection.getTypeVariableReference("$a");
 
         assertThat(result, is(constraint));
     }

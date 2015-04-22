@@ -8,10 +8,10 @@ package ch.tsphp.tinsphp.symbols.constraints;
 
 
 import ch.tsphp.common.symbols.ITypeSymbol;
-import ch.tsphp.tinsphp.common.inference.constraints.FixedTypeVariableConstraint;
+import ch.tsphp.tinsphp.common.inference.constraints.FixedTypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
-import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableConstraint;
-import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableConstraint;
+import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableReference;
+import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
@@ -33,7 +33,7 @@ public class OverloadBindings implements IOverloadBindings
     private final Map<String, IIntersectionTypeSymbol> upperTypeBounds;
     private final Map<String, Set<String>> upperRefBounds;
     private final Map<String, Set<String>> lowerRefBounds;
-    private final Map<String, ITypeVariableConstraint> variable2TypeVariable;
+    private final Map<String, ITypeVariableReference> variable2TypeVariable;
     private final Map<String, Set<String>> typeVariable2Variables;
 
     private int count = 1;
@@ -78,12 +78,12 @@ public class OverloadBindings implements IOverloadBindings
         }
 
         variable2TypeVariable = new HashMap<>(bindings.variable2TypeVariable.size());
-        for (Map.Entry<String, ITypeVariableConstraint> entry : bindings.variable2TypeVariable.entrySet()) {
-            ITypeVariableConstraint constraint = entry.getValue();
-            TypeVariableConstraint typeVariableConstraint = new TypeVariableConstraint(constraint.getTypeVariable());
-            ITypeVariableConstraint copy = typeVariableConstraint;
-            if (constraint.hasFixedType()) {
-                copy = new FixedTypeVariableConstraint(typeVariableConstraint);
+        for (Map.Entry<String, ITypeVariableReference> entry : bindings.variable2TypeVariable.entrySet()) {
+            ITypeVariableReference reference = entry.getValue();
+            TypeVariableReference typeVariableReference = new TypeVariableReference(reference.getTypeVariable());
+            ITypeVariableReference copy = typeVariableReference;
+            if (reference.hasFixedType()) {
+                copy = new FixedTypeVariableReference(typeVariableReference);
             }
             variable2TypeVariable.put(entry.getKey(), copy);
         }
@@ -96,18 +96,18 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     @Override
-    public TypeVariableConstraint getNextTypeVariable() {
-        return new TypeVariableConstraint("T" + count++);
+    public TypeVariableReference getNextTypeVariable() {
+        return new TypeVariableReference("T" + count++);
     }
 
     @Override
-    public void addVariable(String variableId, ITypeVariableConstraint constraint) {
+    public void addVariable(String variableId, ITypeVariableReference reference) {
         if (variable2TypeVariable.containsKey(variableId)) {
             throw new IllegalArgumentException(
                     "variable with id " + variableId + " was already added to this binding.");
         }
-        variable2TypeVariable.put(variableId, constraint);
-        addToSetInMap(typeVariable2Variables, constraint.getTypeVariable(), variableId);
+        variable2TypeVariable.put(variableId, reference);
+        addToSetInMap(typeVariable2Variables, reference.getTypeVariable(), variableId);
     }
 
     @Override
@@ -121,24 +121,24 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     @Override
-    public ITypeVariableConstraint getTypeVariableConstraint(String variableId) {
+    public ITypeVariableReference getTypeVariableReference(String variableId) {
         return variable2TypeVariable.get(variableId);
     }
 
     @Override
-    public void addLowerRefBound(String typeVariable, ITypeVariableConstraint refTypeVariableConstraint) {
+    public void addLowerRefBound(String typeVariable, ITypeVariableReference reference) {
         if (!typeVariable2Variables.containsKey(typeVariable)) {
             throw new IllegalArgumentException("no variable has a binding for type variable \"" + typeVariable + "\".");
         }
 
-        String refTypeVariable = refTypeVariableConstraint.getTypeVariable();
+        String refTypeVariable = reference.getTypeVariable();
 
         if (!typeVariable2Variables.containsKey(refTypeVariable)) {
             throw new IllegalArgumentException(
                     "no variable has a binding for type variable \"" + refTypeVariable + "\".");
         }
 
-        boolean hasNotFixedType = !refTypeVariableConstraint.hasFixedType();
+        boolean hasNotFixedType = !reference.hasFixedType();
         addLowerRefBound(typeVariable, refTypeVariable, hasNotFixedType);
     }
 
@@ -349,9 +349,9 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     private void fixTypeAfterContainsCheck(String variableId) {
-        ITypeVariableConstraint constraint = variable2TypeVariable.get(variableId);
-        if (!constraint.hasFixedType()) {
-            variable2TypeVariable.put(variableId, new FixedTypeVariableConstraint((TypeVariableConstraint) constraint));
+        ITypeVariableReference reference = variable2TypeVariable.get(variableId);
+        if (!reference.hasFixedType()) {
+            variable2TypeVariable.put(variableId, new FixedTypeVariableReference((TypeVariableReference) reference));
         }
     }
 
@@ -653,7 +653,7 @@ public class OverloadBindings implements IOverloadBindings
         StringBuilder sb = new StringBuilder();
         sb.append("[");
         boolean isNotFirst = false;
-        for (Map.Entry<String, ITypeVariableConstraint> entry : variable2TypeVariable.entrySet()) {
+        for (Map.Entry<String, ITypeVariableReference> entry : variable2TypeVariable.entrySet()) {
             if (isNotFirst) {
                 sb.append(", ");
             } else {

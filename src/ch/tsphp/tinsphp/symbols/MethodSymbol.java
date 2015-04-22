@@ -16,8 +16,8 @@ import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ISymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
+import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
-import ch.tsphp.tinsphp.common.inference.constraints.IIntersectionConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
@@ -36,8 +36,7 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
     private final List<IFunctionType> overloads = new ArrayList<>();
 
     //Warning! start code duplication - same as in GlobalNamespaceScope
-    private final List<IIntersectionConstraint> lowerBoundConstraints = new ArrayList<>();
-    private final List<IIntersectionConstraint> upperBoundConstraints = new ArrayList<>();
+    private final List<IConstraint> lowerBoundConstraints = new ArrayList<>();
     private List<IOverloadBindings> bindings;
     //Warning! end code duplication - same as in GlobalNamespaceScope
 
@@ -137,28 +136,15 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
 
     //Warning! start code duplication - same as in GlobalNamespaceScope
     @Override
-    public List<IIntersectionConstraint> getLowerBoundConstraints() {
+    public List<IConstraint> getConstraints() {
         return lowerBoundConstraints;
     }
 
     @Override
-    public List<IIntersectionConstraint> getUpperBoundConstraints() {
-        return upperBoundConstraints;
-    }
-
-    @Override
-    public void addLowerBoundConstraint(IIntersectionConstraint constraint) {
+    public void addConstraint(IConstraint constraint) {
         lowerBoundConstraints.add(constraint);
     }
 
-    @Override
-    public void addUpperBoundConstraint(IIntersectionConstraint constraint) {
-        upperBoundConstraints.add(constraint);
-    }
-    //Warning! end code duplication - same as in GlobalNamespaceScope
-
-
-    //Warning! start code duplication - same as in GlobalNamespaceScope
     @Override
     public List<IOverloadBindings> getBindings() {
         return bindings;
