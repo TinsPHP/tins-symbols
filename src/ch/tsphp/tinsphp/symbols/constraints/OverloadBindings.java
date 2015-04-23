@@ -150,7 +150,6 @@ public class OverloadBindings implements IOverloadBindings
             addToSetInMap(upperRefBounds, refTypeVariable, typeVariable);
         }
 
-
         if (isNotSelfReference(typeVariable, refTypeVariable)) {
 
             // The refTypeVariable needs to be the same or a subtype of typeVariable or we can narrow bounds in order

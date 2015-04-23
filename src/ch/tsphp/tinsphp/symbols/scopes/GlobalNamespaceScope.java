@@ -31,7 +31,7 @@ public class GlobalNamespaceScope extends AScope implements IGlobalNamespaceScop
 
     private final ILowerCaseStringMap<List<ISymbol>> symbolsCaseInsensitive = new LowerCaseStringMap<>();
     //Warning! start code duplication - same as in MethodSymbol
-    private final List<IConstraint> lowerBoundConstraints = new ArrayList<>();
+    private final List<IConstraint> constraints = new ArrayList<>();
     private List<IOverloadBindings> bindings;
     //Warning! end code duplication - same as in MethodSymbol
 
@@ -98,12 +98,12 @@ public class GlobalNamespaceScope extends AScope implements IGlobalNamespaceScop
     //Warning! start code duplication - same as in MethodSymbol
     @Override
     public List<IConstraint> getConstraints() {
-        return lowerBoundConstraints;
+        return constraints;
     }
 
     @Override
     public void addConstraint(IConstraint constraint) {
-        lowerBoundConstraints.add(constraint);
+        constraints.add(constraint);
     }
 
     @Override

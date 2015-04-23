@@ -36,7 +36,7 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
     private final List<IFunctionType> overloads = new ArrayList<>();
 
     //Warning! start code duplication - same as in GlobalNamespaceScope
-    private final List<IConstraint> lowerBoundConstraints = new ArrayList<>();
+    private final List<IConstraint> constraints = new ArrayList<>();
     private List<IOverloadBindings> bindings;
     //Warning! end code duplication - same as in GlobalNamespaceScope
 
@@ -137,12 +137,12 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
     //Warning! start code duplication - same as in GlobalNamespaceScope
     @Override
     public List<IConstraint> getConstraints() {
-        return lowerBoundConstraints;
+        return constraints;
     }
 
     @Override
     public void addConstraint(IConstraint constraint) {
-        lowerBoundConstraints.add(constraint);
+        constraints.add(constraint);
     }
 
     @Override
