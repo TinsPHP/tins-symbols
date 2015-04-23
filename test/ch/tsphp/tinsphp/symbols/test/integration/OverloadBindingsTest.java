@@ -62,6 +62,10 @@ public class OverloadBindingsTest extends ATypeTest
 
         overloadResolver = new OverloadResolver();
         symbolFactory = mock(ISymbolFactory.class);
+        ITypeSymbol mixedTypeSymbol = mock(ITypeSymbol.class);
+        when(mixedTypeSymbol.getAbsoluteName()).thenReturn("mixed");
+
+        when(symbolFactory.getMixedTypeSymbol()).thenReturn(mixedTypeSymbol);
         when(symbolFactory.createUnionTypeSymbol()).then(new Answer<Object>()
         {
             @Override
@@ -222,208 +226,6 @@ public class OverloadBindingsTest extends ATypeTest
 
         //assert in annotation
     }
-
-
-//    @Test
-//    public void tryToFixType_IsAlreadyFixedNoLowerBounds_ReturnsTrue() {
-//        //pre act - necessary for arrange
-//        IOverloadBindings collection = createOverloadBindings();
-//
-//        //arrange
-//        Map<String, ITypeVariableConstraint> variable2TypeVariable = collection.getVariable2TypeVariable();
-//        variable2TypeVariable.put("$a", new FixedTypeVariableConstraint(new TypeVariableConstraint("T")));
-//
-//        //act
-//        boolean result = collection.tryToFixType("$a");
-//
-//        assertThat(result, is(true));
-//        assertThat(collection.hasLowerBounds("T"), is(false));
-//    }
-//
-//    @Test
-//    public void tryToFixType_IsAlreadyFixedSomeLowerBounds_DoesNotRemoveLowerBounds() {
-//        //pre act - necessary for arrange
-//        IOverloadBindings collection = createOverloadBindings();
-//
-//        //arrange
-//        Map<String, ITypeVariableConstraint> variable2TypeVariable = collection.getVariable2TypeVariable();
-//        variable2TypeVariable.put("$a", new FixedTypeVariableConstraint(new TypeVariableConstraint("T")));
-//        collection.addLowerBound("T", new TypeConstraint(intType));
-//
-//        //act
-//        boolean result = collection.tryToFixType("$a");
-//
-//        assertThat(result, is(true));
-//        assertThat(collection.hasLowerBounds("T"), is(true));
-//        assertThat(collection.getLowerBoundConstraintIds("T"), containsInAnyOrder("int"));
-//    }
-//
-//    @Test
-//    public void tryToFixType_IsAlreadyFixedOnlySelfAsLowerBound_RemovesAllLowerBounds() {
-//        //pre act - necessary for arrange
-//        IOverloadBindings collection = createOverloadBindings();
-//
-//        //arrange
-//        Map<String, ITypeVariableConstraint> variable2TypeVariable = collection.getVariable2TypeVariable();
-//        variable2TypeVariable.put("$a", new FixedTypeVariableConstraint(new TypeVariableConstraint("T")));
-//        collection.addLowerBound("T", new TypeVariableConstraint("T"));
-//
-//        //act
-//        boolean result = collection.tryToFixType("$a");
-//
-//        assertThat(result, is(true));
-//        assertThat(collection.hasLowerBounds("T"), is(false));
-//    }
-//
-//    @Test
-//    public void tryToFixType_IsAlreadyFixedSelfAndTypeAsLowerBound_RemoveSelfRefButNotType() {
-//        //pre act - necessary for arrange
-//        IOverloadBindings collection = createOverloadBindings();
-//
-//        //arrange
-//        Map<String, ITypeVariableConstraint> variable2TypeVariable = collection.getVariable2TypeVariable();
-//        variable2TypeVariable.put("$a", new FixedTypeVariableConstraint(new TypeVariableConstraint("T")));
-//        collection.addLowerBound("T", new TypeVariableConstraint("T"));
-//        collection.addLowerBound("T", new TypeConstraint(intType));
-//        collection.addLowerBound("T", new TypeConstraint(floatType));
-//
-//        //act
-//        boolean result = collection.tryToFixType("$a");
-//
-//        assertThat(result, is(true));
-//        assertThat(collection.hasLowerBounds("T"), is(true));
-//        assertThat(collection.getLowerBoundConstraintIds("T"), containsInAnyOrder("int", "float"));
-//    }
-//
-//    @Test
-//    public void resolveDependencies_HasNoLowerBounds_HasStillNoLowerBounds() {
-//        //pre act - necessary for arrange
-//        IOverloadBindings collection = createOverloadBindings();
-//
-//        //arrange
-//        Map<String, ITypeVariableConstraint> variable2TypeVariable = collection.getVariable2TypeVariable();
-//        variable2TypeVariable.put("$a", new TypeVariableConstraint("T"));
-//
-//        //act
-//        collection.resolveDependencies("$a", new HashSet<String>());
-//
-//        //assert
-//        assertThat(collection.hasLowerBounds("T"), is(false));
-//    }
-//
-//    @Test
-//    public void resolveDependencies_HasOnlyTypeConstraintAsLowerBounds_NothingNewAdded() {
-//        //pre act - necessary for arrange
-//        IOverloadBindings collection = createOverloadBindings();
-//
-//        //arrange
-//        Map<String, ITypeVariableConstraint> variable2TypeVariable = collection.getVariable2TypeVariable();
-//        variable2TypeVariable.put("$a", new TypeVariableConstraint("T"));
-//        collection.addLowerBound("T", new TypeConstraint(intType));
-//
-//        //act
-//        collection.resolveDependencies("$a", new HashSet<String>());
-//
-//        //assert
-//        assertThat(collection.hasLowerBounds("T"), is(true));
-//        assertThat(collection.getLowerBoundConstraintIds("T"), containsInAnyOrder("int"));
-//    }
-//
-//
-//    @Test
-//    public void resolveDependencies_HasSelfRefAsLowerBounds_SelfRefIsNotRemoved() {
-//        //pre act - necessary for arrange
-//        IOverloadBindings collection = createOverloadBindings();
-//
-//        //arrange
-//        Map<String, ITypeVariableConstraint> variable2TypeVariable = collection.getVariable2TypeVariable();
-//        variable2TypeVariable.put("$a", new TypeVariableConstraint("T"));
-//        collection.addLowerBound("T", new TypeVariableConstraint("T"));
-//
-//        //act
-//        collection.resolveDependencies("$a", new HashSet<String>());
-//
-//        //assert
-//        assertThat(collection.hasLowerBounds("T"), is(true));
-//        assertThat(collection.getLowerBoundConstraintIds("T"), containsInAnyOrder("@T"));
-//    }
-//
-//    @Test
-//    public void resolveDependencies_HasSelfARefAndTypeAsLowerBounds_NothingRemoved() {
-//        //pre act - necessary for arrange
-//        IOverloadBindings collection = createOverloadBindings();
-//
-//        //arrange
-//        Map<String, ITypeVariableConstraint> variable2TypeVariable = collection.getVariable2TypeVariable();
-//        variable2TypeVariable.put("$a", new TypeVariableConstraint("T"));
-//        collection.addLowerBound("T", new TypeVariableConstraint("T"));
-//        collection.addLowerBound("T", new TypeConstraint(intType));
-//
-//        //act
-//        collection.resolveDependencies("$a", new HashSet<String>());
-//
-//        //assert
-//        assertThat(collection.hasLowerBounds("T"), is(true));
-//        assertThat(collection.getLowerBoundConstraintIds("T"), containsInAnyOrder("@T", "int"));
-//    }
-//
-//    @Test
-//    public void resolveDependencies_HasRefToOtherParam_NothingRemoved() {
-//        //pre act - necessary for arrange
-//        IOverloadBindings collection = createOverloadBindings();
-//
-//        //arrange
-//        Map<String, ITypeVariableConstraint> variable2TypeVariable = collection.getVariable2TypeVariable();
-//        variable2TypeVariable.put("$a", new TypeVariableConstraint("T"));
-//        collection.addLowerBound("T", new TypeVariableConstraint("T2"));
-//        Set<String> parameterConstraintIds = new HashSet<>();
-//        parameterConstraintIds.add("@T2");
-//
-//        //act
-//        collection.resolveDependencies("$a", parameterConstraintIds);
-//
-//        //assert
-//        assertThat(collection.hasLowerBounds("T"), is(true));
-//        assertThat(collection.getLowerBoundConstraintIds("T"), containsInAnyOrder("@T2"));
-//    }
-//
-//    @Test
-//    public void resolveDependencies_HasRefWithInt_AddIntToLowerBound() {
-//        //pre act - necessary for arrange
-//        IOverloadBindings collection = createOverloadBindings();
-//
-//        //arrange
-//        Map<String, ITypeVariableConstraint> variable2TypeVariable = collection.getVariable2TypeVariable();
-//        variable2TypeVariable.put("$a", new TypeVariableConstraint("T"));
-//        collection.addLowerBound("T", new TypeVariableConstraint("T2"));
-//        collection.addLowerBound("T2", new TypeConstraint(intType));
-//
-//        //act
-//        collection.resolveDependencies("$a", new HashSet<String>());
-//
-//        //assert
-//        assertThat(collection.hasLowerBounds("T"), is(true));
-//        assertThat(collection.getLowerBoundConstraintIds("T"), containsInAnyOrder("int"));
-//    }
-//
-//    @Test
-//    public void resolveDependencies_HasRefWithInt_NothingRemovedFromRef() {
-//        //pre act - necessary for arrange
-//        IOverloadBindings collection = createOverloadBindings();
-//
-//        //arrange
-//        Map<String, ITypeVariableConstraint> variable2TypeVariable = collection.getVariable2TypeVariable();
-//        variable2TypeVariable.put("$a", new TypeVariableConstraint("T"));
-//        collection.addLowerBound("T", new TypeVariableConstraint("T2"));
-//        collection.addLowerBound("T2", new TypeConstraint(intType));
-//
-//        //act
-//        collection.resolveDependencies("$a", new HashSet<String>());
-//
-//        //assert
-//        assertThat(collection.hasLowerBounds("T2"), is(true));
-//        assertThat(collection.getLowerBoundConstraintIds("T2"), containsInAnyOrder("int"));
-//    }
 
     @Test(expected = IllegalArgumentException.class)
     public void renameTypeVariable_UnknownTypeVariable_ThrowsIllegalArgumentException() {
@@ -1362,14 +1164,15 @@ public class OverloadBindingsTest extends ATypeTest
         collection.addLowerTypeBound(ta, intType);
         collection.addLowerTypeBound(tb, floatType);
         collection.addLowerTypeBound(tReturn, boolType);
+        collection.addUpperTypeBound(tReturn, boolType);
 
         //act
         collection.tryToFix(new HashSet<String>());
 
         assertThat(collection, withVariableBindings(
-                varBinding("$a", ta, asList("int"), null, true),
-                varBinding("$b", tb, asList("float"), null, true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("bool"), null, true)
+                varBinding("$a", ta, asList("int"), asList("int"), true),
+                varBinding("$b", tb, asList("float"), asList("float"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("bool"), asList("bool"), true)
         ));
     }
 
@@ -1398,9 +1201,9 @@ public class OverloadBindingsTest extends ATypeTest
         collection.tryToFix(parameterTypeVariables);
 
         assertThat(collection, withVariableBindings(
-                varBinding("$a", ta, asList("int"), null, true),
-                varBinding("$b", tb, asList("float"), null, true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("float"), null, true)
+                varBinding("$a", ta, asList("int"), asList("int"), true),
+                varBinding("$b", tb, asList("float"), asList("float"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("float"), asList("float"), true)
         ));
     }
 
@@ -1429,9 +1232,9 @@ public class OverloadBindingsTest extends ATypeTest
         collection.tryToFix(parameterTypeVariables);
 
         assertThat(collection, withVariableBindings(
-                varBinding("$a", ta, asList("int"), null, true),
-                varBinding("$b", tb, asList("int"), null, true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
+                varBinding("$a", ta, asList("int"), asList("int"), true),
+                varBinding("$b", tb, asList("int"), asList("int"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), asList("int"), true)
         ));
     }
 
@@ -1466,11 +1269,11 @@ public class OverloadBindingsTest extends ATypeTest
         collection.tryToFix(parameterTypeVariables);
 
         assertThat(collection, withVariableBindings(
-                varBinding("$a", ta, asList("int"), null, true),
-                varBinding("$b", tb, asList("int"), null, true),
-                varBinding("$c", tc, asList("int"), null, true),
-                varBinding("$d", td, asList("int"), null, true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
+                varBinding("$a", ta, asList("int"), asList("int"), true),
+                varBinding("$b", tb, asList("int"), asList("int"), true),
+                varBinding("$c", tc, asList("int"), asList("int"), true),
+                varBinding("$d", td, asList("int"), asList("int"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), asList("int"), true)
         ));
     }
 
@@ -1504,9 +1307,9 @@ public class OverloadBindingsTest extends ATypeTest
         collection.tryToFix(parameterTypeVariables);
 
         assertThat(collection, withVariableBindings(
-                varBinding($x, tx, null, asList("num"), true),
-                varBinding($y, ty, null, asList("num"), true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
+                varBinding($x, tx, asList("num"), asList("num"), true),
+                varBinding($y, ty, asList("num"), asList("num"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), asList("int"), true)
         ));
     }
 
@@ -1840,9 +1643,9 @@ public class OverloadBindingsTest extends ATypeTest
         collection.tryToFix(parameterTypeVariables);
 
         assertThat(collection, withVariableBindings(
-                varBinding($x, tx, null, null, true),
-                varBinding($y, ty, null, null, true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
+                varBinding($x, tx, asList("mixed"), asList("mixed"), true),
+                varBinding($y, ty, asList("mixed"), asList("mixed"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), asList("int"), true)
         ));
     }
 
@@ -1871,9 +1674,9 @@ public class OverloadBindingsTest extends ATypeTest
         collection.tryToFix(parameterTypeVariables);
 
         assertThat(collection, withVariableBindings(
-                varBinding($x, tx, null, null, true),
-                varBinding($a, ta, null, null, true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
+                varBinding($x, tx, asList("mixed"), asList("mixed"), true),
+                varBinding($a, ta, asList("mixed"), asList("mixed"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), asList("int"), true)
         ));
     }
 
@@ -2035,7 +1838,7 @@ public class OverloadBindingsTest extends ATypeTest
         collection.tryToFix(parameterTypeVariables);
 
         assertThat(collection, withVariableBindings(
-                varBinding($x, tx, null, asList("bool"), true),
+                varBinding($x, tx, asList("bool"), asList("bool"), true),
                 varBinding($y, ty, null, null, false),
                 varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int", "@" + ty), null, false)
         ));
