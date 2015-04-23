@@ -19,6 +19,7 @@ import ch.tsphp.common.symbols.ISymbol;
 import ch.tsphp.tinsphp.common.scopes.IGlobalNamespaceScope;
 import ch.tsphp.tinsphp.common.scopes.INamespaceScope;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
+import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.utils.MapHelper;
 
 import java.util.List;
@@ -83,4 +84,17 @@ public class ScopeHelper implements IScopeHelper
     }
     //Warning! end code duplication - same as in CoreSymbolResolver in core component
 
+    @Override
+    public IMethodSymbol getEnclosingMethod(ITSPHPAst ast) {
+        IMethodSymbol methodSymbol = null;
+
+        IScope scope = ast.getScope();
+        while (scope != null && !(scope instanceof IMethodSymbol)) {
+            scope = scope.getEnclosingScope();
+        }
+        if (scope != null) {
+            methodSymbol = (IMethodSymbol) scope;
+        }
+        return methodSymbol;
+    }
 }
