@@ -357,25 +357,17 @@ public class OverloadBindings implements IOverloadBindings
 
             //parameters should be hold as general as possible where local variables should be as specific as possible.
             //therefore we add the lower type bound to the upper type bound if it is not a parameter and vice versa
-            if (isNotParameter) {
-                if (hasLowerTypeBounds(typeVariable)) {
-                    addToUpperIntersectionTypeSymbol(typeVariable, lowerTypeBounds.get(typeVariable));
-                } else if (hasUpperTypeBounds(typeVariable)) {
-                    addToLowerUnionTypeSymbol(typeVariable, upperTypeBounds.get(typeVariable));
-                } else {
-                    throw new IllegalStateException("local variables need to have at least a lower type bound");
-                }
+            if (isNotParameter && hasLowerTypeBounds(typeVariable)) {
+                addToUpperIntersectionTypeSymbol(typeVariable, lowerTypeBounds.get(typeVariable));
+            } else if (hasUpperTypeBounds(typeVariable)) {
+                addToLowerUnionTypeSymbol(typeVariable, upperTypeBounds.get(typeVariable));
+            } else if (!isNotParameter && hasLowerTypeBounds(typeVariable)) {
+                //only need to add it if it is a parameter, otherwise we already did it above
+                addToUpperIntersectionTypeSymbol(typeVariable, lowerTypeBounds.get(typeVariable));
             } else {
-                if (hasUpperTypeBounds(typeVariable)) {
-                    addToLowerUnionTypeSymbol(typeVariable, upperTypeBounds.get(typeVariable));
-                } else if (hasLowerTypeBounds(typeVariable)) {
-                    //only need to add it if it is a parameter, otherwise we already did it above
-                    addToUpperIntersectionTypeSymbol(typeVariable, lowerTypeBounds.get(typeVariable));
-                } else {
-                    //must be a parameter which is not involved in the function body at all
-                    addToLowerUnionTypeSymbol(typeVariable, mixedTypeSymbol);
-                    addToUpperIntersectionTypeSymbol(typeVariable, mixedTypeSymbol);
-                }
+                //must be a parameter which is not involved in the function body at all
+                addToLowerUnionTypeSymbol(typeVariable, mixedTypeSymbol);
+                addToUpperIntersectionTypeSymbol(typeVariable, mixedTypeSymbol);
             }
         }
     }
