@@ -151,16 +151,6 @@ public class SymbolFactory implements ISymbolFactory
     }
 
     @Override
-    public IVariable createVariable(String name, String typeVariable) {
-        return new Variable(name, typeVariable);
-    }
-
-    @Override
-    public IMinimalVariableSymbol createExpressionTypeVariableSymbol(ITSPHPAst exprAst) {
-        return new ExpressionVariableSymbol(exprAst);
-    }
-
-    @Override
     public IUnionTypeSymbol createUnionTypeSymbol() {
         return new UnionTypeSymbol(overloadResolver);
     }
@@ -201,6 +191,21 @@ public class SymbolFactory implements ISymbolFactory
 //    public IVariableSymbol createThisSymbol(ITSPHPAst variableId, IPolymorphicTypeSymbol polymorphicTypeSymbol) {
 //        return new ThisSymbol(variableId, variableId.getText(), polymorphicTypeSymbol);
 //    }
+
+    @Override
+    public IVariable createVariable(String name, String typeVariable) {
+        return new Variable(name, typeVariable);
+    }
+
+    @Override
+    public IMinimalVariableSymbol createExpressionTypeVariableSymbol(ITSPHPAst exprAst) {
+        return new ExpressionVariableSymbol(exprAst);
+    }
+
+    @Override
+    public IMinimalVariableSymbol createMinimalVariableSymbol(ITSPHPAst identifier, String name, String typeVariable) {
+        return new MinimalVariableSymbol(identifier, name, typeVariable);
+    }
 
     @Override
     public IVariableSymbol createVariableSymbol(ITSPHPAst typeModifier, ITSPHPAst variableId) {
