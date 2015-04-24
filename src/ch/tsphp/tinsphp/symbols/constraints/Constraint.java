@@ -7,6 +7,7 @@
 package ch.tsphp.tinsphp.symbols.constraints;
 
 
+import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
 import ch.tsphp.tinsphp.common.symbols.IMinimalMethodSymbol;
@@ -15,17 +16,25 @@ import java.util.List;
 
 public class Constraint implements IConstraint
 {
+    private ITSPHPAst operator;
     private IVariable assignTypeVariable;
     private List<IVariable> arguments;
     private IMinimalMethodSymbol methodSymbol;
 
     public Constraint(
+            ITSPHPAst theOperator,
             IVariable theLeftHandSideVariable,
             List<IVariable> theVariables,
             IMinimalMethodSymbol theMethodSymbol) {
+        operator = theOperator;
         assignTypeVariable = theLeftHandSideVariable;
         arguments = theVariables;
         methodSymbol = theMethodSymbol;
+    }
+
+    @Override
+    public ITSPHPAst getOperator() {
+        return operator;
     }
 
     @Override

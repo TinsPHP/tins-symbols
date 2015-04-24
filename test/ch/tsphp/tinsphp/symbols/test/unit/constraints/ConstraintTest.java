@@ -6,6 +6,7 @@
 
 package ch.tsphp.tinsphp.symbols.test.unit.constraints;
 
+import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
@@ -20,14 +21,25 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.mock;
 
-public class IntersectionConstraintTest
+public class ConstraintTest
 {
+    @Test
+    public void getOperator_Standard_IsOnePassedByConstructor() {
+        ITSPHPAst operator = mock(ITSPHPAst.class);
+
+        IConstraint intersectionConstraint = createIntersectionConstraint(
+                operator, mock(IVariable.class), new ArrayList<IVariable>(), mock(IMethodSymbol.class));
+        ITSPHPAst result = intersectionConstraint.getOperator();
+
+        assertThat(result, is(operator));
+    }
+
     @Test
     public void getLeftHandSide_Standard_IsOnePassedByConstructor() {
         IVariable leftHandSide = mock(IVariable.class);
 
         IConstraint intersectionConstraint = createIntersectionConstraint(
-                leftHandSide, new ArrayList<IVariable>(), mock(IMinimalMethodSymbol.class));
+                mock(ITSPHPAst.class), leftHandSide, new ArrayList<IVariable>(), mock(IMinimalMethodSymbol.class));
         IVariable result = intersectionConstraint.getLeftHandSide();
 
         assertThat(result, is(leftHandSide));
@@ -38,7 +50,7 @@ public class IntersectionConstraintTest
         List<IVariable> arguments = new ArrayList<>();
 
         IConstraint intersectionConstraint = createIntersectionConstraint(
-                mock(IVariable.class), arguments, mock(IMinimalMethodSymbol.class));
+                mock(ITSPHPAst.class), mock(IVariable.class), arguments, mock(IMinimalMethodSymbol.class));
         List<IVariable> result = intersectionConstraint.getArguments();
 
         assertThat(result, is(arguments));
@@ -49,16 +61,17 @@ public class IntersectionConstraintTest
         IMinimalMethodSymbol methodSymbol = mock(IMethodSymbol.class);
 
         IConstraint intersectionConstraint = createIntersectionConstraint(
-                mock(IVariable.class), new ArrayList<IVariable>(), methodSymbol);
+                mock(ITSPHPAst.class), mock(IVariable.class), new ArrayList<IVariable>(), methodSymbol);
         IMinimalMethodSymbol result = intersectionConstraint.getMethodSymbol();
 
         assertThat(result, is(methodSymbol));
     }
 
     protected IConstraint createIntersectionConstraint(
+            ITSPHPAst theOperator,
             IVariable theLeftHandSideVariable,
             List<IVariable> theVariables,
             IMinimalMethodSymbol theMethodSymbol) {
-        return new Constraint(theLeftHandSideVariable, theVariables, theMethodSymbol);
+        return new Constraint(theOperator, theLeftHandSideVariable, theVariables, theMethodSymbol);
     }
 }
