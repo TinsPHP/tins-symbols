@@ -62,19 +62,4 @@ public class ErroneousVariableSymbol extends AErroneousSymbolWithAccessModifier 
     public IMinimalVariableSymbol getCurrentTypeVariable() {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
-
-    @Override
-    public void setHasFixedType() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public boolean hasFixedType() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public String getTypeVariable() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
 }

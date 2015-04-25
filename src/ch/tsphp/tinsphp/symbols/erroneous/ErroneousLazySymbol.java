@@ -111,19 +111,4 @@ public class ErroneousLazySymbol extends AErroneousScopedSymbol implements IErro
     public IUnionTypeSymbol getType() {
         return (IUnionTypeSymbol) super.getType();
     }
-
-    @Override
-    public void setHasFixedType() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public boolean hasFixedType() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public String getTypeVariable() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
 }

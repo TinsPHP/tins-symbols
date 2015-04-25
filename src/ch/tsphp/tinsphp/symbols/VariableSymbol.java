@@ -26,11 +26,6 @@ public class VariableSymbol extends ASymbolWithAccessModifier implements IVariab
     private IMinimalVariableSymbolWithRef definition;
     private final Stack<IMinimalVariableSymbol> referenceTypeVariables = new Stack<>();
 
-    //Warning! start code duplication - same as in Variable and AMinimalVariableSymbol
-    private boolean hasFixedType;
-    //Warning! end code duplication - same as in Variable and AMinimalVariableSymbol
-
-
     public VariableSymbol(ITSPHPAst definitionAst, IModifierSet modifiers, String name) {
         super(definitionAst, modifiers, name);
     }
@@ -71,22 +66,5 @@ public class VariableSymbol extends ASymbolWithAccessModifier implements IVariab
             return referenceTypeVariables.peek();
         }
         return this;
-    }
-
-    //Warning! start code duplication - same as in Variable and AMinimalVariableSymbol
-    @Override
-    public void setHasFixedType() {
-        hasFixedType = true;
-    }
-
-    @Override
-    public boolean hasFixedType() {
-        return hasFixedType;
-    }
-    //Warning! end code duplication - same as in Variable and AMinimalVariableSymbol
-
-    @Override
-    public String getTypeVariable() {
-        return null;
     }
 }

@@ -11,6 +11,7 @@ import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
+import ch.tsphp.tinsphp.symbols.TypeVariableNames;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,17 +22,12 @@ public class FunctionType implements IFunctionType
     protected final String name;
     private IOverloadBindings bindings;
     private List<IVariable> parameters;
-    private IVariable returnVariable;
     private final Map<String, String> suffices = new HashMap<>(2);
 
-    public FunctionType(String theName,
-            IOverloadBindings theOverloadBindings,
-            List<IVariable> theParameterVariables,
-            IVariable theReturnVariable) {
+    public FunctionType(String theName, IOverloadBindings theOverloadBindings, List<IVariable> theParameterVariables) {
         name = theName;
         bindings = theOverloadBindings;
         parameters = theParameterVariables;
-        returnVariable = theReturnVariable;
     }
 
     @Override
@@ -60,11 +56,6 @@ public class FunctionType implements IFunctionType
     }
 
     @Override
-    public IVariable getReturnVariable() {
-        return returnVariable;
-    }
-
-    @Override
     public IOverloadBindings getBindings() {
         return bindings;
     }
@@ -74,18 +65,16 @@ public class FunctionType implements IFunctionType
         StringBuilder sb = new StringBuilder();
         sb.append(name).append("{").append(getNumberOfNonOptionalParameters()).append("}").append("[");
         for (IVariable parameter : parameters) {
-            toString(sb, parameter).append(", ");
+            appendVariable(sb, parameter.getAbsoluteName()).append(", ");
         }
-        toString(sb, returnVariable);
+        appendVariable(sb, TypeVariableNames.RETURN_VARIABLE_NAME);
         sb.append("]");
         return sb.toString();
     }
 
-    private StringBuilder toString(
-            StringBuilder sb, IVariable parameter) {
-        String absoluteName = parameter.getAbsoluteName();
-        sb.append(absoluteName).append(":");
-        ITypeVariableReference constraint = bindings.getTypeVariableReference(absoluteName);
+    private StringBuilder appendVariable(StringBuilder sb, String variableName) {
+        sb.append(variableName).append(":");
+        ITypeVariableReference constraint = bindings.getTypeVariableReference(variableName);
         String typeVariable = constraint.getTypeVariable();
         sb.append(typeVariable)
                 .append("<")

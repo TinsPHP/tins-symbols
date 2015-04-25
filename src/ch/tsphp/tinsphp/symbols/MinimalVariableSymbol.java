@@ -15,9 +15,9 @@ package ch.tsphp.tinsphp.symbols;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.tinsphp.common.symbols.IMinimalVariableSymbol;
 
-public class MinimalVariableSymbol extends AMinimalVariableSymbol implements IMinimalVariableSymbol
+public class MinimalVariableSymbol extends ASymbol implements IMinimalVariableSymbol
 {
-    public MinimalVariableSymbol(ITSPHPAst definitionAst, String theName, String theTypeVariable) {
-        super(definitionAst, theName, theTypeVariable);
+    public MinimalVariableSymbol(ITSPHPAst definitionAst, String theName) {
+        super(definitionAst, theName);
     }
 }

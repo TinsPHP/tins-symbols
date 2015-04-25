@@ -167,11 +167,8 @@ public class SymbolFactory implements ISymbolFactory
 
     @Override
     public IFunctionType createFunctionType(
-            String name,
-            IOverloadBindings overloadBindings,
-            List<IVariable> parameterTypeVariables,
-            IVariable returnTypeVariable) {
-        return new FunctionType(name, overloadBindings, parameterTypeVariables, returnTypeVariable);
+            String name, IOverloadBindings overloadBindings, List<IVariable> parameterTypeVariables) {
+        return new FunctionType(name, overloadBindings, parameterTypeVariables);
     }
 
     @Override
@@ -182,7 +179,7 @@ public class SymbolFactory implements ISymbolFactory
                 identifier,
                 modifierHelper.getModifiers(methodModifier),
                 modifierHelper.getModifiers(returnTypeModifier),
-                new MinimalVariableSymbol(identifier, TypeVariableNames.RETURN_VARIABLE_NAME, "T"),
+                new MinimalVariableSymbol(identifier, TypeVariableNames.RETURN_VARIABLE_NAME),
                 identifier.getText(),
                 currentScope);
     }
@@ -193,8 +190,8 @@ public class SymbolFactory implements ISymbolFactory
 //    }
 
     @Override
-    public IVariable createVariable(String name, String typeVariable) {
-        return new Variable(name, typeVariable);
+    public IVariable createVariable(String name) {
+        return new Variable(name);
     }
 
     @Override
@@ -203,8 +200,8 @@ public class SymbolFactory implements ISymbolFactory
     }
 
     @Override
-    public IMinimalVariableSymbol createMinimalVariableSymbol(ITSPHPAst identifier, String name, String typeVariable) {
-        return new MinimalVariableSymbol(identifier, name, typeVariable);
+    public IMinimalVariableSymbol createMinimalVariableSymbol(ITSPHPAst identifier, String name) {
+        return new MinimalVariableSymbol(identifier, name);
     }
 
     @Override
@@ -224,8 +221,7 @@ public class SymbolFactory implements ISymbolFactory
     }
 
     @Override
-    public IErroneousVariableSymbol createErroneousVariableSymbol(ITSPHPAst ast,
-            TSPHPException exception) {
+    public IErroneousVariableSymbol createErroneousVariableSymbol(ITSPHPAst ast, TSPHPException exception) {
         IErroneousVariableSymbol variableSymbol = new ErroneousVariableSymbol(ast, ast.getText(), exception);
         variableSymbol.setType(createErroneousTypeSymbol(ast, exception));
         return variableSymbol;

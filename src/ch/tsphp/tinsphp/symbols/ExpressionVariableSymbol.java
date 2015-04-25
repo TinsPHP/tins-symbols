@@ -9,12 +9,12 @@ package ch.tsphp.tinsphp.symbols;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.tinsphp.common.symbols.IMinimalVariableSymbol;
 
-public class ExpressionVariableSymbol extends AMinimalVariableSymbol implements IMinimalVariableSymbol
+public class ExpressionVariableSymbol extends ASymbol implements IMinimalVariableSymbol
 {
     public ExpressionVariableSymbol(ITSPHPAst theDefinitionAst) {
         super(theDefinitionAst,
                 theDefinitionAst.getText() + "@"
-                        + theDefinitionAst.getLine() + "|" + theDefinitionAst.getCharPositionInLine(),
-                null);
+                        + theDefinitionAst.getLine() + "|" + theDefinitionAst.getCharPositionInLine()
+        );
     }
 }
