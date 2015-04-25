@@ -8,6 +8,7 @@ package ch.tsphp.tinsphp.symbols.test.integration;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.FixedTypeVariableReference;
+import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
@@ -180,6 +181,21 @@ public class OverloadBindingsTest extends ATypeTest
                 varBinding("$c", "T2", null, null, false)
 
         ));
+    }
+
+    @Test
+    public void copyConstructor_HasAppliedBinding_IsCopied() {
+        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, overloadResolver);
+        bindings1.addVariable("$a", new TypeVariableReference("T1"));
+        IFunctionType overload = mock(IFunctionType.class);
+        bindings1.setAppliedOverload("$a", overload);
+
+        IOverloadBindings collection = createOverloadBindings(bindings1);
+        bindings1.addVariable("$a", new TypeVariableReference("T1"));
+        bindings1.setAppliedOverload("$b", mock(IFunctionType.class));
+
+        assertThat(collection.getAppliedOverload("$a"), is(overload));
+        assertThat(collection.getAppliedOverload("$b"), is(nullValue()));
     }
 
     @Test
@@ -1942,6 +1958,48 @@ public class OverloadBindingsTest extends ATypeTest
         ITypeVariableReference result = collection.getTypeVariableReference("$a");
 
         assertThat(result, is(constraint));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void etetAppliedOverload_NonExistingVariable_ThrowsIllegalArgumentException() {
+        //no arrange necessary
+
+
+        IOverloadBindings collection = createOverloadBindings();
+        collection.setAppliedOverload("$nonExistingVariable", mock(IFunctionType.class));
+
+        //assert in annotation
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setAppliedOverload_AlreadySet_ThrowsIllegalArgumentException() {
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        collection.addVariable("$a", new TypeVariableReference("T"));
+        collection.setAppliedOverload("$a", mock(IFunctionType.class));
+
+        //act
+        collection.setAppliedOverload("$a", mock(IFunctionType.class));
+
+        //assert in annotation
+    }
+
+    @Test
+    public void setAndGetAppliedOverload_OneDefined_ReturnsTheOne() {
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        collection.addVariable("$a", new TypeVariableReference("T"));
+        IFunctionType overload = mock(IFunctionType.class);
+
+        //act
+        collection.setAppliedOverload("$a", overload);
+        IFunctionType result = collection.getAppliedOverload("$a");
+
+        assertThat(result, is(overload));
     }
 
     private IOverloadBindings createOverloadBindings() {

@@ -182,7 +182,7 @@ public class SymbolFactory implements ISymbolFactory
                 identifier,
                 modifierHelper.getModifiers(methodModifier),
                 modifierHelper.getModifiers(returnTypeModifier),
-                new MinimalVariableSymbol(identifier, "rtn", "T"),
+                new MinimalVariableSymbol(identifier, TypeVariableNames.RETURN_VARIABLE_NAME, "T"),
                 identifier.getText(),
                 currentScope);
     }
@@ -198,7 +198,7 @@ public class SymbolFactory implements ISymbolFactory
     }
 
     @Override
-    public IMinimalVariableSymbol createExpressionTypeVariableSymbol(ITSPHPAst exprAst) {
+    public IMinimalVariableSymbol createExpressionVariableSymbol(ITSPHPAst exprAst) {
         return new ExpressionVariableSymbol(exprAst);
     }
 

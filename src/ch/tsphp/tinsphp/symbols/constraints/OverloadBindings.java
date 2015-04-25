@@ -9,6 +9,7 @@ package ch.tsphp.tinsphp.symbols.constraints;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.FixedTypeVariableReference;
+import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
@@ -35,6 +36,7 @@ public class OverloadBindings implements IOverloadBindings
     private final Map<String, Set<String>> lowerRefBounds;
     private final Map<String, ITypeVariableReference> variable2TypeVariable;
     private final Map<String, Set<String>> typeVariable2Variables;
+    private final Map<String, IFunctionType> appliedOverloads;
 
     private int count = 1;
 
@@ -49,6 +51,7 @@ public class OverloadBindings implements IOverloadBindings
         upperRefBounds = new HashMap<>();
         variable2TypeVariable = new HashMap<>();
         typeVariable2Variables = new HashMap<>();
+        appliedOverloads = new HashMap<>();
     }
 
     public OverloadBindings(OverloadBindings bindings) {
@@ -88,11 +91,12 @@ public class OverloadBindings implements IOverloadBindings
             variable2TypeVariable.put(entry.getKey(), copy);
         }
 
-
         typeVariable2Variables = new HashMap<>();
         for (Map.Entry<String, Set<String>> entry : bindings.typeVariable2Variables.entrySet()) {
             typeVariable2Variables.put(entry.getKey(), new HashSet<>(entry.getValue()));
         }
+
+        appliedOverloads = new HashMap<>(bindings.appliedOverloads);
     }
 
     @Override
@@ -337,6 +341,50 @@ public class OverloadBindings implements IOverloadBindings
     @Override
     public Set<String> getUpperRefBounds(String typeVariable) {
         return upperRefBounds.get(typeVariable);
+    }
+
+    @Override
+    public Set<String> getLowerBoundConstraintIds(String typeVariable) {
+        Set<String> ids = new HashSet<>();
+        if (hasLowerTypeBounds(typeVariable)) {
+            ids.addAll(lowerTypeBounds.get(typeVariable).getTypeSymbols().keySet());
+        }
+        if (hasLowerRefBounds(typeVariable)) {
+            for (String refTypeVariable : lowerRefBounds.get(typeVariable)) {
+                ids.add("@" + refTypeVariable);
+            }
+        }
+        return ids;
+    }
+
+    @Override
+    public Set<String> getUpperBoundConstraintIds(String typeVariable) {
+        Set<String> ids = new HashSet<>();
+        if (hasUpperTypeBounds(typeVariable)) {
+            ids.addAll(upperTypeBounds.get(typeVariable).getTypeSymbols().keySet());
+        }
+        if (hasUpperRefBounds(typeVariable)) {
+            for (String refTypeVariable : upperRefBounds.get(typeVariable)) {
+                ids.add("@" + refTypeVariable);
+            }
+        }
+        return ids;
+    }
+
+    @Override
+    public IFunctionType getAppliedOverload(String variableId) {
+        return appliedOverloads.get(variableId);
+    }
+
+    @Override
+    public void setAppliedOverload(String variableId, IFunctionType overload) {
+        if (!variable2TypeVariable.containsKey(variableId)) {
+            throw new IllegalArgumentException("variable with id " + variableId + " does not exist in this binding.");
+        }
+        if (appliedOverloads.containsKey(variableId)) {
+            throw new IllegalArgumentException("applied overload was already set for variable with id " + variableId);
+        }
+        appliedOverloads.put(variableId, overload);
     }
 
     @Override
@@ -632,34 +680,6 @@ public class OverloadBindings implements IOverloadBindings
             map.put(key, set);
         }
         set.add(value);
-    }
-
-    @Override
-    public Set<String> getLowerBoundConstraintIds(String typeVariable) {
-        Set<String> ids = new HashSet<>();
-        if (hasLowerTypeBounds(typeVariable)) {
-            ids.addAll(lowerTypeBounds.get(typeVariable).getTypeSymbols().keySet());
-        }
-        if (hasLowerRefBounds(typeVariable)) {
-            for (String refTypeVariable : lowerRefBounds.get(typeVariable)) {
-                ids.add("@" + refTypeVariable);
-            }
-        }
-        return ids;
-    }
-
-    @Override
-    public Set<String> getUpperBoundConstraintIds(String typeVariable) {
-        Set<String> ids = new HashSet<>();
-        if (hasUpperTypeBounds(typeVariable)) {
-            ids.addAll(upperTypeBounds.get(typeVariable).getTypeSymbols().keySet());
-        }
-        if (hasUpperRefBounds(typeVariable)) {
-            for (String refTypeVariable : upperRefBounds.get(typeVariable)) {
-                ids.add("@" + refTypeVariable);
-            }
-        }
-        return ids;
     }
 
     @Override
