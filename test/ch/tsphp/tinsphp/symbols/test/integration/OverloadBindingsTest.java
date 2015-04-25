@@ -191,7 +191,7 @@ public class OverloadBindingsTest extends ATypeTest
         bindings1.setAppliedOverload("$a", overload);
 
         IOverloadBindings collection = createOverloadBindings(bindings1);
-        bindings1.addVariable("$a", new TypeVariableReference("T1"));
+        bindings1.addVariable("$b", new TypeVariableReference("T1"));
         bindings1.setAppliedOverload("$b", mock(IFunctionType.class));
 
         assertThat(collection.getAppliedOverload("$a"), is(overload));
