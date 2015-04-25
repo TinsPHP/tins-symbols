@@ -351,7 +351,7 @@ public class SymbolFactoryTest
 
         ISymbolFactory symbolFactory = createSymbolFactory();
         IFunctionType result = symbolFactory.createFunctionType(
-                name, mock(IOverloadBindings.class), new ArrayList<IVariable>(), mock(IVariable.class));
+                name, mock(IOverloadBindings.class), new ArrayList<IVariable>());
 
         assertThat(result.getName(), is(name));
     }
@@ -361,8 +361,7 @@ public class SymbolFactoryTest
         IOverloadBindings typeVariables = mock(IOverloadBindings.class);
 
         ISymbolFactory symbolFactory = createSymbolFactory();
-        IFunctionType result = symbolFactory.createFunctionType(
-                "+", typeVariables, new ArrayList<IVariable>(), mock(IVariable.class));
+        IFunctionType result = symbolFactory.createFunctionType("+", typeVariables, new ArrayList<IVariable>());
 
         assertThat(result.getBindings(), is(typeVariables));
     }
@@ -372,21 +371,9 @@ public class SymbolFactoryTest
         List<IVariable> parameters = new ArrayList<>();
 
         ISymbolFactory symbolFactory = createSymbolFactory();
-        IFunctionType result = symbolFactory.createFunctionType(
-                "+", mock(IOverloadBindings.class), parameters, mock(IVariable.class));
+        IFunctionType result = symbolFactory.createFunctionType("+", mock(IOverloadBindings.class), parameters);
 
         assertThat(result.getParameters(), is(parameters));
-    }
-
-    @Test
-    public void createFunctionType_Standard_ReturnTypeVariableIsPassedTypeVariable() {
-        IVariable returnVariable = mock(IVariable.class);
-
-        ISymbolFactory symbolFactory = createSymbolFactory();
-        IFunctionType result = symbolFactory.createFunctionType(
-                "+", mock(IOverloadBindings.class), new ArrayList<IVariable>(), returnVariable);
-
-        assertThat(result.getReturnVariable(), is(returnVariable));
     }
 
     @Test
