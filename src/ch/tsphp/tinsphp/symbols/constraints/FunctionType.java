@@ -22,7 +22,7 @@ public class FunctionType implements IFunctionType
     private IOverloadBindings bindings;
     private List<IVariable> parameters;
     private IVariable returnVariable;
-    private final Map<String, String> nameChanges = new HashMap<>(2);
+    private final Map<String, String> suffices = new HashMap<>(2);
 
     public FunctionType(String theName,
             IOverloadBindings theOverloadBindings,
@@ -40,16 +40,13 @@ public class FunctionType implements IFunctionType
     }
 
     @Override
-    public String getRewrittenName(String translatorId) {
-        if (nameChanges.containsKey(translatorId)) {
-            return nameChanges.get(translatorId);
-        }
-        return name;
+    public String getSuffix(String translatorId) {
+        return suffices.get(translatorId);
     }
 
     @Override
-    public void addRewrittenName(String translatorId, String newName) {
-        nameChanges.put(translatorId, newName);
+    public void addSuffix(String translatorId, String newName) {
+        suffices.put(translatorId, newName);
     }
 
     @Override
