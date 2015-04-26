@@ -14,36 +14,12 @@ import ch.tsphp.tinsphp.symbols.test.unit.symbols.ATypeSymbolTest;
 
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.mockito.Mockito.mock;
-
 public class ArrayTypeSymbol_ATypeSymbol_LSPTest extends ATypeSymbolTest
 {
 
     @Override
-    public void isNullable_NothingDefined_ReturnsFalse() {
-        // different behaviour - ANullableTypeSymbol has always the nullable modifier
-
-        // start same as in ATypeSymbol
-        //no arrange necessary
-
-        ATypeSymbol typeSymbol = createTypeSymbol();
-        boolean result = typeSymbol.isNullable();
-        // end same as in ATypeSymbol
-
-//        assertThat(result, is(false));
-        assertThat(result, is(true));
-    }
-
-    @Override
     public void getParentTypeSymbols_StandardWithSet_ReturnsOnePassedToConstructor() {
         // different behaviour - ArrayTypeSymbol does not support multiple parent types
-    }
-
-
-    private ATypeSymbol createTypeSymbol() {
-        return createTypeSymbol(mock(ITSPHPAst.class), "foo", mock(ITypeSymbol.class));
     }
 
     @Override

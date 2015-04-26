@@ -22,7 +22,6 @@ import ch.tsphp.tinsphp.common.symbols.IClassTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMinimalMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IModifierHelper;
-import ch.tsphp.tinsphp.common.symbols.INullTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IPseudoTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IScalarTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
@@ -43,7 +42,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
@@ -75,43 +73,6 @@ public class SymbolFactoryTest
         ITypeSymbol result = symbolFactory.getMixedTypeSymbol();
 
         assertThat(result, is(typeSymbol));
-    }
-
-    @Test
-    public void createNullTypeSymbol_Standard_ReturnsAlwaysTheSameObject() {
-        //no arrange necessary
-
-        ISymbolFactory symbolFactory = createSymbolFactory();
-        INullTypeSymbol result1 = symbolFactory.createNullTypeSymbol();
-        INullTypeSymbol result2 = symbolFactory.createNullTypeSymbol();
-
-        assertThat(result1, is(result2));
-    }
-
-    @Test
-    public void createNullTypeSymbol_MixedNotYetSet_ReturnsNull() {
-        //see TINS-350 null is not subtype of mixed
-
-        //no arrange necessary
-
-        ISymbolFactory symbolFactory = createSymbolFactory();
-        INullTypeSymbol result = symbolFactory.createNullTypeSymbol();
-
-        assertThat(result, is(nullValue()));
-    }
-
-    @Test
-    public void createNullTypeSymbol_MixedSet_MixedIsParent() {
-        //see TINS-350 null is not subtype of mixed
-
-        ITypeSymbol mixedTypeSymbol = mock(ITypeSymbol.class);
-
-        ISymbolFactory symbolFactory = createSymbolFactory();
-        symbolFactory.setMixedTypeSymbol(mixedTypeSymbol);
-        INullTypeSymbol result = symbolFactory.createNullTypeSymbol();
-
-        assertThat(result.getParentTypeSymbols(), hasItems(mixedTypeSymbol));
-        assertThat(result.getParentTypeSymbols().size(), is(1));
     }
 
     @Test

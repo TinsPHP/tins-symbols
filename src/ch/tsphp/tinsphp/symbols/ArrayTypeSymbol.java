@@ -12,10 +12,13 @@
 
 package ch.tsphp.tinsphp.symbols;
 
+import ch.tsphp.common.AstHelperRegistry;
+import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IArrayTypeSymbol;
+import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
 
-public class ArrayTypeSymbol extends ANullableTypeSymbol implements IArrayTypeSymbol
+public class ArrayTypeSymbol extends ATypeSymbol implements IArrayTypeSymbol
 {
 
     private final ITypeSymbol keyTypeSymbol;
@@ -27,7 +30,7 @@ public class ArrayTypeSymbol extends ANullableTypeSymbol implements IArrayTypeSy
             ITypeSymbol theKeyTypeSymbol,
             ITypeSymbol theValueTypeSymbol,
             ITypeSymbol parentTypeSymbol) {
-        super(name, parentTypeSymbol);
+        super(null, name, parentTypeSymbol);
         keyTypeSymbol = theKeyTypeSymbol;
         valueTypeSymbol = theValueTypeSymbol;
     }
@@ -40,5 +43,10 @@ public class ArrayTypeSymbol extends ANullableTypeSymbol implements IArrayTypeSy
     @Override
     public ITypeSymbol getValueTypeSymbol() {
         return valueTypeSymbol;
+    }
+
+    @Override
+    public ITSPHPAst getDefaultValue() {
+        return AstHelperRegistry.get().createAst(TokenTypes.Null, "null");
     }
 }

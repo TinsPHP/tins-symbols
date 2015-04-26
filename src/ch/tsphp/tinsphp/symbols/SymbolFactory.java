@@ -30,7 +30,6 @@ import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMinimalMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMinimalVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.IModifierHelper;
-import ch.tsphp.tinsphp.common.symbols.INullTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IPseudoTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IScalarTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
@@ -57,7 +56,6 @@ public class SymbolFactory implements ISymbolFactory
     private final IModifierHelper modifierHelper;
     private final IOverloadResolver overloadResolver;
     private ITypeSymbol mixedTypeSymbol = null;
-    private INullTypeSymbol nullTypeSymbol;
 
     public SymbolFactory(
             IScopeHelper theScopeHelper,
@@ -71,16 +69,10 @@ public class SymbolFactory implements ISymbolFactory
     @Override
     public void setMixedTypeSymbol(ITypeSymbol typeSymbol) {
         mixedTypeSymbol = typeSymbol;
-        nullTypeSymbol = new NullTypeSymbol(mixedTypeSymbol);
     }
 
     public ITypeSymbol getMixedTypeSymbol() {
         return mixedTypeSymbol;
-    }
-
-    @Override
-    public INullTypeSymbol createNullTypeSymbol() {
-        return nullTypeSymbol;
     }
 
     //
