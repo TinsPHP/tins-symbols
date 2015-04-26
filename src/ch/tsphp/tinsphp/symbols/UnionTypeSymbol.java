@@ -8,6 +8,7 @@ package ch.tsphp.tinsphp.symbols;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.PrimitiveTypeNames;
 import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
 
 import java.util.Iterator;
@@ -26,10 +27,21 @@ public class UnionTypeSymbol extends AContainerTypeSymbol<IUnionTypeSymbol> impl
     }
 
     @Override
+    public String getTypeSeparator() {
+        return " | ";
+    }
+
+    @Override
+    public String getDefaultName() {
+        return PrimitiveTypeNames.NOTHING;
+    }
+
+    //Warning! start code duplication - almost the same as in IntersectionTypeSymbol
+    @Override
     public boolean addTypeSymbol(ITypeSymbol typeSymbol) {
         boolean hasChanged;
         if (typeSymbol instanceof IUnionTypeSymbol) {
-            hasChanged = merge((IUnionTypeSymbol) typeSymbol);
+            hasChanged = super.merge((IUnionTypeSymbol) typeSymbol);
         } else {
             hasChanged = super.addTypeSymbol(typeSymbol);
         }
@@ -42,6 +54,8 @@ public class UnionTypeSymbol extends AContainerTypeSymbol<IUnionTypeSymbol> impl
         copy.typeSymbols.putAll(typeSymbols);
         return copy;
     }
+    //Warning! start code duplication - almost the same as in IntersectionTypeSymbol
+
 
     @Override
     protected boolean addAndSimplify(String absoluteName, ITypeSymbol newTypeSymbol) {
@@ -74,30 +88,5 @@ public class UnionTypeSymbol extends AContainerTypeSymbol<IUnionTypeSymbol> impl
         //Warning! start code duplication - almost the same as in IntersectionTypeSymbol
 
         return changedUnion;
-    }
-
-    @Override
-    public String getName() {
-        return getAbsoluteName();
-    }
-
-    @Override
-    public String getAbsoluteName() {
-        StringBuilder sb = new StringBuilder();
-        Iterator<String> iterator = typeSymbols.keySet().iterator();
-        if (iterator.hasNext()) {
-            sb.append(iterator.next());
-        }
-        while (iterator.hasNext()) {
-            sb.append(" | ").append(iterator.next());
-        }
-        if (typeSymbols.size() == 0) {
-            sb.append("nothing");
-        }
-        if (typeSymbols.size() > 1) {
-            sb.insert(0, "(");
-            sb.append(")");
-        }
-        return sb.toString();
     }
 }

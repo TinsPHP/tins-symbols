@@ -9,6 +9,7 @@ package ch.tsphp.tinsphp.symbols.test.unit.symbols;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.PrimitiveTypeNames;
 import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
 import ch.tsphp.tinsphp.symbols.IntersectionTypeSymbol;
 import ch.tsphp.tinsphp.symbols.UnionTypeSymbol;
@@ -18,7 +19,6 @@ import org.junit.Test;
 
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
@@ -135,7 +135,7 @@ public class IntersectionTypeSymbolTest extends ATypeTest
         Map<String, ITypeSymbol> symbols = intersectionTypeSymbol.getTypeSymbols();
 
         assertThat(result, is(true));
-        assertThat(symbols.keySet(), hasItems("(int | float)"));
+        assertThat(symbols.keySet(), hasItems("(float | int)"));
     }
 
     @Test
@@ -259,7 +259,7 @@ public class IntersectionTypeSymbolTest extends ATypeTest
         IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol();
         String result = intersectionTypeSymbol.getAbsoluteName();
 
-        assertThat(result, is("mixed"));
+        assertThat(result, is(PrimitiveTypeNames.MIXED));
     }
 
     @Test
@@ -290,7 +290,7 @@ public class IntersectionTypeSymbolTest extends ATypeTest
         String result = intersectionTypeSymbol.getAbsoluteName();
 
         //assert
-        assertThat(result, anyOf(is("(int & float)"), is("(float & int)")));
+        assertThat(result, is("(float & int)"));
     }
 
     @Test
@@ -300,7 +300,7 @@ public class IntersectionTypeSymbolTest extends ATypeTest
         IIntersectionTypeSymbol intersectionTypeSymbol = spy(createIntersectionTypeSymbol());
         String result = intersectionTypeSymbol.getName();
 
-        assertThat(result, is("mixed"));
+        assertThat(result, is(PrimitiveTypeNames.MIXED));
         verify(intersectionTypeSymbol).getAbsoluteName();
     }
 
@@ -311,7 +311,7 @@ public class IntersectionTypeSymbolTest extends ATypeTest
         IIntersectionTypeSymbol intersectionTypeSymbol = spy(createIntersectionTypeSymbol());
         String result = intersectionTypeSymbol.toString();
 
-        assertThat(result, is("mixed"));
+        assertThat(result, is(PrimitiveTypeNames.MIXED));
         verify(intersectionTypeSymbol).getAbsoluteName();
     }
 

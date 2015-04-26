@@ -4,7 +4,7 @@
  * root folder or visit the project's website http://tsphp.ch/wiki/display/TINS/License
  */
 
-package ch.tsphp.tinsphp.symbols.test.integration;
+package ch.tsphp.tinsphp.symbols.test.integration.constraints;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.FixedTypeVariableReference;

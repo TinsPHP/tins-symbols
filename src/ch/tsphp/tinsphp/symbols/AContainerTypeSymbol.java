@@ -14,8 +14,11 @@ import ch.tsphp.tinsphp.common.symbols.IContainerTypeSymbol;
 import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public abstract class AContainerTypeSymbol<TContainer extends IContainerTypeSymbol<? super TContainer>>
         implements IContainerTypeSymbol<TContainer>
@@ -32,20 +35,21 @@ public abstract class AContainerTypeSymbol<TContainer extends IContainerTypeSymb
     protected final IOverloadResolver overloadResolver;
     protected final Map<String, ITypeSymbol> typeSymbols;
 
+    protected boolean hasAbsoluteNameChanged = true;
+    protected String absoluteName;
+
     public AContainerTypeSymbol(IOverloadResolver theOverloadResolver) {
         super();
         overloadResolver = theOverloadResolver;
         typeSymbols = new HashMap<>();
     }
 
-    @Override
-    public abstract ITypeSymbol evalSelf();
+    public abstract String getTypeSeparator();
 
-    @Override
-    public abstract String getName();
-
-    @Override
-    public abstract String getAbsoluteName();
+    /**
+     * Returns the name of the type if no type is within the container
+     */
+    public abstract String getDefaultName();
 
     protected abstract boolean addAndSimplify(String absoluteName, ITypeSymbol newTypeSymbol);
 
@@ -65,6 +69,11 @@ public abstract class AContainerTypeSymbol<TContainer extends IContainerTypeSymb
     }
 
     @Override
+    public ITypeSymbol evalSelf() {
+        return this;
+    }
+
+    @Override
     public boolean addTypeSymbol(ITypeSymbol typeSymbol) {
         boolean hasChanged = false;
 
@@ -74,18 +83,23 @@ public abstract class AContainerTypeSymbol<TContainer extends IContainerTypeSymb
         if (!typeSymbols.containsKey(absoluteName)) {
             hasChanged = addAndSimplify(absoluteName, typeSymbol);
         }
+
+        hasAbsoluteNameChanged = hasAbsoluteNameChanged || hasChanged;
+
         return hasChanged;
     }
 
     protected boolean merge(IContainerTypeSymbol<TContainer> containerTypeSymbol) {
-        boolean changedUnion = false;
+        boolean hasChanged = false;
 
         for (ITypeSymbol typeSymbol : containerTypeSymbol.getTypeSymbols().values()) {
             boolean hasUnionChanged = addTypeSymbol(typeSymbol);
-            changedUnion = changedUnion || hasUnionChanged;
+            hasChanged = hasChanged || hasUnionChanged;
         }
 
-        return changedUnion;
+        hasAbsoluteNameChanged = hasAbsoluteNameChanged || hasChanged;
+
+        return hasChanged;
     }
 
     @Override
@@ -99,9 +113,49 @@ public abstract class AContainerTypeSymbol<TContainer extends IContainerTypeSymb
     }
 
     @Override
+    public String getName() {
+        return getAbsoluteName();
+    }
+
+    @Override
+    public String getAbsoluteName() {
+        if (hasAbsoluteNameChanged) {
+            absoluteName = calculateAbsoluteName();
+            hasAbsoluteNameChanged = false;
+        }
+        return absoluteName;
+    }
+
+    private String calculateAbsoluteName() {
+        String absolutename;
+        if (!typeSymbols.isEmpty()) {
+            final String separator = getTypeSeparator();
+
+            StringBuilder sb = new StringBuilder();
+            SortedSet<String> sortedSet = new TreeSet<>(typeSymbols.keySet());
+            Iterator<String> iterator = sortedSet.iterator();
+            if (iterator.hasNext()) {
+                sb.append(iterator.next());
+            }
+            while (iterator.hasNext()) {
+                sb.append(separator).append(iterator.next());
+            }
+            if (typeSymbols.size() > 1) {
+                sb.insert(0, "(");
+                sb.append(")");
+            }
+            return sb.toString();
+        } else {
+            absolutename = getDefaultName();
+        }
+        return absolutename;
+    }
+
+    @Override
     public String toString() {
         return getAbsoluteName();
     }
+
 
     //--------------------------------------------------------------
     // Unsupported Methods

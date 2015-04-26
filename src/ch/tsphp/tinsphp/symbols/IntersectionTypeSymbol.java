@@ -8,6 +8,7 @@ package ch.tsphp.tinsphp.symbols;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.PrimitiveTypeNames;
 import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
 
 import java.util.Iterator;
@@ -21,6 +22,17 @@ public class IntersectionTypeSymbol extends AContainerTypeSymbol<IIntersectionTy
         super(theOverloadResolver);
     }
 
+    @Override
+    public String getTypeSeparator() {
+        return " & ";
+    }
+
+    @Override
+    public String getDefaultName() {
+        return PrimitiveTypeNames.MIXED;
+    }
+
+    //Warning! start code duplication - almost the same as in UnionTypeSymbol
     @Override
     public boolean addTypeSymbol(ITypeSymbol typeSymbol) {
         boolean hasChanged;
@@ -38,6 +50,7 @@ public class IntersectionTypeSymbol extends AContainerTypeSymbol<IIntersectionTy
         copy.typeSymbols.putAll(typeSymbols);
         return copy;
     }
+    //Warning! end code duplication - almost the same as in UnionTypeSymbol
 
     @Override
     protected boolean addAndSimplify(String absoluteName, ITypeSymbol newTypeSymbol) {
@@ -70,39 +83,5 @@ public class IntersectionTypeSymbol extends AContainerTypeSymbol<IIntersectionTy
         //Warning! end code duplication - almost the same as in UnionTypeSymbol
 
         return changedUnion;
-    }
-
-
-    @Override
-    public ITypeSymbol evalSelf() {
-        return null;
-    }
-
-    @Override
-    public String getName() {
-        return getAbsoluteName();
-    }
-
-    @Override
-    public String getAbsoluteName() {
-
-        StringBuilder sb = new StringBuilder();
-        Iterator<String> iterator = typeSymbols.keySet().iterator();
-        if (iterator.hasNext()) {
-            sb.append(iterator.next());
-        }
-        while (iterator.hasNext()) {
-            sb.append(" & ").append(iterator.next());
-        }
-        if (typeSymbols.size() == 0) {
-            sb.append("mixed");
-        }
-        if (typeSymbols.size() > 1) {
-            sb.insert(0, "(");
-            sb.append(")");
-        }
-
-        return sb.toString();
-
     }
 }

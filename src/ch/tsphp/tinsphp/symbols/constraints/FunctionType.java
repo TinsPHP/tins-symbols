@@ -20,6 +20,7 @@ import java.util.Map;
 public class FunctionType implements IFunctionType
 {
     protected final String name;
+    private String signature;
     private IOverloadBindings bindings;
     private List<IVariable> parameters;
     private final Map<String, String> suffices = new HashMap<>(2);
@@ -33,6 +34,21 @@ public class FunctionType implements IFunctionType
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public void fix() {
+        signature = calculateSignature();
+    }
+
+    private String calculateSignature() {
+        //TODO rstoll TINS-277 operator helper
+        return name;
+    }
+
+    @Override
+    public String getSignature() {
+        return signature;
     }
 
     @Override

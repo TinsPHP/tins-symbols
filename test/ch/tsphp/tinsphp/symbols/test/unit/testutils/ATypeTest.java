@@ -19,7 +19,6 @@ import static org.mockito.Mockito.when;
 @Ignore
 public abstract class ATypeTest
 {
-    //Warning! start code duplication - same as in AConstraintSolverTest from the inference component
     protected static ITypeSymbol mixedType;
     protected static ITypeSymbol arrayType;
     protected static ITypeSymbol scalarType;
@@ -34,12 +33,11 @@ public abstract class ATypeTest
     protected static ITypeSymbol interfaceSubAType;
     protected static ITypeSymbol interfaceBType;
     protected static ITypeSymbol fooType;
-    //Warning! end code duplication - same as in AConstraintSolverTest from the inference component
 
     @BeforeClass
     public static void init() {
-        //Warning! start code duplication - same as in AConstraintSolverTest from the inference component
         mixedType = mock(ITypeSymbol.class);
+        when(mixedType.getAbsoluteName()).thenReturn("mixed");
 
         arrayType = mock(ITypeSymbol.class);
         when(arrayType.getParentTypeSymbols()).thenReturn(set(mixedType));
@@ -90,12 +88,9 @@ public abstract class ATypeTest
         fooType = mock(ITypeSymbol.class);
         when(fooType.getParentTypeSymbols()).thenReturn(set(interfaceSubAType, interfaceBType));
         when(fooType.getAbsoluteName()).thenReturn("Foo");
-        //Warning! end code duplication - same as in AConstraintSolverTest from the inference component
     }
 
-    //Warning! start code duplication - same as in AConstraintSolverTest from the inference component
     protected static HashSet<ITypeSymbol> set(ITypeSymbol... symbols) {
         return new HashSet<>(Arrays.asList(symbols));
     }
-    //Warning! end code duplication - same as in ConstraintSolverTest from the inference component
 }

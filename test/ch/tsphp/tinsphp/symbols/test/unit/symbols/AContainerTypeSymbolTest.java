@@ -33,17 +33,12 @@ public class AContainerTypeSymbolTest
         }
 
         @Override
-        public ITypeSymbol evalSelf() {
+        public String getTypeSeparator() {
             return null;
         }
 
         @Override
-        public String getName() {
-            return null;
-        }
-
-        @Override
-        public String getAbsoluteName() {
+        public String getDefaultName() {
             return null;
         }
 

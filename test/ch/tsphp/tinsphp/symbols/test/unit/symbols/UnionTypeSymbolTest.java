@@ -7,8 +7,11 @@
 package ch.tsphp.tinsphp.symbols.test.unit.symbols;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.PrimitiveTypeNames;
 import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
+import ch.tsphp.tinsphp.symbols.IntersectionTypeSymbol;
 import ch.tsphp.tinsphp.symbols.UnionTypeSymbol;
 import ch.tsphp.tinsphp.symbols.test.unit.testutils.ATypeTest;
 import ch.tsphp.tinsphp.symbols.utils.OverloadResolver;
@@ -16,7 +19,6 @@ import org.junit.Test;
 
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
@@ -119,6 +121,62 @@ public class UnionTypeSymbolTest extends ATypeTest
 
         assertThat(result, is(true));
         assertThat(symbols.keySet(), hasItems("num", "string", "bool"));
+    }
+
+    @Test
+    public void addTypeSymbol_EmptyAndIntersectionContainingIBAndIA_ReturnsTrueAndUnionContainsIntersection() {
+        IIntersectionTypeSymbol intersectionTypeSymbol = new IntersectionTypeSymbol(new OverloadResolver());
+        intersectionTypeSymbol.addTypeSymbol(interfaceAType);
+        intersectionTypeSymbol.addTypeSymbol(interfaceBType);
+
+        //act
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol();
+        boolean result = unionTypeSymbol.addTypeSymbol(intersectionTypeSymbol);
+        Map<String, ITypeSymbol> symbols = unionTypeSymbol.getTypeSymbols();
+
+        assertThat(result, is(true));
+        assertThat(symbols.keySet(), hasItems("(IA & IB)"));
+    }
+
+    @Test
+    public void addTypeSymbol_IntAndIntersectionContainingIBAndIA_ReturnsTrueAndUnionContainsIntAndIntersection() {
+        //pre-act necessary for arrange
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol();
+
+        //arrange
+        unionTypeSymbol.addTypeSymbol(intType);
+
+        IIntersectionTypeSymbol intersectionTypeSymbol = new IntersectionTypeSymbol(new OverloadResolver());
+        intersectionTypeSymbol.addTypeSymbol(interfaceAType);
+        intersectionTypeSymbol.addTypeSymbol(interfaceBType);
+
+        //act
+        boolean result = unionTypeSymbol.addTypeSymbol(intersectionTypeSymbol);
+        Map<String, ITypeSymbol> symbols = unionTypeSymbol.getTypeSymbols();
+
+        assertThat(result, is(true));
+        assertThat(symbols.keySet(), hasItems("(IA & IB)", "int"));
+    }
+
+    @Test
+    public void addTypeSymbol_IntAndIAIntersectionContainingIBAndIA_ReturnsFalseAndUnionContainsIntAndIA() {
+        //pre-act necessary for arrange
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol();
+
+        //arrange
+        unionTypeSymbol.addTypeSymbol(intType);
+        unionTypeSymbol.addTypeSymbol(interfaceAType);
+
+        IIntersectionTypeSymbol intersectionTypeSymbol = new IntersectionTypeSymbol(new OverloadResolver());
+        intersectionTypeSymbol.addTypeSymbol(interfaceAType);
+        intersectionTypeSymbol.addTypeSymbol(interfaceBType);
+
+        //act
+        boolean result = unionTypeSymbol.addTypeSymbol(intersectionTypeSymbol);
+        Map<String, ITypeSymbol> symbols = unionTypeSymbol.getTypeSymbols();
+
+        assertThat(result, is(false));
+        assertThat(symbols.keySet(), hasItems("IA", "int"));
     }
 
 
@@ -225,7 +283,7 @@ public class UnionTypeSymbolTest extends ATypeTest
         IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol();
         String result = unionTypeSymbol.getAbsoluteName();
 
-        assertThat(result, is("nothing"));
+        assertThat(result, is(PrimitiveTypeNames.NOTHING));
     }
 
     @Test
@@ -256,7 +314,7 @@ public class UnionTypeSymbolTest extends ATypeTest
         String result = unionTypeSymbol.getAbsoluteName();
 
         //assert
-        assertThat(result, anyOf(is("(int | float)"), is("(float | int)")));
+        assertThat(result, is("(float | int)"));
     }
 
     @Test
@@ -266,7 +324,7 @@ public class UnionTypeSymbolTest extends ATypeTest
         IUnionTypeSymbol unionTypeSymbol = spy(createUnionTypeSymbol());
         String result = unionTypeSymbol.getName();
 
-        assertThat(result, is("nothing"));
+        assertThat(result, is(PrimitiveTypeNames.NOTHING));
         verify(unionTypeSymbol).getAbsoluteName();
     }
 
@@ -277,7 +335,7 @@ public class UnionTypeSymbolTest extends ATypeTest
         IUnionTypeSymbol unionTypeSymbol = spy(createUnionTypeSymbol());
         String result = unionTypeSymbol.toString();
 
-        assertThat(result, is("nothing"));
+        assertThat(result, is(PrimitiveTypeNames.NOTHING));
         verify(unionTypeSymbol).getAbsoluteName();
     }
 
