@@ -69,6 +69,7 @@ public class SymbolFactory implements ISymbolFactory
     @Override
     public void setMixedTypeSymbol(ITypeSymbol typeSymbol) {
         mixedTypeSymbol = typeSymbol;
+        overloadResolver.setMixedTypeSymbol(mixedTypeSymbol);
     }
 
     public ITypeSymbol getMixedTypeSymbol() {

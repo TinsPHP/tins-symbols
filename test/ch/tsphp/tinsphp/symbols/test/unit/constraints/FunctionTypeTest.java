@@ -132,23 +132,22 @@ public class FunctionTypeTest
         assertThat(result, is(nullValue()));
     }
 
-    //TODO rstoll TINS-277 operator helper
-//    @Test
-//    public void getSignature_FixedNoParamsReturnsNull_ReturnsEmptyParamArrowNullType() {
-//        //no arrange necessary
-//
-//        IFunctionType function = createFunction();
-//        function.fix();
-//        String result = function.getSignature();
-//
-//        assertThat(result, is("foo{0}() -> nullTyp"));
-//    }
+    @Test(expected = IllegalStateException.class)
+    public void fix_CalledSecondTime_ThrowsIllegalStateException() {
+        //no arrange necessary
+
+        IFunctionType function = createFunction();
+        function.fix();
+        function.fix();
+
+        //assert in annotation
+    }
 
     private IFunctionType createFunction() {
         return createFunction("foo", mock(IOverloadBindings.class), new ArrayList<IVariable>());
     }
 
-    private IFunctionType createFunction(
+    protected IFunctionType createFunction(
             String theName, IOverloadBindings theOverloadBindings, List<IVariable> theParameterVariables) {
         return new FunctionType(theName, theOverloadBindings, theParameterVariables);
     }
