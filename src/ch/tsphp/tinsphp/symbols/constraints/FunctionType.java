@@ -66,8 +66,8 @@ public class FunctionType implements IFunctionType
         sb.append(" -> ");
         appendParameter(sb, TypeVariableNames.RETURN_VARIABLE_NAME, typeVariablesAdded, sbTypeParameters);
 
-        if (!typeVariablesAdded.isEmpty()) {
-            sb.append(" \\ ").append(sbTypeParameters);
+        if (sbTypeParameters.length() > 0) {
+            sb.append(sbTypeParameters);
         }
         return sb.toString();
     }
@@ -101,9 +101,6 @@ public class FunctionType implements IFunctionType
         } else {
             sb.append(typeVariable);
             if (!typeVariablesAdded.contains(typeVariable)) {
-                if (!typeVariablesAdded.isEmpty()) {
-                    sbTypeParameters.append(", ");
-                }
                 typeVariablesAdded.add(typeVariable);
                 appendTypeParameter(sbTypeParameters, typeVariable);
             }
@@ -111,7 +108,20 @@ public class FunctionType implements IFunctionType
     }
 
     private void appendTypeParameter(StringBuilder sbTypeParameters, String typeVariable) {
-        if (bindings.hasLowerBounds(typeVariable)) {
+        boolean hasLowerBounds = bindings.hasLowerBounds(typeVariable);
+        boolean hasUpperTypeBounds = bindings.hasUpperTypeBounds(typeVariable);
+        boolean hasLowerOrUpperBounds = hasLowerBounds || hasUpperTypeBounds;
+
+
+        if (hasLowerOrUpperBounds) {
+            if (sbTypeParameters.length() > 0) {
+                sbTypeParameters.append(", ");
+            } else {
+                sbTypeParameters.append(" \\ ");
+            }
+        }
+
+        if (hasLowerBounds) {
             List<String> lowerBounds = new ArrayList<>();
             if (bindings.hasLowerTypeBounds(typeVariable)) {
                 SortedSet<String> sortedSet = new TreeSet<>(
@@ -137,8 +147,12 @@ public class FunctionType implements IFunctionType
             }
             sbTypeParameters.append(" < ");
         }
-        sbTypeParameters.append(typeVariable);
-        if (bindings.hasUpperTypeBounds(typeVariable)) {
+
+        if (hasLowerOrUpperBounds) {
+            sbTypeParameters.append(typeVariable);
+        }
+
+        if (hasUpperTypeBounds) {
             sbTypeParameters.append(" < ");
             sbTypeParameters.append(bindings.getUpperTypeBounds(typeVariable).getAbsoluteName());
         }

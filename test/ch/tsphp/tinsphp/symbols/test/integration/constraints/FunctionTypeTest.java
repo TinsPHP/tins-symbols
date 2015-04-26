@@ -11,15 +11,11 @@ import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
-import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
-import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
-import ch.tsphp.tinsphp.symbols.IntersectionTypeSymbol;
 import ch.tsphp.tinsphp.symbols.ModifierHelper;
 import ch.tsphp.tinsphp.symbols.SymbolFactory;
 import ch.tsphp.tinsphp.symbols.TypeVariableNames;
-import ch.tsphp.tinsphp.symbols.UnionTypeSymbol;
 import ch.tsphp.tinsphp.symbols.constraints.FunctionType;
 import ch.tsphp.tinsphp.symbols.constraints.OverloadBindings;
 import ch.tsphp.tinsphp.symbols.constraints.Variable;
@@ -73,22 +69,26 @@ public class FunctionTypeTest extends ATypeTest
     }
 
     @Test
-    public void
-    getSignature_T1xT2ArrowT3AndT1IsIntOrFloatAndT2LowerIBAndIAAndT3IsString_ReturnsSignatureWithTypeParameters() {
+    public void getSignature_Identity_ReturnsTArrowT() {
         IOverloadBindings overloadBindings = createOverloadBindings();
-        overloadBindings.addVariable("$lhs", new FixedTypeVariableReference(new TypeVariableReference("T1")));
+        overloadBindings.addVariable("$expr", new TypeVariableReference("T"));
+        overloadBindings.addVariable(TypeVariableNames.RETURN_VARIABLE_NAME, new TypeVariableReference("T"));
+        IVariable expr = new Variable("$expr");
+
+        IFunctionType function = createFunction("foo", overloadBindings, asList(expr));
+        function.fix();
+        String result = function.getSignature();
+
+        assertThat(result, is("T -> T"));
+    }
+
+    @Test
+    public void getSignature_Assign_ReturnsT1xT2ArrowT1AndT2LowerT1() {
+        IOverloadBindings overloadBindings = createOverloadBindings();
+        overloadBindings.addVariable("$lhs", new TypeVariableReference("T1"));
         overloadBindings.addVariable("$rhs", new TypeVariableReference("T2"));
-        overloadBindings.addVariable(TypeVariableNames.RETURN_VARIABLE_NAME,
-                new FixedTypeVariableReference(new TypeVariableReference("T3")));
-        IUnionTypeSymbol intOrFloat = new UnionTypeSymbol(new OverloadResolver());
-        intOrFloat.addTypeSymbol(intType);
-        intOrFloat.addTypeSymbol(floatType);
-        IIntersectionTypeSymbol iBAndIA = new IntersectionTypeSymbol(new OverloadResolver());
-        iBAndIA.addTypeSymbol(interfaceAType);
-        iBAndIA.addTypeSymbol(interfaceBType);
-        overloadBindings.addLowerTypeBound("T1", intOrFloat);
-        overloadBindings.addUpperTypeBound("T2", iBAndIA);
-        overloadBindings.addLowerTypeBound("T3", stringType);
+        overloadBindings.addVariable(TypeVariableNames.RETURN_VARIABLE_NAME, new TypeVariableReference("T1"));
+        overloadBindings.addLowerRefBound("T1", new TypeVariableReference("T2"));
         IVariable lhs = new Variable("$lhs");
         IVariable rhs = new Variable("$rhs");
 
@@ -96,7 +96,7 @@ public class FunctionTypeTest extends ATypeTest
         function.fix();
         String result = function.getSignature();
 
-        assertThat(result, is("(float | int) x T2 -> string \\ T2 < (IA & IB)"));
+        assertThat(result, is("T1 x T2 -> T1 \\ T2 < T1"));
     }
 
     @Test
@@ -141,6 +141,21 @@ public class FunctionTypeTest extends ATypeTest
         String result = function.getSignature();
 
         assertThat(result, is("T1 x T2 -> T3 \\ int < T1 < num, T2 < bool, (int | T1 | T2) < T3"));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void getSignature_CalledFixTheSecondTime_ThrowsIllegalStateException() {
+        IOverloadBindings overloadBindings = createOverloadBindings();
+        overloadBindings.addVariable(TypeVariableNames.RETURN_VARIABLE_NAME,
+                new FixedTypeVariableReference(new TypeVariableReference("T")));
+        overloadBindings.addLowerTypeBound("T", intType);
+        overloadBindings.addUpperTypeBound("T", intType);
+
+        IFunctionType function = createFunction("foo", overloadBindings, new ArrayList<IVariable>());
+        function.fix();
+        function.fix();
+
+        //assert in annotation
     }
 
     private OverloadBindings createOverloadBindings() {

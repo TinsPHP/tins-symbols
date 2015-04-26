@@ -132,17 +132,6 @@ public class FunctionTypeTest
         assertThat(result, is(nullValue()));
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void fix_CalledSecondTime_ThrowsIllegalStateException() {
-        //no arrange necessary
-
-        IFunctionType function = createFunction();
-        function.fix();
-        function.fix();
-
-        //assert in annotation
-    }
-
     private IFunctionType createFunction() {
         return createFunction("foo", mock(IOverloadBindings.class), new ArrayList<IVariable>());
     }
