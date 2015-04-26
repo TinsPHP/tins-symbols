@@ -36,7 +36,7 @@ public abstract class AContainerTypeSymbol<TContainer extends IContainerTypeSymb
     protected final Map<String, ITypeSymbol> typeSymbols;
 
     protected boolean hasAbsoluteNameChanged = true;
-    protected String absoluteName;
+    protected String ownAsboluteName;
 
     public AContainerTypeSymbol(IOverloadResolver theOverloadResolver) {
         super();
@@ -120,10 +120,10 @@ public abstract class AContainerTypeSymbol<TContainer extends IContainerTypeSymb
     @Override
     public String getAbsoluteName() {
         if (hasAbsoluteNameChanged) {
-            absoluteName = calculateAbsoluteName();
+            ownAsboluteName = calculateAbsoluteName();
             hasAbsoluteNameChanged = false;
         }
-        return absoluteName;
+        return ownAsboluteName;
     }
 
     private String calculateAbsoluteName() {
