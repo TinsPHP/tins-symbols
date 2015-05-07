@@ -1899,6 +1899,111 @@ public class OverloadBindingsTest extends ATypeTest
         ));
     }
 
+    //see TINS-415 same lower and upper type bound equals fix type
+    @Test
+    public void tryToFix_SameLowerAndUpperTypeBound_FixIt() {
+        //corresponds: function foo($x){ $x = 'h'; expectsString($x); return $x;}
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String tx = "Tx";
+        String tReturn = "Treturn";
+
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        collection.addLowerTypeBound(tx, stringType);
+        collection.addUpperTypeBound(tx, stringType);
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, tx, asList("string"), asList("string"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("string"), asList("string"), true)
+        ));
+    }
+
+    //see TINS-415 same lower and upper type bound equals fix type
+    @Test
+    public void tryToFix_SameLowerAndUpperTypeBoundWithRefToOtherParamWhichHasSameUpper_FixBoth() {
+        //corresponds:
+        // function foo($x, $y){
+        //   $y = $x; $x = 'h'; expectsString($x); expectsString($y); return $x; return $y;
+        // }
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String $y = "$y";
+        String tx = "Tx";
+        String ty = "Ty";
+        String tReturn = "Treturn";
+
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($y, new TypeVariableReference(ty));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        collection.addLowerTypeBound(tx, stringType);
+        collection.addUpperTypeBound(tx, stringType);
+        collection.addUpperTypeBound(ty, stringType);
+        collection.addLowerRefBound(ty, new TypeVariableReference(tx));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(ty));
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+        parameterTypeVariables.add(ty);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, tx, asList("string"), asList("string"), true),
+                varBinding($y, ty, asList("string"), asList("string"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("string"), asList("string"), true)
+        ));
+    }
+
+    //see TINS-415 same lower and upper type bound equals fix type
+    @Test
+    public void tryToFix_SameLowerAndUpperTypeBoundWithRefToOtherParamWhichHasDifferentUpper_FixOnlyOne() {
+        //corresponds: function foo($x, $y){ $y = $x; $x = 'h'; expectsString($x); return $x; return $y; }
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String $y = "$y";
+        String tx = "Tx";
+        String ty = "Ty";
+        String tReturn = "Treturn";
+
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($y, new TypeVariableReference(ty));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        collection.addLowerTypeBound(tx, stringType);
+        collection.addUpperTypeBound(tx, stringType);
+        collection.addLowerRefBound(ty, new TypeVariableReference(tx));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(ty));
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+        parameterTypeVariables.add(ty);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, tx, asList("string"), asList("string"), true),
+                varBinding($y, ty, asList("string"), null, false),
+                varBinding(RETURN_VARIABLE_NAME, ty, asList("string"), null, false)
+        ));
+    }
+
     @Test
     public void getLowerRefBounds_NothingDefined_ReturnsNull() {
         //no arrange necessary
