@@ -1293,6 +1293,45 @@ public class OverloadBindingsTest extends ATypeTest
         ));
     }
 
+
+    //see TINS-449 unused ad-hoc polymorphic parameters
+    @Test
+    public void tryToFix_UnusedAdHocParamsAssignedToLocalConstantReturn_LocalHasNotMixedAsType() {
+        //corresponds: function foo($x, $y){ $a = $x + $y; return $1;}
+
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String $y = "$y";
+        String $a = "$a";
+        String t1 = "T1";
+        String ta = "Ta";
+        String tReturn = "Treturn";
+
+        collection.addVariable($a, new TypeVariableReference(ta));
+        collection.addVariable($x, new TypeVariableReference(t1));
+        collection.addVariable($y, new TypeVariableReference(t1));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        collection.addLowerRefBound(ta, new TypeVariableReference(t1));
+        collection.addUpperTypeBound(t1, numType);
+        collection.addLowerTypeBound(tReturn, intType);
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(t1);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, t1, asList("num"), asList("num"), true),
+                varBinding($y, t1, asList("num"), asList("num"), true),
+                varBinding($a, ta, asList("num"), asList("num"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), asList("int"), true)
+        ));
+    }
+
+
     @Test
     public void tryToFix_YIsLowerRefOfXAndConstantReturn_AllVariablesAreFixed() {
         //corresponds: function foo($x, $y){ $x + 1; $x = $y; return 1;}
