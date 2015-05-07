@@ -7,22 +7,22 @@
 package ch.tsphp.tinsphp.symbols.test.integration.constraints;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
+import ch.tsphp.tinsphp.common.inference.constraints.BoundException;
 import ch.tsphp.tinsphp.common.inference.constraints.FixedTypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableReference;
+import ch.tsphp.tinsphp.common.inference.constraints.IntersectionBoundException;
+import ch.tsphp.tinsphp.common.inference.constraints.LowerBoundException;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
+import ch.tsphp.tinsphp.common.inference.constraints.UpperBoundException;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
 import ch.tsphp.tinsphp.symbols.IntersectionTypeSymbol;
 import ch.tsphp.tinsphp.symbols.UnionTypeSymbol;
-import ch.tsphp.tinsphp.symbols.constraints.BoundException;
-import ch.tsphp.tinsphp.symbols.constraints.IntersectionBoundException;
-import ch.tsphp.tinsphp.symbols.constraints.LowerBoundException;
 import ch.tsphp.tinsphp.symbols.constraints.OverloadBindings;
-import ch.tsphp.tinsphp.symbols.constraints.UpperBoundException;
 import ch.tsphp.tinsphp.symbols.test.unit.testutils.ATypeTest;
 import ch.tsphp.tinsphp.symbols.utils.OverloadResolver;
 import org.junit.Assert;
