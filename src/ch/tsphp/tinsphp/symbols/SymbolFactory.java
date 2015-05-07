@@ -17,6 +17,7 @@ import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
 import ch.tsphp.common.symbols.ITypeSymbol;
+import ch.tsphp.tinsphp.common.TinsPHPConstants;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
@@ -175,7 +176,7 @@ public class SymbolFactory implements ISymbolFactory
                 identifier,
                 modifierHelper.getModifiers(methodModifier),
                 modifierHelper.getModifiers(returnTypeModifier),
-                new MinimalVariableSymbol(identifier, TypeVariableNames.RETURN_VARIABLE_NAME),
+                new MinimalVariableSymbol(identifier, TinsPHPConstants.RETURN_VARIABLE_NAME),
                 identifier.getText(),
                 currentScope);
     }

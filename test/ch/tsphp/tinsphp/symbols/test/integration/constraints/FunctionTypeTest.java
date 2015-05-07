@@ -6,6 +6,7 @@
 
 package ch.tsphp.tinsphp.symbols.test.integration.constraints;
 
+import ch.tsphp.tinsphp.common.TinsPHPConstants;
 import ch.tsphp.tinsphp.common.inference.constraints.FixedTypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
@@ -15,7 +16,6 @@ import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
 import ch.tsphp.tinsphp.symbols.ModifierHelper;
 import ch.tsphp.tinsphp.symbols.SymbolFactory;
-import ch.tsphp.tinsphp.symbols.TypeVariableNames;
 import ch.tsphp.tinsphp.symbols.constraints.FunctionType;
 import ch.tsphp.tinsphp.symbols.constraints.OverloadBindings;
 import ch.tsphp.tinsphp.symbols.constraints.Variable;
@@ -37,7 +37,7 @@ public class FunctionTypeTest extends ATypeTest
     @Test
     public void getSignature_FixedNoParamsReturnsInt_ReturnsEmptyParamArrowInt() {
         IOverloadBindings overloadBindings = createOverloadBindings();
-        overloadBindings.addVariable(TypeVariableNames.RETURN_VARIABLE_NAME,
+        overloadBindings.addVariable(TinsPHPConstants.RETURN_VARIABLE_NAME,
                 new FixedTypeVariableReference(new TypeVariableReference("T")));
         overloadBindings.addLowerTypeBound("T", intType);
         overloadBindings.addUpperTypeBound("T", intType);
@@ -53,7 +53,7 @@ public class FunctionTypeTest extends ATypeTest
     public void getSignature_IntArrowFloat_ReturnsSignatureWithParams() {
         IOverloadBindings overloadBindings = createOverloadBindings();
         overloadBindings.addVariable("$expr", new FixedTypeVariableReference(new TypeVariableReference("T1")));
-        overloadBindings.addVariable(TypeVariableNames.RETURN_VARIABLE_NAME,
+        overloadBindings.addVariable(TinsPHPConstants.RETURN_VARIABLE_NAME,
                 new FixedTypeVariableReference(new TypeVariableReference("T2")));
         overloadBindings.addLowerTypeBound("T1", intType);
         overloadBindings.addUpperTypeBound("T1", intType);
@@ -72,7 +72,7 @@ public class FunctionTypeTest extends ATypeTest
     public void getSignature_Identity_ReturnsTArrowT() {
         IOverloadBindings overloadBindings = createOverloadBindings();
         overloadBindings.addVariable("$expr", new TypeVariableReference("T"));
-        overloadBindings.addVariable(TypeVariableNames.RETURN_VARIABLE_NAME, new TypeVariableReference("T"));
+        overloadBindings.addVariable(TinsPHPConstants.RETURN_VARIABLE_NAME, new TypeVariableReference("T"));
         IVariable expr = new Variable("$expr");
 
         IFunctionType function = createFunction("foo", overloadBindings, asList(expr));
@@ -87,7 +87,7 @@ public class FunctionTypeTest extends ATypeTest
         IOverloadBindings overloadBindings = createOverloadBindings();
         overloadBindings.addVariable("$lhs", new TypeVariableReference("T1"));
         overloadBindings.addVariable("$rhs", new TypeVariableReference("T2"));
-        overloadBindings.addVariable(TypeVariableNames.RETURN_VARIABLE_NAME, new TypeVariableReference("T1"));
+        overloadBindings.addVariable(TinsPHPConstants.RETURN_VARIABLE_NAME, new TypeVariableReference("T1"));
         overloadBindings.addLowerRefBound("T1", new TypeVariableReference("T2"));
         IVariable lhs = new Variable("$lhs");
         IVariable rhs = new Variable("$rhs");
@@ -105,7 +105,7 @@ public class FunctionTypeTest extends ATypeTest
         IOverloadBindings overloadBindings = createOverloadBindings();
         overloadBindings.addVariable("$lhs", new TypeVariableReference("T1"));
         overloadBindings.addVariable("$rhs", new TypeVariableReference("T2"));
-        overloadBindings.addVariable(TypeVariableNames.RETURN_VARIABLE_NAME, new TypeVariableReference("T3"));
+        overloadBindings.addVariable(TinsPHPConstants.RETURN_VARIABLE_NAME, new TypeVariableReference("T3"));
         overloadBindings.addLowerTypeBound("T1", intType);
         overloadBindings.addUpperTypeBound("T1", numType);
         overloadBindings.addUpperTypeBound("T2", boolType);
@@ -127,7 +127,7 @@ public class FunctionTypeTest extends ATypeTest
         IOverloadBindings overloadBindings = createOverloadBindings();
         overloadBindings.addVariable("$lhs", new TypeVariableReference("T1"));
         overloadBindings.addVariable("$rhs", new TypeVariableReference("T2"));
-        overloadBindings.addVariable(TypeVariableNames.RETURN_VARIABLE_NAME, new TypeVariableReference("T3"));
+        overloadBindings.addVariable(TinsPHPConstants.RETURN_VARIABLE_NAME, new TypeVariableReference("T3"));
         overloadBindings.addLowerTypeBound("T1", intType);
         overloadBindings.addUpperTypeBound("T1", numType);
         overloadBindings.addUpperTypeBound("T2", boolType);
@@ -146,7 +146,7 @@ public class FunctionTypeTest extends ATypeTest
     @Test(expected = IllegalStateException.class)
     public void getSignature_CalledFixTheSecondTime_ThrowsIllegalStateException() {
         IOverloadBindings overloadBindings = createOverloadBindings();
-        overloadBindings.addVariable(TypeVariableNames.RETURN_VARIABLE_NAME,
+        overloadBindings.addVariable(TinsPHPConstants.RETURN_VARIABLE_NAME,
                 new FixedTypeVariableReference(new TypeVariableReference("T")));
         overloadBindings.addLowerTypeBound("T", intType);
         overloadBindings.addUpperTypeBound("T", intType);

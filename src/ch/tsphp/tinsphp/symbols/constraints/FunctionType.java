@@ -8,11 +8,11 @@ package ch.tsphp.tinsphp.symbols.constraints;
 
 
 import ch.tsphp.common.symbols.ITypeSymbol;
+import ch.tsphp.tinsphp.common.TinsPHPConstants;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
-import ch.tsphp.tinsphp.symbols.TypeVariableNames;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,7 +64,7 @@ public class FunctionType implements IFunctionType
         }
 
         sb.append(" -> ");
-        appendParameter(sb, TypeVariableNames.RETURN_VARIABLE_NAME, typeVariablesAdded, sbTypeParameters);
+        appendParameter(sb, TinsPHPConstants.RETURN_VARIABLE_NAME, typeVariablesAdded, sbTypeParameters);
 
         if (sbTypeParameters.length() > 0) {
             sb.append(sbTypeParameters);
@@ -196,7 +196,7 @@ public class FunctionType implements IFunctionType
         for (IVariable parameter : parameters) {
             appendVariable(sb, parameter.getAbsoluteName()).append(", ");
         }
-        appendVariable(sb, TypeVariableNames.RETURN_VARIABLE_NAME);
+        appendVariable(sb, TinsPHPConstants.RETURN_VARIABLE_NAME);
         sb.append("]");
         return sb.toString();
     }

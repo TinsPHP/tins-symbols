@@ -8,6 +8,7 @@ package ch.tsphp.tinsphp.symbols.constraints;
 
 
 import ch.tsphp.common.symbols.ITypeSymbol;
+import ch.tsphp.tinsphp.common.TinsPHPConstants;
 import ch.tsphp.tinsphp.common.inference.constraints.FixedTypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
@@ -17,7 +18,6 @@ import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
-import ch.tsphp.tinsphp.symbols.TypeVariableNames;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -424,7 +424,7 @@ public class OverloadBindings implements IOverloadBindings
     public void tryToFix(Set<String> parameterTypeVariables) {
 
         Set<String> removeReturnTypeVariable = new HashSet<>();
-        String returnTypeVariable = variable2TypeVariable.get(TypeVariableNames.RETURN_VARIABLE_NAME).getTypeVariable();
+        String returnTypeVariable = variable2TypeVariable.get(TinsPHPConstants.RETURN_VARIABLE_NAME).getTypeVariable();
         propagateReturnVariableToParameters(returnTypeVariable, parameterTypeVariables, removeReturnTypeVariable);
 
         Map<String, Set<String>> typeVariablesToVisit = new HashMap<>(typeVariable2Variables);
