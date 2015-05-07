@@ -484,7 +484,8 @@ public class OverloadBindings implements IOverloadBindings
         boolean hasConstantReturn = true;
         for (String parameterTypeVariable : parameterTypeVariables) {
             Set<String> parameterUpperRefBounds = upperRefBounds.get(parameterTypeVariable);
-            if (hasUpperRefBounds(parameterTypeVariable) && parameterUpperRefBounds.contains(returnTypeVariable)) {
+            boolean hasUpperRefBounds = hasUpperRefBounds(parameterTypeVariable);
+            if (hasUpperRefBounds && parameterUpperRefBounds.contains(returnTypeVariable)) {
                 hasConstantReturn = false;
                 for (String refTypeVariable : parameterUpperRefBounds) {
                     if (!parameterTypeVariables.contains(refTypeVariable)) {
@@ -494,8 +495,21 @@ public class OverloadBindings implements IOverloadBindings
                 }
                 upperRefBounds.remove(parameterTypeVariable);
             } else {
+                // if only upper type bounds (no lower type bounds) were defined for the parameter,
+                // then we need to propagate those to the upper refs (if there are any) before we fix all variables
+                // belonging to the type variable of the parameter, otherwise they might turn out to be mixed (which
+                // is less intuitive). see TINS-449 unused ad-hoc polymorphic parameters
+                if (hasUpperRefBounds && !hasLowerTypeBounds(parameterTypeVariable)
+                        && hasUpperTypeBounds(parameterTypeVariable)) {
+                    IIntersectionTypeSymbol upperTypeBound = upperTypeBounds.get(parameterTypeVariable);
+                    for (String refTypeVariable : parameterUpperRefBounds) {
+                        addToLowerUnionTypeSymbol(refTypeVariable, upperTypeBound);
+                    }
+                }
+
                 final boolean isNotParameter = false;
                 for (String variableId : typeVariable2Variables.get(parameterTypeVariable)) {
+
                     fixTypeAfterContainsCheck(variableId, isNotParameter);
                 }
             }
