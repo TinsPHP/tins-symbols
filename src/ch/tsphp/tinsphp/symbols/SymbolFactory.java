@@ -17,6 +17,7 @@ import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
 import ch.tsphp.common.symbols.ITypeSymbol;
+import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
@@ -41,7 +42,9 @@ import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.ILazySymbolResolver;
 import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
+import ch.tsphp.tinsphp.symbols.constraints.Constraint;
 import ch.tsphp.tinsphp.symbols.constraints.FunctionType;
+import ch.tsphp.tinsphp.symbols.constraints.OverloadBindings;
 import ch.tsphp.tinsphp.symbols.constraints.Variable;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousLazySymbol;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousMethodSymbol;
@@ -226,4 +229,19 @@ public class SymbolFactory implements ISymbolFactory
         return new ErroneousLazySymbol(ast, ast.getText(), exception, symbolResolver);
     }
 
+    @Override
+    public IConstraint createConstraint(
+            ITSPHPAst operator, IVariable leftHandSide, List<IVariable> arguments, IMinimalMethodSymbol methodSymbol) {
+        return new Constraint(operator, leftHandSide, arguments, methodSymbol);
+    }
+
+    @Override
+    public IOverloadBindings createOverloadBindings() {
+        return new OverloadBindings(this, overloadResolver);
+    }
+
+    @Override
+    public IOverloadBindings createOverloadBindings(IOverloadBindings overloadBindingsToCopy) {
+        return new OverloadBindings((OverloadBindings) overloadBindingsToCopy);
+    }
 }
