@@ -17,9 +17,11 @@ import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.LowerCaseStringMap;
 import ch.tsphp.common.symbols.ISymbol;
+import ch.tsphp.tinsphp.common.scopes.IConditionalScope;
 import ch.tsphp.tinsphp.common.scopes.IGlobalNamespaceScope;
 import ch.tsphp.tinsphp.common.scopes.INamespaceScope;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
+import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.symbols.scopes.ScopeHelper;
 import org.junit.Test;
 
@@ -31,6 +33,7 @@ import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsMapContaining.hasKey;
 import static org.junit.Assert.assertNull;
@@ -255,7 +258,7 @@ public class ScopeHelperTest
     }
 
     @Test
-    public void resolve_NotInScope_ReturnNull() {
+    public void Cresolve_NotInScope_ReturnNull() {
         IScope scope = createScope(new HashMap<String, List<ISymbol>>());
         ITSPHPAst ast = createAst("astText");
 
@@ -348,20 +351,19 @@ public class ScopeHelperTest
         assertThat(result, is((IScope) namespaceScope));
     }
 
-    //TODO rstoll TINS-161 inference OOP
-//    @Test
-//    public void getEnclosingNamespaceScope_InMethod_ReturnNamespace() {
-//        INamespaceScope namespaceScope = mock(INamespaceScope.class);
-//        ITSPHPAst ast = createAst(SYMBOL_NAME);
-//        IMethodSymbol methodSymbol = mock(IMethodSymbol.class);
-//        when(methodSymbol.getEnclosingScope()).thenReturn(namespaceScope);
-//        when(ast.getScope()).thenReturn(methodSymbol);
-//
-//        IScopeHelper scopeHelper = createScopeHelper();
-//        IScope result = scopeHelper.getEnclosingNamespaceScope(ast);
-//
-//        assertThat(result, is((IScope) namespaceScope));
-//    }
+    @Test
+    public void getEnclosingNamespaceScope_InMethod_ReturnNamespace() {
+        INamespaceScope namespaceScope = mock(INamespaceScope.class);
+        ITSPHPAst ast = createAst(SYMBOL_NAME);
+        IMethodSymbol methodSymbol = mock(IMethodSymbol.class);
+        when(methodSymbol.getEnclosingScope()).thenReturn(namespaceScope);
+        when(ast.getScope()).thenReturn(methodSymbol);
+
+        IScopeHelper scopeHelper = createScopeHelper();
+        IScope result = scopeHelper.getEnclosingNamespaceScope(ast);
+
+        assertThat(result, is((IScope) namespaceScope));
+    }
 
     @Test
     public void getEnclosingNamespaceScope_AstHasNoScope_ReturnNull() {
@@ -373,19 +375,67 @@ public class ScopeHelperTest
         assertNull(result);
     }
 
-    //TODO rstoll TINS-161 inference OOP
-//    @Test
-//    public void getEnclosingNamespaceScope_InMethodHasNoScope_ReturnNull() {
-//        ITSPHPAst ast = createAst(SYMBOL_NAME);
-//        IMethodSymbol methodSymbol = mock(IMethodSymbol.class);
-//        when(methodSymbol.getEnclosingScope()).thenReturn(null);
-//        when(ast.getScope()).thenReturn(methodSymbol);
-//
-//        IScopeHelper scopeHelper = createScopeHelper();
-//        IScope result = scopeHelper.getEnclosingNamespaceScope(ast);
-//
-//        assertNull(result);
-//    }
+    @Test
+    public void getEnclosingNamespaceScope_InMethodHasNoScope_ReturnNull() {
+        ITSPHPAst ast = createAst(SYMBOL_NAME);
+        IMethodSymbol methodSymbol = mock(IMethodSymbol.class);
+        when(methodSymbol.getEnclosingScope()).thenReturn(null);
+        when(ast.getScope()).thenReturn(methodSymbol);
+
+        IScopeHelper scopeHelper = createScopeHelper();
+        IScope result = scopeHelper.getEnclosingNamespaceScope(ast);
+
+        assertThat(result, is(nullValue()));
+    }
+
+    @Test
+    public void getEnclosingMethod_InNamespace_ReturnsNull() {
+        INamespaceScope namespaceScope = mock(INamespaceScope.class);
+        ITSPHPAst ast = createAst(SYMBOL_NAME);
+        when(ast.getScope()).thenReturn(namespaceScope);
+
+        IScopeHelper scopeHelper = createScopeHelper();
+        IScope result = scopeHelper.getEnclosingMethod(ast);
+
+        assertThat(result, is(nullValue()));
+    }
+
+    @Test
+    public void getEnclosingMethod_HasNoScope_ReturnsNull() {
+        ITSPHPAst ast = createAst(SYMBOL_NAME);
+        when(ast.getScope()).thenReturn(null);
+
+        IScopeHelper scopeHelper = createScopeHelper();
+        IScope result = scopeHelper.getEnclosingMethod(ast);
+
+        assertThat(result, is(nullValue()));
+    }
+
+    @Test
+    public void getEnclosingMethod_InMethod_ReturnsMethodSymbol() {
+        IMethodSymbol methodSymbol = mock(IMethodSymbol.class);
+        ITSPHPAst ast = createAst(SYMBOL_NAME);
+        when(ast.getScope()).thenReturn(methodSymbol);
+
+        IScopeHelper scopeHelper = createScopeHelper();
+        IScope result = scopeHelper.getEnclosingMethod(ast);
+
+        assertThat(result, is((IScope) methodSymbol));
+    }
+
+    @Test
+    public void getEnclosingMethod_InConditionalInMethod_ReturnsMethodSymbol() {
+        IConditionalScope conditionalScope = mock(IConditionalScope.class);
+        IMethodSymbol methodSymbol = mock(IMethodSymbol.class);
+        when(conditionalScope.getEnclosingScope()).thenReturn(methodSymbol);
+        ITSPHPAst ast = createAst(SYMBOL_NAME);
+        when(ast.getScope()).thenReturn(conditionalScope);
+
+        IScopeHelper scopeHelper = createScopeHelper();
+        IScope result = scopeHelper.getEnclosingMethod(ast);
+
+        assertThat(result, is((IScope) methodSymbol));
+    }
 
     protected ScopeHelper createScopeHelper() {
         return new ScopeHelper();

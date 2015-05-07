@@ -11,6 +11,7 @@ import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
+import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
@@ -21,6 +22,7 @@ import ch.tsphp.tinsphp.common.symbols.IArrayTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IClassTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMinimalMethodSymbol;
+import ch.tsphp.tinsphp.common.symbols.IMinimalVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.IModifierHelper;
 import ch.tsphp.tinsphp.common.symbols.IPseudoTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IScalarTypeSymbol;
@@ -423,6 +425,26 @@ public class SymbolFactoryTest
     }
 
     @Test
+    public void createVariable_Standard_NameIsPassedName() {
+        String name = "$dummy";
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IVariable result = symbolFactory.createVariable(name);
+
+        assertThat(result.getName(), is(name));
+    }
+
+    @Test
+    public void createExpressionVariableSymbol_Standard_DefinitionAstIsPassedAst() {
+        ITSPHPAst ast = mock(ITSPHPAst.class);
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IMinimalVariableSymbol result = symbolFactory.createExpressionVariableSymbol(ast);
+
+        assertThat(result.getDefinitionAst(), is(ast));
+    }
+
+    @Test
     public void createErroneousTypeSymbol_Standard_DefinitionAstIsPassedVariableIdAndNameIsVariableIdText() {
         ITSPHPAst ast = mock(ITSPHPAst.class);
         String name = "foo";
@@ -529,6 +551,68 @@ public class SymbolFactoryTest
         assertThat(result.getException(), is(exception));
     }
 
+    @Test
+    public void createConstraint_Standard_OperatorIsPassedOperator() {
+        ITSPHPAst operator = mock(ITSPHPAst.class);
+        IVariable leftHandSide = mock(IVariable.class);
+        List<IVariable> arguments = new ArrayList<>();
+        IMinimalMethodSymbol methodSymbol = mock(IMinimalMethodSymbol.class);
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IConstraint result = symbolFactory.createConstraint(operator, leftHandSide, arguments, methodSymbol);
+
+        assertThat(result.getOperator(), is(operator));
+    }
+
+    @Test
+    public void createConstraint_Standard_LeftHandSideIsPassedLeftHandSide() {
+        ITSPHPAst operator = mock(ITSPHPAst.class);
+        IVariable leftHandSide = mock(IVariable.class);
+        List<IVariable> arguments = new ArrayList<>();
+        IMinimalMethodSymbol methodSymbol = mock(IMinimalMethodSymbol.class);
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IConstraint result = symbolFactory.createConstraint(operator, leftHandSide, arguments, methodSymbol);
+
+        assertThat(result.getLeftHandSide(), is(leftHandSide));
+    }
+
+
+    @Test
+    public void createConstraint_Standard_ArgumentsArePassedArguments() {
+        ITSPHPAst operator = mock(ITSPHPAst.class);
+        IVariable leftHandSide = mock(IVariable.class);
+        List<IVariable> arguments = new ArrayList<>();
+        IMinimalMethodSymbol methodSymbol = mock(IMinimalMethodSymbol.class);
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IConstraint result = symbolFactory.createConstraint(operator, leftHandSide, arguments, methodSymbol);
+
+        assertThat(result.getArguments(), is(arguments));
+    }
+
+    @Test
+    public void createConstraint_Standard_MethodSymbolIsPassedMethodSymbol() {
+        ITSPHPAst operator = mock(ITSPHPAst.class);
+        IVariable leftHandSide = mock(IVariable.class);
+        List<IVariable> arguments = new ArrayList<>();
+        IMinimalMethodSymbol methodSymbol = mock(IMinimalMethodSymbol.class);
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IConstraint result = symbolFactory.createConstraint(operator, leftHandSide, arguments, methodSymbol);
+
+        assertThat(result.getMethodSymbol(), is(methodSymbol));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void createOverloadBindings_NotTheOneOfThisComponent_ThrowsIllegalArgumentException() {
+        //no arrange necessary
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        symbolFactory.createOverloadBindings(mock(IOverloadBindings.class));
+
+        //assert in annotation
+    }
 
     private ISymbolFactory createSymbolFactory() {
         return createSymbolFactory(mock(IModifierHelper.class));

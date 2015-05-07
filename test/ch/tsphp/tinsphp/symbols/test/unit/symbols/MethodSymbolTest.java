@@ -10,20 +10,26 @@ import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ISymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
+import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
+import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
+import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMinimalVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.symbols.MethodSymbol;
 import ch.tsphp.tinsphp.symbols.ModifierSet;
+import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
+import static org.hamcrest.core.IsNull.nullValue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -134,6 +140,86 @@ public class MethodSymbolTest
     }
 
     @Test
+    public void getConstraints_NothingDefined_ReturnsEmptyList() {
+        //nothing to arrange
+
+        IMethodSymbol methodSymbol = createMethodSymbol();
+        List<IConstraint> result = methodSymbol.getConstraints();
+
+        Assert.assertThat(result, is(empty()));
+    }
+
+    @Test
+    public void addAndGetConstraints_OneAdded_ReturnsListWithOne() {
+        IConstraint constraint = mock(IConstraint.class);
+
+        IMethodSymbol methodSymbol = createMethodSymbol();
+        methodSymbol.addConstraint(constraint);
+        List<IConstraint> result = methodSymbol.getConstraints();
+
+        Assert.assertThat(result, contains(constraint));
+    }
+
+    @Test
+    public void getBindings_NothingDefined_ReturnsNull() {
+        //nothing to arrange
+
+        IMethodSymbol methodSymbol = createMethodSymbol();
+        List<IOverloadBindings> result = methodSymbol.getBindings();
+
+        Assert.assertThat(result, is(nullValue()));
+    }
+
+    @Test
+    public void setAndGetBindings_Standard_ReturnsTheOneSet() {
+        List<IOverloadBindings> bindings = new ArrayList<>();
+
+        IMethodSymbol methodSymbol = createMethodSymbol();
+        methodSymbol.setBindings(bindings);
+        List<IOverloadBindings> result = methodSymbol.getBindings();
+
+        Assert.assertThat(result, is(bindings));
+    }
+
+    @Test
+    public void getOverloads_NothingDefined_ReturnsEmptyList() {
+        //nothing to arrange
+
+        IMethodSymbol methodSymbol = createMethodSymbol();
+        List<IFunctionType> result = methodSymbol.getOverloads();
+
+        Assert.assertThat(result, is(empty()));
+    }
+
+    @Test
+    public void addAndGetOverloads_OneAdded_ReturnsListWithOne() {
+        IFunctionType functionType = mock(IFunctionType.class);
+
+        IMethodSymbol methodSymbol = createMethodSymbol();
+        methodSymbol.addOverload(functionType);
+        List<IFunctionType> result = methodSymbol.getOverloads();
+
+        Assert.assertThat(result, contains(functionType));
+    }
+
+    @Test
+    public void getReturnVariable_Standard_IsOnePassedInConstructor() {
+        IMinimalVariableSymbol returnVariable = mock(IMinimalVariableSymbol.class);
+
+        IMethodSymbol methodSymbol = createMethodSymbol(
+                mock(IScopeHelper.class),
+                mock(ITSPHPAst.class),
+                new ModifierSet(),
+                new ModifierSet(),
+                returnVariable,
+                "foo",
+                mock(IScope.class));
+        IMinimalVariableSymbol result = methodSymbol.getReturnVariable();
+
+        assertThat(result, is(returnVariable));
+    }
+
+    @Test
     public void toString_NoTypeModifiersEmptyAndOneReturnTypeModifierDefined_ReturnNameInclReturnTypeModifier() {
         String name = "foo";
         int modifier = 98;
@@ -162,6 +248,7 @@ public class MethodSymbolTest
 
         assertThat(result, is(name + "|" + modifier + "|" + returnTypeModifier));
     }
+
 
     private IMethodSymbol createMethodSymbol() {
         return createMethodSymbol("foo", mock(IModifierSet.class), mock(IModifierSet.class));

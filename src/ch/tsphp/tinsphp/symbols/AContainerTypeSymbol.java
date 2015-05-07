@@ -134,9 +134,7 @@ public abstract class AContainerTypeSymbol<TContainer extends IContainerTypeSymb
             StringBuilder sb = new StringBuilder();
             SortedSet<String> sortedSet = new TreeSet<>(typeSymbols.keySet());
             Iterator<String> iterator = sortedSet.iterator();
-            if (iterator.hasNext()) {
-                sb.append(iterator.next());
-            }
+            sb.append(iterator.next());
             while (iterator.hasNext()) {
                 sb.append(separator).append(iterator.next());
             }

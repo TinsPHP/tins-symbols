@@ -242,6 +242,9 @@ public class SymbolFactory implements ISymbolFactory
 
     @Override
     public IOverloadBindings createOverloadBindings(IOverloadBindings overloadBindingsToCopy) {
+        if (!(overloadBindingsToCopy instanceof OverloadBindings)) {
+            throw new IllegalArgumentException("only supports " + OverloadBindings.class.getName() + " or a subclass");
+        }
         return new OverloadBindings((OverloadBindings) overloadBindingsToCopy);
     }
 }

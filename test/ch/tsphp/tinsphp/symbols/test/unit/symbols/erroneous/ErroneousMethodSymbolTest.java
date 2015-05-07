@@ -8,10 +8,15 @@ package ch.tsphp.tinsphp.symbols.test.unit.symbols.erroneous;
 
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
+import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
+import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
+import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousMethodSymbol;
 import org.junit.Test;
+
+import java.util.ArrayList;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -128,6 +133,77 @@ public class ErroneousMethodSymbolTest
         boolean result = methodSymbol.isPrivate();
 
         assertThat(result, is(false));
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void getOverloads_Standard_ThrowsUnsupportedOperationException() {
+        //no arrange necessary
+
+        IErroneousMethodSymbol methodSymbol = createMethodSymbol();
+        methodSymbol.getOverloads();
+
+        //assert in annotation
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void addOverload_Standard_ThrowsUnsupportedOperationException() {
+        //no arrange necessary
+
+        IErroneousMethodSymbol methodSymbol = createMethodSymbol();
+        methodSymbol.addOverload(mock(IFunctionType.class));
+
+        //assert in annotation
+    }
+
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void setBindings_Standard_ThrowsUnsupportedOperationException() {
+        //no arrange necessary
+
+        IErroneousMethodSymbol methodSymbol = createMethodSymbol();
+        methodSymbol.setBindings(new ArrayList<IOverloadBindings>());
+
+        //assert in annotation
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void getBindings_Standard_ThrowsUnsupportedOperationException() {
+        //no arrange necessary
+
+        IErroneousMethodSymbol methodSymbol = createMethodSymbol();
+        methodSymbol.getBindings();
+
+        //assert in annotation
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void getConstraints_Standard_ThrowsUnsupportedOperationException() {
+        //no arrange necessary
+
+        IErroneousMethodSymbol methodSymbol = createMethodSymbol();
+        methodSymbol.getConstraints();
+
+        //assert in annotation
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void addConstraints_Standard_ThrowsUnsupportedOperationException() {
+        //no arrange necessary
+
+        IErroneousMethodSymbol methodSymbol = createMethodSymbol();
+        methodSymbol.addConstraint(mock(IConstraint.class));
+
+        //assert in annotation
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void getReturnVariable_Standard_ThrowsUnsupportedOperationException() {
+        //no arrange necessary
+
+        IErroneousMethodSymbol methodSymbol = createMethodSymbol();
+        methodSymbol.getReturnVariable();
+
+        //assert in annotation
     }
 
     private IErroneousMethodSymbol createMethodSymbol() {

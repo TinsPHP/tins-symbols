@@ -15,7 +15,6 @@ import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousTypeSymbol;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousTypeSymbol;
 import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
-import org.hamcrest.core.Is;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -76,7 +75,17 @@ public class ErroneousTypeSymbolTest
         IErroneousTypeSymbol typeSymbol = createTypeSymbol();
         ITypeSymbol result = typeSymbol.evalSelf();
 
-        assertThat(result, Is.is((ITypeSymbol) typeSymbol));
+        assertThat(result, is((ITypeSymbol) typeSymbol));
+    }
+
+    @Test
+    public void canBeUsedInIntersection_Standard_ReturnsFalse() {
+        //no arrange necessary
+
+        IErroneousTypeSymbol typeSymbol = createTypeSymbol();
+        boolean result = typeSymbol.canBeUsedInIntersection();
+
+        assertThat(result, is(false));
     }
 
     private IErroneousTypeSymbol createTypeSymbol() {

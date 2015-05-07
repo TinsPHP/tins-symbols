@@ -15,6 +15,8 @@ package ch.tsphp.tinsphp.symbols.test.unit.scopes;
 import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ISymbol;
+import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
+import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.scopes.IGlobalNamespaceScope;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.utils.MapHelper;
@@ -24,7 +26,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.collection.IsEmptyCollection.empty;
+import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doAnswer;
@@ -240,6 +247,48 @@ public class GlobalNamespaceScopeTest
         ISymbol result = globalNamespaceScope.resolveCaseInsensitive(ast);
 
         assertThat(result, is(symbol));
+    }
+
+    @Test
+    public void getConstraints_NothingDefined_ReturnsEmptyList() {
+        //nothing to arrange
+
+        IGlobalNamespaceScope globalNamespaceScope = createGlobalNamespaceScope();
+        List<IConstraint> result = globalNamespaceScope.getConstraints();
+
+        assertThat(result, is(empty()));
+    }
+
+    @Test
+    public void addAndGetConstraints_OneAdded_ReturnsListWithOne() {
+        IConstraint constraint = mock(IConstraint.class);
+
+        IGlobalNamespaceScope globalNamespaceScope = createGlobalNamespaceScope();
+        globalNamespaceScope.addConstraint(constraint);
+        List<IConstraint> result = globalNamespaceScope.getConstraints();
+
+        assertThat(result, contains(constraint));
+    }
+
+    @Test
+    public void getBindings_NothingDefined_ReturnsNull() {
+        //nothing to arrange
+
+        IGlobalNamespaceScope globalNamespaceScope = createGlobalNamespaceScope();
+        List<IOverloadBindings> result = globalNamespaceScope.getBindings();
+
+        assertThat(result, is(nullValue()));
+    }
+
+    @Test
+    public void setAndGetBindings_Standard_ReturnsTheOneSet() {
+        List<IOverloadBindings> bindings = new ArrayList<>();
+
+        IGlobalNamespaceScope globalNamespaceScope = createGlobalNamespaceScope();
+        globalNamespaceScope.setBindings(bindings);
+        List<IOverloadBindings> result = globalNamespaceScope.getBindings();
+
+        assertThat(result, is(bindings));
     }
 
     private IGlobalNamespaceScope createGlobalNamespaceScope() {

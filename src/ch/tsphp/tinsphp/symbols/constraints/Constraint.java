@@ -17,18 +17,18 @@ import java.util.List;
 public class Constraint implements IConstraint
 {
     private ITSPHPAst operator;
-    private IVariable assignTypeVariable;
+    private IVariable leftHandSide;
     private List<IVariable> arguments;
     private IMinimalMethodSymbol methodSymbol;
 
     public Constraint(
             ITSPHPAst theOperator,
-            IVariable theLeftHandSideVariable,
-            List<IVariable> theVariables,
+            IVariable theLeftHandSide,
+            List<IVariable> theArguments,
             IMinimalMethodSymbol theMethodSymbol) {
         operator = theOperator;
-        assignTypeVariable = theLeftHandSideVariable;
-        arguments = theVariables;
+        leftHandSide = theLeftHandSide;
+        arguments = theArguments;
         methodSymbol = theMethodSymbol;
     }
 
@@ -39,7 +39,7 @@ public class Constraint implements IConstraint
 
     @Override
     public IVariable getLeftHandSide() {
-        return assignTypeVariable;
+        return leftHandSide;
     }
 
     @Override
