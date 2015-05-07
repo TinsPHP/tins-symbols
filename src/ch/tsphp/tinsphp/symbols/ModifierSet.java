@@ -14,7 +14,7 @@ package ch.tsphp.tinsphp.symbols;
 
 
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
-import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
+import ch.tsphp.tinsphp.common.gen.TokenTypes;
 
 import java.util.Collection;
 import java.util.HashSet;

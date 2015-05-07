@@ -11,10 +11,10 @@ import ch.tsphp.common.IAstHelper;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
 import ch.tsphp.common.symbols.ITypeSymbol;
+import ch.tsphp.tinsphp.common.gen.TokenTypes;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousLazySymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.ILazySymbolResolver;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousLazySymbol;
-import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
 import org.hamcrest.core.Is;
 import org.junit.Test;
 

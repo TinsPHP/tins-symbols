@@ -21,10 +21,10 @@ import ch.tsphp.common.symbols.ISymbol;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.modifiers.ICanBeAbstract;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
+import ch.tsphp.tinsphp.common.gen.TokenTypes;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IPolymorphicTypeSymbol;
 import ch.tsphp.tinsphp.common.utils.MapHelper;
-import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
 import ch.tsphp.tinsphp.symbols.utils.TypeHelper;
 
 import java.util.HashSet;

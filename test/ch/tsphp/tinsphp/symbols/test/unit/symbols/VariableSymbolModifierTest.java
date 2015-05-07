@@ -8,10 +8,10 @@ package ch.tsphp.tinsphp.symbols.test.unit.symbols;
 
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
+import ch.tsphp.tinsphp.common.gen.TokenTypes;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.symbols.ModifierSet;
 import ch.tsphp.tinsphp.symbols.VariableSymbol;
-import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;

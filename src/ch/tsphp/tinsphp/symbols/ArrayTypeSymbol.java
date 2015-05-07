@@ -15,8 +15,8 @@ package ch.tsphp.tinsphp.symbols;
 import ch.tsphp.common.AstHelperRegistry;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ITypeSymbol;
+import ch.tsphp.tinsphp.common.gen.TokenTypes;
 import ch.tsphp.tinsphp.common.symbols.IArrayTypeSymbol;
-import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
 
 public class ArrayTypeSymbol extends ATypeSymbol implements IArrayTypeSymbol
 {

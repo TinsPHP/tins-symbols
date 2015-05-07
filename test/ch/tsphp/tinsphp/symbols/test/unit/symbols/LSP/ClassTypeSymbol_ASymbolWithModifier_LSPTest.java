@@ -9,10 +9,10 @@ package ch.tsphp.tinsphp.symbols.test.unit.symbols.LSP;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
+import ch.tsphp.tinsphp.common.gen.TokenTypes;
 import ch.tsphp.tinsphp.symbols.ASymbolWithModifier;
 import ch.tsphp.tinsphp.symbols.ClassTypeSymbol;
 import ch.tsphp.tinsphp.symbols.ModifierSet;
-import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
 import ch.tsphp.tinsphp.symbols.test.unit.symbols.ASymbolWithModifierTest;
 
 import static org.hamcrest.CoreMatchers.is;

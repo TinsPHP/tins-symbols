@@ -7,7 +7,7 @@
 package ch.tsphp.tinsphp.symbols.utils;
 
 import ch.tsphp.common.symbols.ISymbolWithModifier;
-import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
+import ch.tsphp.tinsphp.common.gen.TokenTypes;
 
 public final class TypeHelper
 {

@@ -11,6 +11,7 @@ import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
+import ch.tsphp.tinsphp.common.gen.TokenTypes;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
@@ -37,7 +38,6 @@ import ch.tsphp.tinsphp.common.symbols.erroneous.ILazySymbolResolver;
 import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
 import ch.tsphp.tinsphp.symbols.ModifierSet;
 import ch.tsphp.tinsphp.symbols.SymbolFactory;
-import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
 import org.junit.Test;
 
 import java.util.ArrayList;

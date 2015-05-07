@@ -16,9 +16,9 @@ import ch.tsphp.common.AstHelperRegistry;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
 import ch.tsphp.common.symbols.ITypeSymbol;
+import ch.tsphp.tinsphp.common.gen.TokenTypes;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousTypeSymbol;
-import ch.tsphp.tinsphp.symbols.gen.TokenTypes;
 
 import java.util.Set;
 
