@@ -179,6 +179,43 @@ public class UnionTypeSymbolTest extends ATypeTest
         assertThat(symbols.keySet(), hasItems("IA", "int"));
     }
 
+    //see TINS-406 add single type in intersection to union
+    @Test
+    public void addTypeSymbol_EmptyAndIntersectionContainingFloat_ReturnsTrueAndUnionContainsIntAndFloatAsSingleTypes
+    () {
+        //pre-act necessary for arrange
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol();
+
+        //arrange
+        unionTypeSymbol.addTypeSymbol(intType);
+
+        IIntersectionTypeSymbol intersectionTypeSymbol = new IntersectionTypeSymbol(new OverloadResolver());
+        intersectionTypeSymbol.addTypeSymbol(floatType);
+
+        //act
+        boolean result = unionTypeSymbol.addTypeSymbol(intersectionTypeSymbol);
+        Map<String, ITypeSymbol> symbols = unionTypeSymbol.getTypeSymbols();
+
+        assertThat(result, is(true));
+        assertThat(symbols.keySet(), hasItems("float", "int"));
+        assertThat(symbols.get("float"), is(floatType));
+        assertThat(symbols.get("int"), is(intType));
+    }
+
+    //see TINS-406 add single type in intersection to union
+    @Test
+    public void addTypeSymbol_IntAndIntersectionContainingFloat_ReturnsTrueAndUnionContainsFloatAsSingleType() {
+        IIntersectionTypeSymbol intersectionTypeSymbol = new IntersectionTypeSymbol(new OverloadResolver());
+        intersectionTypeSymbol.addTypeSymbol(floatType);
+
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol();
+        boolean result = unionTypeSymbol.addTypeSymbol(intersectionTypeSymbol);
+        Map<String, ITypeSymbol> symbols = unionTypeSymbol.getTypeSymbols();
+
+        assertThat(result, is(true));
+        assertThat(symbols.keySet(), hasItems("float"));
+        assertThat(symbols.get("float"), is(floatType));
+    }
 
     //--------- merging unions test
 
