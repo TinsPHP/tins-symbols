@@ -399,27 +399,38 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     private void fixTypeAfterContainsCheck(String variableId, boolean isNotParameter) {
+        //Warning! start code duplication, more or less same as in propagateOrFixParameters
         ITypeVariableReference reference = variable2TypeVariable.get(variableId);
         if (!reference.hasFixedType()) {
-            variable2TypeVariable.put(variableId, new FixedTypeVariableReference((TypeVariableReference) reference));
             String typeVariable = reference.getTypeVariable();
-            removeRefBounds(typeVariable);
-            //TODO TINS-407 - store fixed type only in lower bound
+            fixTypeVariable(variableId, reference);
+            fixTypeVariableType(isNotParameter, typeVariable);
+        }
+        //Warning! start code duplication, more or less same as in propagateOrFixParameters
+    }
 
-            //parameters should be hold as general as possible where local variables should be as specific as possible.
-            //therefore we add the lower type bound to the upper type bound if it is not a parameter and vice versa
-            if (isNotParameter && hasLowerTypeBounds(typeVariable)) {
-                addToUpperIntersectionTypeSymbol(typeVariable, lowerTypeBounds.get(typeVariable));
-            } else if (hasUpperTypeBounds(typeVariable)) {
-                addToLowerUnionTypeSymbol(typeVariable, upperTypeBounds.get(typeVariable));
-            } else if (!isNotParameter && hasLowerTypeBounds(typeVariable)) {
-                //only need to add it if it is a parameter, otherwise we already did it above
-                addToUpperIntersectionTypeSymbol(typeVariable, lowerTypeBounds.get(typeVariable));
-            } else {
-                //must be a parameter which is not involved in the function body at all
-                addToLowerUnionTypeSymbol(typeVariable, mixedTypeSymbol);
-                addToUpperIntersectionTypeSymbol(typeVariable, mixedTypeSymbol);
-            }
+    private void fixTypeVariable(String variableId, ITypeVariableReference reference) {
+        String typeVariable = reference.getTypeVariable();
+        variable2TypeVariable.put(variableId, new FixedTypeVariableReference((TypeVariableReference) reference));
+        removeRefBounds(typeVariable);
+    }
+
+    private void fixTypeVariableType(boolean isNotParameter, String typeVariable) {
+        //TODO TINS-407 - store fixed type only in lower bound
+
+        //parameters should be hold as general as possible where local variables should be as specific as possible.
+        //therefore we add the lower type bound to the upper type bound if it is not a parameter and vice versa
+        if (isNotParameter && hasLowerTypeBounds(typeVariable)) {
+            addToUpperIntersectionTypeSymbol(typeVariable, lowerTypeBounds.get(typeVariable));
+        } else if (hasUpperTypeBounds(typeVariable)) {
+            addToLowerUnionTypeSymbol(typeVariable, upperTypeBounds.get(typeVariable));
+        } else if (!isNotParameter && hasLowerTypeBounds(typeVariable)) {
+            //only need to add it if it is a parameter, otherwise we already did it above
+            addToUpperIntersectionTypeSymbol(typeVariable, lowerTypeBounds.get(typeVariable));
+        } else {
+            //must be a parameter which is not involved in the function body at all
+            addToLowerUnionTypeSymbol(typeVariable, mixedTypeSymbol);
+            addToUpperIntersectionTypeSymbol(typeVariable, mixedTypeSymbol);
         }
     }
 
@@ -511,9 +522,20 @@ public class OverloadBindings implements IOverloadBindings
                 }
 
                 final boolean isNotParameter = false;
+                boolean typeVariableFixed = false;
                 for (String variableId : typeVariable2Variables.get(parameterTypeVariable)) {
-
-                    fixTypeAfterContainsCheck(variableId, isNotParameter);
+                    //Warning! start code duplication, more or less same as in fixTypeAfterContainsCheck
+                    ITypeVariableReference reference = variable2TypeVariable.get(variableId);
+                    if (!reference.hasFixedType()) {
+                        fixTypeVariable(variableId, reference);
+                        //no need to fix it multiple times, once is enough
+                        if (!typeVariableFixed) {
+                            String typeVariable = reference.getTypeVariable();
+                            fixTypeVariableType(isNotParameter, typeVariable);
+                            typeVariableFixed = true;
+                        }
+                    }
+                    //Warning! end code duplication, more or less same as in fixTypeAfterContainsCheck
                 }
             }
             typeVariablesToVisit.remove(parameterTypeVariable);
