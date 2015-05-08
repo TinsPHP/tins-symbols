@@ -444,6 +444,9 @@ public class OverloadBindings implements IOverloadBindings
         Map<String, String> variablesToRename = identifyVariablesToRename(
                 parameterTypeVariables, typeVariablesToVisit);
         renameVariables(variablesToRename);
+
+        //upper ref bounds are no longer needed
+        upperRefBounds.clear();
     }
 
     private void propagateReturnVariableToParameters(
@@ -487,8 +490,7 @@ public class OverloadBindings implements IOverloadBindings
         boolean hasConstantReturn = true;
         for (String parameterTypeVariable : parameterTypeVariables) {
             Set<String> parameterUpperRefBounds = upperRefBounds.get(parameterTypeVariable);
-            boolean hasUpperRefBounds = hasUpperRefBounds(parameterTypeVariable);
-            if (hasUpperRefBounds && parameterUpperRefBounds.contains(returnTypeVariable)) {
+            if (hasReturnTypeVariableAsUpperAndNotFixedType(parameterTypeVariable, returnTypeVariable)) {
                 hasConstantReturn = false;
                 for (String refTypeVariable : parameterUpperRefBounds) {
                     if (!parameterTypeVariables.contains(refTypeVariable)) {
@@ -496,14 +498,12 @@ public class OverloadBindings implements IOverloadBindings
                                 refTypeVariable, parameterTypeVariable, parameterTypeVariables);
                     }
                 }
-                upperRefBounds.remove(parameterTypeVariable);
             } else {
                 // if only upper type bounds (no lower type bounds) were defined for the parameter,
                 // then we need to propagate those to the upper refs (if there are any) before we fix all variables
                 // belonging to the type variable of the parameter, otherwise they might turn out to be mixed (which
                 // is less intuitive). see TINS-449 unused ad-hoc polymorphic parameters
-                if (hasUpperRefBounds && !hasLowerTypeBounds(parameterTypeVariable)
-                        && hasUpperTypeBounds(parameterTypeVariable)) {
+                if (hasUpperRefBoundAndOnlyUpperTypeBound(parameterTypeVariable)) {
                     IIntersectionTypeSymbol upperTypeBound = upperTypeBounds.get(parameterTypeVariable);
                     for (String refTypeVariable : parameterUpperRefBounds) {
                         addToLowerUnionTypeSymbol(refTypeVariable, upperTypeBound);
@@ -520,6 +520,30 @@ public class OverloadBindings implements IOverloadBindings
         }
         return hasConstantReturn;
     }
+
+
+    private boolean hasReturnTypeVariableAsUpperAndNotFixedType(String parameterTypeVariable,
+            String returnTypeVariable) {
+        boolean has = false;
+        if (hasUpperRefBounds(parameterTypeVariable)) {
+            has = upperRefBounds.get(parameterTypeVariable).contains(returnTypeVariable);
+            if (has) {
+                IUnionTypeSymbol upperTypeBound = lowerTypeBounds.get(parameterTypeVariable);
+                IIntersectionTypeSymbol lowerTypeBound = upperTypeBounds.get(parameterTypeVariable);
+                if (lowerTypeBound != null && upperTypeBound != null) {
+                    has = !overloadResolver.areSame(lowerTypeBound, upperTypeBound);
+                }
+            }
+        }
+        return has;
+    }
+
+    private boolean hasUpperRefBoundAndOnlyUpperTypeBound(String parameterTypeVariable) {
+        return hasUpperRefBounds(parameterTypeVariable)
+                && !hasLowerTypeBounds(parameterTypeVariable)
+                && hasUpperTypeBounds(parameterTypeVariable);
+    }
+
 
     private void propagateTypeVariableUpwards(
             String refTypeVariable, String parameterTypeVariable, Set<String> parameterTypeVariables) {
