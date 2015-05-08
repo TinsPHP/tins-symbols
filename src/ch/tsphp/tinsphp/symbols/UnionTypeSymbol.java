@@ -7,6 +7,7 @@
 package ch.tsphp.tinsphp.symbols;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IContainerTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.PrimitiveTypeNames;
 import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
@@ -42,6 +43,13 @@ public class UnionTypeSymbol extends AContainerTypeSymbol<IUnionTypeSymbol> impl
         boolean hasChanged;
         if (typeSymbol instanceof IUnionTypeSymbol) {
             hasChanged = super.merge((IUnionTypeSymbol) typeSymbol);
+        } else if (typeSymbol instanceof IContainerTypeSymbol) {
+            Map<String, ITypeSymbol> otherTypeSymbols = ((IContainerTypeSymbol) typeSymbol).getTypeSymbols();
+            if (otherTypeSymbols.size() == 1) {
+                hasChanged = addTypeSymbol(otherTypeSymbols.values().iterator().next());
+            } else {
+                hasChanged = super.addTypeSymbol(typeSymbol);
+            }
         } else {
             hasChanged = super.addTypeSymbol(typeSymbol);
         }
