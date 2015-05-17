@@ -442,8 +442,12 @@ public class OverloadBindings implements IOverloadBindings
         propagateReturnVariableToParameters(returnTypeVariable, parameterTypeVariables, removeReturnTypeVariable);
 
         Map<String, Set<String>> typeVariablesToVisit = new HashMap<>(typeVariable2Variables);
+        Set<String> recursiveParameterTypeVariables = new HashSet<>();
         boolean hasConstantReturn = propagateOrFixParameters(
-                returnTypeVariable, parameterTypeVariables, typeVariablesToVisit);
+                returnTypeVariable, parameterTypeVariables, typeVariablesToVisit, recursiveParameterTypeVariables);
+
+        //in case of recursion
+        removeUpperRefBounds(returnTypeVariable);
 
         if (hasConstantReturn) {
             removeRefBounds(returnTypeVariable);
@@ -452,9 +456,10 @@ public class OverloadBindings implements IOverloadBindings
             upperRefBounds.get(refTypeVariable).remove(returnTypeVariable);
         }
 
-        Map<String, String> variablesToRename = identifyVariablesToRename(
-                parameterTypeVariables, typeVariablesToVisit);
-        renameVariables(variablesToRename);
+        Map<String, String> variablesToRename = identifyVariablesToRename(parameterTypeVariables, typeVariablesToVisit);
+        renameTypeVariables(variablesToRename);
+
+        renameRecursiveParameters(recursiveParameterTypeVariables);
 
         //upper ref bounds are no longer needed
         upperRefBounds.clear();
@@ -495,8 +500,10 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     private boolean propagateOrFixParameters(
-            String returnTypeVariable, Set<String> parameterTypeVariables,
-            Map<String, Set<String>> typeVariablesToVisit) {
+            String returnTypeVariable,
+            Set<String> parameterTypeVariables,
+            Map<String, Set<String>> typeVariablesToVisit,
+            Set<String> recursiveParameters) {
 
         boolean hasConstantReturn = true;
         for (String parameterTypeVariable : parameterTypeVariables) {
@@ -506,7 +513,7 @@ public class OverloadBindings implements IOverloadBindings
                 for (String refTypeVariable : parameterUpperRefBounds) {
                     if (!parameterTypeVariables.contains(refTypeVariable)) {
                         propagateTypeVariableUpwards(
-                                refTypeVariable, parameterTypeVariable, parameterTypeVariables);
+                                refTypeVariable, parameterTypeVariable, parameterTypeVariables, recursiveParameters);
                     }
                 }
             } else {
@@ -568,18 +575,27 @@ public class OverloadBindings implements IOverloadBindings
 
 
     private void propagateTypeVariableUpwards(
-            String refTypeVariable, String parameterTypeVariable, Set<String> parameterTypeVariables) {
-
-        //if parameter is lower ref of another parameter, then we do not need to propagate it
+            String refTypeVariable,
+            String parameterTypeVariable,
+            Set<String> parameterTypeVariables,
+            Set<String> recursiveParameters) {
         if (hasUpperRefBounds(refTypeVariable)) {
             Set<String> refUpperRefBounds = upperRefBounds.get(refTypeVariable);
             for (String refRefTypeVariable : refUpperRefBounds) {
                 Set<String> refRefLowerRefBounds = lowerRefBounds.get(refRefTypeVariable);
                 if (!refRefLowerRefBounds.contains(parameterTypeVariable)) {
                     refRefLowerRefBounds.remove(refTypeVariable);
-                    refRefLowerRefBounds.add(parameterTypeVariable);
-                    if (!parameterTypeVariables.contains(refRefTypeVariable)) {
-                        propagateTypeVariableUpwards(refRefTypeVariable, parameterTypeVariable, parameterTypeVariables);
+                    if (isNotSelfReference(refRefTypeVariable, parameterTypeVariable)) {
+                        refRefLowerRefBounds.add(parameterTypeVariable);
+                        if (!parameterTypeVariables.contains(refRefTypeVariable)) {
+                            propagateTypeVariableUpwards(
+                                    refRefTypeVariable,
+                                    parameterTypeVariable,
+                                    parameterTypeVariables,
+                                    recursiveParameters);
+                        }
+                    } else {
+                        recursiveParameters.add(parameterTypeVariable);
                     }
                 }
             }
@@ -592,6 +608,10 @@ public class OverloadBindings implements IOverloadBindings
                 upperRefBounds.get(lowerRefTypeVariable).remove(typeVariable);
             }
         }
+        removeUpperRefBounds(typeVariable);
+    }
+
+    private void removeUpperRefBounds(String typeVariable) {
         if (hasUpperRefBounds(typeVariable)) {
             for (String upperRefTypeVariable : upperRefBounds.remove(typeVariable)) {
                 lowerRefBounds.get(upperRefTypeVariable).remove(typeVariable);
@@ -674,16 +694,43 @@ public class OverloadBindings implements IOverloadBindings
         return canBeUnified;
     }
 
-    private void renameVariables(Map<String, String> variablesToRename) {
-        for (Map.Entry<String, String> entry : variablesToRename.entrySet()) {
+    private void renameTypeVariables(Map<String, String> typeVariablesToRename) {
+        for (Map.Entry<String, String> entry : typeVariablesToRename.entrySet()) {
             String typeVariable = entry.getKey();
             String parameterTypeVariable = entry.getValue();
             // need to remove the existing ref between typeVariable and parameterTypeVariable before we rename
             // otherwise we create inadvertently a self ref even though we do not have one
             lowerRefBounds.get(typeVariable).remove(parameterTypeVariable);
-            //
-            // upperRefBounds.get(parameterTypeVariable).remove(typeVariable);
             renameTypeVariableAfterContainsCheck(typeVariable, parameterTypeVariable);
+        }
+    }
+
+    private void renameRecursiveParameters(Set<String> recursiveParameterTypeVariables) {
+        for (String parameterTypeVariable : recursiveParameterTypeVariables) {
+            //could be already renamed by now
+            if (hasLowerRefBounds(parameterTypeVariable)) {
+                Set<String> typeVariablesToRemove = new HashSet<>();
+                Set<String> parameterLowerRefs = lowerRefBounds.get(parameterTypeVariable);
+                for (String typeVariable : parameterLowerRefs) {
+                    if (hasLowerRefBounds(typeVariable)) {
+                        Set<String> typeVariableLowerRefBounds = lowerRefBounds.get(typeVariable);
+                        if (typeVariableLowerRefBounds.contains(parameterTypeVariable)) {
+                            // need to remove the existing ref before we rename otherwise we create a self ref (and
+                            // cause a ConcurrentModificationException)
+                            typeVariableLowerRefBounds.remove(parameterTypeVariable);
+                            renameTypeVariableAfterContainsCheck(typeVariable, parameterTypeVariable);
+                            typeVariablesToRemove.add(typeVariable);
+                        }
+                    }
+                }
+
+                for (String typeVariable : typeVariablesToRemove) {
+                    //remove all lower otherwise we keep the cyclic ref
+                    parameterLowerRefs.remove(typeVariable);
+                }
+                //remove potential self ref
+                parameterLowerRefs.remove(parameterTypeVariable);
+            }
         }
     }
 

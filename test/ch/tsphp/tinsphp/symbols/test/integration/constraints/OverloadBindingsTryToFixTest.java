@@ -1033,6 +1033,223 @@ public class OverloadBindingsTryToFixTest extends ATypeTest
         ));
     }
 
+    @Test
+    public void tryToFix_Recursion_DoesNotHaveSelfReference() {
+        //corresponds: function endless($x){ $x = endless($x); return $x;}
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String tx = "Tx";
+        String tReturn = "Treturn";
+
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        collection.addLowerRefBound(tx, new TypeVariableReference(tReturn));
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, tx, null, null, false),
+                varBinding(RETURN_VARIABLE_NAME, tx, null, null, false)
+        ));
+    }
+
+    @Test
+    public void tryToFix_RecursionWithLocalVariableIndirection_DoesNotHaveSelfReference() {
+        //corresponds: function endless($x){ $a = endless($x); $x = $a; return $x;}
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String tx = "Tx";
+        String $a = "$a";
+        String ta = "Ta";
+
+        String tReturn = "Treturn";
+
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($a, new TypeVariableReference(ta));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        collection.addLowerRefBound(tx, new TypeVariableReference(ta));
+        collection.addLowerRefBound(ta, new TypeVariableReference(tReturn));
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, tx, null, null, false),
+                varBinding($a, tx, null, null, false),
+                varBinding(RETURN_VARIABLE_NAME, tx, null, null, false)
+        ));
+    }
+
+    @Test
+    public void tryToFix_RecursionWithParamIndirection_DoesNotHaveCyclicRef() {
+        //corresponds: function endless($x, $y){ $y = endless($x,$y); $x = $y; return $x;}
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String tx = "Tx";
+        String $y = "$y";
+        String ty = "Ty";
+
+        String tReturn = "Treturn";
+
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($y, new TypeVariableReference(ty));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        collection.addLowerRefBound(ty, new TypeVariableReference(tReturn));
+        collection.addLowerRefBound(tx, new TypeVariableReference(ty));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+        parameterTypeVariables.add(ty);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, ty, null, null, false),
+                varBinding($y, ty, null, null, false),
+                varBinding(RETURN_VARIABLE_NAME, ty, null, null, false)
+        ));
+    }
+
+    @Test
+    public void tryToFix_RecursionWithDoubleParamIndirection_DoesNotHaveCyclicRef() {
+        //corresponds: function endless($x, $y, $z){ $y = endless($x,$y,$z); $z = $y; $x = $z; return $x;}
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String tx = "Tx";
+        String $y = "$y";
+        String ty = "Ty";
+        String $z = "$z";
+        String tz = "Tz";
+
+        String tReturn = "Treturn";
+
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($y, new TypeVariableReference(ty));
+        collection.addVariable($z, new TypeVariableReference(tz));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        collection.addLowerRefBound(ty, new TypeVariableReference(tReturn));
+        collection.addLowerRefBound(tz, new TypeVariableReference(ty));
+        collection.addLowerRefBound(tx, new TypeVariableReference(tz));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+        parameterTypeVariables.add(ty);
+        parameterTypeVariables.add(tz);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, ty, null, null, false),
+                varBinding($y, ty, null, null, false),
+                varBinding($z, ty, null, null, false),
+                varBinding(RETURN_VARIABLE_NAME, ty, null, null, false)
+        ));
+    }
+
+    @Test
+    public void tryToFix_RecursionWithDoubleParamIndirectionAndTwoReturn_DoesNotHaveCyclicRef() {
+        //corresponds: function foo($x, $y, $z){ if($x > 0){ $y = foo($x -1,$y,$z); $z = $y; return $z;} return $x;}
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String tx = "Tx";
+        String $y = "$y";
+        String ty = "Ty";
+        String $z = "$z";
+        String tz = "Tz";
+
+        String tReturn = "Treturn";
+
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($y, new TypeVariableReference(ty));
+        collection.addVariable($z, new TypeVariableReference(tz));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        collection.addLowerTypeBound(tx, intType);
+        collection.addUpperTypeBound(tx, numType);
+        collection.addLowerRefBound(ty, new TypeVariableReference(tReturn));
+        collection.addLowerRefBound(tz, new TypeVariableReference(ty));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tz));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+        parameterTypeVariables.add(ty);
+        parameterTypeVariables.add(tz);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, tx, asList("int"), asList("num"), false),
+                varBinding($y, ty, asList("int", "@Tx"), null, false),
+                varBinding($z, ty, asList("int", "@Tx"), null, false),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int", "@Tx", "@Ty"), null, false)
+        ));
+    }
+
+    @Test
+    public void tryToFix_TwoRecursions_DoesNotHaveCyclicRef() {
+        //corresponds: function foo($x, $y, $z){ $y = foo(...); $x = foo(...); $z = $y; $z = $x; return $z;}
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String tx = "Tx";
+        String $y = "$y";
+        String ty = "Ty";
+        String $z = "$z";
+        String tz = "Tz";
+
+        String tReturn = "Treturn";
+
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($y, new TypeVariableReference(ty));
+        collection.addVariable($z, new TypeVariableReference(tz));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        collection.addLowerRefBound(ty, new TypeVariableReference(tReturn));
+        collection.addLowerRefBound(tx, new TypeVariableReference(tReturn));
+        collection.addLowerRefBound(tz, new TypeVariableReference(ty));
+        collection.addLowerRefBound(tz, new TypeVariableReference(tx));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tz));
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+        parameterTypeVariables.add(ty);
+        parameterTypeVariables.add(tz);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, ty, null, null, false),
+                varBinding($y, ty, null, null, false),
+                varBinding($z, ty, null, null, false),
+                varBinding(RETURN_VARIABLE_NAME, ty, null, null, false)
+        ));
+    }
+
     private IOverloadBindings createOverloadBindings() {
         return createOverloadBindings(symbolFactory, overloadResolver);
     }
@@ -1043,3 +1260,4 @@ public class OverloadBindingsTryToFixTest extends ATypeTest
     }
 
 }
+
