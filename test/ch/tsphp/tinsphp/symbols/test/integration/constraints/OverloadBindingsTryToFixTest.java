@@ -1250,6 +1250,221 @@ public class OverloadBindingsTryToFixTest extends ATypeTest
         ));
     }
 
+    //see TINS-463 multiple return and ConcurrentModificationException
+    @Test
+    public void tryToFix_ParametricReturnDueToParametricFunctionCall_NoConcurrentModificationException() {
+        //corresponds: function foo($x){ return bar($x); return bar($x);} function bar($x){return $x;}
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String tx = "Tx";
+        String fCallBar1 = "bar()@2|1";
+        String tBar1 = "Tb";
+        String fCallBar2 = "bar()@2|4";
+        String tBar2 = "Tb";
+        String tReturn = "Treturn";
+
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable(fCallBar1, new TypeVariableReference(tBar1));
+        collection.addVariable(fCallBar2, new TypeVariableReference(tBar2));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tBar1));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tBar2));
+        collection.addLowerRefBound(tBar1, new TypeVariableReference(tx));
+        collection.addLowerRefBound(tBar2, new TypeVariableReference(tx));
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, tx, null, null, false),
+                varBinding(fCallBar1, tx, null, null, false),
+                varBinding(fCallBar2, tx, null, null, false),
+                varBinding(RETURN_VARIABLE_NAME, tx, null, null, false)
+        ));
+    }
+
+    //see TINS-463 multiple return and ConcurrentModificationException
+    @Test
+    public void tryToFix_TwoParametricReturnDueToParametricFunctionCall_NoConcurrentModificationException() {
+        //corresponds:
+        //  function foo($x, $y, $z){ if($x){return bar($y, z);} return bar($y, $z);}
+        //  function bar($x, $y){ if($x){return $x;} return $y;}
+
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String tx = "Tx";
+        String $y = "$y";
+        String ty = "Ty";
+        String $z = "$z";
+        String tz = "Tz";
+        String fCallBar1 = "bar()@2|1";
+        String tBar1 = "Tb1";
+        String fCallBar2 = "bar()@2|4";
+        String tBar2 = "Tb2";
+        String tReturn = "Treturn";
+
+
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($y, new TypeVariableReference(ty));
+        collection.addVariable($z, new TypeVariableReference(tz));
+        collection.addVariable(fCallBar1, new TypeVariableReference(tBar1));
+        collection.addVariable(fCallBar2, new TypeVariableReference(tBar2));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        collection.addUpperTypeBound(tx, boolType);
+        collection.addUpperTypeBound(ty, boolType);
+        collection.addLowerRefBound(tBar1, new TypeVariableReference(tz));
+        collection.addLowerRefBound(tBar1, new TypeVariableReference(ty));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tBar1));
+        collection.addLowerRefBound(tBar2, new TypeVariableReference(tz));
+        collection.addLowerRefBound(tBar2, new TypeVariableReference(ty));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tBar2));
+
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+        parameterTypeVariables.add(ty);
+        parameterTypeVariables.add(tz);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, tx, asList("bool"), asList("bool"), true),
+                varBinding($y, ty, null, asList("bool"), false),
+                varBinding($z, tz, null, null, false),
+                varBinding(fCallBar1, tBar1, asList("@Ty", "@Tz"), null, false),
+                varBinding(fCallBar2, tBar2, asList("@Ty", "@Tz"), null, false),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("@Ty", "@Tz"), null, false)
+        ));
+    }
+
+    //see TINS-463 multiple return and ConcurrentModificationException
+    @Test
+    public void tryToFix_ThreeParametricReturnDueToParametricFunctionCall_NoConcurrentModificationException() {
+        //corresponds:
+        //  function foo($x,$y,$z){
+        //     if($x > 10){ return bar($y, z); } else if($x <= 10){ return bar($y, $z); }
+        //     return bar($y,$z);
+        //  }
+        //  function bar($x, $y){ if($x){return $x;} return $y;}
+
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String tx = "Tx";
+        String $y = "$y";
+        String ty = "Ty";
+        String $z = "$z";
+        String tz = "Tz";
+        String fCallBar1 = "bar()@2|1";
+        String tBar1 = "Tb1";
+        String fCallBar2 = "bar()@2|4";
+        String tBar2 = "Tb2";
+        String fCallBar3 = "bar()@2|6";
+        String tBar3 = "Tb3";
+        String tReturn = "Treturn";
+
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($y, new TypeVariableReference(ty));
+        collection.addVariable($z, new TypeVariableReference(tz));
+        collection.addVariable(fCallBar1, new TypeVariableReference(tBar1));
+        collection.addVariable(fCallBar2, new TypeVariableReference(tBar2));
+        collection.addVariable(fCallBar3, new TypeVariableReference(tBar3));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        collection.addUpperTypeBound(tx, boolType);
+        collection.addUpperTypeBound(ty, boolType);
+        collection.addLowerRefBound(tBar1, new TypeVariableReference(tz));
+        collection.addLowerRefBound(tBar1, new TypeVariableReference(ty));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tBar1));
+        collection.addLowerRefBound(tBar2, new TypeVariableReference(tz));
+        collection.addLowerRefBound(tBar2, new TypeVariableReference(ty));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tBar2));
+        collection.addLowerRefBound(tBar3, new TypeVariableReference(tz));
+        collection.addLowerRefBound(tBar3, new TypeVariableReference(ty));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tBar3));
+
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+        parameterTypeVariables.add(ty);
+        parameterTypeVariables.add(tz);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, tx, asList("bool"), asList("bool"), true),
+                varBinding($y, ty, null, asList("bool"), false),
+                varBinding($z, tz, null, null, false),
+                varBinding(fCallBar1, tBar1, asList("@Ty", "@Tz"), null, false),
+                varBinding(fCallBar2, tBar2, asList("@Ty", "@Tz"), null, false),
+                varBinding(fCallBar3, tBar3, asList("@Ty", "@Tz"), null, false),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("@Ty", "@Tz"), null, false)
+        ));
+    }
+
+    //see TINS-463 multiple return and ConcurrentModificationException
+    @Test
+    public void tryToFix_LocalVariableWithMultipleLowerRefs_NoConcurrentModificationException() {
+        //corresponds:
+        //  function foo($x, $y){ $a = $b; $a = $c; $b = $x; $c = $y; $b = $y; $c = $x; return $a;}
+
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String tx = "Tx";
+        String $y = "$y";
+        String ty = "Ty";
+        String $a = "$a";
+        String ta = "Ta";
+        String $b = "$b";
+        String tb = "Tb";
+        String $c = "$c";
+        String tc = "Tc";
+        String tReturn = "Treturn";
+
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($y, new TypeVariableReference(ty));
+        collection.addVariable($a, new TypeVariableReference(ta));
+        collection.addVariable($b, new TypeVariableReference(tb));
+        collection.addVariable($c, new TypeVariableReference(tc));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        collection.addLowerRefBound(ta, new TypeVariableReference(tb));
+        collection.addLowerRefBound(ta, new TypeVariableReference(tc));
+        collection.addLowerRefBound(tb, new TypeVariableReference(tx));
+        collection.addLowerRefBound(tb, new TypeVariableReference(ty));
+        collection.addLowerRefBound(tc, new TypeVariableReference(tx));
+        collection.addLowerRefBound(tc, new TypeVariableReference(ty));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(ta));
+
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+        parameterTypeVariables.add(ty);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, tx, null, null, false),
+                varBinding($y, ty, null, null, false),
+                varBinding($a, ta, asList("@Tx", "@Ty"), null, false),
+                varBinding($b, tb, asList("@Tx", "@Ty"), null, false),
+                varBinding($c, tc, asList("@Tx", "@Ty"), null, false),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("@Tx", "@Ty"), null, false)
+        ));
+    }
+
+
     private IOverloadBindings createOverloadBindings() {
         return createOverloadBindings(symbolFactory, overloadResolver);
     }
@@ -1260,4 +1475,5 @@ public class OverloadBindingsTryToFixTest extends ATypeTest
     }
 
 }
+
 
