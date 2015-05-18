@@ -17,12 +17,14 @@ import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ISymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
+import ch.tsphp.tinsphp.common.inference.constraints.IConstraintCollection;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMinimalVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
+import ch.tsphp.tinsphp.symbols.constraints.ConstraintCollection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,11 +36,7 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
     private final IMinimalVariableSymbol returnVariable;
     private final IModifierSet returnTypeModifiers;
     private final List<IFunctionType> overloads = new ArrayList<>();
-
-    //Warning! start code duplication - same as in GlobalNamespaceScope
-    private final List<IConstraint> constraints = new ArrayList<>();
-    private List<IOverloadBindings> bindings;
-    //Warning! end code duplication - same as in GlobalNamespaceScope
+    private final IConstraintCollection constraintCollection;
 
     @SuppressWarnings("checkstyle:parameternumber")
     public MethodSymbol(
@@ -52,6 +50,8 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
         super(scopeHelper, definitionAst, methodModifiers, name, enclosingScope);
         returnTypeModifiers = theReturnTypeModifiers;
         returnVariable = theReturnVariable;
+
+        constraintCollection = new ConstraintCollection(getAbsoluteName());
     }
 
     @Override
@@ -133,29 +133,27 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
     }
     //Warning! end code duplication - same as in GlobalNamespaceScope
 
-
     //Warning! start code duplication - same as in GlobalNamespaceScope
     @Override
     public List<IConstraint> getConstraints() {
-        return constraints;
+        return constraintCollection.getConstraints();
     }
 
     @Override
     public void addConstraint(IConstraint constraint) {
-        constraints.add(constraint);
+        constraintCollection.addConstraint(constraint);
     }
 
     @Override
     public List<IOverloadBindings> getBindings() {
-        return bindings;
+        return constraintCollection.getBindings();
     }
 
     @Override
     public void setBindings(List<IOverloadBindings> theBindings) {
-        bindings = theBindings;
+        constraintCollection.setBindings(theBindings);
     }
     //Warning! end code duplication - same as in GlobalNamespaceScope
-
 
     @Override
     public void addOverload(IFunctionType overload) {

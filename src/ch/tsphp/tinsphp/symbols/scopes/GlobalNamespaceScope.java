@@ -17,12 +17,13 @@ import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.LowerCaseStringMap;
 import ch.tsphp.common.symbols.ISymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
+import ch.tsphp.tinsphp.common.inference.constraints.IConstraintCollection;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.scopes.IGlobalNamespaceScope;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.utils.MapHelper;
+import ch.tsphp.tinsphp.symbols.constraints.ConstraintCollection;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -30,14 +31,11 @@ public class GlobalNamespaceScope extends AScope implements IGlobalNamespaceScop
 {
 
     private final ILowerCaseStringMap<List<ISymbol>> symbolsCaseInsensitive = new LowerCaseStringMap<>();
-    //Warning! start code duplication - same as in MethodSymbol
-    private final List<IConstraint> constraints = new ArrayList<>();
-    private List<IOverloadBindings> bindings;
-    //Warning! end code duplication - same as in MethodSymbol
-
+    private final IConstraintCollection constraintCollection;
 
     public GlobalNamespaceScope(IScopeHelper scopeHelper, String scopeName) {
         super(scopeHelper, scopeName, null);
+        constraintCollection = new ConstraintCollection(scopeName);
     }
 
     @Override
@@ -95,25 +93,30 @@ public class GlobalNamespaceScope extends AScope implements IGlobalNamespaceScop
         return typeNameWithoutPrefix;
     }
 
+    @Override
+    public String getAbsoluteName() {
+        return constraintCollection.getAbsoluteName();
+    }
+
     //Warning! start code duplication - same as in MethodSymbol
     @Override
     public List<IConstraint> getConstraints() {
-        return constraints;
+        return constraintCollection.getConstraints();
     }
 
     @Override
     public void addConstraint(IConstraint constraint) {
-        constraints.add(constraint);
+        constraintCollection.addConstraint(constraint);
     }
 
     @Override
     public List<IOverloadBindings> getBindings() {
-        return bindings;
+        return constraintCollection.getBindings();
     }
 
     @Override
     public void setBindings(List<IOverloadBindings> theBindings) {
-        bindings = theBindings;
+        constraintCollection.setBindings(theBindings);
     }
     //Warning! end code duplication - same as in MethodSymbol
 }
