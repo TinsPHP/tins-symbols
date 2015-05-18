@@ -24,6 +24,7 @@ import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -583,8 +584,8 @@ public class OverloadBindings implements IOverloadBindings
             Set<String> refUpperRefBounds = upperRefBounds.get(refTypeVariable);
             for (String refRefTypeVariable : refUpperRefBounds) {
                 Set<String> refRefLowerRefBounds = lowerRefBounds.get(refRefTypeVariable);
+                refRefLowerRefBounds.remove(refTypeVariable);
                 if (!refRefLowerRefBounds.contains(parameterTypeVariable)) {
-                    refRefLowerRefBounds.remove(refTypeVariable);
                     if (isNotSelfReference(refRefTypeVariable, parameterTypeVariable)) {
                         refRefLowerRefBounds.add(parameterTypeVariable);
                         if (!parameterTypeVariables.contains(refRefTypeVariable)) {
@@ -655,12 +656,12 @@ public class OverloadBindings implements IOverloadBindings
         return renameTo;
     }
 
-    private void removeNonParameterLowerRefBounds(
-            String typeVariable, Set<String> parameterTypeVariables) {
-        Set<String> refTypeVariables = lowerRefBounds.get(typeVariable);
-        for (String refTypeVariable : refTypeVariables) {
+    private void removeNonParameterLowerRefBounds(String typeVariable, Set<String> parameterTypeVariables) {
+        Iterator<String> iterator = lowerRefBounds.get(typeVariable).iterator();
+        while (iterator.hasNext()) {
+            String refTypeVariable = iterator.next();
             if (!parameterTypeVariables.contains(refTypeVariable)) {
-                refTypeVariables.remove(refTypeVariable);
+                iterator.remove();
                 upperRefBounds.get(refTypeVariable).remove(typeVariable);
             }
         }
@@ -709,6 +710,8 @@ public class OverloadBindings implements IOverloadBindings
         for (String parameterTypeVariable : recursiveParameterTypeVariables) {
             //could be already renamed by now
             if (hasLowerRefBounds(parameterTypeVariable)) {
+                // typeVariablesToRemove is required since using an iterator does not work -- renaming could add
+                // further ref bounds (lower and upper)
                 Set<String> typeVariablesToRemove = new HashSet<>();
                 Set<String> parameterLowerRefs = lowerRefBounds.get(parameterTypeVariable);
                 for (String typeVariable : parameterLowerRefs) {
