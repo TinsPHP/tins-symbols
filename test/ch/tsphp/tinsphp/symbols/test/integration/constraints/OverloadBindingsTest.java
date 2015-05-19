@@ -306,8 +306,7 @@ public class OverloadBindingsTest extends ATypeTest
         ));
     }
 
-
-    //see
+    //see TINS-466 rename type variable does not promote type bounds
     @Test
     public void renameTypeVariable_HasTypeBoundsAndOtherHasUpperRef_TransferTypeBoundsAndPropagate() {
         //pre act - necessary for arrange
@@ -469,21 +468,6 @@ public class OverloadBindingsTest extends ATypeTest
 
         IOverloadBindings collection = createOverloadBindings();
         collection.setAppliedOverload("$nonExistingVariable", mock(IFunctionType.class));
-
-        //assert in annotation
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void setAppliedOverload_AlreadySet_ThrowsIllegalArgumentException() {
-        //pre-act necessary for arrange
-        IOverloadBindings collection = createOverloadBindings();
-
-        //arrange
-        collection.addVariable("$a", new TypeVariableReference("T"));
-        collection.setAppliedOverload("$a", mock(IFunctionType.class));
-
-        //act
-        collection.setAppliedOverload("$a", mock(IFunctionType.class));
 
         //assert in annotation
     }
