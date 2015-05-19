@@ -385,9 +385,6 @@ public class OverloadBindings implements IOverloadBindings
         if (!variable2TypeVariable.containsKey(variableId)) {
             throw new IllegalArgumentException("variable with id " + variableId + " does not exist in this binding.");
         }
-        if (appliedOverloads.containsKey(variableId)) {
-            throw new IllegalArgumentException("applied overload was already set for variable with id " + variableId);
-        }
         appliedOverloads.put(variableId, overload);
     }
 
