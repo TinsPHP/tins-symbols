@@ -306,6 +306,34 @@ public class OverloadBindingsTest extends ATypeTest
         ));
     }
 
+
+    //see
+    @Test
+    public void renameTypeVariable_HasTypeBoundsAndOtherHasUpperRef_TransferTypeBoundsAndPropagate() {
+        //pre act - necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String lhs = "Tlhs";
+        String rhs = "Trhs";
+        String upperRhs = "Tupper";
+        collection.addVariable("$lhs", new TypeVariableReference(lhs));
+        collection.addVariable("$rhs", new TypeVariableReference(rhs));
+        collection.addVariable("$upper", new TypeVariableReference(upperRhs));
+        collection.addLowerRefBound(upperRhs, new TypeVariableReference(rhs));
+        collection.addLowerTypeBound(lhs, intType);
+        collection.addUpperTypeBound(lhs, numType);
+
+        //act
+        collection.renameTypeVariable(lhs, rhs);
+
+        assertThat(collection, withVariableBindings(
+                varBinding("$lhs", rhs, asList("int"), asList("num", "@" + upperRhs), false),
+                varBinding("$rhs", rhs, asList("int"), asList("num", "@" + upperRhs), false),
+                varBinding("$upper", upperRhs, asList("int", "@" + rhs), null, false)
+        ));
+    }
+
     @Test
     public void renameTypeVariable_HasRefBounds_TransfersBounds() {
         //pre act - necessary for arrange
@@ -435,7 +463,7 @@ public class OverloadBindingsTest extends ATypeTest
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void etetAppliedOverload_NonExistingVariable_ThrowsIllegalArgumentException() {
+    public void setAppliedOverload_NonExistingVariable_ThrowsIllegalArgumentException() {
         //no arrange necessary
 
 
