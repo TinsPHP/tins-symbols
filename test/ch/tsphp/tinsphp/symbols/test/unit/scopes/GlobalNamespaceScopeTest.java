@@ -323,7 +323,7 @@ public class GlobalNamespaceScopeTest
         {
             public Object answer(InvocationOnMock invocation) {
                 ISymbol symbol = symbolCaptor.getValue();
-                MapHelper.addToListMap(scopeCaptor.getValue().getSymbols(), symbol.getName(), symbol);
+                MapHelper.addToListInMap(scopeCaptor.getValue().getSymbols(), symbol.getName(), symbol);
                 return null;
             }
         }).when(scopeHelper).define(scopeCaptor.capture(), symbolCaptor.capture());

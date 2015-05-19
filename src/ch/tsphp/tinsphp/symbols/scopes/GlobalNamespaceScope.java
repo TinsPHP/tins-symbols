@@ -41,7 +41,7 @@ public class GlobalNamespaceScope extends AScope implements IGlobalNamespaceScop
     @Override
     public void define(ISymbol symbol) {
         scopeHelper.define(this, symbol);
-        MapHelper.addToListMap(symbolsCaseInsensitive, symbol.getName(), symbol);
+        MapHelper.addToListInMap(symbolsCaseInsensitive, symbol.getName(), symbol);
     }
 
     @Override

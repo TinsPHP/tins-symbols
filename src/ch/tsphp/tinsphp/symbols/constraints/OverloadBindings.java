@@ -752,10 +752,10 @@ public class OverloadBindings implements IOverloadBindings
 
     private void renameTypeVariableAfterContainsCheck(String typeVariable, String newTypeVariable) {
         if (hasLowerTypeBounds(typeVariable)) {
-            addLowerTypeBound(newTypeVariable, lowerTypeBounds.remove(typeVariable));
+            addLowerTypeBoundAfterContainsCheck(newTypeVariable, lowerTypeBounds.remove(typeVariable));
         }
         if (hasUpperTypeBounds(typeVariable)) {
-            addUpperTypeBound(newTypeVariable, upperTypeBounds.remove(typeVariable));
+            addUpperTypeBoundAfterContainsCheck(newTypeVariable, upperTypeBounds.remove(typeVariable));
         }
 
         if (hasLowerRefBounds(typeVariable)) {

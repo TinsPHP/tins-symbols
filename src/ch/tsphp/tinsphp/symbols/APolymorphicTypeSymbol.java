@@ -60,7 +60,7 @@ public abstract class APolymorphicTypeSymbol extends AScopedSymbol implements IP
     @Override
     public void define(ISymbol symbol) {
         super.define(symbol);
-        MapHelper.addToListMap(symbolsCaseInsensitive, symbol.getName(), symbol);
+        MapHelper.addToListInMap(symbolsCaseInsensitive, symbol.getName(), symbol);
     }
 
     @Override

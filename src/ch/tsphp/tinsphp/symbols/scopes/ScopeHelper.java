@@ -45,7 +45,7 @@ public class ScopeHelper implements IScopeHelper
 
     @Override
     public void define(IScope definitionScope, ISymbol symbol) {
-        MapHelper.addToListMap(definitionScope.getSymbols(), symbol.getName(), symbol);
+        MapHelper.addToListInMap(definitionScope.getSymbols(), symbol.getName(), symbol);
         symbol.setDefinitionScope(definitionScope);
     }
 

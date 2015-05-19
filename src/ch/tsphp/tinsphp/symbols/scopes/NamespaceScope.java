@@ -69,8 +69,8 @@ public class NamespaceScope implements INamespaceScope
 
     @Override
     public void defineUse(IAliasSymbol symbol) {
-        MapHelper.addToListMap(usesCaseInsensitive, symbol.getName(), symbol);
-        MapHelper.addToListMap(uses, symbol.getName(), symbol);
+        MapHelper.addToListInMap(usesCaseInsensitive, symbol.getName(), symbol);
+        MapHelper.addToListInMap(uses, symbol.getName(), symbol);
         symbol.setDefinitionScope(this);
     }
 
