@@ -10,7 +10,7 @@ import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IContainerTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.PrimitiveTypeNames;
-import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
+import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -18,8 +18,8 @@ import java.util.Map;
 public class UnionTypeSymbol extends AContainerTypeSymbol<IUnionTypeSymbol> implements IUnionTypeSymbol
 {
 
-    public UnionTypeSymbol(IOverloadResolver theOverloadResolver) {
-        super(theOverloadResolver);
+    public UnionTypeSymbol(ITypeHelper theTypeHelper) {
+        super(theTypeHelper);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class UnionTypeSymbol extends AContainerTypeSymbol<IUnionTypeSymbol> impl
 
     @Override
     public IUnionTypeSymbol copy() {
-        UnionTypeSymbol copy = new UnionTypeSymbol(overloadResolver);
+        UnionTypeSymbol copy = new UnionTypeSymbol(typeHelper);
         copy.typeSymbols.putAll(typeSymbols);
         return copy;
     }
@@ -75,20 +75,19 @@ public class UnionTypeSymbol extends AContainerTypeSymbol<IUnionTypeSymbol> impl
         Iterator<Map.Entry<String, ITypeSymbol>> iterator = typeSymbols.entrySet().iterator();
         while (iterator.hasNext()) {
             ITypeSymbol existingTypeInUnion = iterator.next().getValue();
-            if ((status == ETypeRelation.NO_RELATION || status == ETypeRelation.PARENT_TYPE)
-                    && overloadResolver.isFirstSameOrSubTypeOfSecond(existingTypeInUnion, newTypeSymbol)) {
-                //remove sub-type, it does no longer add information to the union type
+            if (typeHelper.isFirstSameOrParentTypeOfSecond(newTypeSymbol, existingTypeInUnion)) {
+                //remove subtype, it does no longer add information to the union type
                 status = ETypeRelation.PARENT_TYPE;
                 iterator.remove();
             } else if (status == ETypeRelation.NO_RELATION
-                    && overloadResolver.isFirstSameOrParentTypeOfSecond(existingTypeInUnion, newTypeSymbol)) {
-                //new type is a sub type of an existing and hence it does not add new information to the union
-                status = ETypeRelation.SUB_TYPE;
+                    && typeHelper.isFirstSameOrSubTypeOfSecond(newTypeSymbol, existingTypeInUnion)) {
+                //new type is a subtype of an existing and hence it does not add new information to the union
+                status = ETypeRelation.SUBTYPE;
                 break;
             }
         }
 
-        if (status == ETypeRelation.NO_RELATION || status == ETypeRelation.PARENT_TYPE) {
+        if (status != ETypeRelation.SUBTYPE) {
             changedUnion = true;
             typeSymbols.put(absoluteName, newTypeSymbol);
         }

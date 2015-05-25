@@ -10,11 +10,11 @@ import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.PrimitiveTypeNames;
-import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
+import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.symbols.IntersectionTypeSymbol;
 import ch.tsphp.tinsphp.symbols.UnionTypeSymbol;
 import ch.tsphp.tinsphp.symbols.test.unit.testutils.ATypeTest;
-import ch.tsphp.tinsphp.symbols.utils.OverloadResolver;
+import ch.tsphp.tinsphp.symbols.utils.TypeHelper;
 import org.junit.Test;
 
 import java.util.Map;
@@ -125,7 +125,7 @@ public class UnionTypeSymbolTest extends ATypeTest
 
     @Test
     public void addTypeSymbol_EmptyAndIntersectionContainingIBAndIA_ReturnsTrueAndUnionContainsIntersection() {
-        IIntersectionTypeSymbol intersectionTypeSymbol = new IntersectionTypeSymbol(new OverloadResolver());
+        IIntersectionTypeSymbol intersectionTypeSymbol = new IntersectionTypeSymbol(new TypeHelper());
         intersectionTypeSymbol.addTypeSymbol(interfaceAType);
         intersectionTypeSymbol.addTypeSymbol(interfaceBType);
 
@@ -146,7 +146,7 @@ public class UnionTypeSymbolTest extends ATypeTest
         //arrange
         unionTypeSymbol.addTypeSymbol(intType);
 
-        IIntersectionTypeSymbol intersectionTypeSymbol = new IntersectionTypeSymbol(new OverloadResolver());
+        IIntersectionTypeSymbol intersectionTypeSymbol = new IntersectionTypeSymbol(new TypeHelper());
         intersectionTypeSymbol.addTypeSymbol(interfaceAType);
         intersectionTypeSymbol.addTypeSymbol(interfaceBType);
 
@@ -167,7 +167,7 @@ public class UnionTypeSymbolTest extends ATypeTest
         unionTypeSymbol.addTypeSymbol(intType);
         unionTypeSymbol.addTypeSymbol(interfaceAType);
 
-        IIntersectionTypeSymbol intersectionTypeSymbol = new IntersectionTypeSymbol(new OverloadResolver());
+        IIntersectionTypeSymbol intersectionTypeSymbol = new IntersectionTypeSymbol(new TypeHelper());
         intersectionTypeSymbol.addTypeSymbol(interfaceAType);
         intersectionTypeSymbol.addTypeSymbol(interfaceBType);
 
@@ -189,7 +189,7 @@ public class UnionTypeSymbolTest extends ATypeTest
         //arrange
         unionTypeSymbol.addTypeSymbol(intType);
 
-        IIntersectionTypeSymbol intersectionTypeSymbol = new IntersectionTypeSymbol(new OverloadResolver());
+        IIntersectionTypeSymbol intersectionTypeSymbol = new IntersectionTypeSymbol(new TypeHelper());
         intersectionTypeSymbol.addTypeSymbol(floatType);
 
         //act
@@ -205,7 +205,7 @@ public class UnionTypeSymbolTest extends ATypeTest
     //see TINS-406 add single type in intersection to union
     @Test
     public void addTypeSymbol_IntAndIntersectionContainingFloat_ReturnsTrueAndUnionContainsFloatAsSingleType() {
-        IIntersectionTypeSymbol intersectionTypeSymbol = new IntersectionTypeSymbol(new OverloadResolver());
+        IIntersectionTypeSymbol intersectionTypeSymbol = new IntersectionTypeSymbol(new TypeHelper());
         intersectionTypeSymbol.addTypeSymbol(floatType);
 
         IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol();
@@ -377,11 +377,11 @@ public class UnionTypeSymbolTest extends ATypeTest
     }
 
     private IUnionTypeSymbol createUnionTypeSymbol() {
-        return createUnionTypeSymbol(new OverloadResolver());
+        return createUnionTypeSymbol(new TypeHelper());
     }
 
-    protected IUnionTypeSymbol createUnionTypeSymbol(IOverloadResolver overloadResolver) {
-        return new UnionTypeSymbol(overloadResolver);
+    protected IUnionTypeSymbol createUnionTypeSymbol(ITypeHelper typeHelper) {
+        return new UnionTypeSymbol(typeHelper);
     }
 
 }

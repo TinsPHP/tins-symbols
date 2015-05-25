@@ -35,7 +35,7 @@ import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.ILazySymbolResolver;
-import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
+import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.symbols.ModifierSet;
 import ch.tsphp.tinsphp.symbols.SymbolFactory;
 import org.junit.Test;
@@ -622,14 +622,14 @@ public class SymbolFactoryTest
         return createSymbolFactory(
                 mock(IScopeHelper.class),
                 modifierHelper,
-                mock(IOverloadResolver.class)
+                mock(ITypeHelper.class)
         );
     }
 
     protected ISymbolFactory createSymbolFactory(
             IScopeHelper theScopeHelper,
             IModifierHelper theModifierHelper,
-            IOverloadResolver overloadResolver) {
-        return new SymbolFactory(theScopeHelper, theModifierHelper, overloadResolver);
+            ITypeHelper theTypeHelper) {
+        return new SymbolFactory(theScopeHelper, theModifierHelper, theTypeHelper);
     }
 }

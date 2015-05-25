@@ -13,7 +13,7 @@ import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
-import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
+import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.symbols.ModifierHelper;
 import ch.tsphp.tinsphp.symbols.SymbolFactory;
 import ch.tsphp.tinsphp.symbols.constraints.FunctionType;
@@ -21,7 +21,7 @@ import ch.tsphp.tinsphp.symbols.constraints.OverloadBindings;
 import ch.tsphp.tinsphp.symbols.constraints.Variable;
 import ch.tsphp.tinsphp.symbols.scopes.ScopeHelper;
 import ch.tsphp.tinsphp.symbols.test.unit.testutils.ATypeTest;
-import ch.tsphp.tinsphp.symbols.utils.OverloadResolver;
+import ch.tsphp.tinsphp.symbols.utils.TypeHelper;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -159,10 +159,10 @@ public class FunctionTypeTest extends ATypeTest
     }
 
     private OverloadBindings createOverloadBindings() {
-        IOverloadResolver overloadResolver = new OverloadResolver();
-        overloadResolver.setMixedTypeSymbol(mixedType);
-        ISymbolFactory symbolFactory = new SymbolFactory(new ScopeHelper(), new ModifierHelper(), overloadResolver);
-        return new OverloadBindings(symbolFactory, overloadResolver);
+        ITypeHelper typeHelper = new TypeHelper();
+        typeHelper.setMixedTypeSymbol(mixedType);
+        ISymbolFactory symbolFactory = new SymbolFactory(new ScopeHelper(), new ModifierHelper(), typeHelper);
+        return new OverloadBindings(symbolFactory, typeHelper);
     }
 
 

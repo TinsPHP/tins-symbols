@@ -20,7 +20,7 @@ import ch.tsphp.tinsphp.common.inference.constraints.UpperBoundException;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
-import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
+import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,7 +31,7 @@ import java.util.Set;
 public class OverloadBindings implements IOverloadBindings
 {
     private final ISymbolFactory symbolFactory;
-    private final IOverloadResolver overloadResolver;
+    private final ITypeHelper typeHelper;
     private final ITypeSymbol mixedTypeSymbol;
 
     private final Map<String, IUnionTypeSymbol> lowerTypeBounds;
@@ -44,9 +44,9 @@ public class OverloadBindings implements IOverloadBindings
 
     private int count = 1;
 
-    public OverloadBindings(ISymbolFactory theSymbolFactory, IOverloadResolver theOverloadResolver) {
+    public OverloadBindings(ISymbolFactory theSymbolFactory, ITypeHelper theTypeHelper) {
         symbolFactory = theSymbolFactory;
-        overloadResolver = theOverloadResolver;
+        typeHelper = theTypeHelper;
         mixedTypeSymbol = symbolFactory.getMixedTypeSymbol();
 
         lowerTypeBounds = new HashMap<>();
@@ -60,7 +60,7 @@ public class OverloadBindings implements IOverloadBindings
 
     public OverloadBindings(OverloadBindings bindings) {
         symbolFactory = bindings.symbolFactory;
-        overloadResolver = bindings.overloadResolver;
+        typeHelper = bindings.typeHelper;
         mixedTypeSymbol = bindings.mixedTypeSymbol;
 
         count = bindings.count;
@@ -214,7 +214,7 @@ public class OverloadBindings implements IOverloadBindings
     private void checkUpperTypeBounds(String typeVariable, ITypeSymbol newLowerType) {
         if (hasUpperTypeBounds(typeVariable)) {
             IIntersectionTypeSymbol upperTypeSymbol = upperTypeBounds.get(typeVariable);
-            if (!overloadResolver.isFirstSameOrSubTypeOfSecond(newLowerType, upperTypeSymbol)) {
+            if (!typeHelper.isFirstSameOrSubTypeOfSecond(newLowerType, upperTypeSymbol)) {
                 throw new UpperBoundException("The new lower type " + newLowerType.getAbsoluteName() + " is not the "
                         + "same or a subtype of " + upperTypeSymbol.getAbsoluteName(),
                         upperTypeSymbol,
@@ -288,15 +288,15 @@ public class OverloadBindings implements IOverloadBindings
 
     private boolean areNotInSameTypeHierarchyAndOneCannotBeUsedInIntersection(ITypeSymbol typeSymbol,
             IIntersectionTypeSymbol upperBound) {
-        return !overloadResolver.isFirstSameOrSubTypeOfSecond(typeSymbol, upperBound)
-                && !overloadResolver.isFirstSameOrSubTypeOfSecond(upperBound, typeSymbol)
+        return !typeHelper.isFirstSameOrSubTypeOfSecond(typeSymbol, upperBound)
+                && !typeHelper.isFirstSameOrSubTypeOfSecond(upperBound, typeSymbol)
                 && (!typeSymbol.canBeUsedInIntersection() || !upperBound.canBeUsedInIntersection());
     }
 
     private void checkLowerTypeBounds(String typeVariable, ITypeSymbol newUpperTypeBound) {
         if (hasLowerTypeBounds(typeVariable)) {
             IUnionTypeSymbol lowerTypeSymbol = lowerTypeBounds.get(typeVariable);
-            if (!overloadResolver.isFirstSameOrSubTypeOfSecond(lowerTypeSymbol, newUpperTypeBound)) {
+            if (!typeHelper.isFirstSameOrSubTypeOfSecond(lowerTypeSymbol, newUpperTypeBound)) {
                 throw new LowerBoundException(
                         "The new upper bound " + newUpperTypeBound.getAbsoluteName() + " is not the same or a parent "
                                 + "type of the current lower bound " + lowerTypeSymbol.getAbsoluteName(),
@@ -558,7 +558,7 @@ public class OverloadBindings implements IOverloadBindings
                 IUnionTypeSymbol upperTypeBound = lowerTypeBounds.get(parameterTypeVariable);
                 IIntersectionTypeSymbol lowerTypeBound = upperTypeBounds.get(parameterTypeVariable);
                 if (lowerTypeBound != null && upperTypeBound != null) {
-                    has = !overloadResolver.areSame(lowerTypeBound, upperTypeBound);
+                    has = !typeHelper.areSame(lowerTypeBound, upperTypeBound);
                 }
             }
         }
@@ -681,7 +681,7 @@ public class OverloadBindings implements IOverloadBindings
         if (hasLowerTypeBounds(typeVariable)) {
             canBeUnified = hasLowerTypeBounds(parameterTypeVariable);
             if (canBeUnified) {
-                canBeUnified = overloadResolver.areSame(
+                canBeUnified = typeHelper.areSame(
                         lowerTypeBounds.get(typeVariable), lowerTypeBounds.get(parameterTypeVariable));
             }
         } else {

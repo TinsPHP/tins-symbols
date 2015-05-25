@@ -9,7 +9,7 @@ package ch.tsphp.tinsphp.symbols.test.unit.symbols;
 import ch.tsphp.common.IScope;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IContainerTypeSymbol;
-import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
+import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.symbols.AContainerTypeSymbol;
 import ch.tsphp.tinsphp.symbols.ModifierSet;
 import org.junit.Test;
@@ -28,8 +28,8 @@ public class AContainerTypeSymbolTest
     private class DummyAContainerTypeSymbol extends AContainerTypeSymbol<IDummyContainerTypeSymbol>
     {
 
-        public DummyAContainerTypeSymbol(IOverloadResolver theOverloadResolver) {
-            super(theOverloadResolver);
+        public DummyAContainerTypeSymbol(ITypeHelper theTypeHelper) {
+            super(theTypeHelper);
         }
 
         @Override
@@ -194,10 +194,10 @@ public class AContainerTypeSymbolTest
     }
 
     private AContainerTypeSymbol createContainerTypeSymbol() {
-        return createContainerTypeSymbol(mock(IOverloadResolver.class));
+        return createContainerTypeSymbol(mock(ITypeHelper.class));
     }
 
-    protected AContainerTypeSymbol createContainerTypeSymbol(IOverloadResolver overloadResolver) {
-        return new DummyAContainerTypeSymbol(overloadResolver);
+    protected AContainerTypeSymbol createContainerTypeSymbol(ITypeHelper typeHelper) {
+        return new DummyAContainerTypeSymbol(typeHelper);
     }
 }

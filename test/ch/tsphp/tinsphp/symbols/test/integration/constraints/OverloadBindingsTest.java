@@ -13,12 +13,12 @@ import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
-import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
+import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.symbols.IntersectionTypeSymbol;
 import ch.tsphp.tinsphp.symbols.UnionTypeSymbol;
 import ch.tsphp.tinsphp.symbols.constraints.OverloadBindings;
 import ch.tsphp.tinsphp.symbols.test.unit.testutils.ATypeTest;
-import ch.tsphp.tinsphp.symbols.utils.OverloadResolver;
+import ch.tsphp.tinsphp.symbols.utils.TypeHelper;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -45,13 +45,13 @@ import static org.mockito.Mockito.when;
 public class OverloadBindingsTest extends ATypeTest
 {
     private static ISymbolFactory symbolFactory;
-    private static IOverloadResolver overloadResolver;
+    private static ITypeHelper typeHelper;
 
     @BeforeClass
     public static void init() {
         ATypeTest.init();
 
-        overloadResolver = new OverloadResolver();
+        typeHelper = new TypeHelper();
         symbolFactory = mock(ISymbolFactory.class);
         ITypeSymbol mixedTypeSymbol = mock(ITypeSymbol.class);
         when(mixedTypeSymbol.getAbsoluteName()).thenReturn("mixed");
@@ -61,21 +61,21 @@ public class OverloadBindingsTest extends ATypeTest
         {
             @Override
             public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                return new UnionTypeSymbol(overloadResolver);
+                return new UnionTypeSymbol(typeHelper);
             }
         });
         when(symbolFactory.createIntersectionTypeSymbol()).then(new Answer<Object>()
         {
             @Override
             public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                return new IntersectionTypeSymbol(overloadResolver);
+                return new IntersectionTypeSymbol(typeHelper);
             }
         });
     }
 
     @Test
     public void copyConstructor_HasTwoVariables_CopyBoth() {
-        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, overloadResolver);
+        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, typeHelper);
         bindings1.addVariable("$a", new TypeVariableReference("T1"));
         bindings1.addVariable("$b", new TypeVariableReference("T2"));
 
@@ -88,7 +88,7 @@ public class OverloadBindingsTest extends ATypeTest
 
     @Test
     public void copyConstructor_HasTwoVariablesFirstIsFixed_OnlyFirstIsFixed() {
-        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, overloadResolver);
+        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, typeHelper);
         bindings1.addVariable("$a", new FixedTypeVariableReference(new TypeVariableReference("T")));
         bindings1.addVariable("$b", new TypeVariableReference("T"));
 
@@ -101,7 +101,7 @@ public class OverloadBindingsTest extends ATypeTest
 
     @Test
     public void copyConstructor_HasTwoVariablesSecondIsFixed_OnlySecondIsFixed() {
-        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, overloadResolver);
+        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, typeHelper);
         bindings1.addVariable("$a", new TypeVariableReference("T"));
         bindings1.addVariable("$b", new FixedTypeVariableReference(new TypeVariableReference("T")));
 
@@ -114,7 +114,7 @@ public class OverloadBindingsTest extends ATypeTest
 
     @Test
     public void copyConstructor_HasLowerTypeBound_IsCopied() {
-        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, overloadResolver);
+        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, typeHelper);
         bindings1.addVariable("$a", new TypeVariableReference("T"));
         bindings1.addLowerTypeBound("T", intType);
 
@@ -126,7 +126,7 @@ public class OverloadBindingsTest extends ATypeTest
 
     @Test
     public void copyConstructor_HasUpperTypeBound_IsCopied() {
-        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, overloadResolver);
+        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, typeHelper);
         bindings1.addVariable("$a", new TypeVariableReference("T"));
         bindings1.addUpperTypeBound("T", interfaceAType);
 
@@ -139,7 +139,7 @@ public class OverloadBindingsTest extends ATypeTest
 
     @Test
     public void copyConstructor_HasLowerRefBound_IsCopied() {
-        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, overloadResolver);
+        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, typeHelper);
         bindings1.addVariable("$a", new TypeVariableReference("T1"));
         bindings1.addVariable("$b", new TypeVariableReference("T2"));
         bindings1.addLowerRefBound("T1", new TypeVariableReference("T2"));
@@ -155,7 +155,7 @@ public class OverloadBindingsTest extends ATypeTest
 
     @Test
     public void copyConstructor_HasVariablesAndRenameOneAfterCopying_DoesOnlyRenameOldBinding() {
-        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, overloadResolver);
+        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, typeHelper);
         bindings1.addVariable("$a", new TypeVariableReference("T1"));
         bindings1.addVariable("$b", new TypeVariableReference("T2"));
         bindings1.addVariable("$c", new TypeVariableReference("T3"));
@@ -175,7 +175,7 @@ public class OverloadBindingsTest extends ATypeTest
 
     @Test
     public void copyConstructor_HasAppliedBinding_IsCopied() {
-        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, overloadResolver);
+        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, typeHelper);
         bindings1.addVariable("$a", new TypeVariableReference("T1"));
         IFunctionType overload = mock(IFunctionType.class);
         bindings1.setAppliedOverload("$a", overload);
@@ -200,7 +200,7 @@ public class OverloadBindingsTest extends ATypeTest
 
     @Test
     public void getNextTypeVariable_SecondCallAfterCopy_ReturnsT2() {
-        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, overloadResolver);
+        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, typeHelper);
         bindings1.getNextTypeVariable();
 
         IOverloadBindings collection = createOverloadBindings(bindings1);
@@ -489,12 +489,12 @@ public class OverloadBindingsTest extends ATypeTest
     }
 
     private IOverloadBindings createOverloadBindings() {
-        return createOverloadBindings(symbolFactory, overloadResolver);
+        return createOverloadBindings(symbolFactory, typeHelper);
     }
 
     protected IOverloadBindings createOverloadBindings(
-            ISymbolFactory symbolFactory, IOverloadResolver overloadResolver) {
-        return new OverloadBindings(symbolFactory, overloadResolver);
+            ISymbolFactory symbolFactory, ITypeHelper typeHelper) {
+        return new OverloadBindings(symbolFactory, typeHelper);
     }
 
     protected IOverloadBindings createOverloadBindings(OverloadBindings bindings) {

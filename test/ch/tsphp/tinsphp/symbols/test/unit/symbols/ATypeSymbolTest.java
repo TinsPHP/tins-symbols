@@ -9,7 +9,7 @@ package ch.tsphp.tinsphp.symbols.test.unit.symbols;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.symbols.ATypeSymbol;
-import ch.tsphp.tinsphp.symbols.utils.TypeHelper;
+import ch.tsphp.tinsphp.symbols.utils.ModifierHelper;
 import org.hamcrest.collection.IsIterableContainingInAnyOrder;
 import org.junit.Test;
 
@@ -86,7 +86,7 @@ public class ATypeSymbolTest
         //no arrange necessary
 
         ATypeSymbol typeSymbol = createTypeSymbol();
-        TypeHelper.addFalseableModifier(typeSymbol);
+        ModifierHelper.addFalseableModifier(typeSymbol);
         boolean result = typeSymbol.isFalseable();
 
         assertThat(result, is(true));
@@ -107,7 +107,7 @@ public class ATypeSymbolTest
         //no arrange necessary
 
         ATypeSymbol typeSymbol = createTypeSymbol();
-        TypeHelper.addNullableModifier(typeSymbol);
+        ModifierHelper.addNullableModifier(typeSymbol);
         boolean result = typeSymbol.isNullable();
 
         assertThat(result, is(true));

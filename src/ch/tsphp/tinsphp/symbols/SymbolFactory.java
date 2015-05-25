@@ -42,7 +42,7 @@ import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.ILazySymbolResolver;
-import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
+import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.symbols.constraints.Constraint;
 import ch.tsphp.tinsphp.symbols.constraints.FunctionType;
 import ch.tsphp.tinsphp.symbols.constraints.OverloadBindings;
@@ -58,22 +58,22 @@ public class SymbolFactory implements ISymbolFactory
 {
     private final IScopeHelper scopeHelper;
     private final IModifierHelper modifierHelper;
-    private final IOverloadResolver overloadResolver;
+    private final ITypeHelper typeHelper;
     private ITypeSymbol mixedTypeSymbol = null;
 
     public SymbolFactory(
             IScopeHelper theScopeHelper,
             IModifierHelper theModifierHelper,
-            IOverloadResolver theOverloadResolver) {
+            ITypeHelper theTypeHelper) {
         scopeHelper = theScopeHelper;
         modifierHelper = theModifierHelper;
-        overloadResolver = theOverloadResolver;
+        typeHelper = theTypeHelper;
     }
 
     @Override
     public void setMixedTypeSymbol(ITypeSymbol typeSymbol) {
         mixedTypeSymbol = typeSymbol;
-        overloadResolver.setMixedTypeSymbol(mixedTypeSymbol);
+        typeHelper.setMixedTypeSymbol(mixedTypeSymbol);
     }
 
     public ITypeSymbol getMixedTypeSymbol() {
@@ -149,12 +149,12 @@ public class SymbolFactory implements ISymbolFactory
 
     @Override
     public IUnionTypeSymbol createUnionTypeSymbol() {
-        return new UnionTypeSymbol(overloadResolver);
+        return new UnionTypeSymbol(typeHelper);
     }
 
     @Override
     public IIntersectionTypeSymbol createIntersectionTypeSymbol() {
-        return new IntersectionTypeSymbol(overloadResolver);
+        return new IntersectionTypeSymbol(typeHelper);
     }
 
     @Override
@@ -238,7 +238,7 @@ public class SymbolFactory implements ISymbolFactory
 
     @Override
     public IOverloadBindings createOverloadBindings() {
-        return new OverloadBindings(this, overloadResolver);
+        return new OverloadBindings(this, typeHelper);
     }
 
     @Override

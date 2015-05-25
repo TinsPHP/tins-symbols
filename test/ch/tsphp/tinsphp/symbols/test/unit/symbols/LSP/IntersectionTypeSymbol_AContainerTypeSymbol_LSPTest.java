@@ -6,7 +6,7 @@
 
 package ch.tsphp.tinsphp.symbols.test.unit.symbols.LSP;
 
-import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
+import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.symbols.AContainerTypeSymbol;
 import ch.tsphp.tinsphp.symbols.IntersectionTypeSymbol;
 import ch.tsphp.tinsphp.symbols.test.unit.symbols.AContainerTypeSymbolTest;
@@ -14,8 +14,8 @@ import ch.tsphp.tinsphp.symbols.test.unit.symbols.AContainerTypeSymbolTest;
 public class IntersectionTypeSymbol_AContainerTypeSymbol_LSPTest extends AContainerTypeSymbolTest
 {
 
-    protected AContainerTypeSymbol createContainerTypeSymbol(IOverloadResolver overloadResolver) {
-        return new IntersectionTypeSymbol(overloadResolver);
+    protected AContainerTypeSymbol createContainerTypeSymbol(ITypeHelper typeHelper) {
+        return new IntersectionTypeSymbol(typeHelper);
     }
 
 }

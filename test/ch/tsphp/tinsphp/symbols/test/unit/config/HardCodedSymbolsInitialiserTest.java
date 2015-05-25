@@ -11,7 +11,7 @@ import ch.tsphp.tinsphp.common.scopes.IScopeFactory;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IModifierHelper;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
-import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
+import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.symbols.config.HardCodedSymbolsInitialiser;
 import org.junit.Test;
 
@@ -43,22 +43,22 @@ public class HardCodedSymbolsInitialiserTest
     }
 
     @Test
-    public void getOverloadResolver_SecondCall_ReturnsSameAsFirst() {
+    public void getTypeHelper_SecondCall_ReturnsSameAsFirst() {
         ISymbolsInitialiser initialiser = createInitialiser();
-        IOverloadResolver firstCall = initialiser.getOverloadResolver();
+        ITypeHelper firstCall = initialiser.getTypeHelper();
 
-        IOverloadResolver result = initialiser.getOverloadResolver();
+        ITypeHelper result = initialiser.getTypeHelper();
 
         assertThat(result, is(firstCall));
     }
 
     @Test
-    public void getOverloadResolver_SecondCallAfterReset_ReturnsSameAsFirstBeforeReset() {
+    public void getTypeHelper_SecondCallAfterReset_ReturnsSameAsFirstBeforeReset() {
         ISymbolsInitialiser initialiser = createInitialiser();
-        IOverloadResolver firstCall = initialiser.getOverloadResolver();
+        ITypeHelper firstCall = initialiser.getTypeHelper();
         initialiser.reset();
 
-        IOverloadResolver result = initialiser.getOverloadResolver();
+        ITypeHelper result = initialiser.getTypeHelper();
 
         assertThat(result, is(firstCall));
     }

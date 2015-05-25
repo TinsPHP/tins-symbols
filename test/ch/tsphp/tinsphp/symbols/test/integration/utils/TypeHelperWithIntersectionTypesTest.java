@@ -7,15 +7,14 @@
 package ch.tsphp.tinsphp.symbols.test.integration.utils;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
-import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
-import ch.tsphp.tinsphp.symbols.test.integration.testutils.AOverloadResolverTest;
-import ch.tsphp.tinsphp.symbols.utils.OverloadResolver;
+import ch.tsphp.tinsphp.common.utils.ITypeHelper;
+import ch.tsphp.tinsphp.symbols.test.integration.testutils.ATypeHelperTest;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
-public class OverloadResolverWithIntersectionTypesTest extends AOverloadResolverTest
+public class TypeHelperWithIntersectionTypesTest extends ATypeHelperTest
 {
 
     //--------------------  tests with intersection types on the left
@@ -25,8 +24,8 @@ public class OverloadResolverWithIntersectionTypesTest extends AOverloadResolver
         ITypeSymbol actual = createIntersectionType(intType);
         ITypeSymbol formal = intType;
 
-        IOverloadResolver solver = createOverloadResolverAndSetMixed();
-        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -36,8 +35,8 @@ public class OverloadResolverWithIntersectionTypesTest extends AOverloadResolver
         ITypeSymbol actual = createIntersectionType(intType);
         ITypeSymbol formal = mixedType;
 
-        IOverloadResolver solver = createOverloadResolverAndSetMixed();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
     }
@@ -47,8 +46,8 @@ public class OverloadResolverWithIntersectionTypesTest extends AOverloadResolver
         ITypeSymbol actual = createIntersectionType(mixedType);
         ITypeSymbol formal = intType;
 
-        IOverloadResolver solver = createOverloadResolverAndSetMixed();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
     }
@@ -60,8 +59,8 @@ public class OverloadResolverWithIntersectionTypesTest extends AOverloadResolver
         ITypeSymbol actual = createIntersectionType();
         ITypeSymbol formal = intType;
 
-        IOverloadResolver solver = createOverloadResolverAndSetMixed();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
     }
@@ -71,8 +70,8 @@ public class OverloadResolverWithIntersectionTypesTest extends AOverloadResolver
         ITypeSymbol actual = createIntersectionType();
         ITypeSymbol formal = mixedType;
 
-        IOverloadResolver solver = createOverloadResolverAndSetMixed();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -84,8 +83,8 @@ public class OverloadResolverWithIntersectionTypesTest extends AOverloadResolver
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createIntersectionType(intType);
 
-        IOverloadResolver solver = createOverloadResolverAndSetMixed();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -95,8 +94,8 @@ public class OverloadResolverWithIntersectionTypesTest extends AOverloadResolver
         ITypeSymbol actual = mixedType;
         ITypeSymbol formal = createIntersectionType(intType);
 
-        IOverloadResolver solver = createOverloadResolverAndSetMixed();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
     }
@@ -106,8 +105,8 @@ public class OverloadResolverWithIntersectionTypesTest extends AOverloadResolver
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createIntersectionType(mixedType);
 
-        IOverloadResolver solver = createOverloadResolverAndSetMixed();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
     }
@@ -119,8 +118,8 @@ public class OverloadResolverWithIntersectionTypesTest extends AOverloadResolver
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createIntersectionType();
 
-        IOverloadResolver solver = createOverloadResolverAndSetMixed();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
     }
@@ -130,8 +129,8 @@ public class OverloadResolverWithIntersectionTypesTest extends AOverloadResolver
         ITypeSymbol actual = mixedType;
         ITypeSymbol formal = createIntersectionType();
 
-        IOverloadResolver solver = createOverloadResolverAndSetMixed();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -143,8 +142,8 @@ public class OverloadResolverWithIntersectionTypesTest extends AOverloadResolver
         ITypeSymbol actual = createIntersectionType(intType);
         ITypeSymbol formal = createIntersectionType(intType);
 
-        IOverloadResolver solver = createOverloadResolverAndSetMixed();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -154,8 +153,8 @@ public class OverloadResolverWithIntersectionTypesTest extends AOverloadResolver
         ITypeSymbol actual = createIntersectionType(interfaceAType, interfaceBType);
         ITypeSymbol formal = createIntersectionType(interfaceAType, interfaceBType);
 
-        IOverloadResolver solver = createOverloadResolverAndSetMixed();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -165,8 +164,8 @@ public class OverloadResolverWithIntersectionTypesTest extends AOverloadResolver
         ITypeSymbol actual = createIntersectionType(interfaceAType, interfaceBType);
         ITypeSymbol formal = createIntersectionType(interfaceBType, interfaceAType);
 
-        IOverloadResolver solver = createOverloadResolverAndSetMixed();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -176,8 +175,8 @@ public class OverloadResolverWithIntersectionTypesTest extends AOverloadResolver
         ITypeSymbol actual = createIntersectionType(interfaceSubAType, interfaceBType);
         ITypeSymbol formal = createIntersectionType(interfaceBType, interfaceAType);
 
-        IOverloadResolver solver = createOverloadResolverAndSetMixed();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
     }
@@ -188,8 +187,8 @@ public class OverloadResolverWithIntersectionTypesTest extends AOverloadResolver
         ITypeSymbol actual = createIntersectionType(interfaceAType, interfaceBType);
         ITypeSymbol formal = createIntersectionType(mixedType);
 
-        IOverloadResolver solver = createOverloadResolverAndSetMixed();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
     }
@@ -199,8 +198,8 @@ public class OverloadResolverWithIntersectionTypesTest extends AOverloadResolver
         ITypeSymbol actual = createIntersectionType(mixedType);
         ITypeSymbol formal = createIntersectionType(interfaceBType, interfaceAType);
 
-        IOverloadResolver solver = createOverloadResolverAndSetMixed();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
     }
@@ -212,8 +211,8 @@ public class OverloadResolverWithIntersectionTypesTest extends AOverloadResolver
         ITypeSymbol actual = createIntersectionType();
         ITypeSymbol formal = createIntersectionType();
 
-        IOverloadResolver solver = createOverloadResolverAndSetMixed();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -224,8 +223,8 @@ public class OverloadResolverWithIntersectionTypesTest extends AOverloadResolver
 //        ITypeSymbol actual = createIntersectionType();
 //        ITypeSymbol formal = createIntersectionType();
 //
-//        IOverloadResolver solver = createOverloadResolverAndSetMixed();
-//        boolean result = solver.isFirstSubTypeOfSecond(actual, formal);
+//        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+//        boolean result = typeHelper.isFirstSubTypeOfSecond(actual, formal);
 //
 //        assertThat(result, is(false));
 //    }
@@ -235,8 +234,8 @@ public class OverloadResolverWithIntersectionTypesTest extends AOverloadResolver
         ITypeSymbol actual = createIntersectionType();
         ITypeSymbol formal = createIntersectionType();
 
-        IOverloadResolver solver = createOverloadResolverAndSetMixed();
-        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -246,8 +245,8 @@ public class OverloadResolverWithIntersectionTypesTest extends AOverloadResolver
         ITypeSymbol actual = createIntersectionType();
         ITypeSymbol formal = createIntersectionType();
 
-        IOverloadResolver solver = createOverloadResolverAndSetMixed();
-        boolean result = solver.isFirstSameOrParentTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        boolean result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -257,8 +256,8 @@ public class OverloadResolverWithIntersectionTypesTest extends AOverloadResolver
 //        ITypeSymbol actual = createIntersectionType();
 //        ITypeSymbol formal = createIntersectionType();
 //
-//        IOverloadResolver solver = createOverloadResolverAndSetMixed();
-//        boolean result = solver.isFirstParentTypeOfSecond(actual, formal);
+//        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+//        boolean result = typeHelper.isFirstParentTypeOfSecond(actual, formal);
 //
 //        assertThat(result, is(false));
 //    }
@@ -271,8 +270,8 @@ public class OverloadResolverWithIntersectionTypesTest extends AOverloadResolver
 //         ITypeSymbol actual = createIntersectionType(mixedType);
 //        ITypeSymbol formal = createIntersectionType(mixedType);
 //
-//        IOverloadResolver solver = createOverloadResolverAndSetMixed();
-//        boolean result = solver.isFirstSubTypeOfSecond(actual, formal);
+//        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+//        boolean result = typeHelper.isFirstSubTypeOfSecond(actual, formal);
 //
 //        assertThat(result, is(false));
 //    }
@@ -282,8 +281,8 @@ public class OverloadResolverWithIntersectionTypesTest extends AOverloadResolver
         ITypeSymbol actual = createIntersectionType(mixedType);
         ITypeSymbol formal = createIntersectionType(mixedType);
 
-        IOverloadResolver solver = createOverloadResolverAndSetMixed();
-        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -293,8 +292,8 @@ public class OverloadResolverWithIntersectionTypesTest extends AOverloadResolver
         ITypeSymbol actual = createIntersectionType(mixedType);
         ITypeSymbol formal = createIntersectionType(mixedType);
 
-        IOverloadResolver solver = createOverloadResolverAndSetMixed();
-        boolean result = solver.isFirstSameOrParentTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        boolean result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -304,14 +303,9 @@ public class OverloadResolverWithIntersectionTypesTest extends AOverloadResolver
 //        ITypeSymbol actual = createIntersectionType(mixedType);
 //        ITypeSymbol formal = createIntersectionType(mixedType);
 //
-//        IOverloadResolver solver = createOverloadResolverAndSetMixed();
-//        boolean result = solver.isFirstParentTypeOfSecond(actual, formal);
+//        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+//        boolean result = typeHelper.isFirstParentTypeOfSecond(actual, formal);
 //
 //        assertThat(result, is(false));
 //    }
-
-
-    protected OverloadResolver createOverloadResolver() {
-        return new OverloadResolver();
-    }
 }

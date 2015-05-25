@@ -7,14 +7,14 @@
 package ch.tsphp.tinsphp.symbols.test.integration.utils;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
-import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
-import ch.tsphp.tinsphp.symbols.test.integration.testutils.AOverloadResolverTest;
+import ch.tsphp.tinsphp.common.utils.ITypeHelper;
+import ch.tsphp.tinsphp.symbols.test.integration.testutils.ATypeHelperTest;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
-public class OverloadResolverWithUnionTypesTest extends AOverloadResolverTest
+public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 {
 
     //--------------------  tests with unions on the left
@@ -24,8 +24,8 @@ public class OverloadResolverWithUnionTypesTest extends AOverloadResolverTest
         ITypeSymbol actual = createUnion(intType);
         ITypeSymbol formal = intType;
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -35,8 +35,8 @@ public class OverloadResolverWithUnionTypesTest extends AOverloadResolverTest
         ITypeSymbol actual = createUnion(intType);
         ITypeSymbol formal = mixedType;
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
     }
@@ -46,8 +46,8 @@ public class OverloadResolverWithUnionTypesTest extends AOverloadResolverTest
         ITypeSymbol actual = createUnion(mixedType);
         ITypeSymbol formal = intType;
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
     }
@@ -59,8 +59,8 @@ public class OverloadResolverWithUnionTypesTest extends AOverloadResolverTest
         ITypeSymbol actual = createUnion();
         ITypeSymbol formal = mixedType;
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
     }
@@ -72,8 +72,8 @@ public class OverloadResolverWithUnionTypesTest extends AOverloadResolverTest
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createUnion(intType);
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -83,8 +83,8 @@ public class OverloadResolverWithUnionTypesTest extends AOverloadResolverTest
         ITypeSymbol actual = mixedType;
         ITypeSymbol formal = createUnion(intType);
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
     }
@@ -94,8 +94,8 @@ public class OverloadResolverWithUnionTypesTest extends AOverloadResolverTest
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createUnion(mixedType);
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
     }
@@ -107,8 +107,8 @@ public class OverloadResolverWithUnionTypesTest extends AOverloadResolverTest
         ITypeSymbol actual = mixedType;
         ITypeSymbol formal = createUnion();
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
     }
@@ -121,8 +121,8 @@ public class OverloadResolverWithUnionTypesTest extends AOverloadResolverTest
         ITypeSymbol actual = createUnion(intType);
         ITypeSymbol formal = createUnion(intType);
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -132,8 +132,8 @@ public class OverloadResolverWithUnionTypesTest extends AOverloadResolverTest
         ITypeSymbol actual = createUnion(intType, floatType);
         ITypeSymbol formal = createUnion(intType, floatType);
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -143,8 +143,8 @@ public class OverloadResolverWithUnionTypesTest extends AOverloadResolverTest
         ITypeSymbol actual = createUnion(intType, floatType);
         ITypeSymbol formal = createUnion(floatType, intType);
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -155,8 +155,8 @@ public class OverloadResolverWithUnionTypesTest extends AOverloadResolverTest
         ITypeSymbol actual = createUnion(intType, boolType);
         ITypeSymbol formal = createUnion(intType, floatType);
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
     }
@@ -166,8 +166,8 @@ public class OverloadResolverWithUnionTypesTest extends AOverloadResolverTest
         ITypeSymbol actual = createUnion(intType, floatType);
         ITypeSymbol formal = createUnion(mixedType);
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
     }
@@ -177,8 +177,8 @@ public class OverloadResolverWithUnionTypesTest extends AOverloadResolverTest
         ITypeSymbol actual = createUnion(mixedType);
         ITypeSymbol formal = createUnion(intType, floatType);
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
     }
@@ -190,8 +190,8 @@ public class OverloadResolverWithUnionTypesTest extends AOverloadResolverTest
         ITypeSymbol actual = createUnion();
         ITypeSymbol formal = createUnion();
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -203,8 +203,8 @@ public class OverloadResolverWithUnionTypesTest extends AOverloadResolverTest
         ITypeSymbol actual = createUnion(mixedType);
         ITypeSymbol formal = createUnion(mixedType);
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.areSame(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));
     }

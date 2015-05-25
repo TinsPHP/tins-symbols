@@ -25,7 +25,6 @@ import ch.tsphp.tinsphp.common.gen.TokenTypes;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IPolymorphicTypeSymbol;
 import ch.tsphp.tinsphp.common.utils.MapHelper;
-import ch.tsphp.tinsphp.symbols.utils.TypeHelper;
 
 import java.util.HashSet;
 import java.util.List;
@@ -54,7 +53,6 @@ public abstract class APolymorphicTypeSymbol extends AScopedSymbol implements IP
         super(scopeHelper, definitionAst, modifiers, name, enclosingScope);
         parentTypeSymbols.add(theParentTypeSymbol);
         isMixedTheParentTypeSymbol = theParentTypeSymbol.getName().equals("mixed");
-        TypeHelper.addNullableModifier(this);
     }
 
     @Override
@@ -178,13 +176,6 @@ public abstract class APolymorphicTypeSymbol extends AScopedSymbol implements IP
     @Override
     public boolean isNullable() {
         return modifiers.isNullable();
-    }
-
-    @Override
-    public void setModifiers(IModifierSet newModifiers) {
-        super.setModifiers(newModifiers);
-        //make sure nullable is part of the modifiers
-        TypeHelper.addNullableModifier(this);
     }
 
     //TODO same as in ATypeSymbol chance to move it out?

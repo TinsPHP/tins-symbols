@@ -11,7 +11,7 @@ import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.symbols.IContainerTypeSymbol;
-import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
+import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -20,7 +20,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-public abstract class AContainerTypeSymbol<TContainer extends IContainerTypeSymbol<? super TContainer>>
+public abstract class AContainerTypeSymbol<TContainer extends IContainerTypeSymbol<TContainer>>
         implements IContainerTypeSymbol<TContainer>
 {
     private static final String ERROR_MESSAGE = "You are dealing with an AContainerTypeSymbol.";
@@ -29,18 +29,18 @@ public abstract class AContainerTypeSymbol<TContainer extends IContainerTypeSymb
     {
         NO_RELATION,
         PARENT_TYPE,
-        SUB_TYPE
+        SUBTYPE
     }
 
-    protected final IOverloadResolver overloadResolver;
+    protected final ITypeHelper typeHelper;
     protected final Map<String, ITypeSymbol> typeSymbols;
 
     protected boolean hasAbsoluteNameChanged = true;
-    protected String ownAsboluteName;
+    protected String ownAbsoluteName;
 
-    public AContainerTypeSymbol(IOverloadResolver theOverloadResolver) {
+    public AContainerTypeSymbol(ITypeHelper theTypeHelper) {
         super();
-        overloadResolver = theOverloadResolver;
+        typeHelper = theTypeHelper;
         typeSymbols = new HashMap<>();
     }
 
@@ -93,8 +93,8 @@ public abstract class AContainerTypeSymbol<TContainer extends IContainerTypeSymb
         boolean hasChanged = false;
 
         for (ITypeSymbol typeSymbol : containerTypeSymbol.getTypeSymbols().values()) {
-            boolean hasUnionChanged = addTypeSymbol(typeSymbol);
-            hasChanged = hasChanged || hasUnionChanged;
+            boolean hasContainerChanged = addTypeSymbol(typeSymbol);
+            hasChanged = hasChanged || hasContainerChanged;
         }
 
         hasAbsoluteNameChanged = hasAbsoluteNameChanged || hasChanged;
@@ -120,14 +120,14 @@ public abstract class AContainerTypeSymbol<TContainer extends IContainerTypeSymb
     @Override
     public String getAbsoluteName() {
         if (hasAbsoluteNameChanged) {
-            ownAsboluteName = calculateAbsoluteName();
+            ownAbsoluteName = calculateAbsoluteName();
             hasAbsoluteNameChanged = false;
         }
-        return ownAsboluteName;
+        return ownAbsoluteName;
     }
 
     private String calculateAbsoluteName() {
-        String absolutename;
+        String absoluteName;
         if (!typeSymbols.isEmpty()) {
             final String separator = getTypeSeparator();
 
@@ -144,9 +144,9 @@ public abstract class AContainerTypeSymbol<TContainer extends IContainerTypeSymb
             }
             return sb.toString();
         } else {
-            absolutename = getDefaultName();
+            absoluteName = getDefaultName();
         }
-        return absolutename;
+        return absoluteName;
     }
 
     @Override

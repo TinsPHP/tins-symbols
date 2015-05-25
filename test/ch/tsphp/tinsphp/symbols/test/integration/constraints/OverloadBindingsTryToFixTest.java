@@ -11,12 +11,12 @@ import ch.tsphp.tinsphp.common.inference.constraints.FixedTypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
-import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
+import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.symbols.IntersectionTypeSymbol;
 import ch.tsphp.tinsphp.symbols.UnionTypeSymbol;
 import ch.tsphp.tinsphp.symbols.constraints.OverloadBindings;
 import ch.tsphp.tinsphp.symbols.test.unit.testutils.ATypeTest;
-import ch.tsphp.tinsphp.symbols.utils.OverloadResolver;
+import ch.tsphp.tinsphp.symbols.utils.TypeHelper;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -36,13 +36,13 @@ import static org.mockito.Mockito.when;
 public class OverloadBindingsTryToFixTest extends ATypeTest
 {
     private static ISymbolFactory symbolFactory;
-    private static IOverloadResolver overloadResolver;
+    private static ITypeHelper typeHelper;
 
     @BeforeClass
     public static void init() {
         ATypeTest.init();
 
-        overloadResolver = new OverloadResolver();
+        typeHelper = new TypeHelper();
         symbolFactory = mock(ISymbolFactory.class);
         ITypeSymbol mixedTypeSymbol = mock(ITypeSymbol.class);
         when(mixedTypeSymbol.getAbsoluteName()).thenReturn("mixed");
@@ -52,14 +52,14 @@ public class OverloadBindingsTryToFixTest extends ATypeTest
         {
             @Override
             public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                return new UnionTypeSymbol(overloadResolver);
+                return new UnionTypeSymbol(typeHelper);
             }
         });
         when(symbolFactory.createIntersectionTypeSymbol()).then(new Answer<Object>()
         {
             @Override
             public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                return new IntersectionTypeSymbol(overloadResolver);
+                return new IntersectionTypeSymbol(typeHelper);
             }
         });
     }
@@ -1466,12 +1466,12 @@ public class OverloadBindingsTryToFixTest extends ATypeTest
 
 
     private IOverloadBindings createOverloadBindings() {
-        return createOverloadBindings(symbolFactory, overloadResolver);
+        return createOverloadBindings(symbolFactory, typeHelper);
     }
 
     protected IOverloadBindings createOverloadBindings(
-            ISymbolFactory symbolFactory, IOverloadResolver overloadResolver) {
-        return new OverloadBindings(symbolFactory, overloadResolver);
+            ISymbolFactory symbolFactory, ITypeHelper typeHelper) {
+        return new OverloadBindings(symbolFactory, typeHelper);
     }
 
 }

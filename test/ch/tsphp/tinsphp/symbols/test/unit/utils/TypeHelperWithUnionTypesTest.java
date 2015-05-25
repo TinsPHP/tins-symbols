@@ -7,21 +7,14 @@
 package ch.tsphp.tinsphp.symbols.test.unit.utils;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
-import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
-import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
-import ch.tsphp.tinsphp.symbols.test.unit.testutils.ATypeTest;
-import ch.tsphp.tinsphp.symbols.utils.OverloadResolver;
+import ch.tsphp.tinsphp.common.utils.ITypeHelper;
+import ch.tsphp.tinsphp.symbols.test.integration.testutils.ATypeHelperTest;
 import org.junit.Test;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-public class OverloadResolverWithUnionTypesTest extends ATypeTest
+public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 {
 
     //--------------------  tests with unions on the left
@@ -31,8 +24,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
         ITypeSymbol actual = createUnion(intType, floatType);
         ITypeSymbol formal = numType;
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -42,8 +35,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
         ITypeSymbol actual = createUnion(stringType, intType, floatType);
         ITypeSymbol formal = scalarType;
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -53,8 +46,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
         ITypeSymbol actual = createUnion(intType, arrayType);
         ITypeSymbol formal = mixedType;
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -64,8 +57,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
         ITypeSymbol actual = createUnion(numType, arrayType);
         ITypeSymbol formal = mixedType;
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -75,8 +68,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
         ITypeSymbol actual = createUnion(arrayType, intType, fooType);
         ITypeSymbol formal = mixedType;
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -86,8 +79,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
         ITypeSymbol actual = createUnion(intType, floatType);
         ITypeSymbol formal = intType;
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(false));
     }
@@ -97,8 +90,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
         ITypeSymbol actual = createUnion(intType, arrayType, floatType);
         ITypeSymbol formal = numType;
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(false));
     }
@@ -110,8 +103,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
         ITypeSymbol actual = createUnion();
         ITypeSymbol formal = intType;
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -121,8 +114,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
         ITypeSymbol actual = createUnion();
         ITypeSymbol formal = fooType;
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -132,8 +125,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
         ITypeSymbol actual = createUnion();
         ITypeSymbol formal = mixedType;
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -143,8 +136,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
 //        ITypeSymbol actual = createUnion();
 //        ITypeSymbol formal = intType;
 //
-//        IOverloadResolver solver = createOverloadResolverOrSetMixed();
-//        boolean result = solver.isFirstSubTypeOfSecond(actual, formal);
+//        IOverloadRetypeHelper typeHelper = createOverloadRetypeHelperOrSetMixed();
+//        boolean result = typeHelper.isFirstSubTypeOfSecond(actual, formal);
 //
 //        assertThat(result, is(true));
 //    }
@@ -154,8 +147,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
         ITypeSymbol actual = createUnion();
         ITypeSymbol formal = intType;
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.isFirstSameOrParentTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
 
         assertThat(result, is(false));
     }
@@ -165,8 +158,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
 //        ITypeSymbol actual = createUnion();
 //        ITypeSymbol formal = intType;
 //
-//        IOverloadResolver solver = createOverloadResolverOrSetMixed();
-//        boolean result = solver.isFirstParentTypeOfSecond(actual, formal);
+//        IOverloadRetypeHelper typeHelper = createOverloadRetypeHelperOrSetMixed();
+//        boolean result = typeHelper.isFirstParentTypeOfSecond(actual, formal);
 //
 //        assertThat(result, is(false));
 //    }
@@ -178,8 +171,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createUnion(intType, floatType);
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -189,8 +182,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createUnion(numType, fooType);
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -200,8 +193,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createUnion(arrayType, stringType, numType, fooType);
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -211,8 +204,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createUnion(arrayType, scalarType);
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -222,8 +215,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createUnion(floatType, stringType);
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(false));
     }
@@ -233,8 +226,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createUnion(arrayType, fooType);
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(false));
     }
@@ -246,8 +239,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createUnion();
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(false));
     }
@@ -257,8 +250,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
         ITypeSymbol actual = arrayType;
         ITypeSymbol formal = createUnion();
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(false));
     }
@@ -268,8 +261,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
         ITypeSymbol actual = interfaceAType;
         ITypeSymbol formal = createUnion();
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(false));
     }
@@ -279,8 +272,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
 //        ITypeSymbol actual = interfaceAType;
 //        ITypeSymbol formal = createUnion();
 //
-//        IOverloadResolver solver = createOverloadResolverOrSetMixed();
-//        boolean result = solver.isFirstSubTypeOfSecond(actual, formal);
+//        IOverloadRetypeHelper typeHelper = createOverloadRetypeHelperOrSetMixed();
+//        boolean result = typeHelper.isFirstSubTypeOfSecond(actual, formal);
 //
 //        assertThat(result, is(false));
 //    }
@@ -290,8 +283,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
         ITypeSymbol actual = interfaceAType;
         ITypeSymbol formal = createUnion();
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.isFirstSameOrParentTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -301,8 +294,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
 //        ITypeSymbol actual = interfaceAType;
 //        ITypeSymbol formal = createUnion();
 //
-//        IOverloadResolver solver = createOverloadResolverOrSetMixed();
-//        boolean result = solver.isFirstParentTypeOfSecond(actual, formal);
+//        IOverloadRetypeHelper typeHelper = createOverloadRetypeHelperOrSetMixed();
+//        boolean result = typeHelper.isFirstParentTypeOfSecond(actual, formal);
 //
 //        assertThat(result, is(true));
 //    }
@@ -314,8 +307,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
         ITypeSymbol actual = createUnion(intType, floatType);
         ITypeSymbol formal = createUnion(numType, stringType);
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -325,8 +318,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
         ITypeSymbol actual = createUnion(intType, fooType);
         ITypeSymbol formal = createUnion(scalarType, arrayType, interfaceAType);
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -336,8 +329,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
         ITypeSymbol actual = createUnion(stringType, fooType);
         ITypeSymbol formal = createUnion(numType, arrayType, interfaceAType);
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(false));
     }
@@ -347,8 +340,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
 //        ITypeSymbol actual = createUnion(intType, floatType);
 //        ITypeSymbol formal = createUnion(intType, floatType);
 //
-//        IOverloadResolver solver = createOverloadResolverOrSetMixed();
-//        boolean result = solver.isFirstSubTypeOfSecond(actual, formal);
+//        IOverloadRetypeHelper typeHelper = createOverloadRetypeHelperOrSetMixed();
+//        boolean result = typeHelper.isFirstSubTypeOfSecond(actual, formal);
 //
 //        assertThat(result, is(false));
 //    }
@@ -358,8 +351,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
 //        ITypeSymbol actual = createUnion(intType, floatType);
 //        ITypeSymbol formal = createUnion(intType, floatType);
 //
-//        IOverloadResolver solver = createOverloadResolverOrSetMixed();
-//        boolean result = solver.isFirstParentTypeOfSecond(actual, formal);
+//        IOverloadRetypeHelper typeHelper = createOverloadRetypeHelperOrSetMixed();
+//        boolean result = typeHelper.isFirstParentTypeOfSecond(actual, formal);
 //
 //        assertThat(result, is(false));
 //    }
@@ -371,8 +364,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
 //        ITypeSymbol actual = createUnion();
 //        ITypeSymbol formal = createUnion();
 //
-//        IOverloadResolver solver = createOverloadResolverOrSetMixed();
-//        boolean result = solver.isFirstSubTypeOfSecond(actual, formal);
+//        IOverloadRetypeHelper typeHelper = createOverloadRetypeHelperOrSetMixed();
+//        boolean result = typeHelper.isFirstSubTypeOfSecond(actual, formal);
 //
 //        assertThat(result, is(false));
 //    }
@@ -382,8 +375,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
         ITypeSymbol actual = createUnion();
         ITypeSymbol formal = createUnion();
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -393,8 +386,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
         ITypeSymbol actual = createUnion();
         ITypeSymbol formal = createUnion();
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.isFirstSameOrParentTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -404,8 +397,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
 //        ITypeSymbol actual = createUnion();
 //        ITypeSymbol formal = createUnion();
 //
-//        IOverloadResolver solver = createOverloadResolverOrSetMixed();
-//        boolean result = solver.isFirstParentTypeOfSecond(actual, formal);
+//        IOverloadRetypeHelper typeHelper = createOverloadRetypeHelperOrSetMixed();
+//        boolean result = typeHelper.isFirstParentTypeOfSecond(actual, formal);
 //
 //        assertThat(result, is(false));
 //    }
@@ -417,8 +410,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
 //        ITypeSymbol actual = createUnion(mixedType);
 //        ITypeSymbol formal = createUnion(mixedType);
 //
-//        IOverloadResolver solver = createOverloadResolverOrSetMixed();
-//        boolean result = solver.isFirstSubTypeOfSecond(actual, formal);
+//        IOverloadRetypeHelper typeHelper = createOverloadRetypeHelperOrSetMixed();
+//        boolean result = typeHelper.isFirstSubTypeOfSecond(actual, formal);
 //
 //        assertThat(result, is(false));
 //    }
@@ -428,8 +421,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
         ITypeSymbol actual = createUnion(mixedType);
         ITypeSymbol formal = createUnion(mixedType);
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -439,8 +432,8 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
         ITypeSymbol actual = createUnion(mixedType);
         ITypeSymbol formal = createUnion(mixedType);
 
-        IOverloadResolver solver = createOverloadResolver();
-        boolean result = solver.isFirstSameOrParentTypeOfSecond(actual, formal);
+        ITypeHelper typeHelper = createTypeHelper();
+        boolean result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -450,23 +443,9 @@ public class OverloadResolverWithUnionTypesTest extends ATypeTest
 //        ITypeSymbol actual = createUnion(mixedType);
 //        ITypeSymbol formal = createUnion(mixedType);
 //
-//        IOverloadResolver solver = createOverloadResolverOrSetMixed();
-//        boolean result = solver.isFirstParentTypeOfSecond(actual, formal);
+//        IOverloadRetypeHelper typeHelper = createOverloadRetypeHelperOrSetMixed();
+//        boolean result = typeHelper.isFirstParentTypeOfSecond(actual, formal);
 //
 //        assertThat(result, is(false));
 //    }
-
-    private IUnionTypeSymbol createUnion(ITypeSymbol... typeSymbols) {
-        IUnionTypeSymbol unionTypeSymbol = mock(IUnionTypeSymbol.class);
-        Map<String, ITypeSymbol> map = new HashMap<>();
-        for (ITypeSymbol typeSymbol : typeSymbols) {
-            map.put(typeSymbol.getAbsoluteName(), typeSymbol);
-        }
-        when(unionTypeSymbol.getTypeSymbols()).thenReturn(map);
-        return unionTypeSymbol;
-    }
-
-    protected IOverloadResolver createOverloadResolver() {
-        return new OverloadResolver();
-    }
 }

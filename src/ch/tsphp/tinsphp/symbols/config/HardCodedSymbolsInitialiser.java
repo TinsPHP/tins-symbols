@@ -11,26 +11,26 @@ import ch.tsphp.tinsphp.common.scopes.IScopeFactory;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IModifierHelper;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
-import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
+import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.symbols.ModifierHelper;
 import ch.tsphp.tinsphp.symbols.SymbolFactory;
 import ch.tsphp.tinsphp.symbols.scopes.ScopeFactory;
 import ch.tsphp.tinsphp.symbols.scopes.ScopeHelper;
-import ch.tsphp.tinsphp.symbols.utils.OverloadResolver;
+import ch.tsphp.tinsphp.symbols.utils.TypeHelper;
 
 public class HardCodedSymbolsInitialiser implements ISymbolsInitialiser
 {
     private final IModifierHelper modifierHelper;
     private final IScopeHelper scopeHelper;
-    private final IOverloadResolver overloadResolver;
+    private final ITypeHelper typeHelper;
     private final ISymbolFactory symbolFactory;
     private final IScopeFactory scopeFactory;
 
     public HardCodedSymbolsInitialiser() {
         modifierHelper = new ModifierHelper();
-        overloadResolver = new OverloadResolver();
+        typeHelper = new TypeHelper();
         scopeHelper = new ScopeHelper();
-        symbolFactory = new SymbolFactory(scopeHelper, modifierHelper, overloadResolver);
+        symbolFactory = new SymbolFactory(scopeHelper, modifierHelper, typeHelper);
         scopeFactory = new ScopeFactory(scopeHelper);
     }
 
@@ -41,8 +41,8 @@ public class HardCodedSymbolsInitialiser implements ISymbolsInitialiser
     }
 
     @Override
-    public IOverloadResolver getOverloadResolver() {
-        return overloadResolver;
+    public ITypeHelper getTypeHelper() {
+        return typeHelper;
     }
 
     @Override

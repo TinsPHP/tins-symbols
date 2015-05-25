@@ -10,7 +10,7 @@ import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IContainerTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.PrimitiveTypeNames;
-import ch.tsphp.tinsphp.common.utils.IOverloadResolver;
+import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -19,8 +19,8 @@ public class IntersectionTypeSymbol extends AContainerTypeSymbol<IIntersectionTy
         implements IIntersectionTypeSymbol
 {
 
-    public IntersectionTypeSymbol(IOverloadResolver theOverloadResolver) {
-        super(theOverloadResolver);
+    public IntersectionTypeSymbol(ITypeHelper theTypeHelper) {
+        super(theTypeHelper);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class IntersectionTypeSymbol extends AContainerTypeSymbol<IIntersectionTy
 
     @Override
     public IIntersectionTypeSymbol copy() {
-        IntersectionTypeSymbol copy = new IntersectionTypeSymbol(overloadResolver);
+        IntersectionTypeSymbol copy = new IntersectionTypeSymbol(typeHelper);
         copy.typeSymbols.putAll(typeSymbols);
         return copy;
     }
@@ -70,20 +70,19 @@ public class IntersectionTypeSymbol extends AContainerTypeSymbol<IIntersectionTy
         Iterator<Map.Entry<String, ITypeSymbol>> iterator = typeSymbols.entrySet().iterator();
         while (iterator.hasNext()) {
             ITypeSymbol existingTypeInUnion = iterator.next().getValue();
-            if ((status == ETypeRelation.NO_RELATION || status == ETypeRelation.SUB_TYPE)
-                    && overloadResolver.isFirstSameOrParentTypeOfSecond(existingTypeInUnion, newTypeSymbol)) {
+            if (typeHelper.isFirstSameOrSubTypeOfSecond(newTypeSymbol, existingTypeInUnion)) {
                 //remove parent type, it does no longer add information to the intersection type
-                status = ETypeRelation.SUB_TYPE;
+                status = ETypeRelation.SUBTYPE;
                 iterator.remove();
             } else if (status == ETypeRelation.NO_RELATION
-                    && overloadResolver.isFirstSameOrSubTypeOfSecond(existingTypeInUnion, newTypeSymbol)) {
+                    && typeHelper.isFirstSameOrParentTypeOfSecond(newTypeSymbol, existingTypeInUnion)) {
                 //new type is a parent type of an existing and hence it does not add new information to the union
                 status = ETypeRelation.PARENT_TYPE;
                 break;
             }
         }
 
-        if (status == ETypeRelation.NO_RELATION || status == ETypeRelation.SUB_TYPE) {
+        if (status != ETypeRelation.PARENT_TYPE) {
             changedUnion = true;
             typeSymbols.put(absoluteName, newTypeSymbol);
         }
