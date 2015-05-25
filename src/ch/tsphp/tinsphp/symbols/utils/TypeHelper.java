@@ -56,7 +56,7 @@ public class TypeHelper implements ITypeHelper
             return hasUpRelationFormalIsIntersection(
                     actualParameterType, (IIntersectionTypeSymbol) formalParameterType);
         }
-        return hasUpRelationWithoutUnionAndIntersection(actualParameterType, formalParameterType);
+        return hasNominalUpRelation(actualParameterType, formalParameterType);
     }
 
     private boolean hasUpRelationActualIsUnion(IUnionTypeSymbol actualParameterType, ITypeSymbol formalParameterType) {
@@ -119,7 +119,7 @@ public class TypeHelper implements ITypeHelper
         } else {
             // an empty intersection is the top type of all types and hence is a parent type of all types,
             // it is represented by mixed
-            hasUpRelation = hasUpRelationWithoutUnionAndIntersection(actualParameterType, mixedTypeSymbol);
+            hasUpRelation = hasNominalUpRelation(actualParameterType, mixedTypeSymbol);
         }
 
         return hasUpRelation;
@@ -181,13 +181,12 @@ public class TypeHelper implements ITypeHelper
         return oneIsParentType;
     }
 
-    private boolean hasUpRelationWithoutUnionAndIntersection(
-            ITypeSymbol actualParameterType, ITypeSymbol formalParameterType) {
+    private boolean hasNominalUpRelation(ITypeSymbol actualParameterType, ITypeSymbol formalParameterType) {
         boolean hasUpRelation = areSame(actualParameterType, formalParameterType);
         if (!hasUpRelation) {
             Set<ITypeSymbol> parentTypes = actualParameterType.getParentTypeSymbols();
             for (ITypeSymbol parentType : parentTypes) {
-                boolean hasRelation = hasUpRelationWithoutUnionAndIntersection(parentType, formalParameterType);
+                boolean hasRelation = hasNominalUpRelation(parentType, formalParameterType);
                 if (hasRelation) {
                     hasUpRelation = true;
                     break;

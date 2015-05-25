@@ -24,7 +24,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -58,9 +58,7 @@ public class ClassTypeSymbolModifierTest
         IPolymorphicTypeSymbol typeSymbol = createClassTypeSymbol(set);
         boolean result = (boolean) typeSymbol.getClass().getMethod(methodName).invoke(typeSymbol);
 
-        //APolymorphicTypeSymbol is always nullable
-        boolean is = methodName.equals("isNullable");
-        assertEquals(methodName + " failed.", is, result);
+        assertFalse(methodName + " failed.", result);
     }
 
     @Parameterized.Parameters
