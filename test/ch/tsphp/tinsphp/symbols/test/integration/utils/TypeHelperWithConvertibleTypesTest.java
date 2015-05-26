@@ -219,6 +219,27 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
     }
 
     @Test
+    public void isFirstSameOrSubTypeOfSecond_NumToAsString_ReturnsFalse() {
+        //pre-act arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions = new HashMap<>();
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions
+                = createConversions(pair(intType, asList(stringType)));
+
+        //pre-act necessary for arrange
+        ITypeHelper typeHelper = createTypeHelperAndSetConversions(implicitConversions, explicitConversions);
+        ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
+
+        //arrange
+        ITypeSymbol actual = numType;
+        ITypeSymbol formal = createConvertibleType(stringType, symbolFactory, typeHelper);
+
+        //act
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result, is(false));
+    }
+
+    @Test
     public void isFirstSameOrSubTypeOfSecond_FooToAsString_ReturnsTrue() {
         Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions = new HashMap<>();
         Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions
@@ -252,6 +273,46 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         //arrange
         ITypeSymbol actual = fooType;
         ITypeSymbol formal = createConvertibleType(scalarType, symbolFactory, typeHelper);
+
+        //act
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void isFirstSameOrSubTypeOfSecond_ISubAToAsStringWhereIAHasExpConversionToString_ReturnsTrue() {
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions = new HashMap<>();
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions
+                = createConversions(pair(interfaceAType, asList(stringType)));
+
+        //pre-act necessary for arrange
+        ITypeHelper typeHelper = createTypeHelperAndSetConversions(implicitConversions, explicitConversions);
+        ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
+
+        //arrange
+        ITypeSymbol actual = interfaceSubAType;
+        ITypeSymbol formal = createConvertibleType(stringType, symbolFactory, typeHelper);
+
+        //act
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void isFirstSameOrSubTypeOfSecond_ISubAToAsStringWhereIAHasImpConversionToString_ReturnsTrue() {
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(interfaceAType, asList(stringType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+
+        //pre-act necessary for arrange
+        ITypeHelper typeHelper = createTypeHelperAndSetConversions(implicitConversions, explicitConversions);
+        ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
+
+        //arrange
+        ITypeSymbol actual = interfaceSubAType;
+        ITypeSymbol formal = createConvertibleType(stringType, symbolFactory, typeHelper);
 
         //act
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);

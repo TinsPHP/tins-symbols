@@ -17,7 +17,6 @@ import ch.tsphp.tinsphp.common.utils.Pair;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 
 public class TypeHelper implements ITypeHelper
 {
@@ -151,32 +150,53 @@ public class TypeHelper implements ITypeHelper
     }
 
     private boolean hasUpRelationFromNominalToConvertible(ITypeSymbol fromType, IConvertibleTypeSymbol toType) {
-        String fromAbsoluteName = fromType.getAbsoluteName();
         ITypeSymbol toTargetType = toType.getUpperTypeBounds();
-        String toTargetAbsoluteName = toTargetType.getAbsoluteName();
-
         boolean canBeConverted = isFirstSameOrSubTypeOfSecond(fromType, toTargetType);
 
         if (!canBeConverted) {
-            Map<String, Pair<ITypeSymbol, IConversionMethod>> explicitConversions
-                    = core.getExplicitConversions().get(fromAbsoluteName);
-            Map<String, Pair<ITypeSymbol, IConversionMethod>> implicitConversions
-                    = core.getImplicitConversions().get(fromAbsoluteName);
-            canBeConverted = explicitConversions != null && explicitConversions.containsKey(toTargetAbsoluteName)
+            canBeConverted = hasConversionFromNominalToTarget(fromType, toTargetType);
+        }
+        return canBeConverted;
+    }
 
-                    || implicitConversions != null && implicitConversions.containsKey(toTargetAbsoluteName);
+    private boolean hasConversionFromNominalToTarget(ITypeSymbol fromType, ITypeSymbol toTargetType) {
+        String fromAbsoluteName = fromType.getAbsoluteName();
+        String toTargetAbsoluteName = toTargetType.getAbsoluteName();
+
+        boolean canBeConverted;
+        Map<String, Pair<ITypeSymbol, IConversionMethod>> explicitConversions
+                = core.getExplicitConversions().get(fromAbsoluteName);
+        Map<String, Pair<ITypeSymbol, IConversionMethod>> implicitConversions
+                = core.getImplicitConversions().get(fromAbsoluteName);
+        canBeConverted = explicitConversions != null && explicitConversions.containsKey(toTargetAbsoluteName)
+
+                || implicitConversions != null && implicitConversions.containsKey(toTargetAbsoluteName);
+
+        if (!canBeConverted) {
+            if (explicitConversions != null) {
+                canBeConverted = isAtLeastOneSameOrSubtype(explicitConversions, toTargetType);
+            }
+            if (!canBeConverted && implicitConversions != null) {
+                canBeConverted = isAtLeastOneSameOrSubtype(implicitConversions, toTargetType);
+            }
 
             if (!canBeConverted) {
-                if (explicitConversions != null) {
-                    canBeConverted = isAtLeastOneSameOrSubtype(explicitConversions, toTargetType);
-                }
-                if (!canBeConverted && implicitConversions != null) {
-                    canBeConverted = isAtLeastOneSameOrSubtype(implicitConversions, toTargetType);
-                }
+                canBeConverted = hasParentsUpRelationToConvertible(fromType, toTargetType);
             }
         }
-
         return canBeConverted;
+    }
+
+    private boolean hasParentsUpRelationToConvertible(ITypeSymbol fromType, ITypeSymbol toTargetType) {
+        boolean oneCanBeConverted = false;
+        for (ITypeSymbol typeSymbol : fromType.getParentTypeSymbols()) {
+            boolean canBeConverted = hasConversionFromNominalToTarget(typeSymbol, toTargetType);
+            if (canBeConverted) {
+                oneCanBeConverted = true;
+                break;
+            }
+        }
+        return oneCanBeConverted;
     }
 
     private boolean isAtLeastOneSameOrSubtype(
@@ -254,8 +274,7 @@ public class TypeHelper implements ITypeHelper
             ITypeSymbol actualParameterType, ITypeSymbol formalParameterType) {
         boolean hasUpRelation = areSame(actualParameterType, formalParameterType);
         if (!hasUpRelation) {
-            Set<ITypeSymbol> parentTypes = actualParameterType.getParentTypeSymbols();
-            for (ITypeSymbol parentType : parentTypes) {
+            for (ITypeSymbol parentType : actualParameterType.getParentTypeSymbols()) {
                 boolean hasRelation = hasUpRelationFromNominalToNominal(parentType, formalParameterType);
                 if (hasRelation) {
                     hasUpRelation = true;
