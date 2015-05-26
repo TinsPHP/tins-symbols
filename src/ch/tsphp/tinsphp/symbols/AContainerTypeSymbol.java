@@ -6,25 +6,19 @@
 
 package ch.tsphp.tinsphp.symbols;
 
-import ch.tsphp.common.IScope;
-import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ITypeSymbol;
-import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.symbols.IContainerTypeSymbol;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 public abstract class AContainerTypeSymbol<TContainer extends IContainerTypeSymbol<TContainer>>
-        implements IContainerTypeSymbol<TContainer>
+        extends AIndirectTypeSymbol implements IContainerTypeSymbol<TContainer>
 {
-    private static final String ERROR_MESSAGE = "You are dealing with an AContainerTypeSymbol.";
-
     protected static enum ETypeRelation
     {
         NO_RELATION,
@@ -34,9 +28,6 @@ public abstract class AContainerTypeSymbol<TContainer extends IContainerTypeSymb
 
     protected final ITypeHelper typeHelper;
     protected final Map<String, ITypeSymbol> typeSymbols;
-
-    protected boolean hasAbsoluteNameChanged = true;
-    protected String ownAbsoluteName;
 
     public AContainerTypeSymbol(ITypeHelper theTypeHelper) {
         super();
@@ -66,11 +57,6 @@ public abstract class AContainerTypeSymbol<TContainer extends IContainerTypeSymb
             }
         }
         return canBeUsed;
-    }
-
-    @Override
-    public ITypeSymbol evalSelf() {
-        return this;
     }
 
     @Override
@@ -108,25 +94,7 @@ public abstract class AContainerTypeSymbol<TContainer extends IContainerTypeSymb
     }
 
     @Override
-    public IScope getDefinitionScope() {
-        return null;
-    }
-
-    @Override
-    public String getName() {
-        return getAbsoluteName();
-    }
-
-    @Override
-    public String getAbsoluteName() {
-        if (hasAbsoluteNameChanged) {
-            ownAbsoluteName = calculateAbsoluteName();
-            hasAbsoluteNameChanged = false;
-        }
-        return ownAbsoluteName;
-    }
-
-    private String calculateAbsoluteName() {
+    protected String calculateAbsoluteName() {
         String absoluteName;
         if (!typeSymbols.isEmpty()) {
             final String separator = getTypeSeparator();
@@ -149,72 +117,4 @@ public abstract class AContainerTypeSymbol<TContainer extends IContainerTypeSymb
         return absoluteName;
     }
 
-    @Override
-    public String toString() {
-        return getAbsoluteName();
-    }
-
-
-    //--------------------------------------------------------------
-    // Unsupported Methods
-
-    @Override
-    public Set<ITypeSymbol> getParentTypeSymbols() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public ITSPHPAst getDefaultValue() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public void addModifier(Integer integer) {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public boolean removeModifier(Integer integer) {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public IModifierSet getModifiers() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public void setModifiers(IModifierSet modifierSet) {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public ITSPHPAst getDefinitionAst() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public void setDefinitionScope(IScope iScope) {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public ITypeSymbol getType() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public void setType(ITypeSymbol iTypeSymbol) {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public boolean isFalseable() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
-
-    @Override
-    public boolean isNullable() {
-        throw new UnsupportedOperationException(ERROR_MESSAGE);
-    }
 }

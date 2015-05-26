@@ -21,6 +21,7 @@ import ch.tsphp.tinsphp.common.symbols.IAliasSymbol;
 import ch.tsphp.tinsphp.common.symbols.IAliasTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IArrayTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IClassTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMinimalMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMinimalVariableSymbol;
@@ -288,11 +289,22 @@ public class SymbolFactoryTest
     }
 
     @Test
-    public void createUnionTypeSymbol_WithoutHashMap_StillReturnsAnEmptyMap() {
+    public void createUnionTypeSymbol_Standard_HasNoTypeSymbols() {
         //no arrange necessary
 
         ISymbolFactory symbolFactory = createSymbolFactory();
         IUnionTypeSymbol result = symbolFactory.createUnionTypeSymbol();
+
+        assertThat(result.getTypeSymbols(), is(not(nullValue())));
+        assertThat(result.getTypeSymbols().size(), is(0));
+    }
+
+    @Test
+    public void createIntersectionTypeSymbol_Standard_HasNoTypeSymbols() {
+        //no arrange necessary
+
+        ISymbolFactory symbolFactory = createSymbolFactory();
+        IIntersectionTypeSymbol result = symbolFactory.createIntersectionTypeSymbol();
 
         assertThat(result.getTypeSymbols(), is(not(nullValue())));
         assertThat(result.getTypeSymbols().size(), is(0));

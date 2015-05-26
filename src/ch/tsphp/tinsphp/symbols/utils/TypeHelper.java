@@ -7,16 +7,28 @@
 package ch.tsphp.tinsphp.symbols.utils;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
+import ch.tsphp.tinsphp.common.IConversionMethod;
+import ch.tsphp.tinsphp.common.ICore;
+import ch.tsphp.tinsphp.common.symbols.IConvertibleTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
+import ch.tsphp.tinsphp.common.utils.Pair;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 public class TypeHelper implements ITypeHelper
 {
+
     private ITypeSymbol mixedTypeSymbol;
+    private ICore core;
+
+    @Override
+    public void setCore(ICore theCore) {
+        core = theCore;
+    }
 
     @Override
     public void setMixedTypeSymbol(ITypeSymbol typeSymbol) {
@@ -38,39 +50,40 @@ public class TypeHelper implements ITypeHelper
         return areSame(potentialParentType, typeSymbol) || hasUpRelationFromTo(typeSymbol, potentialParentType);
     }
 
-    private boolean hasUpRelationFromTo(ITypeSymbol actualParameterType, ITypeSymbol formalParameterType) {
-        if (actualParameterType instanceof IUnionTypeSymbol) {
-            return hasUpRelationActualIsUnion((IUnionTypeSymbol) actualParameterType, formalParameterType);
-        } else if (actualParameterType instanceof IIntersectionTypeSymbol) {
-            return hasUpRelationActualIsIntersection(
-                    (IIntersectionTypeSymbol) actualParameterType, formalParameterType);
+    private boolean hasUpRelationFromTo(ITypeSymbol fromType, ITypeSymbol toType) {
+        if (fromType instanceof IUnionTypeSymbol) {
+            return hasUpRelationFromUnionTo((IUnionTypeSymbol) fromType, toType);
+        } else if (fromType instanceof IIntersectionTypeSymbol) {
+            return hasUpRelationFromIntersectionTo((IIntersectionTypeSymbol) fromType, toType);
+        } else if (fromType instanceof IConvertibleTypeSymbol) {
+            return hasUpRelationFromConvertibleTo((IConvertibleTypeSymbol) fromType, toType);
         }
-        return hasUpRelationActualIsNotUnionNorIntersection(actualParameterType, formalParameterType);
+        return hasUpRelationFromNominalTo(fromType, toType);
     }
 
-    private boolean hasUpRelationActualIsNotUnionNorIntersection(
-            ITypeSymbol actualParameterType, ITypeSymbol formalParameterType) {
-        if (formalParameterType instanceof IUnionTypeSymbol) {
-            return hasUpRelationFormalIsUnion(actualParameterType, (IUnionTypeSymbol) formalParameterType);
-        } else if (formalParameterType instanceof IIntersectionTypeSymbol) {
-            return hasUpRelationFormalIsIntersection(
-                    actualParameterType, (IIntersectionTypeSymbol) formalParameterType);
+    private boolean hasUpRelationFromNominalTo(ITypeSymbol fromType, ITypeSymbol toType) {
+        if (toType instanceof IUnionTypeSymbol) {
+            return hasUpRelationFromNominalToUnion(fromType, (IUnionTypeSymbol) toType);
+        } else if (toType instanceof IIntersectionTypeSymbol) {
+            return hasUpRelationFromNominalToIntersection(fromType, (IIntersectionTypeSymbol) toType);
+        } else if (toType instanceof IConvertibleTypeSymbol) {
+            return hasUpRelationFromNominalToConvertible(fromType, (IConvertibleTypeSymbol) toType);
         }
-        return hasNominalUpRelation(actualParameterType, formalParameterType);
+        return hasUpRelationFromNominalToNominal(fromType, toType);
     }
 
-    private boolean hasUpRelationActualIsUnion(IUnionTypeSymbol actualParameterType, ITypeSymbol formalParameterType) {
-        Collection<ITypeSymbol> typeSymbols = actualParameterType.getTypeSymbols().values();
+    private boolean hasUpRelationFromUnionTo(IUnionTypeSymbol fromType, ITypeSymbol toType) {
+        Collection<ITypeSymbol> typeSymbols = fromType.getTypeSymbols().values();
 
         if (!typeSymbols.isEmpty()) {
-            return allAreSameOrSubtypes(typeSymbols, formalParameterType);
+            return allAreSameOrSubtypes(typeSymbols, toType);
         }
-        // an empty union is the bottom type of all types and hence is at least the same type as formalParameterType
+        // an empty union is the bottom type of all types and hence is at least the same type as toType
         // (could also be a subtype)
         return true;
     }
 
-    private boolean hasUpRelationActualIsIntersection(
+    private boolean hasUpRelationFromIntersectionTo(
             IIntersectionTypeSymbol actualParameterType, ITypeSymbol formalParameterType) {
         Collection<ITypeSymbol> typeSymbols = actualParameterType.getTypeSymbols().values();
 
@@ -90,24 +103,36 @@ public class TypeHelper implements ITypeHelper
 
                 hasUpRelation = allAreSameOrParentTypes(formalParameterTypes, actualParameterType);
             } else {
-                hasUpRelation = isAtLeastOneIsSameOrSubtype(typeSymbols, formalParameterType);
+                hasUpRelation = isAtLeastOneSameOrSubtype(typeSymbols, formalParameterType);
             }
         } else {
-            hasUpRelation = hasUpRelationActualIsNotUnionNorIntersection(mixedTypeSymbol, formalParameterType);
+            hasUpRelation = hasUpRelationFromNominalTo(mixedTypeSymbol, formalParameterType);
         }
 
         return hasUpRelation;
     }
 
-    private boolean hasUpRelationFormalIsUnion(ITypeSymbol actualParameterType, IUnionTypeSymbol formalParameterType) {
+    private boolean hasUpRelationFromConvertibleTo(
+            IConvertibleTypeSymbol actualParameterType, ITypeSymbol formalParameterType) {
+        if (formalParameterType instanceof IConvertibleTypeSymbol) {
+            IConvertibleTypeSymbol formalConvertibleType = (IConvertibleTypeSymbol) formalParameterType;
+            return hasUpRelationFromTo(
+                    actualParameterType.getUpperTypeBounds(), formalConvertibleType.getUpperTypeBounds());
+        }
+        //A convertible type cannot be a subtype of another type if this type is not a convertible type.
+        return false;
+    }
+
+    private boolean hasUpRelationFromNominalToUnion(ITypeSymbol actualParameterType, IUnionTypeSymbol
+            formalParameterType) {
         //if union is empty, then it cannot be a subtype or the same (if actual was an empty union type then we would
-        // already have stopped in hasUpRelationActualIsUnion and return true)
+        // already have stopped in hasUpRelationFromNominalToUnion and return true)
 
         Collection<ITypeSymbol> typeSymbols = formalParameterType.getTypeSymbols().values();
         return isAtLeastOneSameOrParentType(typeSymbols, actualParameterType);
     }
 
-    private boolean hasUpRelationFormalIsIntersection(
+    private boolean hasUpRelationFromNominalToIntersection(
             ITypeSymbol actualParameterType, IIntersectionTypeSymbol formalParameterType) {
 
         Collection<ITypeSymbol> typeSymbols = formalParameterType.getTypeSymbols().values();
@@ -119,10 +144,54 @@ public class TypeHelper implements ITypeHelper
         } else {
             // an empty intersection is the top type of all types and hence is a parent type of all types,
             // it is represented by mixed
-            hasUpRelation = hasNominalUpRelation(actualParameterType, mixedTypeSymbol);
+            hasUpRelation = hasUpRelationFromNominalToNominal(actualParameterType, mixedTypeSymbol);
         }
 
         return hasUpRelation;
+    }
+
+    private boolean hasUpRelationFromNominalToConvertible(ITypeSymbol fromType, IConvertibleTypeSymbol toType) {
+        String fromAbsoluteName = fromType.getAbsoluteName();
+        ITypeSymbol toTargetType = toType.getUpperTypeBounds();
+        String toTargetAbsoluteName = toTargetType.getAbsoluteName();
+
+        boolean canBeConverted = isFirstSameOrSubTypeOfSecond(fromType, toTargetType);
+
+        if (!canBeConverted) {
+            Map<String, Pair<ITypeSymbol, IConversionMethod>> explicitConversions
+                    = core.getExplicitConversions().get(fromAbsoluteName);
+            Map<String, Pair<ITypeSymbol, IConversionMethod>> implicitConversions
+                    = core.getImplicitConversions().get(fromAbsoluteName);
+            canBeConverted = explicitConversions != null && explicitConversions.containsKey(toTargetAbsoluteName)
+
+                    || implicitConversions != null && implicitConversions.containsKey(toTargetAbsoluteName);
+
+            if (!canBeConverted) {
+                if (explicitConversions != null) {
+                    canBeConverted = isAtLeastOneSameOrSubtype(explicitConversions, toTargetType);
+                }
+                if (!canBeConverted && implicitConversions != null) {
+                    canBeConverted = isAtLeastOneSameOrSubtype(implicitConversions, toTargetType);
+                }
+            }
+        }
+
+        return canBeConverted;
+    }
+
+    private boolean isAtLeastOneSameOrSubtype(
+            Map<String, Pair<ITypeSymbol, IConversionMethod>> conversions, ITypeSymbol targetType) {
+
+        boolean oneIsSameOrSubtype = false;
+        for (Map.Entry<String, Pair<ITypeSymbol, IConversionMethod>> entry : conversions.entrySet()) {
+            ITypeSymbol typeSymbol = entry.getValue().first;
+            boolean hasRelation = isFirstSameOrSubTypeOfSecond(typeSymbol, targetType);
+            if (hasRelation) {
+                oneIsSameOrSubtype = true;
+                break;
+            }
+        }
+        return oneIsSameOrSubtype;
     }
 
     private boolean allAreSameOrParentTypes(
@@ -130,7 +199,7 @@ public class TypeHelper implements ITypeHelper
 
         boolean areAllSameOrParentTypes = true;
         for (ITypeSymbol typeSymbol : typeSymbols) {
-            boolean hasRelation = hasUpRelationFromTo(typeSymbolToCompareWith, typeSymbol);
+            boolean hasRelation = isFirstSameOrParentTypeOfSecond(typeSymbol, typeSymbolToCompareWith);
             if (!hasRelation) {
                 areAllSameOrParentTypes = false;
                 break;
@@ -144,7 +213,7 @@ public class TypeHelper implements ITypeHelper
 
         boolean areAllSameOrSubtypes = true;
         for (ITypeSymbol typeSymbol : typeSymbols) {
-            boolean hasRelation = hasUpRelationFromTo(typeSymbol, typeSymbolToCompareWith);
+            boolean hasRelation = isFirstSameOrSubTypeOfSecond(typeSymbol, typeSymbolToCompareWith);
             if (!hasRelation) {
                 areAllSameOrSubtypes = false;
                 break;
@@ -153,12 +222,12 @@ public class TypeHelper implements ITypeHelper
         return areAllSameOrSubtypes;
     }
 
-    private boolean isAtLeastOneIsSameOrSubtype(
+    private boolean isAtLeastOneSameOrSubtype(
             Collection<ITypeSymbol> typeSymbols, ITypeSymbol typeSymbolToCompareWith) {
 
         boolean oneIsSameOrSubtype = false;
         for (ITypeSymbol typeSymbol : typeSymbols) {
-            boolean hasRelation = hasUpRelationFromTo(typeSymbol, typeSymbolToCompareWith);
+            boolean hasRelation = isFirstSameOrSubTypeOfSecond(typeSymbol, typeSymbolToCompareWith);
             if (hasRelation) {
                 oneIsSameOrSubtype = true;
                 break;
@@ -172,7 +241,7 @@ public class TypeHelper implements ITypeHelper
 
         boolean oneIsParentType = false;
         for (ITypeSymbol typeSymbol : typeSymbols) {
-            boolean hasRelation = hasUpRelationFromTo(typeSymbolToCompareWith, typeSymbol);
+            boolean hasRelation = isFirstSameOrParentTypeOfSecond(typeSymbol, typeSymbolToCompareWith);
             if (hasRelation) {
                 oneIsParentType = true;
                 break;
@@ -181,12 +250,13 @@ public class TypeHelper implements ITypeHelper
         return oneIsParentType;
     }
 
-    private boolean hasNominalUpRelation(ITypeSymbol actualParameterType, ITypeSymbol formalParameterType) {
+    private boolean hasUpRelationFromNominalToNominal(
+            ITypeSymbol actualParameterType, ITypeSymbol formalParameterType) {
         boolean hasUpRelation = areSame(actualParameterType, formalParameterType);
         if (!hasUpRelation) {
             Set<ITypeSymbol> parentTypes = actualParameterType.getParentTypeSymbols();
             for (ITypeSymbol parentType : parentTypes) {
-                boolean hasRelation = hasNominalUpRelation(parentType, formalParameterType);
+                boolean hasRelation = hasUpRelationFromNominalToNominal(parentType, formalParameterType);
                 if (hasRelation) {
                     hasUpRelation = true;
                     break;

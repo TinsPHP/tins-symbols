@@ -21,6 +21,7 @@ import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
+import ch.tsphp.tinsphp.common.utils.MapHelper;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -134,7 +135,7 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     @Override
-    public void addLowerRefBound(String typeVariable, ITypeVariableReference reference) {
+    public boolean addLowerRefBound(String typeVariable, ITypeVariableReference reference) {
         if (!typeVariable2Variables.containsKey(typeVariable)) {
             throw new IllegalArgumentException("no variable has a binding for type variable \"" + typeVariable + "\".");
         }
@@ -147,15 +148,28 @@ public class OverloadBindings implements IOverloadBindings
         }
 
         boolean hasNotFixedType = !reference.hasFixedType();
-        addLowerRefBound(typeVariable, refTypeVariable, hasNotFixedType);
+        return addLowerRefBound(typeVariable, refTypeVariable, hasNotFixedType);
     }
 
-    private void addLowerRefBound(String typeVariable, String refTypeVariable, boolean hasNotFixedType) {
+    private boolean addLowerRefBound(String typeVariable, String refTypeVariable, boolean hasNotFixedType) {
+        boolean hasChanged = false;
+
         // no need to actually add the dependency if it has a fixed type (then it is enough that we transfer the
         // type bounds)
         if (hasNotFixedType) {
-            addToSetInMap(lowerRefBounds, typeVariable, refTypeVariable);
-            addToSetInMap(upperRefBounds, refTypeVariable, typeVariable);
+            hasChanged = !lowerRefBounds.containsKey(typeVariable);
+            if (!hasChanged) {
+                Set<String> set = lowerRefBounds.get(typeVariable);
+                if (!set.contains(refTypeVariable)) {
+                    hasChanged = true;
+                    set.add(refTypeVariable);
+                }
+            } else {
+                Set<String> set = new HashSet<>();
+                set.add(refTypeVariable);
+                lowerRefBounds.put(typeVariable, set);
+            }
+            MapHelper.addToSetInMap(upperRefBounds, refTypeVariable, typeVariable);
         }
 
         if (isNotSelfReference(typeVariable, refTypeVariable)) {
@@ -184,6 +198,8 @@ public class OverloadBindings implements IOverloadBindings
                 addLowerTypeBoundAfterContainsCheck(typeVariable, lowerTypeBounds.get(refTypeVariable));
             }
         }
+
+        return hasChanged;
     }
 
     private boolean isNotSelfReference(String typeVariable, String refTypeVariable) {
@@ -191,15 +207,15 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     @Override
-    public void addLowerTypeBound(String typeVariable, ITypeSymbol typeSymbol) {
+    public boolean addLowerTypeBound(String typeVariable, ITypeSymbol typeSymbol) {
         if (!typeVariable2Variables.containsKey(typeVariable)) {
             throw new IllegalArgumentException("no variable has a binding for type variable \"" + typeVariable + "\".");
         }
 
-        addLowerTypeBoundAfterContainsCheck(typeVariable, typeSymbol);
+        return addLowerTypeBoundAfterContainsCheck(typeVariable, typeSymbol);
     }
 
-    private void addLowerTypeBoundAfterContainsCheck(String typeVariable, ITypeSymbol typeSymbol) {
+    private boolean addLowerTypeBoundAfterContainsCheck(String typeVariable, ITypeSymbol typeSymbol) {
         checkUpperTypeBounds(typeVariable, typeSymbol);
 
         boolean hasChanged = addToLowerUnionTypeSymbol(typeVariable, typeSymbol);
@@ -209,6 +225,7 @@ public class OverloadBindings implements IOverloadBindings
                 addLowerTypeBoundAfterContainsCheck(refTypeVariable, typeSymbol);
             }
         }
+        return hasChanged;
     }
 
     private void checkUpperTypeBounds(String typeVariable, ITypeSymbol newLowerType) {
@@ -256,15 +273,15 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     @Override
-    public void addUpperTypeBound(String typeVariable, ITypeSymbol typeSymbol) {
+    public boolean addUpperTypeBound(String typeVariable, ITypeSymbol typeSymbol) {
         if (!typeVariable2Variables.containsKey(typeVariable)) {
             throw new IllegalArgumentException("No variable has a binding for type variable \"" + typeVariable + "\".");
         }
 
-        addUpperTypeBoundAfterContainsCheck(typeVariable, typeSymbol);
+        return addUpperTypeBoundAfterContainsCheck(typeVariable, typeSymbol);
     }
 
-    private void addUpperTypeBoundAfterContainsCheck(String typeVariable, ITypeSymbol typeSymbol) {
+    private boolean addUpperTypeBoundAfterContainsCheck(String typeVariable, ITypeSymbol typeSymbol) {
         checkLowerTypeBounds(typeVariable, typeSymbol);
 
         if (hasUpperTypeBounds(typeVariable)) {
@@ -284,6 +301,8 @@ public class OverloadBindings implements IOverloadBindings
                 addUpperTypeBoundAfterContainsCheck(refTypeVariable, typeSymbol);
             }
         }
+
+        return hasChanged;
     }
 
     private boolean areNotInSameTypeHierarchyAndOneCannotBeUsedInIntersection(ITypeSymbol typeSymbol,
