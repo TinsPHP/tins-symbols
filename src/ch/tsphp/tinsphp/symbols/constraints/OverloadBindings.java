@@ -224,11 +224,15 @@ public class OverloadBindings implements IOverloadBindings
     private boolean addLowerTypeBoundAfterContainsCheck(String typeVariable, ITypeSymbol typeSymbol) {
         checkUpperTypeBounds(typeVariable, typeSymbol);
 
-        boolean hasChanged = addToLowerUnionTypeSymbol(typeVariable, typeSymbol);
+        boolean hasChanged = false;
+        if (isNotConvertibleTypeWithSelfRef(typeVariable, typeSymbol)) {
 
-        if (hasChanged && hasUpperRefBounds(typeVariable)) {
-            for (String refTypeVariable : upperRefBounds.get(typeVariable)) {
-                addLowerTypeBoundAfterContainsCheck(refTypeVariable, typeSymbol);
+            hasChanged = addToLowerUnionTypeSymbol(typeVariable, typeSymbol);
+
+            if (hasChanged && hasUpperRefBounds(typeVariable)) {
+                for (String refTypeVariable : upperRefBounds.get(typeVariable)) {
+                    addLowerTypeBoundAfterContainsCheck(refTypeVariable, typeSymbol);
+                }
             }
         }
         return hasChanged;

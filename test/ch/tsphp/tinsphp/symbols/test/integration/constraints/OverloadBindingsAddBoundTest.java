@@ -221,6 +221,47 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         assertThat(changed, is(true));
     }
 
+    //see TINS-482 upper bound with convertible type which points to lower bound
+    @Test
+    public void addLowerTypeBound_ConvertibleTypeWhichPointsToItself_DoesNotAddTheConvertibleType() {
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String tLhs = "Tlhs";
+        collection.addVariable("$lhs", new TypeVariableReference(tLhs));
+        IConvertibleTypeSymbol asTlhs = symbolFactory.createConvertibleTypeSymbol();
+        asTlhs.setOverloadBindings(collection, tLhs);
+
+        //act
+        boolean changed = collection.addLowerTypeBound(tLhs, asTlhs);
+
+        assertThat(collection.getLowerTypeBounds(tLhs), is(nullValue()));
+        assertThat(changed, is(false));
+    }
+
+    @Test
+    public void addLowerTypeBound_ConvertibleTypeWithRefWhichIsAlreadyUpper_DoesNotPropagateTheTypeUpwards() {
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String tLhs = "Tlhs";
+        String tRhs = "Trhs";
+        collection.addVariable("$lhs", new TypeVariableReference(tLhs));
+        collection.addVariable("$rhs", new TypeVariableReference(tRhs));
+        IConvertibleTypeSymbol asTlhs = symbolFactory.createConvertibleTypeSymbol();
+        asTlhs.setOverloadBindings(collection, tLhs);
+        collection.addLowerRefBound(tLhs, new TypeVariableReference(tRhs));
+
+        //act
+        boolean changed = collection.addLowerTypeBound(tRhs, asTlhs);
+
+        assertThat(collection.getLowerTypeBounds(tLhs), is(nullValue()));
+        assertThat(collection.getLowerTypeBounds(tRhs).getTypeSymbols().keySet(), containsInAnyOrder("{as Tlhs}"));
+        assertThat(changed, is(true));
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void addUpperTypeBound_ForNonExistingBinding_ThrowsIllegalArgumentException() {
         //no arrange necessary
