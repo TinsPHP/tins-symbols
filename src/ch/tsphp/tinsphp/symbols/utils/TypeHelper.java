@@ -8,7 +8,7 @@ package ch.tsphp.tinsphp.symbols.utils;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.IConversionMethod;
-import ch.tsphp.tinsphp.common.ICore;
+import ch.tsphp.tinsphp.common.core.IConversionsProvider;
 import ch.tsphp.tinsphp.common.symbols.IConvertibleTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
@@ -22,11 +22,11 @@ public class TypeHelper implements ITypeHelper
 {
 
     private ITypeSymbol mixedTypeSymbol;
-    private ICore core;
+    private IConversionsProvider conversionsProvider;
 
     @Override
-    public void setCore(ICore theCore) {
-        core = theCore;
+    public void setConversionsProvider(IConversionsProvider theConversionProvider) {
+        conversionsProvider = theConversionProvider;
     }
 
     @Override
@@ -166,9 +166,9 @@ public class TypeHelper implements ITypeHelper
 
         boolean canBeConverted;
         Map<String, Pair<ITypeSymbol, IConversionMethod>> explicitConversions
-                = core.getExplicitConversions().get(fromAbsoluteName);
+                = conversionsProvider.getExplicitConversions().get(fromAbsoluteName);
         Map<String, Pair<ITypeSymbol, IConversionMethod>> implicitConversions
-                = core.getImplicitConversions().get(fromAbsoluteName);
+                = conversionsProvider.getImplicitConversions().get(fromAbsoluteName);
         canBeConverted = explicitConversions != null && explicitConversions.containsKey(toTargetAbsoluteName)
 
                 || implicitConversions != null && implicitConversions.containsKey(toTargetAbsoluteName);

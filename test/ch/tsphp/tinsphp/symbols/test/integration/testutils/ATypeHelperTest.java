@@ -8,7 +8,7 @@ package ch.tsphp.tinsphp.symbols.test.integration.testutils;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.IConversionMethod;
-import ch.tsphp.tinsphp.common.ICore;
+import ch.tsphp.tinsphp.common.core.IConversionsProvider;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IConvertibleTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
@@ -90,10 +90,10 @@ public abstract class ATypeHelperTest extends ATypeTest
             Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions,
             Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions) {
         ITypeHelper typeHelper = createTypeHelper();
-        ICore core = mock(ICore.class);
-        when(core.getImplicitConversions()).thenReturn(implicitConversions);
-        when(core.getExplicitConversions()).thenReturn(explicitConversions);
-        typeHelper.setCore(core);
+        IConversionsProvider conversionsProvider = mock(IConversionsProvider.class);
+        when(conversionsProvider.getImplicitConversions()).thenReturn(implicitConversions);
+        when(conversionsProvider.getExplicitConversions()).thenReturn(explicitConversions);
+        typeHelper.setConversionsProvider(conversionsProvider);
         return typeHelper;
     }
 
