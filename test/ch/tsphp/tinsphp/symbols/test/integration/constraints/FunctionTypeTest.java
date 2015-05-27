@@ -96,7 +96,7 @@ public class FunctionTypeTest extends ATypeTest
         function.fix();
         String result = function.getSignature();
 
-        assertThat(result, is("T1 x T2 -> T1 \\ T2 < T1"));
+        assertThat(result, is("T1 x T2 -> T1 \\ T2 <: T1"));
     }
 
     @Test
@@ -118,7 +118,7 @@ public class FunctionTypeTest extends ATypeTest
         function.fix();
         String result = function.getSignature();
 
-        assertThat(result, is("T1 x T2 -> T3 \\ int < T1 < num, T2 < bool, (int | T1 | T2) < T3"));
+        assertThat(result, is("T1 x T2 -> T3 \\ int <: T1 <: num, T2 <: bool, (int | T1 | T2) <: T3"));
     }
 
     @Test
@@ -140,7 +140,7 @@ public class FunctionTypeTest extends ATypeTest
         function.fix();
         String result = function.getSignature();
 
-        assertThat(result, is("T1 x T2 -> T3 \\ int < T1 < num, T2 < bool, (int | T1 | T2) < T3"));
+        assertThat(result, is("T1 x T2 -> T3 \\ int <: T1 <: num, T2 <: bool, (int | T1 | T2) <: T3"));
     }
 
     @Test(expected = IllegalStateException.class)

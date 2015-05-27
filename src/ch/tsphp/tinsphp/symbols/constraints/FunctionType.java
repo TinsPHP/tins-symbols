@@ -145,7 +145,7 @@ public class FunctionType implements IFunctionType
             } else {
                 sbTypeParameters.append(lowerBounds.get(0));
             }
-            sbTypeParameters.append(" < ");
+            sbTypeParameters.append(" <: ");
         }
 
         if (hasLowerOrUpperBounds) {
@@ -153,7 +153,7 @@ public class FunctionType implements IFunctionType
         }
 
         if (hasUpperTypeBounds) {
-            sbTypeParameters.append(" < ");
+            sbTypeParameters.append(" <: ");
             sbTypeParameters.append(bindings.getUpperTypeBounds(typeVariable).getAbsoluteName());
         }
     }
