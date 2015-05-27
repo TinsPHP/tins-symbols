@@ -17,12 +17,15 @@ import ch.tsphp.tinsphp.common.inference.constraints.IntersectionBoundException;
 import ch.tsphp.tinsphp.common.inference.constraints.LowerBoundException;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.UpperBoundException;
+import ch.tsphp.tinsphp.common.symbols.IContainerTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IConvertibleTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.common.utils.MapHelper;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -182,8 +185,10 @@ public class OverloadBindings implements IOverloadBindings
             // upper bound of typeVariable to refTypeVariable's upper bound. If refTypeVariable is not yet the same
             // or a subtype, then either the newly added upper bound will specialise the upper bound of the
             // refTypeVariable or will lead to a BoundException. ...
+            boolean changed;
             if (hasUpperTypeBounds(typeVariable)) {
-                addUpperTypeBoundAfterContainsCheck(refTypeVariable, upperTypeBounds.get(typeVariable));
+                changed = addUpperTypeBoundAfterContainsCheck(refTypeVariable, upperTypeBounds.get(typeVariable));
+                hasChanged = hasChanged || changed;
             }
 
             // ... Furthermore, typeVariable logically needs to be able to hold all types refTypeVariable can hold. Thus
@@ -195,7 +200,8 @@ public class OverloadBindings implements IOverloadBindings
             // it is beneficial to propagate the lower bound upwards since we need to check later on,
             // if variables have the same lower bound as parameters and thus can be unified.
             if (hasLowerTypeBounds(refTypeVariable)) {
-                addLowerTypeBoundAfterContainsCheck(typeVariable, lowerTypeBounds.get(refTypeVariable));
+                changed = addLowerTypeBoundAfterContainsCheck(typeVariable, lowerTypeBounds.get(refTypeVariable));
+                hasChanged = hasChanged || changed;
             }
         }
 
@@ -284,32 +290,73 @@ public class OverloadBindings implements IOverloadBindings
     private boolean addUpperTypeBoundAfterContainsCheck(String typeVariable, ITypeSymbol typeSymbol) {
         checkLowerTypeBounds(typeVariable, typeSymbol);
 
-        if (hasUpperTypeBounds(typeVariable)) {
-            IIntersectionTypeSymbol upperBound = upperTypeBounds.get(typeVariable);
-            if (areNotInSameTypeHierarchyAndOneCannotBeUsedInIntersection(typeSymbol, upperBound)) {
-                throw new IntersectionBoundException(
-                        "Either the new upper bound " + typeSymbol.getAbsoluteName() + " or the existing upper bound "
-                                + upperBound.getAbsoluteName() + " cannot be used in an intersection type.",
-                        upperBound, typeSymbol);
-            }
-        }
 
-        boolean hasChanged = addToUpperIntersectionTypeSymbol(typeVariable, typeSymbol);
+        boolean hasChanged = false;
+        if (isNotConvertibleTypeWithSelfRef(typeVariable, typeSymbol)) {
 
-        if (hasChanged && hasLowerRefBounds(typeVariable)) {
-            for (String refTypeVariable : lowerRefBounds.get(typeVariable)) {
-                addUpperTypeBoundAfterContainsCheck(refTypeVariable, typeSymbol);
+            checkIfCanBeUsedInIntersectionWithOthers(typeVariable, typeSymbol);
+
+            hasChanged = addToUpperIntersectionTypeSymbol(typeVariable, typeSymbol);
+
+            if (hasChanged && hasLowerRefBounds(typeVariable)) {
+                for (String refTypeVariable : lowerRefBounds.get(typeVariable)) {
+                    addUpperTypeBoundAfterContainsCheck(refTypeVariable, typeSymbol);
+                }
             }
         }
 
         return hasChanged;
     }
 
-    private boolean areNotInSameTypeHierarchyAndOneCannotBeUsedInIntersection(ITypeSymbol typeSymbol,
+    private boolean isNotConvertibleTypeWithSelfRef(String typeVariable, ITypeSymbol typeSymbol) {
+        boolean isNot = true;
+        if (typeSymbol instanceof IContainerTypeSymbol) {
+            Collection<ITypeSymbol> typeSymbols = ((IContainerTypeSymbol) typeSymbol).getTypeSymbols().values();
+            isNot = isNotOneConvertibleTypeWithSelfRef(typeVariable, typeSymbols);
+        } else if (typeSymbol instanceof IConvertibleTypeSymbol) {
+            IConvertibleTypeSymbol convertibleTypeSymbol = (IConvertibleTypeSymbol) typeSymbol;
+            isNot = convertibleTypeSymbol.getOverloadBindings() != this
+                    || !convertibleTypeSymbol.getTypeVariable().equals(typeVariable);
+        }
+        return isNot;
+    }
+
+    private boolean isNotOneConvertibleTypeWithSelfRef(
+            String typeVariable, Collection<ITypeSymbol> typeSymbols) {
+        boolean isNotOne = true;
+        for (ITypeSymbol typeSymbol : typeSymbols) {
+            boolean isNot = isNotConvertibleTypeWithSelfRef(typeVariable, typeSymbol);
+            if (!isNot) {
+                isNotOne = false;
+                break;
+            }
+        }
+        return isNotOne;
+    }
+
+
+    private void checkIfCanBeUsedInIntersectionWithOthers(String typeVariable, ITypeSymbol typeSymbol) {
+        if (!typeSymbol.canBeUsedInIntersection() && hasUpperTypeBounds(typeVariable)) {
+            IIntersectionTypeSymbol upperBound = upperTypeBounds.get(typeVariable);
+            //only need to check if we already have a type in the upper bound which cannot be used in an
+            // intersection
+
+            // along with others which cannot be used
+            if (!upperBound.canBeUsedInIntersection()) {
+                if (areNotInSameTypeHierarchy(typeSymbol, upperBound)) {
+                    throw new IntersectionBoundException(
+                            "The upper bound " + upperBound.getAbsoluteName() + " already contained a concrete type "
+                                    + "and thus the new type " + typeSymbol.getAbsoluteName() + " cannot be added.",
+                            upperBound, typeSymbol);
+                }
+            }
+        }
+    }
+
+    private boolean areNotInSameTypeHierarchy(ITypeSymbol typeSymbol,
             IIntersectionTypeSymbol upperBound) {
         return !typeHelper.isFirstSameOrSubTypeOfSecond(typeSymbol, upperBound)
-                && !typeHelper.isFirstSameOrSubTypeOfSecond(upperBound, typeSymbol)
-                && (!typeSymbol.canBeUsedInIntersection() || !upperBound.canBeUsedInIntersection());
+                && !typeHelper.isFirstSameOrSubTypeOfSecond(upperBound, typeSymbol);
     }
 
     private void checkLowerTypeBounds(String typeVariable, ITypeSymbol newUpperTypeBound) {

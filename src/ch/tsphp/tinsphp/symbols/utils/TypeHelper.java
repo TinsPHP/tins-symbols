@@ -151,6 +151,7 @@ public class TypeHelper implements ITypeHelper
 
     private boolean hasUpRelationFromNominalToConvertible(ITypeSymbol fromType, IConvertibleTypeSymbol toType) {
         ITypeSymbol toTargetType = toType.getUpperTypeBounds();
+
         boolean canBeConverted = isFirstSameOrSubTypeOfSecond(fromType, toTargetType);
 
         if (!canBeConverted) {

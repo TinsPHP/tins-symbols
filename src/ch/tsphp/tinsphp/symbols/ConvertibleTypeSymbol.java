@@ -15,47 +15,70 @@ import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 
 public class ConvertibleTypeSymbol extends AIndirectTypeSymbol implements IConvertibleTypeSymbol
 {
-    private static final String TYPE_VARIABLE = "T";
+    private String typeVariable = "T";
     private IOverloadBindings overloadBindings;
 
     public ConvertibleTypeSymbol(
             IOverloadBindings theOverloadBindings) {
         overloadBindings = theOverloadBindings;
-        overloadBindings.addVariable(TYPE_VARIABLE, new TypeVariableReference(TYPE_VARIABLE));
+        overloadBindings.addVariable(typeVariable, new TypeVariableReference(typeVariable));
+    }
+
+    @Override
+    public void setOverloadBindings(IOverloadBindings bindings, String newTypeVariable) {
+        if (hasLowerTypeBounds()) {
+            bindings.addLowerTypeBound(newTypeVariable, getLowerTypeBounds());
+        }
+        if (hasUpperTypeBounds()) {
+            bindings.addUpperTypeBound(newTypeVariable, getUpperTypeBounds());
+        }
+        overloadBindings = bindings;
+        typeVariable = newTypeVariable;
+        hasAbsoluteNameChanged = true;
+    }
+
+    @Override
+    public IOverloadBindings getOverloadBindings() {
+        return overloadBindings;
+    }
+
+    @Override
+    public String getTypeVariable() {
+        return typeVariable;
     }
 
     @Override
     public boolean addLowerTypeBound(ITypeSymbol typeSymbol) {
-        boolean hasChanged = overloadBindings.addLowerTypeBound(TYPE_VARIABLE, typeSymbol);
+        boolean hasChanged = overloadBindings.addLowerTypeBound(typeVariable, typeSymbol);
         hasAbsoluteNameChanged = hasAbsoluteNameChanged || hasChanged;
         return hasChanged;
     }
 
     @Override
     public boolean addUpperTypeBound(ITypeSymbol typeSymbol) {
-        boolean hasChanged = overloadBindings.addUpperTypeBound(TYPE_VARIABLE, typeSymbol);
+        boolean hasChanged = overloadBindings.addUpperTypeBound(typeVariable, typeSymbol);
         hasAbsoluteNameChanged = hasAbsoluteNameChanged || hasChanged;
         return hasChanged;
     }
 
     @Override
     public boolean hasLowerTypeBounds() {
-        return overloadBindings.hasLowerTypeBounds(TYPE_VARIABLE);
+        return overloadBindings.hasLowerTypeBounds(typeVariable);
     }
 
     @Override
     public boolean hasUpperTypeBounds() {
-        return overloadBindings.hasUpperTypeBounds(TYPE_VARIABLE);
+        return overloadBindings.hasUpperTypeBounds(typeVariable);
     }
 
     @Override
     public IUnionTypeSymbol getLowerTypeBounds() {
-        return overloadBindings.getLowerTypeBounds(TYPE_VARIABLE);
+        return overloadBindings.getLowerTypeBounds(typeVariable);
     }
 
     @Override
     public IIntersectionTypeSymbol getUpperTypeBounds() {
-        return overloadBindings.getUpperTypeBounds(TYPE_VARIABLE);
+        return overloadBindings.getUpperTypeBounds(typeVariable);
     }
 
     @Override
@@ -65,7 +88,7 @@ public class ConvertibleTypeSymbol extends AIndirectTypeSymbol implements IConve
         String absoluteName;
 
         if (lowerTypeBounds == null && upperTypeBounds == null) {
-            absoluteName = "{as " + TYPE_VARIABLE + "}";
+            absoluteName = "{as " + typeVariable + "}";
         } else {
             String lowerAbsoluteName = lowerTypeBounds != null ? lowerTypeBounds.getAbsoluteName() : "";
             String upperAbsoluteName = upperTypeBounds != null ? getUpperTypeBounds().getAbsoluteName() : "";
@@ -73,10 +96,11 @@ public class ConvertibleTypeSymbol extends AIndirectTypeSymbol implements IConve
                 absoluteName = "{as " + lowerAbsoluteName + "}";
             } else {
                 StringBuilder stringBuilder = new StringBuilder("{as ");
-                stringBuilder.append(TYPE_VARIABLE).append(" \\ ");
+                stringBuilder.append(typeVariable).append(" \\ ");
                 if (!lowerAbsoluteName.isEmpty()) {
                     stringBuilder.append(lowerAbsoluteName).append(" < ");
                 }
+                stringBuilder.append(typeVariable);
                 if (!upperAbsoluteName.isEmpty()) {
                     stringBuilder.append(" < ").append(upperAbsoluteName);
                 }
@@ -95,6 +119,5 @@ public class ConvertibleTypeSymbol extends AIndirectTypeSymbol implements IConve
     public boolean canBeUsedInIntersection() {
         return true;
     }
-
 
 }
