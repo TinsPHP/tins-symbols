@@ -322,24 +322,4 @@ public class TypeHelper implements ITypeHelper
         }
         return hasUpRelation;
     }
-
-    private static class TypeHelperDto
-    {
-        public ITypeSymbol fromType;
-        public ITypeSymbol toType;
-        boolean shallConsiderImplicitConversions;
-
-        private TypeHelperDto(
-                ITypeSymbol theFromType, ITypeSymbol theToType, boolean shallConsiderImplicitConversions) {
-            fromType = theFromType;
-            toType = theToType;
-            this.shallConsiderImplicitConversions = shallConsiderImplicitConversions;
-        }
-
-        private TypeHelperDto(TypeHelperDto dto) {
-            fromType = dto.fromType;
-            toType = dto.toType;
-            shallConsiderImplicitConversions = dto.shallConsiderImplicitConversions;
-        }
-    }
 }
