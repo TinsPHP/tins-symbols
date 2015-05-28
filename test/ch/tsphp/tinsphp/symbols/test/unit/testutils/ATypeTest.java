@@ -7,11 +7,26 @@
 package ch.tsphp.tinsphp.symbols.test.unit.testutils;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
+import ch.tsphp.tinsphp.common.IConversionMethod;
+import ch.tsphp.tinsphp.common.core.IConversionsProvider;
+import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
+import ch.tsphp.tinsphp.common.utils.ITypeHelper;
+import ch.tsphp.tinsphp.common.utils.Pair;
+import ch.tsphp.tinsphp.symbols.ConvertibleTypeSymbol;
+import ch.tsphp.tinsphp.symbols.IntersectionTypeSymbol;
+import ch.tsphp.tinsphp.symbols.UnionTypeSymbol;
+import ch.tsphp.tinsphp.symbols.constraints.OverloadBindings;
+import ch.tsphp.tinsphp.symbols.utils.TypeHelper;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -33,6 +48,9 @@ public abstract class ATypeTest
     protected static ITypeSymbol interfaceSubAType;
     protected static ITypeSymbol interfaceBType;
     protected static ITypeSymbol fooType;
+
+    protected static ISymbolFactory symbolFactory;
+    protected static ITypeHelper typeHelper;
 
     @BeforeClass
     public static void init() {
@@ -88,6 +106,44 @@ public abstract class ATypeTest
         fooType = mock(ITypeSymbol.class);
         when(fooType.getParentTypeSymbols()).thenReturn(set(interfaceSubAType, interfaceBType));
         when(fooType.getAbsoluteName()).thenReturn("Foo");
+
+
+        typeHelper = new TypeHelper();
+        symbolFactory = mock(ISymbolFactory.class);
+        ITypeSymbol mixedTypeSymbol = mock(ITypeSymbol.class);
+        when(mixedTypeSymbol.getAbsoluteName()).thenReturn("mixed");
+
+        when(symbolFactory.getMixedTypeSymbol()).thenReturn(mixedTypeSymbol);
+        when(symbolFactory.createUnionTypeSymbol()).then(new Answer<Object>()
+        {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                return new UnionTypeSymbol(typeHelper);
+            }
+        });
+        when(symbolFactory.createIntersectionTypeSymbol()).then(new Answer<Object>()
+        {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                return new IntersectionTypeSymbol(typeHelper);
+            }
+        });
+        when(symbolFactory.createConvertibleTypeSymbol()).then(new Answer<Object>()
+        {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                return new ConvertibleTypeSymbol(new OverloadBindings(symbolFactory, typeHelper));
+            }
+        });
+    }
+
+    @Before
+    public void setUp() {
+        IConversionsProvider conversionsProvider = mock(IConversionsProvider.class);
+        HashMap<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> conversions = new HashMap<>();
+        when(conversionsProvider.getImplicitConversions()).thenReturn(conversions);
+        when(conversionsProvider.getExplicitConversions()).thenReturn(conversions);
+        typeHelper.setConversionsProvider(conversionsProvider);
     }
 
     protected static HashSet<ITypeSymbol> set(ITypeSymbol... symbols) {

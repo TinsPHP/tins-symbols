@@ -6,7 +6,6 @@
 
 package ch.tsphp.tinsphp.symbols.test.integration.constraints;
 
-import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.FixedTypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
@@ -14,17 +13,11 @@ import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
-import ch.tsphp.tinsphp.symbols.IntersectionTypeSymbol;
-import ch.tsphp.tinsphp.symbols.UnionTypeSymbol;
 import ch.tsphp.tinsphp.symbols.constraints.OverloadBindings;
 import ch.tsphp.tinsphp.symbols.test.unit.testutils.ATypeTest;
-import ch.tsphp.tinsphp.symbols.utils.TypeHelper;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.exceptions.base.MockitoAssertionError;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import java.util.Set;
 
@@ -40,38 +33,9 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class OverloadBindingsTest extends ATypeTest
 {
-    private static ISymbolFactory symbolFactory;
-    private static ITypeHelper typeHelper;
-
-    @BeforeClass
-    public static void init() {
-        ATypeTest.init();
-
-        typeHelper = new TypeHelper();
-        symbolFactory = mock(ISymbolFactory.class);
-        ITypeSymbol mixedTypeSymbol = mock(ITypeSymbol.class);
-        when(mixedTypeSymbol.getAbsoluteName()).thenReturn("mixed");
-
-        when(symbolFactory.getMixedTypeSymbol()).thenReturn(mixedTypeSymbol);
-        when(symbolFactory.createUnionTypeSymbol()).then(new Answer<Object>()
-        {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                return new UnionTypeSymbol(typeHelper);
-            }
-        });
-        when(symbolFactory.createIntersectionTypeSymbol()).then(new Answer<Object>()
-        {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                return new IntersectionTypeSymbol(typeHelper);
-            }
-        });
-    }
 
     @Test
     public void copyConstructor_HasTwoVariables_CopyBoth() {

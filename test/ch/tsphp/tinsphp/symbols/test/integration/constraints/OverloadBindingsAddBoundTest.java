@@ -19,18 +19,11 @@ import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
-import ch.tsphp.tinsphp.symbols.ConvertibleTypeSymbol;
-import ch.tsphp.tinsphp.symbols.IntersectionTypeSymbol;
-import ch.tsphp.tinsphp.symbols.UnionTypeSymbol;
 import ch.tsphp.tinsphp.symbols.constraints.OverloadBindings;
 import ch.tsphp.tinsphp.symbols.test.unit.testutils.ATypeTest;
-import ch.tsphp.tinsphp.symbols.utils.TypeHelper;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.exceptions.base.MockitoAssertionError;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import static ch.tsphp.tinsphp.symbols.test.integration.testutils.OverloadBindingsMatcher.varBinding;
 import static ch.tsphp.tinsphp.symbols.test.integration.testutils.OverloadBindingsMatcher.withVariableBindings;
@@ -41,49 +34,13 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class OverloadBindingsAddBoundTest extends ATypeTest
 {
-    private static ISymbolFactory symbolFactory;
-    private static ITypeHelper typeHelper;
 
-    @BeforeClass
-    public static void init() {
-        ATypeTest.init();
-
-        typeHelper = new TypeHelper();
-        symbolFactory = mock(ISymbolFactory.class);
-        ITypeSymbol mixedTypeSymbol = mock(ITypeSymbol.class);
-        when(mixedTypeSymbol.getAbsoluteName()).thenReturn("mixed");
-
-        when(symbolFactory.getMixedTypeSymbol()).thenReturn(mixedTypeSymbol);
-        when(symbolFactory.createUnionTypeSymbol()).then(new Answer<Object>()
-        {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                return new UnionTypeSymbol(typeHelper);
-            }
-        });
-        when(symbolFactory.createIntersectionTypeSymbol()).then(new Answer<Object>()
-        {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                return new IntersectionTypeSymbol(typeHelper);
-            }
-        });
-        when(symbolFactory.createConvertibleTypeSymbol()).then(new Answer<Object>()
-        {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                return new ConvertibleTypeSymbol(new OverloadBindings(symbolFactory, typeHelper));
-            }
-        });
-    }
 
     @Test(expected = IllegalArgumentException.class)
     public void addLowerTypeBound_ForNonExistingBinding_ThrowsIllegalArgumentException() {

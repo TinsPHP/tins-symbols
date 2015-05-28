@@ -24,7 +24,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion(intType);
         ITypeSymbol formal = intType;
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));
@@ -35,7 +35,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion(intType);
         ITypeSymbol formal = mixedType;
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
@@ -46,7 +46,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion(mixedType);
         ITypeSymbol formal = intType;
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
@@ -59,7 +59,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion();
         ITypeSymbol formal = mixedType;
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
@@ -72,7 +72,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createUnion(intType);
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));
@@ -83,7 +83,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = mixedType;
         ITypeSymbol formal = createUnion(intType);
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
@@ -94,7 +94,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createUnion(mixedType);
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
@@ -107,7 +107,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = mixedType;
         ITypeSymbol formal = createUnion();
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
@@ -121,7 +121,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion(intType);
         ITypeSymbol formal = createUnion(intType);
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));
@@ -132,7 +132,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion(intType, floatType);
         ITypeSymbol formal = createUnion(intType, floatType);
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));
@@ -143,7 +143,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion(intType, floatType);
         ITypeSymbol formal = createUnion(floatType, intType);
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));
@@ -155,7 +155,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion(intType, boolType);
         ITypeSymbol formal = createUnion(intType, floatType);
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
@@ -166,7 +166,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion(intType, floatType);
         ITypeSymbol formal = createUnion(mixedType);
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
@@ -177,7 +177,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion(mixedType);
         ITypeSymbol formal = createUnion(intType, floatType);
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
@@ -190,7 +190,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion();
         ITypeSymbol formal = createUnion();
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));
@@ -203,7 +203,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion(mixedType);
         ITypeSymbol formal = createUnion(mixedType);
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));

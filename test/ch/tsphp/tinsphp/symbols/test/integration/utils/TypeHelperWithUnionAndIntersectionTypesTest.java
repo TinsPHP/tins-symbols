@@ -22,7 +22,7 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createIntersectionType(intType);
         ITypeSymbol formal = createUnion(intType);
 
-        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
@@ -33,7 +33,7 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion(intType);
         ITypeSymbol formal = createIntersectionType(intType);
 
-        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
@@ -44,7 +44,7 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createIntersectionType(intType);
         ITypeSymbol formal = createUnion(mixedType);
 
-        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
@@ -55,7 +55,7 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion(intType);
         ITypeSymbol formal = createIntersectionType(mixedType);
 
-        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
@@ -68,7 +68,7 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion();
         ITypeSymbol formal = createIntersectionType();
 
-        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
@@ -80,7 +80,7 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createIntersectionType();
         ITypeSymbol formal = createUnion();
 
-        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(false));
@@ -93,7 +93,7 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion(mixedType);
         ITypeSymbol formal = createIntersectionType(mixedType);
 
-        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));
@@ -104,7 +104,7 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createIntersectionType(mixedType);
         ITypeSymbol formal = createUnion(mixedType);
 
-        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
@@ -115,7 +115,7 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createIntersectionType();
         ITypeSymbol formal = createUnion(mixedType);
 
-        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
@@ -126,7 +126,7 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion(mixedType);
         ITypeSymbol formal = createIntersectionType();
 
-        ITypeHelper typeHelper = createTypeHelperAndSetMixed();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));

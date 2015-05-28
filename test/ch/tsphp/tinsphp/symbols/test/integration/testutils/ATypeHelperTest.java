@@ -39,20 +39,36 @@ public abstract class ATypeHelperTest extends ATypeTest
 {
 
     protected IUnionTypeSymbol createUnion(ITypeSymbol... typeSymbols) {
-        IUnionTypeSymbol unionTypeSymbol = new UnionTypeSymbol(createTypeHelper());
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol();
         for (ITypeSymbol typeSymbol : typeSymbols) {
             unionTypeSymbol.addTypeSymbol(typeSymbol);
         }
         return unionTypeSymbol;
     }
 
+    protected IUnionTypeSymbol createUnionTypeSymbol() {
+        return createUnionTypeSymbol(typeHelper);
+    }
+
+    protected IUnionTypeSymbol createUnionTypeSymbol(ITypeHelper typeHelper) {
+        return new UnionTypeSymbol(typeHelper);
+    }
+
+
     protected IIntersectionTypeSymbol createIntersectionType(ITypeSymbol... typeSymbols) {
-        IIntersectionTypeSymbol intersectionTypeSymbol
-                = new IntersectionTypeSymbol(createTypeHelperAndSetMixed());
+        IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol();
         for (ITypeSymbol typeSymbol : typeSymbols) {
             intersectionTypeSymbol.addTypeSymbol(typeSymbol);
         }
         return intersectionTypeSymbol;
+    }
+
+    protected IIntersectionTypeSymbol createIntersectionTypeSymbol() {
+        return createIntersectionTypeSymbol(typeHelper);
+    }
+
+    protected IIntersectionTypeSymbol createIntersectionTypeSymbol(ITypeHelper typeHelper) {
+        return new IntersectionTypeSymbol(typeHelper);
     }
 
     protected IConvertibleTypeSymbol createConvertibleType(
@@ -80,31 +96,29 @@ public abstract class ATypeHelperTest extends ATypeTest
         return conversionsMap;
     }
 
-    protected ITypeHelper createTypeHelperAndSetMixed() {
-        ITypeHelper typeHelper = createTypeHelper();
-        typeHelper.setMixedTypeSymbol(mixedType);
-        return typeHelper;
-    }
-
-    protected ITypeHelper createTypeHelperAndSetConversions(
-            Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions,
-            Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions) {
-        ITypeHelper typeHelper = createTypeHelper();
-        IConversionsProvider conversionsProvider = mock(IConversionsProvider.class);
-        when(conversionsProvider.getImplicitConversions()).thenReturn(implicitConversions);
-        when(conversionsProvider.getExplicitConversions()).thenReturn(explicitConversions);
-        typeHelper.setConversionsProvider(conversionsProvider);
-        return typeHelper;
-    }
-
-    protected ITypeHelper createTypeHelper() {
-        return new TypeHelper();
-    }
-
     protected ISymbolFactory createSymbolFactory(
             IScopeHelper theScopeHelper,
             IModifierHelper theModifierHelper,
             ITypeHelper theTypeHelper) {
         return new SymbolFactory(theScopeHelper, theModifierHelper, theTypeHelper);
+    }
+
+
+    protected ITypeHelper createTypeHelperAndInit(
+            Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions,
+            Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions) {
+        ITypeHelper typeHelper = new TypeHelper();
+        IConversionsProvider conversionsProvider = mock(IConversionsProvider.class);
+        when(conversionsProvider.getImplicitConversions()).thenReturn(implicitConversions);
+        when(conversionsProvider.getExplicitConversions()).thenReturn(explicitConversions);
+        typeHelper.setConversionsProvider(conversionsProvider);
+        typeHelper.setMixedTypeSymbol(mixedType);
+        return typeHelper;
+    }
+
+    protected ITypeHelper createTypeHelperAndInit() {
+        return createTypeHelperAndInit(
+                new HashMap<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>>(),
+                new HashMap<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>>());
     }
 }

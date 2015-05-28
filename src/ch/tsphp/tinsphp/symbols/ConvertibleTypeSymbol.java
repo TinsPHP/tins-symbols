@@ -17,6 +17,7 @@ public class ConvertibleTypeSymbol extends AIndirectTypeSymbol implements IConve
 {
     private String typeVariable = "T";
     private IOverloadBindings overloadBindings;
+    private boolean wasBound = false;
 
     public ConvertibleTypeSymbol(
             IOverloadBindings theOverloadBindings) {
@@ -35,6 +36,7 @@ public class ConvertibleTypeSymbol extends AIndirectTypeSymbol implements IConve
         overloadBindings = bindings;
         typeVariable = newTypeVariable;
         hasAbsoluteNameChanged = true;
+        wasBound = true;
     }
 
     @Override
@@ -94,6 +96,8 @@ public class ConvertibleTypeSymbol extends AIndirectTypeSymbol implements IConve
             String upperAbsoluteName = upperTypeBounds != null ? getUpperTypeBounds().getAbsoluteName() : "";
             if (lowerAbsoluteName.equals(upperAbsoluteName)) {
                 absoluteName = "{as " + lowerAbsoluteName + "}";
+            } else if (wasBound) {
+                absoluteName = "{as " + typeVariable + "}";
             } else {
                 StringBuilder stringBuilder = new StringBuilder("{as ");
                 stringBuilder.append(typeVariable).append(" \\ ");
@@ -104,6 +108,7 @@ public class ConvertibleTypeSymbol extends AIndirectTypeSymbol implements IConve
                 if (!upperAbsoluteName.isEmpty()) {
                     stringBuilder.append(" < ").append(upperAbsoluteName);
                 }
+                stringBuilder.append("}");
                 absoluteName = stringBuilder.toString();
             }
         }

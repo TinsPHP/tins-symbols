@@ -24,7 +24,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion(intType, floatType);
         ITypeSymbol formal = numType;
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
@@ -35,7 +35,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion(stringType, intType, floatType);
         ITypeSymbol formal = scalarType;
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
@@ -46,7 +46,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion(intType, arrayType);
         ITypeSymbol formal = mixedType;
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
@@ -57,7 +57,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion(numType, arrayType);
         ITypeSymbol formal = mixedType;
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
@@ -68,7 +68,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion(arrayType, intType, fooType);
         ITypeSymbol formal = mixedType;
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
@@ -79,7 +79,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion(intType, floatType);
         ITypeSymbol formal = intType;
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(false));
@@ -90,7 +90,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion(intType, arrayType, floatType);
         ITypeSymbol formal = numType;
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(false));
@@ -103,7 +103,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion();
         ITypeSymbol formal = intType;
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
@@ -114,7 +114,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion();
         ITypeSymbol formal = fooType;
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
@@ -125,7 +125,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion();
         ITypeSymbol formal = mixedType;
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
@@ -147,7 +147,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion();
         ITypeSymbol formal = intType;
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
 
         assertThat(result, is(false));
@@ -171,7 +171,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createUnion(intType, floatType);
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
@@ -182,7 +182,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createUnion(numType, fooType);
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
@@ -193,7 +193,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createUnion(arrayType, stringType, numType, fooType);
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
@@ -204,7 +204,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createUnion(arrayType, scalarType);
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
@@ -215,7 +215,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createUnion(floatType, stringType);
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(false));
@@ -226,7 +226,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createUnion(arrayType, fooType);
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(false));
@@ -239,7 +239,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createUnion();
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(false));
@@ -250,7 +250,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = arrayType;
         ITypeSymbol formal = createUnion();
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(false));
@@ -261,7 +261,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = interfaceAType;
         ITypeSymbol formal = createUnion();
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(false));
@@ -283,7 +283,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = interfaceAType;
         ITypeSymbol formal = createUnion();
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
@@ -307,7 +307,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion(intType, floatType);
         ITypeSymbol formal = createUnion(numType, stringType);
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
@@ -318,7 +318,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion(intType, fooType);
         ITypeSymbol formal = createUnion(scalarType, arrayType, interfaceAType);
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
@@ -329,7 +329,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion(stringType, fooType);
         ITypeSymbol formal = createUnion(numType, arrayType, interfaceAType);
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(false));
@@ -375,7 +375,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion();
         ITypeSymbol formal = createUnion();
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
@@ -386,7 +386,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion();
         ITypeSymbol formal = createUnion();
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
@@ -421,7 +421,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion(mixedType);
         ITypeSymbol formal = createUnion(mixedType);
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));
@@ -432,7 +432,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol actual = createUnion(mixedType);
         ITypeSymbol formal = createUnion(mixedType);
 
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
 
         assertThat(result, is(true));

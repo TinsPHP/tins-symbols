@@ -6,21 +6,14 @@
 
 package ch.tsphp.tinsphp.symbols.test.integration.constraints;
 
-import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.FixedTypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
-import ch.tsphp.tinsphp.symbols.IntersectionTypeSymbol;
-import ch.tsphp.tinsphp.symbols.UnionTypeSymbol;
 import ch.tsphp.tinsphp.symbols.constraints.OverloadBindings;
 import ch.tsphp.tinsphp.symbols.test.unit.testutils.ATypeTest;
-import ch.tsphp.tinsphp.symbols.utils.TypeHelper;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -30,41 +23,9 @@ import static ch.tsphp.tinsphp.symbols.test.integration.testutils.OverloadBindin
 import static ch.tsphp.tinsphp.symbols.test.integration.testutils.OverloadBindingsMatcher.withVariableBindings;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class OverloadBindingsTryToFixTest extends ATypeTest
 {
-    private static ISymbolFactory symbolFactory;
-    private static ITypeHelper typeHelper;
-
-    @BeforeClass
-    public static void init() {
-        ATypeTest.init();
-
-        typeHelper = new TypeHelper();
-        symbolFactory = mock(ISymbolFactory.class);
-        ITypeSymbol mixedTypeSymbol = mock(ITypeSymbol.class);
-        when(mixedTypeSymbol.getAbsoluteName()).thenReturn("mixed");
-
-        when(symbolFactory.getMixedTypeSymbol()).thenReturn(mixedTypeSymbol);
-        when(symbolFactory.createUnionTypeSymbol()).then(new Answer<Object>()
-        {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                return new UnionTypeSymbol(typeHelper);
-            }
-        });
-        when(symbolFactory.createIntersectionTypeSymbol()).then(new Answer<Object>()
-        {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                return new IntersectionTypeSymbol(typeHelper);
-            }
-        });
-    }
-
-
     @Test
     public void tryToFix_NoParams_AllVariablesAreConstant() {
         //corresponds: function foo(){ $a = 1; $b = 2.2; return true;}

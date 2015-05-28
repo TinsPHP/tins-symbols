@@ -7,25 +7,29 @@
 package ch.tsphp.tinsphp.symbols.test.unit.symbols;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
+import ch.tsphp.tinsphp.common.IConversionMethod;
+import ch.tsphp.tinsphp.common.core.IConversionsProvider;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.PrimitiveTypeNames;
-import ch.tsphp.tinsphp.common.utils.ITypeHelper;
-import ch.tsphp.tinsphp.symbols.IntersectionTypeSymbol;
-import ch.tsphp.tinsphp.symbols.UnionTypeSymbol;
-import ch.tsphp.tinsphp.symbols.test.unit.testutils.ATypeTest;
-import ch.tsphp.tinsphp.symbols.utils.TypeHelper;
+import ch.tsphp.tinsphp.common.utils.Pair;
+import ch.tsphp.tinsphp.symbols.test.integration.testutils.ATypeHelperTest;
 import org.junit.Test;
 
+import java.util.HashMap;
 import java.util.Map;
 
+import static ch.tsphp.tinsphp.common.utils.Pair.pair;
+import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-public class IntersectionTypeSymbolTest extends ATypeTest
+public class IntersectionTypeSymbolTest extends ATypeHelperTest
 {
 
     @Test
@@ -125,9 +129,7 @@ public class IntersectionTypeSymbolTest extends ATypeTest
 
     @Test
     public void addTypeSymbol_EmptyAndIsUnionContainingIntAndFloat_ReturnsTrueAndIntersectionContainsUnion() {
-        IUnionTypeSymbol unionTypeSymbol = new UnionTypeSymbol(new TypeHelper());
-        unionTypeSymbol.addTypeSymbol(intType);
-        unionTypeSymbol.addTypeSymbol(floatType);
+        IUnionTypeSymbol unionTypeSymbol = createUnion(intType, floatType);
 
         //act
         IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol();
@@ -145,9 +147,7 @@ public class IntersectionTypeSymbolTest extends ATypeTest
 
         //arrange
         intersectionTypeSymbol.addTypeSymbol(intType);
-        IUnionTypeSymbol unionTypeSymbol = new UnionTypeSymbol(new TypeHelper());
-        unionTypeSymbol.addTypeSymbol(intType);
-        unionTypeSymbol.addTypeSymbol(boolType);
+        IUnionTypeSymbol unionTypeSymbol = createUnion(intType, boolType);
 
         //act
         boolean result = unionTypeSymbol.addTypeSymbol(unionTypeSymbol);
@@ -160,8 +160,7 @@ public class IntersectionTypeSymbolTest extends ATypeTest
     //see TINS-406 add single type in intersection to union
     @Test
     public void addTypeSymbol_EmptyAndIsUnionContainingInt_ReturnsTrueAndIntersectionContainsIntAsSingleType() {
-        IUnionTypeSymbol unionTypeSymbol = new UnionTypeSymbol(new TypeHelper());
-        unionTypeSymbol.addTypeSymbol(intType);
+        IUnionTypeSymbol unionTypeSymbol = createUnion(intType);
 
         //act
         IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol();
@@ -181,8 +180,7 @@ public class IntersectionTypeSymbolTest extends ATypeTest
 
         //arrange
         intersectionTypeSymbol.addTypeSymbol(floatType);
-        IUnionTypeSymbol unionTypeSymbol = new UnionTypeSymbol(new TypeHelper());
-        unionTypeSymbol.addTypeSymbol(intType);
+        IUnionTypeSymbol unionTypeSymbol = createUnion(intType);
 
         //act
         boolean result = intersectionTypeSymbol.addTypeSymbol(unionTypeSymbol);
@@ -289,6 +287,32 @@ public class IntersectionTypeSymbolTest extends ATypeTest
         assertThat(symbols.keySet(), hasItems("Foo", "bool", "int"));
     }
 
+    //---------------------------------- implicit conversions
+
+    @Test
+    public void addTypeSymbol_IntAddIBAndIntHasImplicitConversionToIB_ReturnsTrueAndContainsIntAndIB() {
+        //pre-act necessary for arrange
+        IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol();
+
+        //arrange
+        intersectionTypeSymbol.addTypeSymbol(intType);
+        IConversionsProvider provider = mock(IConversionsProvider.class);
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions =
+                createConversions(pair(intType, asList(interfaceBType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+        when(provider.getImplicitConversions()).thenReturn(implicitConversions);
+        when(provider.getExplicitConversions()).thenReturn(explicitConversions);
+        typeHelper.setConversionsProvider(provider);
+
+        //act
+        boolean result = intersectionTypeSymbol.addTypeSymbol(interfaceBType);
+        Map<String, ITypeSymbol> symbols = intersectionTypeSymbol.getTypeSymbols();
+
+        assertThat(result, is(true));
+        assertThat(symbols.keySet(), hasItems("int", "IB"));
+    }
+
+
     @Test
     public void getAbsoluteName_IsEmpty_ReturnsMixed() {
         //no arrange necessary
@@ -351,14 +375,5 @@ public class IntersectionTypeSymbolTest extends ATypeTest
         assertThat(result, is(PrimitiveTypeNames.MIXED));
         verify(intersectionTypeSymbol).getAbsoluteName();
     }
-
-    private IIntersectionTypeSymbol createIntersectionTypeSymbol() {
-        return createIntersectionTypeSymbol(new TypeHelper());
-    }
-
-    protected IIntersectionTypeSymbol createIntersectionTypeSymbol(ITypeHelper typeHelper) {
-        return new IntersectionTypeSymbol(typeHelper);
-    }
-
 }
 

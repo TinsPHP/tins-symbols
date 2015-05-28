@@ -32,7 +32,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
     @Test
     public void areSameType_AsIntToInt_ReturnsFalse() {
         //pre-act necessary for arrange
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
@@ -48,7 +48,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
     @Test
     public void areSameType_AsIntToMixed_ReturnsFalse() {
         //pre-act necessary for arrange
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
@@ -64,7 +64,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
     @Test
     public void isFirstSameOrSubTypeOfSecond_AsIntToInt_ReturnsFalse() {
         //pre-act necessary for arrange
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
@@ -80,7 +80,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
     @Test
     public void isFirstSameOrSubTypeOfSecond_AsNumToInt_ReturnsFalse() {
         //pre-act necessary for arrange
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
@@ -102,7 +102,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
 
         //pre-act necessary for arrange
-        ITypeHelper typeHelper = createTypeHelperAndSetConversions(implicitConversions, explicitConversions);
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
@@ -123,7 +123,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
                 createConversions(pair(stringType, asList(floatType)));
 
         //pre-act necessary for arrange
-        ITypeHelper typeHelper = createTypeHelperAndSetConversions(implicitConversions, explicitConversions);
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
@@ -143,7 +143,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
 
         //pre-act necessary for arrange
-        ITypeHelper typeHelper = createTypeHelperAndSetConversions(implicitConversions, explicitConversions);
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
@@ -163,7 +163,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
 
         //pre-act necessary for arrange
-        ITypeHelper typeHelper = createTypeHelperAndSetConversions(implicitConversions, explicitConversions);
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
@@ -184,7 +184,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
 
         //pre-act necessary for arrange
-        ITypeHelper typeHelper = createTypeHelperAndSetConversions(implicitConversions, explicitConversions);
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
@@ -205,7 +205,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
                 = createConversions(pair(intType, asList(stringType)));
 
         //pre-act necessary for arrange
-        ITypeHelper typeHelper = createTypeHelperAndSetConversions(implicitConversions, explicitConversions);
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
@@ -226,7 +226,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
                 = createConversions(pair(intType, asList(stringType)));
 
         //pre-act necessary for arrange
-        ITypeHelper typeHelper = createTypeHelperAndSetConversions(implicitConversions, explicitConversions);
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
@@ -246,7 +246,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
                 = createConversions(pair(fooType, asList(stringType)));
 
         //pre-act necessary for arrange
-        ITypeHelper typeHelper = createTypeHelperAndSetConversions(implicitConversions, explicitConversions);
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
@@ -267,7 +267,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
                 = createConversions(pair(fooType, asList(stringType)));
 
         //pre-act necessary for arrange
-        ITypeHelper typeHelper = createTypeHelperAndSetConversions(implicitConversions, explicitConversions);
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
@@ -287,7 +287,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
                 = createConversions(pair(interfaceAType, asList(stringType)));
 
         //pre-act necessary for arrange
-        ITypeHelper typeHelper = createTypeHelperAndSetConversions(implicitConversions, explicitConversions);
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
@@ -307,7 +307,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
 
         //pre-act necessary for arrange
-        ITypeHelper typeHelper = createTypeHelperAndSetConversions(implicitConversions, explicitConversions);
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
@@ -325,7 +325,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
     @Test
     public void areSameType_AsIntToAsInt_ReturnsTrue() {
         //pre-act necessary for arrange
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
@@ -341,7 +341,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
     @Test
     public void areSameType_AsIntToAsNum_ReturnsFalse() {
         //pre-act necessary for arrange
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
@@ -357,7 +357,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
     @Test
     public void areSameType_AsNumToAsInt_ReturnsFalse() {
         //pre-act necessary for arrange
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
@@ -373,7 +373,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
     @Test
     public void isFirstSameOrSubTypeOfSecond_AsIntToAsInt_ReturnsTrue() {
         //pre-act necessary for arrange
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
@@ -389,7 +389,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
     @Test
     public void isFirstSameOrSubTypeOfSecond_AsIntToAsNum_ReturnsTrue() {
         //pre-act necessary for arrange
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
@@ -405,7 +405,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
     @Test
     public void isFirstSameOrSubTypeOfSecond_AsIntToAsScalar_ReturnsTrue() {
         //pre-act necessary for arrange
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
@@ -421,7 +421,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
     @Test
     public void isFirstSameOrSubTypeOfSecond_AsIntToAsFloat_ReturnsFalse() {
         //pre-act necessary for arrange
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
@@ -437,7 +437,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
     @Test
     public void isFirstSameOrSubTypeOfSecond_AsNumToAsFloat_ReturnsFalse() {
         //pre-act necessary for arrange
-        ITypeHelper typeHelper = createTypeHelper();
+        ITypeHelper typeHelper = createTypeHelperAndInit();
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange

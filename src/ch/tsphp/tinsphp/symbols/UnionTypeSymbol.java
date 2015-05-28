@@ -75,12 +75,12 @@ public class UnionTypeSymbol extends AContainerTypeSymbol<IUnionTypeSymbol> impl
         Iterator<Map.Entry<String, ITypeSymbol>> iterator = typeSymbols.entrySet().iterator();
         while (iterator.hasNext()) {
             ITypeSymbol existingTypeInUnion = iterator.next().getValue();
-            if (typeHelper.isFirstSameOrParentTypeOfSecond(newTypeSymbol, existingTypeInUnion)) {
+            if (typeHelper.isFirstSameOrParentTypeOfSecond(newTypeSymbol, existingTypeInUnion, false)) {
                 //remove subtype, it does no longer add information to the union type
                 status = ETypeRelation.PARENT_TYPE;
                 iterator.remove();
             } else if (status == ETypeRelation.NO_RELATION
-                    && typeHelper.isFirstSameOrSubTypeOfSecond(newTypeSymbol, existingTypeInUnion)) {
+                    && typeHelper.isFirstSameOrSubTypeOfSecond(newTypeSymbol, existingTypeInUnion, false)) {
                 //new type is a subtype of an existing and hence it does not add new information to the union
                 status = ETypeRelation.SUBTYPE;
                 break;

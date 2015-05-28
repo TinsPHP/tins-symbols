@@ -70,12 +70,12 @@ public class IntersectionTypeSymbol extends AContainerTypeSymbol<IIntersectionTy
         Iterator<Map.Entry<String, ITypeSymbol>> iterator = typeSymbols.entrySet().iterator();
         while (iterator.hasNext()) {
             ITypeSymbol existingTypeInUnion = iterator.next().getValue();
-            if (typeHelper.isFirstSameOrSubTypeOfSecond(newTypeSymbol, existingTypeInUnion)) {
+            if (typeHelper.isFirstSameOrSubTypeOfSecond(newTypeSymbol, existingTypeInUnion, false)) {
                 //remove parent type, it does no longer add information to the intersection type
                 status = ETypeRelation.SUBTYPE;
                 iterator.remove();
             } else if (status == ETypeRelation.NO_RELATION
-                    && typeHelper.isFirstSameOrParentTypeOfSecond(newTypeSymbol, existingTypeInUnion)) {
+                    && typeHelper.isFirstSameOrParentTypeOfSecond(newTypeSymbol, existingTypeInUnion, false)) {
                 //new type is a parent type of an existing and hence it does not add new information to the union
                 status = ETypeRelation.PARENT_TYPE;
                 break;
