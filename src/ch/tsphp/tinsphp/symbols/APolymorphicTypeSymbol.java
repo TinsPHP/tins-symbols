@@ -4,187 +4,130 @@
  * root folder or visit the project's website http://tsphp.ch/wiki/display/TINS/License
  */
 
-/*
- * This class is based on the class APolymorphicTypeSymbol from the TSPHP project.
- * TSPHP is also published under the Apache License 2.0
- * For more information see http://tsphp.ch/wiki/display/TSPHP/License
- */
-
 package ch.tsphp.tinsphp.symbols;
 
-import ch.tsphp.common.AstHelperRegistry;
-import ch.tsphp.common.ILowerCaseStringMap;
 import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
-import ch.tsphp.common.LowerCaseStringMap;
-import ch.tsphp.common.symbols.ISymbol;
 import ch.tsphp.common.symbols.ITypeSymbol;
-import ch.tsphp.common.symbols.modifiers.ICanBeAbstract;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
-import ch.tsphp.tinsphp.common.gen.TokenTypes;
-import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
-import ch.tsphp.tinsphp.common.symbols.IPolymorphicTypeSymbol;
-import ch.tsphp.tinsphp.common.utils.MapHelper;
+import ch.tsphp.tinsphp.common.symbols.IObservableTypeListener;
+import ch.tsphp.tinsphp.common.symbols.IObservableTypeSymbol;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-/**
- * Provides some helper methods for polymorphic types.
- */
-public abstract class APolymorphicTypeSymbol extends AScopedSymbol implements IPolymorphicTypeSymbol
+public abstract class APolymorphicTypeSymbol implements ITypeSymbol, IObservableTypeSymbol
 {
+    private static final String ERROR_MESSAGE = "You are dealing with an AContainerTypeSymbol.";
 
-    protected Set<ITypeSymbol> parentTypeSymbols = new HashSet<>();
-    protected final ILowerCaseStringMap<List<ISymbol>> symbolsCaseInsensitive = new LowerCaseStringMap<>();
-    private boolean isMixedTheParentTypeSymbol = false;
-    private Set<ISymbol> abstractSymbols;
+    protected boolean hasAbsoluteNameChanged = true;
+    protected String ownAbsoluteName;
+    protected List<IObservableTypeListener> listeners = new ArrayList<>();
 
-    @SuppressWarnings("checkstyle:parameternumber")
-    public APolymorphicTypeSymbol(
-            IScopeHelper scopeHelper,
-            ITSPHPAst definitionAst,
-            IModifierSet modifiers,
-            String name,
-            IScope enclosingScope,
-            ITypeSymbol theParentTypeSymbol) {
-        super(scopeHelper, definitionAst, modifiers, name, enclosingScope);
-        parentTypeSymbols.add(theParentTypeSymbol);
-        isMixedTheParentTypeSymbol = theParentTypeSymbol.getName().equals("mixed");
+    @Override
+    public String getName() {
+        return getAbsoluteName();
     }
 
     @Override
-    public void define(ISymbol symbol) {
-        super.define(symbol);
-        MapHelper.addToListInMap(symbolsCaseInsensitive, symbol.getName(), symbol);
-    }
-
-    @Override
-    public ISymbol resolveCaseInsensitive(ITSPHPAst identifier) {
-        ISymbol symbol = null;
-        if (symbolsCaseInsensitive.containsKey(identifier.getText())) {
-            symbol = symbolsCaseInsensitive.get(identifier.getText()).get(0);
+    public String getAbsoluteName() {
+        if (hasAbsoluteNameChanged) {
+            ownAbsoluteName = calculateAbsoluteName();
+            hasAbsoluteNameChanged = false;
         }
-        return symbol;
+        return ownAbsoluteName;
+    }
+
+    protected abstract String calculateAbsoluteName();
+
+    @Override
+    public IScope getDefinitionScope() {
+        return null;
     }
 
     @Override
-    public ISymbol resolveWithFallbackToParent(ITSPHPAst ast) {
-        ISymbol symbol = scopeHelper.resolve(this, ast);
-        for (ITypeSymbol parentTypeSymbol : parentTypeSymbols) {
-            if (parentTypeSymbol instanceof IPolymorphicTypeSymbol) {
-                symbol = ((IPolymorphicTypeSymbol) parentTypeSymbol).resolveWithFallbackToParent(ast);
-                if (symbol != null) {
-                    break;
-                }
-            }
-        }
-        return symbol;
+    public ITypeSymbol evalSelf() {
+        return this;
     }
+
+    @Override
+    public String toString() {
+        return getAbsoluteName();
+    }
+
+    @Override
+    public void register(IObservableTypeListener subscriberType) {
+        listeners.add(subscriberType);
+    }
+
+    protected void notifyHasChanged() {
+        String oldAbsoluteName = getAbsoluteName();
+        hasAbsoluteNameChanged = true;
+        for (IObservableTypeListener listener : listeners) {
+            listener.nameOfObservableHasChanged(this, oldAbsoluteName);
+        }
+    }
+
+    //-  Unsupported Methods -------------------------------------
 
     @Override
     public Set<ITypeSymbol> getParentTypeSymbols() {
-        return parentTypeSymbols;
-    }
-
-    @Override
-    public void addParentTypeSymbol(IPolymorphicTypeSymbol aParent) {
-        if (isMixedTheParentTypeSymbol) {
-            parentTypeSymbols = new HashSet<>();
-            isMixedTheParentTypeSymbol = false;
-        }
-        parentTypeSymbols.add(aParent);
-    }
-
-    @Override
-    public boolean isAbstract() {
-        return modifiers.isAbstract();
-    }
-
-    @Override
-    public Set<ISymbol> getAbstractSymbols() {
-        if (abstractSymbols == null) {
-            loadOwnAbstractSymbols();
-            loadParentsAbstractSymbols();
-        }
-        return abstractSymbols;
-    }
-
-    private void loadOwnAbstractSymbols() {
-        abstractSymbols = new HashSet<>();
-        for (List<ISymbol> symbolList : symbols.values()) {
-            ISymbol symbol = symbolList.get(0);
-            if (symbol instanceof ICanBeAbstract) {
-                if (((ICanBeAbstract) symbol).isAbstract()) {
-                    abstractSymbols.add(symbol);
-                }
-            }
-        }
-    }
-
-    private void loadParentsAbstractSymbols() {
-        for (ITypeSymbol typeSymbol : parentTypeSymbols) {
-            if (typeSymbol instanceof IPolymorphicTypeSymbol) {
-                IPolymorphicTypeSymbol polymorphicTypeSymbol = (IPolymorphicTypeSymbol) typeSymbol;
-                if (polymorphicTypeSymbol.isAbstract()) {
-                    for (ISymbol symbol : polymorphicTypeSymbol.getAbstractSymbols()) {
-                        if (!symbols.containsKey(symbol.getName())) {
-                            abstractSymbols.add(symbol);
-                        }
-                    }
-                }
-            }
-        }
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
     @Override
     public ITSPHPAst getDefaultValue() {
-        return AstHelperRegistry.get().createAst(TokenTypes.Null, "null");
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
     @Override
-    public void addToInitialisedSymbols(ISymbol symbol, boolean isFullyInitialised) {
-        throw new UnsupportedOperationException("all symbols in a polymorphic type symbol are implicitly initialised.\n"
-                + "Therefore there should not be the need to call this method.");
+    public void addModifier(Integer integer) {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
     @Override
-    public Map<String, Boolean> getInitialisedSymbols() {
-        throw new UnsupportedOperationException("all symbols in a polymorphic type symbol are implicitly initialised.\n"
-                + "Therefore there should not be the need to call this method.");
+    public boolean removeModifier(Integer integer) {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
     @Override
-    public boolean isFullyInitialised(ISymbol symbol) {
-        //all symbols in a polymorphic type symbol are implicitly initialised as long as they exist
-        return symbols.containsKey(symbol.getName());
+    public IModifierSet getModifiers() {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
     @Override
-    public boolean isPartiallyInitialised(ISymbol symbol) {
-        //all symbols in a polymorphic type symbol are implicitly initialised
-        return false;
+    public void setModifiers(IModifierSet modifierSet) {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
+
+    @Override
+    public ITSPHPAst getDefinitionAst() {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
+
+    @Override
+    public void setDefinitionScope(IScope iScope) {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
+
+    @Override
+    public ITypeSymbol getType() {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
+
+    @Override
+    public void setType(ITypeSymbol iTypeSymbol) {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
     @Override
     public boolean isFalseable() {
-        return modifiers.isFalseable();
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
     @Override
     public boolean isNullable() {
-        return modifiers.isNullable();
-    }
-
-    //TODO same as in ATypeSymbol chance to move it out?
-
-    /**
-     * Returns itself, override in sub-classes for another behaviour (lazy types for instance).
-     */
-    @Override
-    public ITypeSymbol evalSelf() {
-        return this;
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 }

@@ -20,20 +20,26 @@ import ch.tsphp.tinsphp.common.inference.constraints.UpperBoundException;
 import ch.tsphp.tinsphp.common.symbols.IContainerTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IConvertibleTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IParametricTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.common.utils.MapHelper;
 
+import java.util.ArrayDeque;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class OverloadBindings implements IOverloadBindings
 {
+    private static final String TEMP_VARIABLE_PREFIX = "!temp";
+
     private final ISymbolFactory symbolFactory;
     private final ITypeHelper typeHelper;
     private final ITypeSymbol mixedTypeSymbol;
@@ -45,8 +51,10 @@ public class OverloadBindings implements IOverloadBindings
     private final Map<String, ITypeVariableReference> variable2TypeVariable;
     private final Map<String, Set<String>> typeVariable2Variables;
     private final Map<String, IFunctionType> appliedOverloads;
+    private final Map<String, Set<IParametricTypeSymbol>> typeVariable2BoundTypes;
 
     private int count = 1;
+    private int tempVariableCount = 0;
 
     public OverloadBindings(ISymbolFactory theSymbolFactory, ITypeHelper theTypeHelper) {
         symbolFactory = theSymbolFactory;
@@ -60,6 +68,7 @@ public class OverloadBindings implements IOverloadBindings
         variable2TypeVariable = new HashMap<>();
         typeVariable2Variables = new HashMap<>();
         appliedOverloads = new HashMap<>();
+        typeVariable2BoundTypes = new HashMap<>();
     }
 
     public OverloadBindings(OverloadBindings bindings) {
@@ -68,27 +77,35 @@ public class OverloadBindings implements IOverloadBindings
         mixedTypeSymbol = bindings.mixedTypeSymbol;
 
         count = bindings.count;
+        tempVariableCount = bindings.tempVariableCount;
 
-        lowerTypeBounds = new HashMap<>(bindings.lowerTypeBounds.size());
-        for (Map.Entry<String, IUnionTypeSymbol> entry : bindings.lowerTypeBounds.entrySet()) {
-            lowerTypeBounds.put(entry.getKey(), entry.getValue().copy());
-        }
-        upperTypeBounds = new HashMap<>(bindings.upperTypeBounds.size());
-        for (Map.Entry<String, IIntersectionTypeSymbol> entry : bindings.upperTypeBounds.entrySet()) {
-            upperTypeBounds.put(entry.getKey(), entry.getValue().copy());
-        }
-
-        lowerRefBounds = new HashMap<>();
-        for (Map.Entry<String, Set<String>> entry : bindings.lowerRefBounds.entrySet()) {
-            lowerRefBounds.put(entry.getKey(), new HashSet<>(entry.getValue()));
-        }
-
-        upperRefBounds = new HashMap<>();
-        for (Map.Entry<String, Set<String>> entry : bindings.upperRefBounds.entrySet()) {
-            upperRefBounds.put(entry.getKey(), new HashSet<>(entry.getValue()));
-        }
-
+        //type variables need to be copied first since a lower or upper type bound might contain a parametric
+        // polymorphic type which is bound to one of the type variables
         variable2TypeVariable = new HashMap<>(bindings.variable2TypeVariable.size());
+        typeVariable2Variables = new HashMap<>(bindings.typeVariable2Variables.size());
+        copyVariablesAndTypeVariables(bindings);
+
+        typeVariable2BoundTypes = new HashMap<>(bindings.typeVariable2BoundTypes.size());
+        lowerTypeBounds = new HashMap<>(bindings.lowerTypeBounds.size());
+        upperTypeBounds = new HashMap<>(bindings.upperTypeBounds.size());
+        lowerRefBounds = new HashMap<>(bindings.lowerRefBounds.size());
+        upperRefBounds = new HashMap<>(bindings.upperRefBounds.size());
+
+        Deque<IParametricTypeSymbol> parametricTypeSymbols = new ArrayDeque<>();
+        copyBounds(bindings, parametricTypeSymbols);
+
+        appliedOverloads = new HashMap<>(bindings.appliedOverloads);
+
+        //rebound parametric polymorphic types
+        for (IParametricTypeSymbol parametricTypeSymbol : parametricTypeSymbols) {
+            List<String> typeVariables = parametricTypeSymbol.rebind(this);
+            for (String typeVariable : typeVariables) {
+                MapHelper.addToSetInMap(typeVariable2BoundTypes, typeVariable, parametricTypeSymbol);
+            }
+        }
+    }
+
+    private void copyVariablesAndTypeVariables(OverloadBindings bindings) {
         for (Map.Entry<String, ITypeVariableReference> entry : bindings.variable2TypeVariable.entrySet()) {
             ITypeVariableReference reference = entry.getValue();
             TypeVariableReference typeVariableReference = new TypeVariableReference(reference.getTypeVariable());
@@ -99,16 +116,50 @@ public class OverloadBindings implements IOverloadBindings
             variable2TypeVariable.put(entry.getKey(), copy);
         }
 
-        typeVariable2Variables = new HashMap<>();
         for (Map.Entry<String, Set<String>> entry : bindings.typeVariable2Variables.entrySet()) {
             typeVariable2Variables.put(entry.getKey(), new HashSet<>(entry.getValue()));
         }
+    }
 
-        appliedOverloads = new HashMap<>(bindings.appliedOverloads);
+    private void copyBounds(OverloadBindings bindings, Deque<IParametricTypeSymbol> parametricTypeSymbols) {
+        for (Map.Entry<String, IUnionTypeSymbol> entry : bindings.lowerTypeBounds.entrySet()) {
+            IUnionTypeSymbol copy = entry.getValue().copy(parametricTypeSymbols);
+            lowerTypeBounds.put(entry.getKey(), copy);
+        }
+
+        for (Map.Entry<String, IIntersectionTypeSymbol> entry : bindings.upperTypeBounds.entrySet()) {
+            IIntersectionTypeSymbol copy = entry.getValue().copy(parametricTypeSymbols);
+            upperTypeBounds.put(entry.getKey(), copy);
+        }
+
+
+        for (Map.Entry<String, Set<String>> entry : bindings.lowerRefBounds.entrySet()) {
+            lowerRefBounds.put(entry.getKey(), new HashSet<>(entry.getValue()));
+        }
+
+        for (Map.Entry<String, Set<String>> entry : bindings.upperRefBounds.entrySet()) {
+            upperRefBounds.put(entry.getKey(), new HashSet<>(entry.getValue()));
+        }
     }
 
     @Override
-    public TypeVariableReference getNextTypeVariable() {
+    public ITypeVariableReference createTempVariable() {
+        ITypeVariableReference nextTypeVariable = getNextTypeVariable();
+        addVariable(TEMP_VARIABLE_PREFIX + tempVariableCount++, nextTypeVariable);
+        return nextTypeVariable;
+    }
+
+    @Override
+    public void removeTempVariables() {
+        for (int i = 0; i < tempVariableCount; ++i) {
+            ITypeVariableReference reference = variable2TypeVariable.remove(TEMP_VARIABLE_PREFIX + i);
+            typeVariable2Variables.get(reference.getTypeVariable()).remove(TEMP_VARIABLE_PREFIX + i);
+        }
+        tempVariableCount = 0;
+    }
+
+    @Override
+    public ITypeVariableReference getNextTypeVariable() {
         return new TypeVariableReference("T" + count++);
     }
 
@@ -119,7 +170,7 @@ public class OverloadBindings implements IOverloadBindings
                     "variable with id " + variableId + " was already added to this binding.");
         }
         variable2TypeVariable.put(variableId, reference);
-        addToSetInMap(typeVariable2Variables, reference.getTypeVariable(), variableId);
+        MapHelper.addToSetInMap(typeVariable2Variables, reference.getTypeVariable(), variableId);
     }
 
     @Override
@@ -293,7 +344,6 @@ public class OverloadBindings implements IOverloadBindings
 
     private boolean addUpperTypeBoundAfterContainsCheck(String typeVariable, ITypeSymbol typeSymbol) {
         checkLowerTypeBounds(typeVariable, typeSymbol);
-
 
         boolean hasChanged = false;
         if (isNotConvertibleTypeWithSelfRef(typeVariable, typeSymbol)) {
@@ -820,6 +870,32 @@ public class OverloadBindings implements IOverloadBindings
         }
     }
 
+    @Override
+    public void bind(IParametricTypeSymbol parametricType, List<String> typeVariables) {
+        int size = typeVariables.size();
+        for (int i = 0; i < size; ++i) {
+            String typeVariable = typeVariables.get(i);
+            if (!typeVariable2Variables.containsKey(typeVariable)) {
+                for (int j = 0; j < i; ++j) {
+                    typeVariable2BoundTypes.get(typeVariables.get(j)).remove(parametricType);
+                }
+                throw new IllegalArgumentException("no variable has a binding for type variable"
+                        + " \"" + typeVariable + "\"");
+            }
+            MapHelper.addToSetInMap(typeVariable2BoundTypes, typeVariable, parametricType);
+        }
+
+        try {
+            parametricType.bindTo(this, typeVariables);
+        } catch (IllegalArgumentException ex) {
+            //remove registration before throwing the exception further
+            for (String typeVariable : typeVariables) {
+                typeVariable2BoundTypes.get(typeVariable).remove(parametricType);
+            }
+            throw ex;
+        }
+    }
+
     private void renameTypeVariableAfterContainsCheck(String typeVariable, String newTypeVariable) {
         if (hasLowerTypeBounds(typeVariable)) {
             addLowerTypeBoundAfterContainsCheck(newTypeVariable, lowerTypeBounds.remove(typeVariable));
@@ -834,7 +910,6 @@ public class OverloadBindings implements IOverloadBindings
                 upperRefBounds.get(lowerRefTypeVariable).remove(typeVariable);
             }
         }
-
         if (hasUpperRefBounds(typeVariable)) {
             for (String upperRefTypeVariable : upperRefBounds.remove(typeVariable)) {
                 addLowerRefBound(upperRefTypeVariable, newTypeVariable, true);
@@ -847,18 +922,19 @@ public class OverloadBindings implements IOverloadBindings
             variable2TypeVariable.get(variableId).setTypeVariable(newTypeVariable);
             variables.add(variableId);
         }
-    }
 
+        if (typeVariable2BoundTypes.containsKey(typeVariable)) {
+            Set<IParametricTypeSymbol> boundTypes = typeVariable2BoundTypes.get(newTypeVariable);
+            if (boundTypes == null) {
+                boundTypes = new HashSet<>();
+                typeVariable2BoundTypes.put(newTypeVariable, boundTypes);
+            }
 
-    private void addToSetInMap(Map<String, Set<String>> map, String key, String value) {
-        Set<String> set;
-        if (map.containsKey(key)) {
-            set = map.get(key);
-        } else {
-            set = new HashSet<>();
-            map.put(key, set);
+            for (IParametricTypeSymbol parametricType : typeVariable2BoundTypes.remove(typeVariable)) {
+                parametricType.renameTypeVariable(typeVariable, newTypeVariable);
+                boundTypes.add(parametricType);
+            }
         }
-        set.add(value);
     }
 
     @Override

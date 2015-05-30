@@ -11,13 +11,12 @@ import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
+import ch.tsphp.tinsphp.common.symbols.IConvertibleTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.symbols.constraints.OverloadBindings;
-import ch.tsphp.tinsphp.symbols.test.unit.testutils.ATypeTest;
-import org.junit.Assert;
+import ch.tsphp.tinsphp.symbols.test.integration.testutils.ATypeHelperTest;
 import org.junit.Test;
-import org.mockito.exceptions.base.MockitoAssertionError;
 
 import java.util.Set;
 
@@ -29,12 +28,9 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsNull.nullValue;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
-public class OverloadBindingsTest extends ATypeTest
+public class OverloadBindingsTest extends ATypeHelperTest
 {
 
     @Test
@@ -153,11 +149,29 @@ public class OverloadBindingsTest extends ATypeTest
     }
 
     @Test
+    public void copyConstructor_HasBoundedType_IsCopied() {
+        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, typeHelper);
+        bindings1.addVariable("$a", new TypeVariableReference("T1"));
+        bindings1.addVariable("$b", new TypeVariableReference("T2"));
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        bindings1.bind(convertibleTypeSymbol, asList("T2"));
+        bindings1.addUpperTypeBound("T1", convertibleTypeSymbol);
+
+        IOverloadBindings collection = createOverloadBindings(bindings1);
+        convertibleTypeSymbol.renameTypeVariable("T2", "T3");
+
+        assertThat(collection, withVariableBindings(
+                varBinding("$a", "T1", null, asList("{as T2}"), false),
+                varBinding("$b", "T2", null, null, false)
+        ));
+    }
+
+    @Test
     public void getNextTypeVariable_FirstCall_ReturnsT1() {
         //no arrange necessary
 
         IOverloadBindings collection = createOverloadBindings();
-        TypeVariableReference result = collection.getNextTypeVariable();
+        ITypeVariableReference result = collection.getNextTypeVariable();
 
         assertThat(result.getTypeVariable(), is("T1"));
     }
@@ -168,7 +182,7 @@ public class OverloadBindingsTest extends ATypeTest
         bindings1.getNextTypeVariable();
 
         IOverloadBindings collection = createOverloadBindings(bindings1);
-        TypeVariableReference result = collection.getNextTypeVariable();
+        ITypeVariableReference result = collection.getNextTypeVariable();
 
         assertThat(result.getTypeVariable(), is("T2"));
     }
@@ -195,134 +209,6 @@ public class OverloadBindingsTest extends ATypeTest
         collection.addVariable("$a", new TypeVariableReference("T2"));
 
         //assert in annotation
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void renameTypeVariable_UnknownTypeVariable_ThrowsIllegalArgumentException() {
-        //pre act - necessary for arrange
-        IOverloadBindings collection = createOverloadBindings();
-
-        //arrange
-        String lhs = "Tlhs";
-        collection.addVariable("$lhs", new TypeVariableReference(lhs));
-
-        //act
-        collection.renameTypeVariable("T", lhs);
-
-        //assert in annotation
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void renameTypeVariable_UnknownNewName_ThrowsIllegalArgumentException() {
-        //pre act - necessary for arrange
-        IOverloadBindings collection = createOverloadBindings();
-
-        //arrange
-        String lhs = "Tlhs";
-        collection.addVariable("$lhs", new TypeVariableReference(lhs));
-
-        //act
-        collection.renameTypeVariable(lhs, "T");
-
-        //assert in annotation
-    }
-
-    @Test
-    public void renameTypeVariable_IsSelfReference_DoesNotCallSetTypeVariableOnConstraint() {
-        //pre act - necessary for arrange
-        IOverloadBindings collection = createOverloadBindings();
-
-        //arrange
-        String lhs = "Tlhs";
-        TypeVariableReference constraint = spy(new TypeVariableReference(lhs));
-        collection.addVariable("$lhs", constraint);
-
-        //act
-        collection.renameTypeVariable(lhs, lhs);
-
-        try {
-            verify(constraint).setTypeVariable(anyString());
-            Assert.fail("should not rename a self reference");
-        } catch (MockitoAssertionError ex) {
-            //should be thrown
-        }
-    }
-
-    @Test
-    public void renameTypeVariable_HasTypeBounds_TransferTypeBounds() {
-        //pre act - necessary for arrange
-        IOverloadBindings collection = createOverloadBindings();
-
-        //arrange
-        String lhs = "Tlhs";
-        String rhs = "Trhs";
-        collection.addVariable("$lhs", new TypeVariableReference(lhs));
-        collection.addVariable("$rhs", new TypeVariableReference(rhs));
-        collection.addLowerTypeBound(lhs, intType);
-        collection.addUpperTypeBound(lhs, numType);
-
-        //act
-        collection.renameTypeVariable(lhs, rhs);
-
-        assertThat(collection, withVariableBindings(
-                varBinding("$lhs", rhs, asList("int"), asList("num"), false),
-                varBinding("$rhs", rhs, asList("int"), asList("num"), false)
-        ));
-    }
-
-    //see TINS-466 rename type variable does not promote type bounds
-    @Test
-    public void renameTypeVariable_HasTypeBoundsAndOtherHasUpperRef_TransferTypeBoundsAndPropagate() {
-        //pre act - necessary for arrange
-        IOverloadBindings collection = createOverloadBindings();
-
-        //arrange
-        String lhs = "Tlhs";
-        String rhs = "Trhs";
-        String upperRhs = "Tupper";
-        collection.addVariable("$lhs", new TypeVariableReference(lhs));
-        collection.addVariable("$rhs", new TypeVariableReference(rhs));
-        collection.addVariable("$upper", new TypeVariableReference(upperRhs));
-        collection.addLowerRefBound(upperRhs, new TypeVariableReference(rhs));
-        collection.addLowerTypeBound(lhs, intType);
-        collection.addUpperTypeBound(lhs, numType);
-
-        //act
-        collection.renameTypeVariable(lhs, rhs);
-
-        assertThat(collection, withVariableBindings(
-                varBinding("$lhs", rhs, asList("int"), asList("num", "@" + upperRhs), false),
-                varBinding("$rhs", rhs, asList("int"), asList("num", "@" + upperRhs), false),
-                varBinding("$upper", upperRhs, asList("int", "@" + rhs), null, false)
-        ));
-    }
-
-    @Test
-    public void renameTypeVariable_HasRefBounds_TransfersBounds() {
-        //pre act - necessary for arrange
-        IOverloadBindings collection = createOverloadBindings();
-
-        //arrange
-        String lhs = "Tlhs";
-        String rhs = "Trhs";
-        collection.addVariable("$lhs", new TypeVariableReference(lhs));
-        collection.addVariable("$rhs", new TypeVariableReference(rhs));
-        String t1 = "T1";
-        collection.addVariable("$t1", new TypeVariableReference(t1));
-        String t2 = "T2";
-        collection.addVariable("$t2", new TypeVariableReference(t2));
-        collection.addLowerRefBound(lhs, new TypeVariableReference(t1));
-        collection.addLowerRefBound(t2, new TypeVariableReference(lhs));
-
-        //act
-        collection.renameTypeVariable(lhs, rhs);
-
-        assertThat(collection, withVariableBindings(
-                varBinding("$lhs", rhs, asList("@T1"), asList("@T2"), false),
-                varBinding("$rhs", rhs, asList("@T1"), asList("@T2"), false),
-                varBinding("$t1", t1, null, asList("@Trhs"), false),
-                varBinding("$t2", t2, asList("@Trhs"), null, false)
-        ));
     }
 
     @Test

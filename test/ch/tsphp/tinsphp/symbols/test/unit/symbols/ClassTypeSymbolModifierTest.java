@@ -13,7 +13,7 @@ import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.gen.TokenTypes;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IClassTypeSymbol;
-import ch.tsphp.tinsphp.common.symbols.IPolymorphicTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IRecordTypeSymbol;
 import ch.tsphp.tinsphp.symbols.ClassTypeSymbol;
 import ch.tsphp.tinsphp.symbols.ModifierSet;
 import org.junit.Test;
@@ -45,7 +45,7 @@ public class ClassTypeSymbolModifierTest
         IModifierSet set = createModifierSet();
         set.add(modifierType);
 
-        IPolymorphicTypeSymbol typeSymbol = createClassTypeSymbol(set);
+        IRecordTypeSymbol typeSymbol = createClassTypeSymbol(set);
         boolean result = (boolean) typeSymbol.getClass().getMethod(methodName).invoke(typeSymbol);
 
         assertTrue(methodName + " failed.", result);
@@ -55,7 +55,7 @@ public class ClassTypeSymbolModifierTest
     public void isNot_ReturnsFalse() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         IModifierSet set = createModifierSet();
 
-        IPolymorphicTypeSymbol typeSymbol = createClassTypeSymbol(set);
+        IRecordTypeSymbol typeSymbol = createClassTypeSymbol(set);
         boolean result = (boolean) typeSymbol.getClass().getMethod(methodName).invoke(typeSymbol);
 
         assertFalse(methodName + " failed.", result);

@@ -11,22 +11,70 @@ import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
 import ch.tsphp.tinsphp.common.symbols.IConvertibleTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IParametricTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 
-public class ConvertibleTypeSymbol extends AIndirectTypeSymbol implements IConvertibleTypeSymbol
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
+public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements IConvertibleTypeSymbol
 {
     private String typeVariable = "T";
     private IOverloadBindings overloadBindings;
     private boolean wasBound = false;
 
-    public ConvertibleTypeSymbol(
-            IOverloadBindings theOverloadBindings) {
+    public ConvertibleTypeSymbol(IOverloadBindings theOverloadBindings) {
         overloadBindings = theOverloadBindings;
         overloadBindings.addVariable(typeVariable, new TypeVariableReference(typeVariable));
     }
 
+    private ConvertibleTypeSymbol(ConvertibleTypeSymbol convertibleTypeSymbol) {
+        overloadBindings = convertibleTypeSymbol.overloadBindings;
+        typeVariable = convertibleTypeSymbol.typeVariable;
+        wasBound = true;
+        hasAbsoluteNameChanged = true;
+    }
+
     @Override
-    public void setOverloadBindings(IOverloadBindings bindings, String newTypeVariable) {
+    public boolean wasBound() {
+        return wasBound;
+    }
+
+    @Override
+    public IConvertibleTypeSymbol copy(Collection<IParametricTypeSymbol> parametricTypeSymbols) {
+        return new ConvertibleTypeSymbol(this);
+    }
+
+    @Override
+    public boolean isFixed() {
+        return !wasBound;
+    }
+
+    @Override
+    public void renameTypeVariable(String theTypeVariable, String newTypeVariable) {
+        if (!typeVariable.equals(theTypeVariable)) {
+            throw new IllegalArgumentException("given type variable name \"" + theTypeVariable + "\" "
+                    + "was not the current type variable name \"" + typeVariable + "\"");
+        }
+
+        if (!wasBound) {
+            throw new IllegalArgumentException("can only rename the type variable if it is bound to another "
+                    + "parametric polymorphic type");
+        }
+
+        typeVariable = newTypeVariable;
+
+        notifyHasChanged();
+    }
+
+    @Override
+    public void bindTo(IOverloadBindings bindings, List<String> typeParameters) {
+        if (typeParameters.size() != 1) {
+            throw new IllegalArgumentException("a convertible type expects exactly one type parameter");
+        }
+
+        String newTypeVariable = typeParameters.get(0);
         if (hasLowerTypeBounds()) {
             bindings.addLowerTypeBound(newTypeVariable, getLowerTypeBounds());
         }
@@ -35,8 +83,27 @@ public class ConvertibleTypeSymbol extends AIndirectTypeSymbol implements IConve
         }
         overloadBindings = bindings;
         typeVariable = newTypeVariable;
-        hasAbsoluteNameChanged = true;
+        notifyHasChanged();
         wasBound = true;
+    }
+
+    @Override
+    public List<String> rebind(IOverloadBindings newOverloadBindings) {
+        if (!wasBound) {
+            throw new IllegalStateException("can only rebind a convertible type if it was already bound before.");
+        }
+
+        //ensures that the type variable exists in the new overload bindings
+        newOverloadBindings.renameTypeVariable(typeVariable, typeVariable);
+
+        overloadBindings = newOverloadBindings;
+
+        return Arrays.asList(typeVariable);
+    }
+
+    @Override
+    public List<String> getTypeVariables() {
+        return Arrays.asList(typeVariable);
     }
 
     @Override
@@ -52,14 +119,18 @@ public class ConvertibleTypeSymbol extends AIndirectTypeSymbol implements IConve
     @Override
     public boolean addLowerTypeBound(ITypeSymbol typeSymbol) {
         boolean hasChanged = overloadBindings.addLowerTypeBound(typeVariable, typeSymbol);
-        hasAbsoluteNameChanged = hasAbsoluteNameChanged || hasChanged;
+        if (hasChanged) {
+            notifyHasChanged();
+        }
         return hasChanged;
     }
 
     @Override
     public boolean addUpperTypeBound(ITypeSymbol typeSymbol) {
         boolean hasChanged = overloadBindings.addUpperTypeBound(typeVariable, typeSymbol);
-        hasAbsoluteNameChanged = hasAbsoluteNameChanged || hasChanged;
+        if (hasChanged) {
+            notifyHasChanged();
+        }
         return hasChanged;
     }
 

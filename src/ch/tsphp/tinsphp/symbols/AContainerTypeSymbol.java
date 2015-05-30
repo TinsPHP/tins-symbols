@@ -8,16 +8,20 @@ package ch.tsphp.tinsphp.symbols;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IContainerTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IObservableTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IParametricTypeSymbol;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 
+import java.util.ArrayDeque;
+import java.util.Collection;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-public abstract class AContainerTypeSymbol<TContainer extends IContainerTypeSymbol<TContainer>>
-        extends AIndirectTypeSymbol implements IContainerTypeSymbol<TContainer>
+public abstract class AContainerTypeSymbol extends APolymorphicTypeSymbol implements IContainerTypeSymbol
 {
     protected static enum ETypeRelation
     {
@@ -28,11 +32,24 @@ public abstract class AContainerTypeSymbol<TContainer extends IContainerTypeSymb
 
     protected final ITypeHelper typeHelper;
     protected final Map<String, ITypeSymbol> typeSymbols;
+    protected boolean isFixed = true;
 
     public AContainerTypeSymbol(ITypeHelper theTypeHelper) {
         super();
         typeHelper = theTypeHelper;
         typeSymbols = new HashMap<>();
+    }
+
+    protected AContainerTypeSymbol(
+            ITypeHelper theTypeHelper,
+            AContainerTypeSymbol containerTypeSymbol,
+            Collection<IParametricTypeSymbol> parametricTypeSymbols) {
+        typeHelper = theTypeHelper;
+        typeSymbols = new HashMap<>(containerTypeSymbol.typeSymbols);
+        isFixed = containerTypeSymbol.isFixed;
+        if (!isFixed) {
+            deepenCopy(parametricTypeSymbols);
+        }
     }
 
     public abstract String getTypeSeparator();
@@ -43,6 +60,43 @@ public abstract class AContainerTypeSymbol<TContainer extends IContainerTypeSymb
     public abstract String getDefaultName();
 
     protected abstract boolean addAndSimplify(String absoluteName, ITypeSymbol newTypeSymbol);
+
+    protected void deepenCopy(Collection<IParametricTypeSymbol> parametricTypeSymbols) {
+        Deque<IParametricTypeSymbol> tmpParametricTypeSymbols = new ArrayDeque<>();
+        Deque<IContainerTypeSymbol> containerTypeSymbols = new ArrayDeque<>();
+
+        Iterator<Map.Entry<String, ITypeSymbol>> iterator = getTypeSymbols().entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, ITypeSymbol> copyEntry = iterator.next();
+            ITypeSymbol typeSymbol = copyEntry.getValue();
+            if (isContainerTypeAndNotFixed(typeSymbol)) {
+                iterator.remove();
+                containerTypeSymbols.add((IContainerTypeSymbol) typeSymbol);
+            } else if (isParametricTypeAndNotFixed(typeSymbol)) {
+                iterator.remove();
+                tmpParametricTypeSymbols.add((IParametricTypeSymbol) typeSymbol);
+            }
+        }
+
+        for (IContainerTypeSymbol containerTypeSymbol : containerTypeSymbols) {
+            IContainerTypeSymbol copy = containerTypeSymbol.copy(parametricTypeSymbols);
+            addTypeSymbol(copy);
+        }
+
+        for (IParametricTypeSymbol parametricTypeSymbol : tmpParametricTypeSymbols) {
+            IParametricTypeSymbol copy = parametricTypeSymbol.copy(parametricTypeSymbols);
+            addTypeSymbol(copy);
+            parametricTypeSymbols.add(copy);
+        }
+    }
+
+    private boolean isContainerTypeAndNotFixed(ITypeSymbol typeSymbol) {
+        return typeSymbol instanceof IContainerTypeSymbol && !((IContainerTypeSymbol) typeSymbol).isFixed();
+    }
+
+    private boolean isParametricTypeAndNotFixed(ITypeSymbol typeSymbol) {
+        return typeSymbol instanceof IParametricTypeSymbol && !((IParametricTypeSymbol) typeSymbol).isFixed();
+    }
 
     /**
      * Returns true if all types in the container can be used in an intersection.
@@ -75,7 +129,7 @@ public abstract class AContainerTypeSymbol<TContainer extends IContainerTypeSymb
         return hasChanged;
     }
 
-    protected boolean merge(IContainerTypeSymbol<TContainer> containerTypeSymbol) {
+    protected boolean merge(IContainerTypeSymbol containerTypeSymbol) {
         boolean hasChanged = false;
 
         for (ITypeSymbol typeSymbol : containerTypeSymbol.getTypeSymbols().values()) {
@@ -91,6 +145,18 @@ public abstract class AContainerTypeSymbol<TContainer extends IContainerTypeSymb
     @Override
     public Map<String, ITypeSymbol> getTypeSymbols() {
         return typeSymbols;
+    }
+
+    @Override
+    public boolean isFixed() {
+        return isFixed;
+    }
+
+    @Override
+    public void nameOfObservableHasChanged(IObservableTypeSymbol type, String oldAbsoluteName) {
+        typeSymbols.remove(oldAbsoluteName);
+        typeSymbols.put(type.getAbsoluteName(), type);
+        notifyHasChanged();
     }
 
     @Override

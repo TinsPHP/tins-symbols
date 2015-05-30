@@ -11,13 +11,13 @@ import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
-import ch.tsphp.tinsphp.common.symbols.IPolymorphicTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IRecordTypeSymbol;
 import ch.tsphp.tinsphp.symbols.ClassTypeSymbol;
 import ch.tsphp.tinsphp.symbols.test.unit.symbols.APolymorphicTypeSymbolTest;
 
 public class ClassTypeSymbol_APolymorphicTypeSymbol_LSPTest extends APolymorphicTypeSymbolTest
 {
-    protected IPolymorphicTypeSymbol createPolymorphicTypeSymbol(
+    protected IRecordTypeSymbol createPolymorphicTypeSymbol(
             IScopeHelper scopeHelper,
             ITSPHPAst definitionAst,
             IModifierSet modifiers,

@@ -12,7 +12,7 @@ import ch.tsphp.common.symbols.ISymbol;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
-import ch.tsphp.tinsphp.symbols.APolymorphicTypeSymbol;
+import ch.tsphp.tinsphp.symbols.ARecordTypeSymbol;
 import ch.tsphp.tinsphp.symbols.AScopedSymbol;
 import ch.tsphp.tinsphp.symbols.test.unit.symbols.AScopedSymbolTest;
 import org.junit.Test;
@@ -26,10 +26,10 @@ import static org.mockito.Mockito.when;
 public class APolymorphicTypeSymbol_AScopedSymbol_LSPTest extends AScopedSymbolTest
 {
 
-    class DummyPolymorphicTypeSymbol extends APolymorphicTypeSymbol
+    class DummyRecordTypeSymbol extends ARecordTypeSymbol
     {
 
-        public DummyPolymorphicTypeSymbol(IScopeHelper scopeHelper, ITSPHPAst definitionAst, IModifierSet modifiers,
+        public DummyRecordTypeSymbol(IScopeHelper scopeHelper, ITSPHPAst definitionAst, IModifierSet modifiers,
                 String name, IScope enclosingScope, ITypeSymbol theParentTypeSymbol) {
             super(scopeHelper, definitionAst, modifiers, name, enclosingScope, theParentTypeSymbol);
         }
@@ -306,7 +306,7 @@ public class APolymorphicTypeSymbol_AScopedSymbol_LSPTest extends AScopedSymbolT
             IModifierSet modifiers, String name, IScope enclosingScope) {
         ITypeSymbol typeSymbol = mock(ITypeSymbol.class);
         when(typeSymbol.getName()).thenReturn("dummy");
-        return new DummyPolymorphicTypeSymbol(
+        return new DummyRecordTypeSymbol(
                 scopeHelper, definitionAst, modifiers, name, enclosingScope, typeSymbol);
     }
 }

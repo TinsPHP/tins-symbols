@@ -21,7 +21,7 @@ import ch.tsphp.tinsphp.common.symbols.IClassTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 
-public class ClassTypeSymbol extends APolymorphicTypeSymbol implements IClassTypeSymbol
+public class ClassTypeSymbol extends ARecordTypeSymbol implements IClassTypeSymbol
 {
 
     private IMethodSymbol construct;

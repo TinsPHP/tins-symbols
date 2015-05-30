@@ -8,23 +8,28 @@ package ch.tsphp.tinsphp.symbols;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IContainerTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IObservableTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IParametricTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IPolymorphicTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.PrimitiveTypeNames;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
-public class UnionTypeSymbol extends AContainerTypeSymbol<IUnionTypeSymbol> implements IUnionTypeSymbol
+public class UnionTypeSymbol extends AContainerTypeSymbol implements IUnionTypeSymbol
 {
-
     public UnionTypeSymbol(ITypeHelper theTypeHelper) {
         super(theTypeHelper);
     }
 
-    @Override
-    public ITypeSymbol evalSelf() {
-        return this;
+    public UnionTypeSymbol(
+            ITypeHelper theTypeHelper,
+            UnionTypeSymbol unionTypeSymbol,
+            Collection<IParametricTypeSymbol> parametricTypeSymbols) {
+        super(theTypeHelper, unionTypeSymbol, parametricTypeSymbols);
     }
 
     @Override
@@ -37,6 +42,7 @@ public class UnionTypeSymbol extends AContainerTypeSymbol<IUnionTypeSymbol> impl
         return PrimitiveTypeNames.NOTHING;
     }
 
+
     //Warning! start code duplication - almost the same as in IntersectionTypeSymbol
     @Override
     public boolean addTypeSymbol(ITypeSymbol typeSymbol) {
@@ -44,23 +50,31 @@ public class UnionTypeSymbol extends AContainerTypeSymbol<IUnionTypeSymbol> impl
         if (typeSymbol instanceof IUnionTypeSymbol) {
             hasChanged = super.merge((IUnionTypeSymbol) typeSymbol);
         } else if (typeSymbol instanceof IContainerTypeSymbol) {
-            Map<String, ITypeSymbol> otherTypeSymbols = ((IContainerTypeSymbol) typeSymbol).getTypeSymbols();
+            IContainerTypeSymbol containerTypeSymbol = (IContainerTypeSymbol) typeSymbol;
+            Map<String, ITypeSymbol> otherTypeSymbols = containerTypeSymbol.getTypeSymbols();
             if (otherTypeSymbols.size() == 1) {
+                //type in container could be a container as well - hence call not the parent method but this one
                 hasChanged = addTypeSymbol(otherTypeSymbols.values().iterator().next());
             } else {
+                isFixed = isFixed && containerTypeSymbol.isFixed();
+                containerTypeSymbol.register(this);
                 hasChanged = super.addTypeSymbol(typeSymbol);
             }
         } else {
+            if (isFixed && typeSymbol instanceof IPolymorphicTypeSymbol) {
+                isFixed = ((IPolymorphicTypeSymbol) typeSymbol).isFixed();
+            }
+            if (typeSymbol instanceof IObservableTypeSymbol) {
+                ((IObservableTypeSymbol) typeSymbol).register(this);
+            }
             hasChanged = super.addTypeSymbol(typeSymbol);
         }
         return hasChanged;
     }
 
     @Override
-    public IUnionTypeSymbol copy() {
-        UnionTypeSymbol copy = new UnionTypeSymbol(typeHelper);
-        copy.typeSymbols.putAll(typeSymbols);
-        return copy;
+    public IUnionTypeSymbol copy(Collection<IParametricTypeSymbol> parametricTypeSymbols) {
+        return new UnionTypeSymbol(typeHelper, this, parametricTypeSymbols);
     }
     //Warning! start code duplication - almost the same as in IntersectionTypeSymbol
 

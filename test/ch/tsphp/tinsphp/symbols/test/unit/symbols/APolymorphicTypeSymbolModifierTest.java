@@ -12,8 +12,8 @@ import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.gen.TokenTypes;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
-import ch.tsphp.tinsphp.common.symbols.IPolymorphicTypeSymbol;
-import ch.tsphp.tinsphp.symbols.APolymorphicTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IRecordTypeSymbol;
+import ch.tsphp.tinsphp.symbols.ARecordTypeSymbol;
 import ch.tsphp.tinsphp.symbols.ModifierSet;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,10 +31,10 @@ import static org.mockito.Mockito.when;
 @RunWith(Parameterized.class)
 public class APolymorphicTypeSymbolModifierTest
 {
-    class DummyPolymorphicTypeSymbol extends APolymorphicTypeSymbol
+    class DummyRecordTypeSymbol extends ARecordTypeSymbol
     {
 
-        public DummyPolymorphicTypeSymbol(IScopeHelper scopeHelper, ITSPHPAst definitionAst, IModifierSet modifiers,
+        public DummyRecordTypeSymbol(IScopeHelper scopeHelper, ITSPHPAst definitionAst, IModifierSet modifiers,
                 String name, IScope enclosingScope, ITypeSymbol theParentTypeSymbol) {
             super(scopeHelper, definitionAst, modifiers, name, enclosingScope, theParentTypeSymbol);
         }
@@ -58,7 +58,7 @@ public class APolymorphicTypeSymbolModifierTest
         IModifierSet set = createModifierSet();
         set.add(modifierType);
 
-        IPolymorphicTypeSymbol typeSymbol = createPolymorphicTypeSymbol(set);
+        IRecordTypeSymbol typeSymbol = createPolymorphicTypeSymbol(set);
         boolean result = (boolean) typeSymbol.getClass().getMethod(methodName).invoke(typeSymbol);
 
         assertTrue(methodName + " failed.", result);
@@ -68,7 +68,7 @@ public class APolymorphicTypeSymbolModifierTest
     public void isNot_ReturnsFalse() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         IModifierSet set = createModifierSet();
 
-        IPolymorphicTypeSymbol typeSymbol = createPolymorphicTypeSymbol(set);
+        IRecordTypeSymbol typeSymbol = createPolymorphicTypeSymbol(set);
         boolean result = (boolean) typeSymbol.getClass().getMethod(methodName).invoke(typeSymbol);
 
         assertFalse(methodName + " failed.", result);
@@ -87,7 +87,7 @@ public class APolymorphicTypeSymbolModifierTest
         return new ModifierSet();
     }
 
-    private IPolymorphicTypeSymbol createPolymorphicTypeSymbol(IModifierSet set) {
+    private IRecordTypeSymbol createPolymorphicTypeSymbol(IModifierSet set) {
         ITypeSymbol typeSymbol = mock(ITypeSymbol.class);
         when(typeSymbol.getName()).thenReturn("dummy");
         return createMethodSymbol(
@@ -100,14 +100,14 @@ public class APolymorphicTypeSymbolModifierTest
         );
     }
 
-    protected IPolymorphicTypeSymbol createMethodSymbol(
+    protected IRecordTypeSymbol createMethodSymbol(
             IScopeHelper scopeHelper,
             ITSPHPAst definitionAst,
             IModifierSet modifiers,
             String name,
             IScope enclosingScope,
             ITypeSymbol parentTypeSymbol) {
-        return new DummyPolymorphicTypeSymbol(
+        return new DummyRecordTypeSymbol(
                 scopeHelper, definitionAst, modifiers, name, enclosingScope, parentTypeSymbol);
     }
 

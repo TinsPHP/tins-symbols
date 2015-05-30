@@ -9,10 +9,13 @@ package ch.tsphp.tinsphp.symbols.test.unit.symbols;
 import ch.tsphp.common.IScope;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IContainerTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IParametricTypeSymbol;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.symbols.AContainerTypeSymbol;
 import ch.tsphp.tinsphp.symbols.ModifierSet;
 import org.junit.Test;
+
+import java.util.Collection;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -21,11 +24,8 @@ import static org.mockito.Mockito.mock;
 
 public class AContainerTypeSymbolTest
 {
-    private interface IDummyContainerTypeSymbol extends IContainerTypeSymbol<IDummyContainerTypeSymbol>
-    {
-    }
 
-    private class DummyAContainerTypeSymbol extends AContainerTypeSymbol<IDummyContainerTypeSymbol>
+    private class DummyAContainerTypeSymbol extends AContainerTypeSymbol
     {
 
         public DummyAContainerTypeSymbol(ITypeHelper theTypeHelper) {
@@ -48,7 +48,7 @@ public class AContainerTypeSymbolTest
         }
 
         @Override
-        public IDummyContainerTypeSymbol copy() {
+        public IContainerTypeSymbol copy(Collection<IParametricTypeSymbol> parametricTypeSymbols) {
             return null;
         }
     }

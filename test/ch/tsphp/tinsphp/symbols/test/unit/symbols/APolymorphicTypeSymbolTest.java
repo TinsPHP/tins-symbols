@@ -14,10 +14,10 @@ import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.gen.TokenTypes;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
-import ch.tsphp.tinsphp.common.symbols.IPolymorphicTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IPseudoTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IRecordTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
-import ch.tsphp.tinsphp.symbols.APolymorphicTypeSymbol;
+import ch.tsphp.tinsphp.symbols.ARecordTypeSymbol;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -42,10 +42,10 @@ import static org.mockito.Mockito.when;
 
 public class APolymorphicTypeSymbolTest
 {
-    class DummyPolymorphicTypeSymbol extends APolymorphicTypeSymbol
+    class DummyRecordTypeSymbol extends ARecordTypeSymbol
     {
 
-        public DummyPolymorphicTypeSymbol(IScopeHelper scopeHelper, ITSPHPAst definitionAst, IModifierSet modifiers,
+        public DummyRecordTypeSymbol(IScopeHelper scopeHelper, ITSPHPAst definitionAst, IModifierSet modifiers,
                 String name, IScope enclosingScope, ITypeSymbol theParentTypeSymbol) {
             super(scopeHelper, definitionAst, modifiers, name, enclosingScope, theParentTypeSymbol);
         }
@@ -61,7 +61,7 @@ public class APolymorphicTypeSymbolTest
     public void resolveCaseInsensitive_NothingDefined_ReturnsNull() {
         ITSPHPAst ast = createAst("astText");
 
-        IPolymorphicTypeSymbol typeSymbol = createPolymorphicTypeSymbol();
+        IRecordTypeSymbol typeSymbol = createPolymorphicTypeSymbol();
         ISymbol result = typeSymbol.resolveCaseInsensitive(ast);
 
         assertNull(result);
@@ -72,7 +72,7 @@ public class APolymorphicTypeSymbolTest
         ISymbol symbol = createSymbol("dummy");
         ITSPHPAst ast = createAst("dummy");
 
-        IPolymorphicTypeSymbol typeSymbol = createPolymorphicTypeSymbol();
+        IRecordTypeSymbol typeSymbol = createPolymorphicTypeSymbol();
         typeSymbol.define(symbol);
         ISymbol result = typeSymbol.resolveCaseInsensitive(ast);
 
@@ -84,7 +84,7 @@ public class APolymorphicTypeSymbolTest
         ISymbol symbol = createSymbol("dummy");
         ITSPHPAst ast = createAst("DUmmy");
 
-        IPolymorphicTypeSymbol typeSymbol = createPolymorphicTypeSymbol();
+        IRecordTypeSymbol typeSymbol = createPolymorphicTypeSymbol();
         typeSymbol.define(symbol);
         ISymbol result = typeSymbol.resolveCaseInsensitive(ast);
 
@@ -99,7 +99,7 @@ public class APolymorphicTypeSymbolTest
         when(scopeHelper.resolve(any(IScope.class), any(ITSPHPAst.class))).thenReturn(symbol);
 
 
-        IPolymorphicTypeSymbol typeSymbol = createPolymorphicTypeSymbol(scopeHelper);
+        IRecordTypeSymbol typeSymbol = createPolymorphicTypeSymbol(scopeHelper);
         ISymbol result = typeSymbol.resolveWithFallbackToParent(ast);
 
         verify(scopeHelper).resolve(typeSymbol, ast);
@@ -110,12 +110,12 @@ public class APolymorphicTypeSymbolTest
     public void resolveWithFallbackToParent_SymbolInParent_DelegatesToScopeHelperAndToParentAndReturnsFoundSymbol() {
         ITSPHPAst ast = createAst("dummy");
         IScopeHelper scopeHelper = mock(IScopeHelper.class);
-        IPolymorphicTypeSymbol parentTypeSymbol = mock(IPolymorphicTypeSymbol.class);
+        IRecordTypeSymbol parentTypeSymbol = mock(IRecordTypeSymbol.class);
         when(parentTypeSymbol.getName()).thenReturn("ParentClass");
         ISymbol symbol = mock(ISymbol.class);
         when(parentTypeSymbol.resolveWithFallbackToParent(ast)).thenReturn(symbol);
 
-        IPolymorphicTypeSymbol typeSymbol = createPolymorphicTypeSymbol(scopeHelper, parentTypeSymbol);
+        IRecordTypeSymbol typeSymbol = createPolymorphicTypeSymbol(scopeHelper, parentTypeSymbol);
         ISymbol result = typeSymbol.resolveWithFallbackToParent(ast);
 
         verify(scopeHelper).resolve(typeSymbol, ast);
@@ -132,7 +132,7 @@ public class APolymorphicTypeSymbolTest
         IPseudoTypeSymbol parentTypeSymbol = mock(IPseudoTypeSymbol.class);
         when(parentTypeSymbol.getName()).thenReturn("mixed");
 
-        IPolymorphicTypeSymbol typeSymbol = createPolymorphicTypeSymbol(scopeHelper, parentTypeSymbol);
+        IRecordTypeSymbol typeSymbol = createPolymorphicTypeSymbol(scopeHelper, parentTypeSymbol);
         ISymbol result = typeSymbol.resolveWithFallbackToParent(ast);
 
         verify(scopeHelper).resolve(typeSymbol, ast);
@@ -147,10 +147,10 @@ public class APolymorphicTypeSymbolTest
         IScopeHelper scopeHelper = mock(IScopeHelper.class);
         ISymbol symbol = mock(ISymbol.class);
         when(scopeHelper.resolve(any(IScope.class), any(ITSPHPAst.class))).thenReturn(symbol);
-        IPolymorphicTypeSymbol parentTypeSymbol = mock(IPolymorphicTypeSymbol.class);
+        IRecordTypeSymbol parentTypeSymbol = mock(IRecordTypeSymbol.class);
         when(parentTypeSymbol.getName()).thenReturn("ParentClass");
 
-        IPolymorphicTypeSymbol typeSymbol = createPolymorphicTypeSymbol(scopeHelper, parentTypeSymbol);
+        IRecordTypeSymbol typeSymbol = createPolymorphicTypeSymbol(scopeHelper, parentTypeSymbol);
         ISymbol result = typeSymbol.resolveWithFallbackToParent(ast);
 
         verify(scopeHelper).resolve(typeSymbol, ast);
@@ -163,7 +163,7 @@ public class APolymorphicTypeSymbolTest
         ITypeSymbol parentTypeSymbol = mock(ITypeSymbol.class);
         when(parentTypeSymbol.getName()).thenReturn("ParentClass");
 
-        IPolymorphicTypeSymbol typeSymbol = createPolymorphicTypeSymbol(parentTypeSymbol);
+        IRecordTypeSymbol typeSymbol = createPolymorphicTypeSymbol(parentTypeSymbol);
         Set<ITypeSymbol> result = typeSymbol.getParentTypeSymbols();
 
         assertThat(result, containsInAnyOrder(parentTypeSymbol));
@@ -173,9 +173,9 @@ public class APolymorphicTypeSymbolTest
     public void addParentTypeSymbol_IfParentWasMixed_ReturnsSetWithPassedTypeSymbolOnly() {
         ITypeSymbol mixed = mock(ITypeSymbol.class);
         when(mixed.getName()).thenReturn("mixed");
-        IPolymorphicTypeSymbol parentTypeSymbol = mock(IPolymorphicTypeSymbol.class);
+        IRecordTypeSymbol parentTypeSymbol = mock(IRecordTypeSymbol.class);
 
-        IPolymorphicTypeSymbol typeSymbol = createPolymorphicTypeSymbol(mixed);
+        IRecordTypeSymbol typeSymbol = createPolymorphicTypeSymbol(mixed);
         typeSymbol.addParentTypeSymbol(parentTypeSymbol);
         Set<ITypeSymbol> result = typeSymbol.getParentTypeSymbols();
 
@@ -186,9 +186,9 @@ public class APolymorphicTypeSymbolTest
     public void addParentTypeSymbol_IfParentWasNotMixed_ReturnsSetWithOldAndNewParentTypeSymbol() {
         ITypeSymbol parentTypeSymbol1 = mock(ITypeSymbol.class);
         when(parentTypeSymbol1.getName()).thenReturn("ParentType");
-        IPolymorphicTypeSymbol parentTypeSymbol2 = mock(IPolymorphicTypeSymbol.class);
+        IRecordTypeSymbol parentTypeSymbol2 = mock(IRecordTypeSymbol.class);
 
-        IPolymorphicTypeSymbol typeSymbol = createPolymorphicTypeSymbol(parentTypeSymbol1);
+        IRecordTypeSymbol typeSymbol = createPolymorphicTypeSymbol(parentTypeSymbol1);
         typeSymbol.addParentTypeSymbol(parentTypeSymbol2);
         Set<ITypeSymbol> result = typeSymbol.getParentTypeSymbols();
 
@@ -200,7 +200,7 @@ public class APolymorphicTypeSymbolTest
         ITypeSymbol parentTypeSymbol = mock(ITypeSymbol.class);
         when(parentTypeSymbol.getName()).thenReturn("mixed");
 
-        IPolymorphicTypeSymbol typeSymbol = createPolymorphicTypeSymbol(parentTypeSymbol);
+        IRecordTypeSymbol typeSymbol = createPolymorphicTypeSymbol(parentTypeSymbol);
         Set<ISymbol> result = typeSymbol.getAbstractSymbols();
 
         verify(parentTypeSymbol).getName();
@@ -210,11 +210,11 @@ public class APolymorphicTypeSymbolTest
 
     @Test
     public void getAbstractSymbols_NothingDefinedAndParentIsPolymorphicButNotAbstract_ReturnsEmptySet() {
-        IPolymorphicTypeSymbol parentTypeSymbol = mock(IPolymorphicTypeSymbol.class);
+        IRecordTypeSymbol parentTypeSymbol = mock(IRecordTypeSymbol.class);
         when(parentTypeSymbol.getName()).thenReturn("ParentClass");
         when(parentTypeSymbol.isAbstract()).thenReturn(false);
 
-        IPolymorphicTypeSymbol typeSymbol = createPolymorphicTypeSymbol(parentTypeSymbol);
+        IRecordTypeSymbol typeSymbol = createPolymorphicTypeSymbol(parentTypeSymbol);
         Set<ISymbol> result = typeSymbol.getAbstractSymbols();
 
         verify(parentTypeSymbol).getName();
@@ -225,12 +225,12 @@ public class APolymorphicTypeSymbolTest
 
     @Test
     public void getAbstractSymbols_NothingDefinedAndParentIsPolymorphicAndAbstract_DelegatesParentAndReturnsNull() {
-        IPolymorphicTypeSymbol parentTypeSymbol = mock(IPolymorphicTypeSymbol.class);
+        IRecordTypeSymbol parentTypeSymbol = mock(IRecordTypeSymbol.class);
         when(parentTypeSymbol.getName()).thenReturn("ParentClass");
         when(parentTypeSymbol.isAbstract()).thenReturn(true);
         when(parentTypeSymbol.getAbstractSymbols()).thenReturn(new HashSet<ISymbol>());
 
-        IPolymorphicTypeSymbol typeSymbol = createPolymorphicTypeSymbol(parentTypeSymbol);
+        IRecordTypeSymbol typeSymbol = createPolymorphicTypeSymbol(parentTypeSymbol);
         Set<ISymbol> result = typeSymbol.getAbstractSymbols();
 
         verify(parentTypeSymbol).getAbstractSymbols();
@@ -247,7 +247,7 @@ public class APolymorphicTypeSymbolTest
         when(symbol.getName()).thenReturn("dummy");
         when(symbol.isAbstract()).thenReturn(true);
 
-        IPolymorphicTypeSymbol typeSymbol = createPolymorphicTypeSymbol(scopeHelper, parentTypeSymbol);
+        IRecordTypeSymbol typeSymbol = createPolymorphicTypeSymbol(scopeHelper, parentTypeSymbol);
         typeSymbol.define(symbol);
         Set<ISymbol> result = typeSymbol.getAbstractSymbols();
 
@@ -268,7 +268,7 @@ public class APolymorphicTypeSymbolTest
         when(symbol2.getName()).thenReturn("dummy2");
         when(symbol2.isAbstract()).thenReturn(true);
 
-        IPolymorphicTypeSymbol typeSymbol = createPolymorphicTypeSymbol(scopeHelper, parentTypeSymbol);
+        IRecordTypeSymbol typeSymbol = createPolymorphicTypeSymbol(scopeHelper, parentTypeSymbol);
         typeSymbol.define(symbol1);
         typeSymbol.define(symbol2);
         Set<ISymbol> result = typeSymbol.getAbstractSymbols();
@@ -295,7 +295,7 @@ public class APolymorphicTypeSymbolTest
         when(nonAbstract.getName()).thenReturn("dummy3");
         when(nonAbstract.isAbstract()).thenReturn(false);
 
-        IPolymorphicTypeSymbol typeSymbol = createPolymorphicTypeSymbol(scopeHelper, parentTypeSymbol);
+        IRecordTypeSymbol typeSymbol = createPolymorphicTypeSymbol(scopeHelper, parentTypeSymbol);
         typeSymbol.define(symbol1);
         typeSymbol.define(nonAbstract);
         typeSymbol.define(symbol2);
@@ -326,7 +326,7 @@ public class APolymorphicTypeSymbolTest
         when(nonAbstract2.getName()).thenReturn("dummy4");
 
         //parent symbols
-        IPolymorphicTypeSymbol parentTypeSymbol = mock(IPolymorphicTypeSymbol.class);
+        IRecordTypeSymbol parentTypeSymbol = mock(IRecordTypeSymbol.class);
         when(parentTypeSymbol.getName()).thenReturn("ParentClass");
         when(parentTypeSymbol.isAbstract()).thenReturn(true);
         IMethodSymbol parentSymbol1 = mock(IMethodSymbol.class);
@@ -340,7 +340,7 @@ public class APolymorphicTypeSymbolTest
 
 
         //act
-        IPolymorphicTypeSymbol typeSymbol = createPolymorphicTypeSymbol(scopeHelper, parentTypeSymbol);
+        IRecordTypeSymbol typeSymbol = createPolymorphicTypeSymbol(scopeHelper, parentTypeSymbol);
         typeSymbol.define(symbol1);
         typeSymbol.define(nonAbstract1);
         typeSymbol.define(symbol2);
@@ -357,11 +357,11 @@ public class APolymorphicTypeSymbolTest
 
     @Test
     public void getAbstractSymbols_CalledASecondTime_DoesNotRecalculate() {
-        IPolymorphicTypeSymbol parentTypeSymbol = mock(IPolymorphicTypeSymbol.class);
+        IRecordTypeSymbol parentTypeSymbol = mock(IRecordTypeSymbol.class);
         when(parentTypeSymbol.getName()).thenReturn("ParentClass");
         when(parentTypeSymbol.isAbstract()).thenReturn(true);
 
-        IPolymorphicTypeSymbol typeSymbol = createPolymorphicTypeSymbol(parentTypeSymbol);
+        IRecordTypeSymbol typeSymbol = createPolymorphicTypeSymbol(parentTypeSymbol);
         Set<ISymbol> result1 = typeSymbol.getAbstractSymbols();
         Set<ISymbol> result2 = typeSymbol.getAbstractSymbols();
 
@@ -373,7 +373,7 @@ public class APolymorphicTypeSymbolTest
     public void getDefaultValue_Standard_ReturnsNull() {
         //no arrange necessary
 
-        IPolymorphicTypeSymbol typeSymbol = createPolymorphicTypeSymbol();
+        IRecordTypeSymbol typeSymbol = createPolymorphicTypeSymbol();
         ITSPHPAst result = typeSymbol.getDefaultValue();
 
         assertThat(result.getType(), is(TokenTypes.Null));
@@ -386,7 +386,7 @@ public class APolymorphicTypeSymbolTest
         ISymbol symbol = mock(ISymbol.class);
         when(symbol.getName()).thenReturn("foo");
 
-        IPolymorphicTypeSymbol typeSymbol = createPolymorphicTypeSymbol();
+        IRecordTypeSymbol typeSymbol = createPolymorphicTypeSymbol();
         boolean result = typeSymbol.isFullyInitialised(symbol);
 
         assertThat(result, is(false));
@@ -398,7 +398,7 @@ public class APolymorphicTypeSymbolTest
         when(symbol.getName()).thenReturn("foo");
         IScopeHelper scopeHelper = createScopeHelper();
 
-        IPolymorphicTypeSymbol typeSymbol = createPolymorphicTypeSymbol(scopeHelper);
+        IRecordTypeSymbol typeSymbol = createPolymorphicTypeSymbol(scopeHelper);
         typeSymbol.define(symbol);
         boolean result = typeSymbol.isFullyInitialised(symbol);
 
@@ -410,7 +410,7 @@ public class APolymorphicTypeSymbolTest
         ISymbol symbol = mock(ISymbol.class);
         when(symbol.getName()).thenReturn("foo");
 
-        IPolymorphicTypeSymbol typeSymbol = createPolymorphicTypeSymbol();
+        IRecordTypeSymbol typeSymbol = createPolymorphicTypeSymbol();
         boolean result = typeSymbol.isPartiallyInitialised(symbol);
 
         assertThat(result, is(false));
@@ -422,7 +422,7 @@ public class APolymorphicTypeSymbolTest
         when(symbol.getName()).thenReturn("foo");
         IScopeHelper scopeHelper = createScopeHelper();
 
-        IPolymorphicTypeSymbol typeSymbol = createPolymorphicTypeSymbol(scopeHelper);
+        IRecordTypeSymbol typeSymbol = createPolymorphicTypeSymbol(scopeHelper);
         typeSymbol.define(symbol);
         boolean result = typeSymbol.isPartiallyInitialised(symbol);
 
@@ -456,24 +456,24 @@ public class APolymorphicTypeSymbolTest
         return scopeHelper;
     }
 
-    private IPolymorphicTypeSymbol createPolymorphicTypeSymbol() {
+    private IRecordTypeSymbol createPolymorphicTypeSymbol() {
         return createPolymorphicTypeSymbol(mock(IScopeHelper.class));
     }
 
-    private IPolymorphicTypeSymbol createPolymorphicTypeSymbol(IScopeHelper scopeHelper) {
+    private IRecordTypeSymbol createPolymorphicTypeSymbol(IScopeHelper scopeHelper) {
         ITypeSymbol typeSymbol = mock(ITypeSymbol.class);
         when(typeSymbol.getName()).thenReturn("dummy");
         return createPolymorphicTypeSymbol(scopeHelper, typeSymbol);
     }
 
-    private IPolymorphicTypeSymbol createPolymorphicTypeSymbol(ITypeSymbol parentTypeSymbol) {
+    private IRecordTypeSymbol createPolymorphicTypeSymbol(ITypeSymbol parentTypeSymbol) {
         return createPolymorphicTypeSymbol(
                 mock(IScopeHelper.class),
                 parentTypeSymbol
         );
     }
 
-    private IPolymorphicTypeSymbol createPolymorphicTypeSymbol(
+    private IRecordTypeSymbol createPolymorphicTypeSymbol(
             IScopeHelper scopeHelper, ITypeSymbol parentTypeSymbol) {
         return createPolymorphicTypeSymbol(
                 scopeHelper,
@@ -485,14 +485,14 @@ public class APolymorphicTypeSymbolTest
         );
     }
 
-    protected IPolymorphicTypeSymbol createPolymorphicTypeSymbol(
+    protected IRecordTypeSymbol createPolymorphicTypeSymbol(
             IScopeHelper scopeHelper,
             ITSPHPAst definitionAst,
             IModifierSet modifiers,
             String name,
             IScope enclosingScope,
             ITypeSymbol parentTypeSymbol) {
-        return new DummyPolymorphicTypeSymbol(
+        return new DummyRecordTypeSymbol(
                 scopeHelper, definitionAst, modifiers, name, enclosingScope, parentTypeSymbol);
     }
 }

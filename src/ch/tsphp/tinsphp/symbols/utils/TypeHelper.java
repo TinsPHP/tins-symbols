@@ -169,11 +169,17 @@ public class TypeHelper implements ITypeHelper
     }
 
     private boolean hasUpRelationFromNominalToConvertible(TypeHelperDto dto) {
-        dto.toType = ((IConvertibleTypeSymbol) dto.toType).getUpperTypeBounds();
-        boolean canBeConverted = hasUpRelationFromNominalToIntersection(dto);
-
-        if (!canBeConverted) {
-            canBeConverted = hasConversionFromNominalToTarget(dto, conversionsProvider.getExplicitConversions());
+        IConvertibleTypeSymbol convertibleTypeSymbol = (IConvertibleTypeSymbol) dto.toType;
+        IIntersectionTypeSymbol upperTypeBounds = convertibleTypeSymbol.getUpperTypeBounds();
+        boolean canBeConverted;
+        if (upperTypeBounds != null) {
+            dto.toType = upperTypeBounds;
+            canBeConverted = hasUpRelationFromNominalToIntersection(dto);
+            if (!canBeConverted) {
+                canBeConverted = hasConversionFromNominalToTarget(dto, conversionsProvider.getExplicitConversions());
+            }
+        } else {
+            canBeConverted = !convertibleTypeSymbol.wasBound();
         }
         return canBeConverted;
     }

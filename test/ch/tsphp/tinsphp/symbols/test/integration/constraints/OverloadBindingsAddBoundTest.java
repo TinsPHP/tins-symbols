@@ -188,7 +188,7 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         String tLhs = "Tlhs";
         collection.addVariable("$lhs", new TypeVariableReference(tLhs));
         IConvertibleTypeSymbol asTlhs = symbolFactory.createConvertibleTypeSymbol();
-        asTlhs.setOverloadBindings(collection, tLhs);
+        asTlhs.bindTo(collection, asList(tLhs));
 
         //act
         boolean changed = collection.addLowerTypeBound(tLhs, asTlhs);
@@ -208,14 +208,15 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         collection.addVariable("$lhs", new TypeVariableReference(tLhs));
         collection.addVariable("$rhs", new TypeVariableReference(tRhs));
         IConvertibleTypeSymbol asTlhs = symbolFactory.createConvertibleTypeSymbol();
-        asTlhs.setOverloadBindings(collection, tLhs);
+        asTlhs.bindTo(collection, asList(tLhs));
         collection.addLowerRefBound(tLhs, new TypeVariableReference(tRhs));
 
         //act
         boolean changed = collection.addLowerTypeBound(tRhs, asTlhs);
 
         assertThat(collection.getLowerTypeBounds(tLhs), is(nullValue()));
-        assertThat(collection.getLowerTypeBounds(tRhs).getTypeSymbols().keySet(), containsInAnyOrder("{as Tlhs}"));
+        assertThat(collection.getLowerTypeBounds(tRhs).getTypeSymbols().keySet(),
+                containsInAnyOrder("{as Tlhs}"));
         assertThat(changed, is(true));
     }
 
@@ -438,14 +439,15 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         collection.addVariable("$lhs", new TypeVariableReference(tLhs));
         collection.addVariable("$rhs", new TypeVariableReference(tRhs));
         IConvertibleTypeSymbol asTrhs = symbolFactory.createConvertibleTypeSymbol();
-        asTrhs.setOverloadBindings(collection, tRhs);
+        asTrhs.bindTo(collection, asList(tRhs));
         collection.addLowerRefBound(tLhs, new TypeVariableReference(tRhs));
 
         //act
         boolean changed = collection.addUpperTypeBound(tLhs, asTrhs);
 
         assertThat(collection.getUpperTypeBounds(tRhs), is(nullValue()));
-        assertThat(collection.getUpperTypeBounds(tLhs).getTypeSymbols().keySet(), containsInAnyOrder("{as Trhs}"));
+        assertThat(collection.getUpperTypeBounds(tLhs).getTypeSymbols().keySet(),
+                containsInAnyOrder("{as Trhs}"));
         assertThat(changed, is(true));
     }
 
@@ -459,7 +461,7 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         String tLhs = "Tlhs";
         collection.addVariable("$lhs", new TypeVariableReference(tLhs));
         IConvertibleTypeSymbol asTlhs = symbolFactory.createConvertibleTypeSymbol();
-        asTlhs.setOverloadBindings(collection, tLhs);
+        asTlhs.bindTo(collection, asList(tLhs));
 
         //act
         boolean changed = collection.addUpperTypeBound(tLhs, asTlhs);
@@ -773,7 +775,8 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         collection.addLowerTypeBound(rhs, numType);
 
         //act
-        boolean changed = collection.addLowerRefBound(lhs, new FixedTypeVariableReference(new TypeVariableReference
+        boolean changed = collection.addLowerRefBound(lhs, new FixedTypeVariableReference(new
+                TypeVariableReference
                 (rhs)));
 
         assertThat(collection, withVariableBindings(
@@ -1004,7 +1007,7 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         collection.addVariable("$lhs", new TypeVariableReference(tLhs));
         collection.addVariable("$rhs", new TypeVariableReference(tRhs));
         IConvertibleTypeSymbol asTrhs = symbolFactory.createConvertibleTypeSymbol();
-        asTrhs.setOverloadBindings(collection, tRhs);
+        asTrhs.bindTo(collection, asList(tRhs));
         collection.addUpperTypeBound(tLhs, asTrhs);
 
         //act
