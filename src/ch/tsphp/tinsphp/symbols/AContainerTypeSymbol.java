@@ -90,6 +90,12 @@ public abstract class AContainerTypeSymbol extends APolymorphicTypeSymbol implem
         }
     }
 
+    @Override
+    public void remove(String absoluteName) {
+        typeSymbols.remove(absoluteName);
+        hasAbsoluteNameChanged = true;
+    }
+
     private boolean isContainerTypeAndNotFixed(ITypeSymbol typeSymbol) {
         return typeSymbol instanceof IContainerTypeSymbol && !((IContainerTypeSymbol) typeSymbol).isFixed();
     }

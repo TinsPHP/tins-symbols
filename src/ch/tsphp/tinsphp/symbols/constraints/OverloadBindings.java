@@ -52,6 +52,8 @@ public class OverloadBindings implements IOverloadBindings
     private final Map<String, Set<String>> typeVariable2Variables;
     private final Map<String, IFunctionType> appliedOverloads;
     private final Map<String, Set<IParametricTypeSymbol>> typeVariable2BoundTypes;
+    private final Map<String, Set<String>> typeVariablesWithLowerConvertible;
+    private final Map<String, Set<String>> typeVariablesWithUpperConvertible;
 
     private int count = 1;
     private int tempVariableCount = 0;
@@ -69,6 +71,8 @@ public class OverloadBindings implements IOverloadBindings
         typeVariable2Variables = new HashMap<>();
         appliedOverloads = new HashMap<>();
         typeVariable2BoundTypes = new HashMap<>();
+        typeVariablesWithLowerConvertible = new HashMap<>();
+        typeVariablesWithUpperConvertible = new HashMap<>();
     }
 
     public OverloadBindings(OverloadBindings bindings) {
@@ -85,24 +89,23 @@ public class OverloadBindings implements IOverloadBindings
         typeVariable2Variables = new HashMap<>(bindings.typeVariable2Variables.size());
         copyVariablesAndTypeVariables(bindings);
 
-        typeVariable2BoundTypes = new HashMap<>(bindings.typeVariable2BoundTypes.size());
         lowerTypeBounds = new HashMap<>(bindings.lowerTypeBounds.size());
         upperTypeBounds = new HashMap<>(bindings.upperTypeBounds.size());
         lowerRefBounds = new HashMap<>(bindings.lowerRefBounds.size());
         upperRefBounds = new HashMap<>(bindings.upperRefBounds.size());
-
-        Deque<IParametricTypeSymbol> parametricTypeSymbols = new ArrayDeque<>();
-        copyBounds(bindings, parametricTypeSymbols);
+        typeVariable2BoundTypes = new HashMap<>(bindings.typeVariable2BoundTypes.size());
+        typeVariablesWithUpperConvertible = new HashMap<>(bindings.typeVariablesWithUpperConvertible.size());
+        typeVariablesWithLowerConvertible = new HashMap<>(bindings.typeVariablesWithLowerConvertible.size());
+        Deque<IParametricTypeSymbol> rebindParametricTypeSymbols = new ArrayDeque<>();
+        copyBounds(bindings, rebindParametricTypeSymbols);
 
         appliedOverloads = new HashMap<>(bindings.appliedOverloads);
 
         //rebound parametric polymorphic types
-        for (IParametricTypeSymbol parametricTypeSymbol : parametricTypeSymbols) {
-            List<String> typeVariables = parametricTypeSymbol.rebind(this);
-            for (String typeVariable : typeVariables) {
-                MapHelper.addToSetInMap(typeVariable2BoundTypes, typeVariable, parametricTypeSymbol);
-            }
+        for (IParametricTypeSymbol parametricTypeSymbol : rebindParametricTypeSymbols) {
+            parametricTypeSymbol.rebind(this);
         }
+
     }
 
     private void copyVariablesAndTypeVariables(OverloadBindings bindings) {
@@ -121,17 +124,34 @@ public class OverloadBindings implements IOverloadBindings
         }
     }
 
-    private void copyBounds(OverloadBindings bindings, Deque<IParametricTypeSymbol> parametricTypeSymbols) {
+    private void copyBounds(
+            OverloadBindings bindings, Deque<IParametricTypeSymbol> rebindParametricTypeSymbols) {
         for (Map.Entry<String, IUnionTypeSymbol> entry : bindings.lowerTypeBounds.entrySet()) {
+            Collection<IParametricTypeSymbol> parametricTypeSymbols = new ArrayDeque<>();
             IUnionTypeSymbol copy = entry.getValue().copy(parametricTypeSymbols);
-            lowerTypeBounds.put(entry.getKey(), copy);
+            String lowerTypeVariable = entry.getKey();
+            for (IParametricTypeSymbol parametricTypeSymbol : parametricTypeSymbols) {
+                for (String typeVariable : parametricTypeSymbol.getTypeVariables()) {
+                    MapHelper.addToSetInMap(typeVariable2BoundTypes, typeVariable, parametricTypeSymbol);
+                    MapHelper.addToSetInMap(typeVariablesWithLowerConvertible, lowerTypeVariable, typeVariable);
+                }
+                rebindParametricTypeSymbols.add(parametricTypeSymbol);
+            }
+            lowerTypeBounds.put(lowerTypeVariable, copy);
         }
 
         for (Map.Entry<String, IIntersectionTypeSymbol> entry : bindings.upperTypeBounds.entrySet()) {
+            Collection<IParametricTypeSymbol> parametricTypeSymbols = new ArrayDeque<>();
             IIntersectionTypeSymbol copy = entry.getValue().copy(parametricTypeSymbols);
-            upperTypeBounds.put(entry.getKey(), copy);
+            String upperTypeVariable = entry.getKey();
+            for (IParametricTypeSymbol parametricTypeSymbol : parametricTypeSymbols) {
+                for (String typeVariable : parametricTypeSymbol.getTypeVariables()) {
+                    MapHelper.addToSetInMap(typeVariable2BoundTypes, typeVariable, parametricTypeSymbol);
+                    MapHelper.addToSetInMap(typeVariablesWithUpperConvertible, upperTypeVariable, typeVariable);
+                }
+            }
+            upperTypeBounds.put(upperTypeVariable, copy);
         }
-
 
         for (Map.Entry<String, Set<String>> entry : bindings.lowerRefBounds.entrySet()) {
             lowerRefBounds.put(entry.getKey(), new HashSet<>(entry.getValue()));
@@ -276,7 +296,10 @@ public class OverloadBindings implements IOverloadBindings
         checkUpperTypeBounds(typeVariable, typeSymbol);
 
         boolean hasChanged = false;
-        if (isNotConvertibleTypeWithSelfRef(typeVariable, typeSymbol)) {
+
+        ITypeSymbol newTypeSymbol
+                = checkForAndRegisterConvertibleType(typeVariable, typeSymbol, typeVariablesWithLowerConvertible);
+        if (newTypeSymbol != null) {
 
             hasChanged = addToLowerUnionTypeSymbol(typeVariable, typeSymbol);
 
@@ -299,6 +322,58 @@ public class OverloadBindings implements IOverloadBindings
                         newLowerType);
             }
         }
+    }
+
+    /**
+     * Removes convertible types with self references and registers others which are bound to this overload bindings
+     * into given map.
+     *
+     * @return The typeSymbol which shall be added or null if it is a self ref (or a container which is empty after
+     * removing self references)
+     */
+    private ITypeSymbol checkForAndRegisterConvertibleType(
+            String typeVariable, ITypeSymbol typeSymbol, Map<String, Set<String>> typeVariablesWithConvertible) {
+        ITypeSymbol nonConvertibleType = null;
+        if (typeSymbol instanceof IContainerTypeSymbol) {
+            IContainerTypeSymbol containerTypeSymbol = (IContainerTypeSymbol) typeSymbol;
+            if (containerTypeSymbol.isFixed()) {
+                nonConvertibleType = containerTypeSymbol;
+            } else {
+                Map<String, ITypeSymbol> typeSymbols = containerTypeSymbol.getTypeSymbols();
+                Set<String> absoluteNames = new HashSet<>();
+                for (Map.Entry<String, ITypeSymbol> entry : typeSymbols.entrySet()) {
+                    ITypeSymbol innerTypeSymbol = entry.getValue();
+                    ITypeSymbol nonConvertibleInnerType = checkForAndRegisterConvertibleType(
+                            typeVariable, innerTypeSymbol, typeVariablesWithConvertible);
+                    if (nonConvertibleInnerType == null) {
+                        absoluteNames.add(entry.getKey());
+                    }
+                }
+                for (String absoluteName : absoluteNames) {
+                    containerTypeSymbol.remove(absoluteName);
+                }
+                int size = typeSymbols.size();
+                if (size == 1) {
+                    nonConvertibleType = typeSymbols.values().iterator().next();
+                } else if (size > 1) {
+                    nonConvertibleType = containerTypeSymbol;
+                }
+            }
+        } else if (typeSymbol instanceof IConvertibleTypeSymbol) {
+            IConvertibleTypeSymbol convertibleTypeSymbol = (IConvertibleTypeSymbol) typeSymbol;
+            if (convertibleTypeSymbol.getOverloadBindings() == this) {
+                String convertibleTypeVariable = convertibleTypeSymbol.getTypeVariable();
+                if (!convertibleTypeVariable.equals(typeVariable)) {
+                    nonConvertibleType = typeSymbol;
+                    MapHelper.addToSetInMap(typeVariablesWithConvertible, typeVariable, convertibleTypeVariable);
+                }
+            } else {
+                nonConvertibleType = typeSymbol;
+            }
+        } else {
+            nonConvertibleType = typeSymbol;
+        }
+        return nonConvertibleType;
     }
 
     private boolean addToLowerUnionTypeSymbol(String typeVariable, ITypeSymbol typeSymbol) {
@@ -346,48 +421,24 @@ public class OverloadBindings implements IOverloadBindings
         checkLowerTypeBounds(typeVariable, typeSymbol);
 
         boolean hasChanged = false;
-        if (isNotConvertibleTypeWithSelfRef(typeVariable, typeSymbol)) {
 
-            checkIfCanBeUsedInIntersectionWithOthers(typeVariable, typeSymbol);
+        ITypeSymbol newTypeSymbol
+                = checkForAndRegisterConvertibleType(typeVariable, typeSymbol, typeVariablesWithUpperConvertible);
+        if (newTypeSymbol != null) {
 
-            hasChanged = addToUpperIntersectionTypeSymbol(typeVariable, typeSymbol);
+            checkIfCanBeUsedInIntersectionWithOthers(typeVariable, newTypeSymbol);
+
+            hasChanged = addToUpperIntersectionTypeSymbol(typeVariable, newTypeSymbol);
 
             if (hasChanged && hasLowerRefBounds(typeVariable)) {
                 for (String refTypeVariable : lowerRefBounds.get(typeVariable)) {
-                    addUpperTypeBoundAfterContainsCheck(refTypeVariable, typeSymbol);
+                    addUpperTypeBoundAfterContainsCheck(refTypeVariable, newTypeSymbol);
                 }
             }
         }
 
         return hasChanged;
     }
-
-    private boolean isNotConvertibleTypeWithSelfRef(String typeVariable, ITypeSymbol typeSymbol) {
-        boolean isNot = true;
-        if (typeSymbol instanceof IContainerTypeSymbol) {
-            Collection<ITypeSymbol> typeSymbols = ((IContainerTypeSymbol) typeSymbol).getTypeSymbols().values();
-            isNot = isNotOneConvertibleTypeWithSelfRef(typeVariable, typeSymbols);
-        } else if (typeSymbol instanceof IConvertibleTypeSymbol) {
-            IConvertibleTypeSymbol convertibleTypeSymbol = (IConvertibleTypeSymbol) typeSymbol;
-            isNot = convertibleTypeSymbol.getOverloadBindings() != this
-                    || !convertibleTypeSymbol.getTypeVariable().equals(typeVariable);
-        }
-        return isNot;
-    }
-
-    private boolean isNotOneConvertibleTypeWithSelfRef(
-            String typeVariable, Collection<ITypeSymbol> typeSymbols) {
-        boolean isNotOne = true;
-        for (ITypeSymbol typeSymbol : typeSymbols) {
-            boolean isNot = isNotConvertibleTypeWithSelfRef(typeVariable, typeSymbol);
-            if (!isNot) {
-                isNotOne = false;
-                break;
-            }
-        }
-        return isNotOne;
-    }
-
 
     private void checkIfCanBeUsedInIntersectionWithOthers(String typeVariable, ITypeSymbol typeSymbol) {
         if (!typeSymbol.canBeUsedInIntersection() && hasUpperTypeBounds(typeVariable)) {
@@ -529,7 +580,7 @@ public class OverloadBindings implements IOverloadBindings
 
     private void fixTypeVariable(String variableId, ITypeVariableReference reference) {
         String typeVariable = reference.getTypeVariable();
-        variable2TypeVariable.put(variableId, new FixedTypeVariableReference((TypeVariableReference) reference));
+        variable2TypeVariable.put(variableId, new FixedTypeVariableReference(reference));
         removeRefBounds(typeVariable);
     }
 
@@ -935,6 +986,33 @@ public class OverloadBindings implements IOverloadBindings
                 boundTypes.add(parametricType);
             }
         }
+
+        //we are not interested in registering convertible types again hence we provide a dummy map which is not used
+        // afterwards instead of typeVariablesWithLowerConvertible and typeVariablesWithUpperConvertible
+        Map<String, Set<String>> dummyTypesWithConvertible = new HashMap<>();
+        if (hasFirstConvertibleToSecond(typeVariablesWithLowerConvertible, newTypeVariable, typeVariable)) {
+            typeVariablesWithLowerConvertible.get(newTypeVariable).remove(typeVariable);
+            IUnionTypeSymbol newLowerBound = (IUnionTypeSymbol) checkForAndRegisterConvertibleType(
+                    newTypeVariable, lowerTypeBounds.get(newTypeVariable), dummyTypesWithConvertible);
+            if (newLowerBound == null) {
+                lowerTypeBounds.remove(newTypeVariable);
+            }
+        }
+
+        if (hasFirstConvertibleToSecond(typeVariablesWithUpperConvertible, newTypeVariable, typeVariable)) {
+            typeVariablesWithUpperConvertible.get(newTypeVariable).remove(typeVariable);
+            IIntersectionTypeSymbol newUpperBound = (IIntersectionTypeSymbol) checkForAndRegisterConvertibleType(
+                    newTypeVariable, upperTypeBounds.get(newTypeVariable), dummyTypesWithConvertible);
+            if (newUpperBound == null) {
+                upperTypeBounds.remove(newTypeVariable);
+            }
+        }
+    }
+
+    private boolean hasFirstConvertibleToSecond(Map<String, Set<String>> typeVariablesWithConvertible,
+            String firstTypeVariable, String secondTypeVariable) {
+        return typeVariablesWithConvertible.containsKey(firstTypeVariable)
+                && typeVariablesWithConvertible.get(firstTypeVariable).contains(secondTypeVariable);
     }
 
     @Override

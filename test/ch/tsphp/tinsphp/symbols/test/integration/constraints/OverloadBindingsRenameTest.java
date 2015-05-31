@@ -449,7 +449,8 @@ public class OverloadBindingsRenameTest extends ATypeHelperTest
     //see TINS-483 rename a type variable and convertible types
     @Test
     public void
-    renameTypeVariable_AfterCopyTwiceAndHasLowerAndUpperBoundToConvertibleTypeInMultipleContainersWithFloat_ConvertibleTypeIsRenamedAsWell() {
+    renameTypeVariable_AfterCopyTwiceAndHasConvertibleInBothBoundsInMultipleContainers_ConvertibleTypeIsRenamedAsWell
+    () {
         //pre act - necessary for arrange
         IOverloadBindings bindings = createOverloadBindings();
 
@@ -485,6 +486,85 @@ public class OverloadBindingsRenameTest extends ATypeHelperTest
                 varBinding("$t2", t2, null, asList("Foo"), false),
                 varBinding("$t3", t3, null, asList("((float & {as T2}) | int)"), false),
                 varBinding("$t4", t4, asList("((ISubA | {as T2}) & array)"), null, false)
+        ));
+    }
+
+    //see TINS-484 renaming a convertible type points to same type variable
+    @Test
+    public void renameTypeVariable_HasUpperBoundToConvertibleWhichPointsToNewTypeVariable_ConvertibleTypeIsRemoved() {
+        //pre act - necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String t1 = "T1";
+        String t2 = "T2";
+        collection.addVariable("$t1", new TypeVariableReference(t1));
+        collection.addVariable("$t2", new TypeVariableReference(t2));
+        collection.addUpperTypeBound(t1, intType);
+        collection.addUpperTypeBound(t2, interfaceBType);
+
+        IConvertibleTypeSymbol asT2 = createConvertibleType();
+        collection.bind(asT2, asList(t2));
+        collection.addUpperTypeBound(t1, asT2);
+
+        //act
+        collection.renameTypeVariable(t1, t2);
+
+        assertThat(collection, withVariableBindings(
+                varBinding("$t1", t2, null, asList("int", "IB"), false),
+                varBinding("$t2", t2, null, asList("int", "IB"), false)
+        ));
+    }
+
+    //see TINS-484 renaming a convertible type points to same type variable
+    @Test
+    public void
+    renameTypeVariable_NewTypeVariableWithConvertibleInUpperWhichPointsToOldTypeVariable_ConvertibleTypeIsRemoved() {
+        //pre act - necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String t1 = "T1";
+        String t2 = "T2";
+        collection.addVariable("$t1", new TypeVariableReference(t1));
+        collection.addVariable("$t2", new TypeVariableReference(t2));
+        collection.addUpperTypeBound(t1, intType);
+        collection.addUpperTypeBound(t2, interfaceBType);
+        IConvertibleTypeSymbol asT1 = createConvertibleType();
+        collection.bind(asT1, asList(t1));
+        collection.addUpperTypeBound(t2, asT1);
+
+        //act
+        collection.renameTypeVariable(t1, t2);
+
+        assertThat(collection, withVariableBindings(
+                varBinding("$t1", t2, null, asList("int", "IB"), false),
+                varBinding("$t2", t2, null, asList("int", "IB"), false)
+        ));
+    }
+
+    //see TINS-484 renaming a convertible type points to same type variable
+    @Test
+    public void
+    renameTypeVariable_NewTypeVariableWithOnlyConvertibleInUpperWhichPointsToOldTypeVariable_UpperIsNullAfterwards() {
+        //pre act - necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String t1 = "T1";
+        String t2 = "T2";
+        collection.addVariable("$t1", new TypeVariableReference(t1));
+        collection.addVariable("$t2", new TypeVariableReference(t2));
+        IConvertibleTypeSymbol asT1 = createConvertibleType();
+        collection.bind(asT1, asList(t1));
+        collection.addUpperTypeBound(t2, asT1);
+
+        //act
+        collection.renameTypeVariable(t1, t2);
+
+        assertThat(collection, withVariableBindings(
+                varBinding("$t1", t2, null, null, false),
+                varBinding("$t2", t2, null, null, false)
         ));
     }
 
