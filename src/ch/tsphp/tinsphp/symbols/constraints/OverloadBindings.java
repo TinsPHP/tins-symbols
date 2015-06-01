@@ -677,7 +677,6 @@ public class OverloadBindings implements IOverloadBindings
     private boolean propagateOrFixParametricParameters(final PropagateDto dto, boolean hasAlreadyConstantReturn) {
         boolean hasConstantReturn = hasAlreadyConstantReturn;
         for (String typeParameter : dto.typeParameters) {
-            dto.removeReturnTypeVariable.remove(typeParameter);
             dto.parameterTypeVariables.add(typeParameter);
         }
 
@@ -713,7 +712,7 @@ public class OverloadBindings implements IOverloadBindings
 
     private boolean isNotParameterNorTypeParameter(final String refTypeVariable, final PropagateDto dto) {
         return !dto.parameterTypeVariables.contains(refTypeVariable)
-                && dto.typeParameters.contains(refTypeVariable);
+                && !dto.typeParameters.contains(refTypeVariable);
     }
 
     private void propagateTypeVariableDownwardsToParameters(final String refTypeVariable, final PropagateDto dto) {
@@ -750,6 +749,7 @@ public class OverloadBindings implements IOverloadBindings
                 }
             } else {
                 fixParameter(parameterTypeVariable);
+                dto.typeParameters.remove(parameterTypeVariable);
             }
 
             dto.typeVariablesToVisit.remove(parameterTypeVariable);
@@ -1059,7 +1059,7 @@ public class OverloadBindings implements IOverloadBindings
         Map<String, Set<String>> dummyTypesWithConvertible = new HashMap<>();
         if (hasFirstConvertibleToSecond(typeVariablesWithLowerConvertible, newTypeVariable, typeVariable)) {
             typeVariablesWithLowerConvertible.get(newTypeVariable).remove(typeVariable);
-            IUnionTypeSymbol newLowerBound = (IUnionTypeSymbol) checkForAndRegisterConvertibleType(
+            ITypeSymbol newLowerBound = checkForAndRegisterConvertibleType(
                     newTypeVariable, lowerTypeBounds.get(newTypeVariable), dummyTypesWithConvertible);
             if (newLowerBound == null) {
                 lowerTypeBounds.remove(newTypeVariable);
@@ -1068,7 +1068,7 @@ public class OverloadBindings implements IOverloadBindings
 
         if (hasFirstConvertibleToSecond(typeVariablesWithUpperConvertible, newTypeVariable, typeVariable)) {
             typeVariablesWithUpperConvertible.get(newTypeVariable).remove(typeVariable);
-            IIntersectionTypeSymbol newUpperBound = (IIntersectionTypeSymbol) checkForAndRegisterConvertibleType(
+            ITypeSymbol newUpperBound = checkForAndRegisterConvertibleType(
                     newTypeVariable, upperTypeBounds.get(newTypeVariable), dummyTypesWithConvertible);
             if (newUpperBound == null) {
                 upperTypeBounds.remove(newTypeVariable);
