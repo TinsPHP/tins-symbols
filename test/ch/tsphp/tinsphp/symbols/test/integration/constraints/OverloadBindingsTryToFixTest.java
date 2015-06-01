@@ -1625,6 +1625,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
     }
 
     //see TINS-485 fixing functions with convertible types
+    //see TINS-487 convertible type which points to fixed parameter can be fixed as well
     @Test
     public void tryToFix_PlusWithConvertibleWithoutReturn_AllAreFixed() {
         //corresponds:
@@ -1666,8 +1667,8 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         collection.tryToFix(parameterTypeVariables);
 
         assertThat(collection, withVariableBindings(
-                varBinding($x, tx, asList("{as " + tPlus + "}"), asList("{as " + tPlus + "}"), true),
-                varBinding($y, ty, asList("{as " + tPlus + "}"), asList("{as " + tPlus + "}"), true),
+                varBinding($x, tx, asList("{as num}"), asList("{as num}"), true),
+                varBinding($y, ty, asList("{as num}"), asList("{as num}"), true),
                 varBinding(plus, tPlus, asList("num"), asList("num"), true),
                 varBinding($a, ta, asList("num"), asList("num"), true),
                 varBinding(RETURN_VARIABLE_NAME, tReturn, asList("bool"), asList("bool"), true)
