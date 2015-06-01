@@ -9,10 +9,11 @@ package ch.tsphp.tinsphp.symbols.test.integration.constraints;
 import ch.tsphp.tinsphp.common.inference.constraints.FixedTypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
+import ch.tsphp.tinsphp.common.symbols.IConvertibleTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.symbols.constraints.OverloadBindings;
-import ch.tsphp.tinsphp.symbols.test.unit.testutils.ATypeTest;
+import ch.tsphp.tinsphp.symbols.test.integration.testutils.ATypeHelperTest;
 import org.junit.Test;
 
 import java.util.HashSet;
@@ -24,7 +25,7 @@ import static ch.tsphp.tinsphp.symbols.test.integration.testutils.OverloadBindin
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class OverloadBindingsTryToFixTest extends ATypeTest
+public class OverloadBindingsTryToFixTest extends ATypeHelperTest
 {
     @Test
     public void tryToFix_NoParams_AllVariablesAreConstant() {
@@ -1422,6 +1423,254 @@ public class OverloadBindingsTryToFixTest extends ATypeTest
                 varBinding($b, tb, asList("@Tx", "@Ty"), null, false),
                 varBinding($c, tc, asList("@Tx", "@Ty"), null, false),
                 varBinding(RETURN_VARIABLE_NAME, tReturn, asList("@Tx", "@Ty"), null, false)
+        ));
+    }
+
+    //see TINS-485 fixing functions with convertible types
+    @Test
+    public void tryToFix_PlusWithConvertible_ReturnIsNotFixed() {
+        //corresponds:
+        //  function foo($x, $y){ return $x + $y;}
+        // with + overload {as T} x {as T} -> T
+
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String tx = "Tx";
+        String $y = "$y";
+        String ty = "Ty";
+        String plus = "+@1|2";
+        String tPlus = "Tplus";
+        String tReturn = "Treturn";
+
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($y, new TypeVariableReference(ty));
+        collection.addVariable(plus, new TypeVariableReference(tPlus));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        IConvertibleTypeSymbol asTPlus = createConvertibleType();
+        collection.bind(asTPlus, asList(tPlus));
+        collection.addUpperTypeBound(tx, asTPlus);
+        collection.addUpperTypeBound(ty, asTPlus);
+        collection.addUpperTypeBound(tPlus, numType);
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tPlus));
+
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+        parameterTypeVariables.add(ty);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, tx, asList("{as " + tPlus + "}"), asList("{as " + tPlus + "}"), true),
+                varBinding($y, ty, asList("{as " + tPlus + "}"), asList("{as " + tPlus + "}"), true),
+                varBinding(plus, tPlus, null, asList("num"), false),
+                varBinding(RETURN_VARIABLE_NAME, tPlus, null, asList("num"), false)
+        ));
+    }
+
+    //see TINS-485 fixing functions with convertible types
+    @Test
+    public void tryToFix_PlusWithConvertibleViaLocal_ReturnIsNotFixed() {
+        //corresponds:
+        //  function foo($x, $y){ $a = $x + $y; return $a;}
+        // with + overload {as T} x {as T} -> T
+
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String tx = "Tx";
+        String $y = "$y";
+        String ty = "Ty";
+        String plus = "+@1|2";
+        String tPlus = "Tplus";
+        String $a = "$a";
+        String ta = "Ta";
+        String tReturn = "Treturn";
+
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($y, new TypeVariableReference(ty));
+        collection.addVariable(plus, new TypeVariableReference(tPlus));
+        collection.addVariable($a, new TypeVariableReference(ta));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        IConvertibleTypeSymbol asTPlus = createConvertibleType();
+        collection.bind(asTPlus, asList(tPlus));
+        collection.addUpperTypeBound(tx, asTPlus);
+        collection.addUpperTypeBound(ty, asTPlus);
+        collection.addUpperTypeBound(tPlus, numType);
+        collection.addLowerRefBound(ta, new TypeVariableReference(tPlus));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(ta));
+
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+        parameterTypeVariables.add(ty);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, tx, asList("{as " + tPlus + "}"), asList("{as " + tPlus + "}"), true),
+                varBinding($y, ty, asList("{as " + tPlus + "}"), asList("{as " + tPlus + "}"), true),
+                varBinding(plus, tPlus, null, asList("num"), false),
+                varBinding($a, tPlus, null, asList("num"), false),
+                varBinding(RETURN_VARIABLE_NAME, tPlus, null, asList("num"), false)
+        ));
+    }
+
+    //see TINS-485 fixing functions with convertible types
+    @Test
+    public void tryToFix_PlusWithConvertibleAndReturnTx_ReturnIsNotFixedIsTPlusAndTx() {
+        //corresponds:
+        //  function foo($x, $y, $z){ if($z){ return $x + $y;} return $x;}
+        // with + overload {as T} x {as T} -> T
+
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String tx = "Tx";
+        String $y = "$y";
+        String ty = "Ty";
+        String $z = "$z";
+        String tz = "Tz";
+        String plus = "+@1|2";
+        String tPlus = "Tplus";
+        String tReturn = "Treturn";
+
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($y, new TypeVariableReference(ty));
+        collection.addVariable($z, new TypeVariableReference(tz));
+        collection.addVariable(plus, new TypeVariableReference(tPlus));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        IConvertibleTypeSymbol asTPlus = createConvertibleType();
+        collection.bind(asTPlus, asList(tPlus));
+        collection.addUpperTypeBound(tz, boolType);
+        collection.addUpperTypeBound(tx, asTPlus);
+        collection.addUpperTypeBound(ty, asTPlus);
+        collection.addUpperTypeBound(tPlus, numType);
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tPlus));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+        parameterTypeVariables.add(ty);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, tx, null, asList("{as " + tPlus + "}"), false),
+                varBinding($y, ty, asList("{as " + tPlus + "}"), asList("{as " + tPlus + "}"), true),
+                varBinding($z, tz, asList("bool"), asList("bool"), true),
+                varBinding(plus, tPlus, null, asList("num"), false),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("@" + tPlus, "@" + tx), null, false)
+        ));
+    }
+
+    //see TINS-485 fixing functions with convertible types
+    @Test
+    public void tryToFix_PlusWithConvertibleAndReturnTxAndTy_ReturnIsNotFixedIsTPlusAndTxAndTy() {
+        //corresponds:
+        //  function foo($x, $y, $z){ if($z > 10){ return $x + $y;} else if ($z <10){return $x;} return $y; }
+        // with + overload {as T} x {as T} -> T
+
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String tx = "Tx";
+        String $y = "$y";
+        String ty = "Ty";
+        String $z = "$z";
+        String tz = "Tz";
+        String plus = "+@1|2";
+        String tPlus = "Tplus";
+        String tReturn = "Treturn";
+
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($y, new TypeVariableReference(ty));
+        collection.addVariable($z, new TypeVariableReference(tz));
+        collection.addVariable(plus, new TypeVariableReference(tPlus));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        IConvertibleTypeSymbol asTPlus = createConvertibleType();
+        collection.bind(asTPlus, asList(tPlus));
+        collection.addUpperTypeBound(tz, mixedType);
+        collection.addUpperTypeBound(tx, asTPlus);
+        collection.addUpperTypeBound(ty, asTPlus);
+        collection.addUpperTypeBound(tPlus, numType);
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tPlus));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(ty));
+
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+        parameterTypeVariables.add(ty);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, tx, null, asList("{as " + tPlus + "}"), false),
+                varBinding($y, ty, null, asList("{as " + tPlus + "}"), false),
+                varBinding($z, tz, asList("mixed"), asList("mixed"), true),
+                varBinding(plus, tPlus, null, asList("num"), false),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("@" + tPlus, "@" + tx, "@" + ty), null, false)
+        ));
+    }
+
+    //see TINS-485 fixing functions with convertible types
+    @Test
+    public void tryToFix_PlusWithConvertibleWithoutReturn_AllAreFixed() {
+        //corresponds:
+        //  function foo($x, $y){ $a = $x + $y; return false;}
+        // with overload {as T} x {as T} -> T
+
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String tx = "Tx";
+        String $y = "$y";
+        String ty = "Ty";
+        String plus = "+@1|2";
+        String tPlus = "Tplus";
+        String $a = "$a";
+        String ta = "Ta";
+        String tReturn = "Treturn";
+
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($y, new TypeVariableReference(ty));
+        collection.addVariable(plus, new TypeVariableReference(tPlus));
+        collection.addVariable($a, new TypeVariableReference(ta));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        IConvertibleTypeSymbol asTPlus = createConvertibleType();
+        collection.bind(asTPlus, asList(tPlus));
+        collection.addUpperTypeBound(tx, asTPlus);
+        collection.addUpperTypeBound(ty, asTPlus);
+        collection.addUpperTypeBound(tPlus, numType);
+        collection.addLowerRefBound(ta, new TypeVariableReference(tPlus));
+        collection.addLowerTypeBound(tReturn, boolType);
+
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+        parameterTypeVariables.add(ty);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, tx, asList("{as " + tPlus + "}"), asList("{as " + tPlus + "}"), true),
+                varBinding($y, ty, asList("{as " + tPlus + "}"), asList("{as " + tPlus + "}"), true),
+                varBinding(plus, tPlus, asList("num"), asList("num"), true),
+                varBinding($a, ta, asList("num"), asList("num"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("bool"), asList("bool"), true)
         ));
     }
 

@@ -568,14 +568,14 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     private void fixTypeAfterContainsCheck(String variableId, boolean isNotParameter) {
-        //Warning! start code duplication, more or less same as in propagateOrFixParameters
+        //Warning! start code duplication, more or less same as in fixParameter
         ITypeVariableReference reference = variable2TypeVariable.get(variableId);
         if (!reference.hasFixedType()) {
             String typeVariable = reference.getTypeVariable();
             fixTypeVariable(variableId, reference);
             fixTypeVariableType(isNotParameter, typeVariable);
         }
-        //Warning! start code duplication, more or less same as in propagateOrFixParameters
+        //Warning! start code duplication, more or less same as in fixParameter
     }
 
     private void fixTypeVariable(String variableId, ITypeVariableReference reference) {
@@ -606,14 +606,24 @@ public class OverloadBindings implements IOverloadBindings
     @Override
     public void tryToFix(Set<String> parameterTypeVariables) {
 
-        Set<String> removeReturnTypeVariable = new HashSet<>();
         String returnTypeVariable = variable2TypeVariable.get(TinsPHPConstants.RETURN_VARIABLE_NAME).getTypeVariable();
-        propagateReturnVariableToParameters(returnTypeVariable, parameterTypeVariables, removeReturnTypeVariable);
-
         Map<String, Set<String>> typeVariablesToVisit = new HashMap<>(typeVariable2Variables);
         Set<String> recursiveParameterTypeVariables = new HashSet<>();
-        boolean hasConstantReturn = propagateOrFixParameters(
-                returnTypeVariable, parameterTypeVariables, typeVariablesToVisit, recursiveParameterTypeVariables);
+        Set<String> parametricParameterTypeVariables = new HashSet<>();
+        Set<String> removeReturnTypeVariable = new HashSet<>();
+        PropagateDto dto = new PropagateDto(returnTypeVariable,
+                parameterTypeVariables,
+                typeVariablesToVisit,
+                parametricParameterTypeVariables,
+                recursiveParameterTypeVariables,
+                removeReturnTypeVariable);
+
+        collectTypeParameters(dto);
+
+        propagateReturnVariableToParameters(dto);
+
+        boolean hasConstantReturn = propagateOrFixParameters(dto);
+        hasConstantReturn = propagateOrFixParametricParameters(dto, hasConstantReturn);
 
         //in case of recursion
         removeUpperRefBounds(returnTypeVariable);
@@ -634,91 +644,156 @@ public class OverloadBindings implements IOverloadBindings
         upperRefBounds.clear();
     }
 
-    private void propagateReturnVariableToParameters(
-            String returnTypeVariable, Set<String> parameterTypeVariables, Set<String> removeReturnTypeVariable) {
-        if (hasLowerRefBounds(returnTypeVariable)) {
-            for (String refTypeVariable : lowerRefBounds.get(returnTypeVariable)) {
-                if (!parameterTypeVariables.contains(refTypeVariable)) {
-                    //since non-parameters might be fixed we need to remove the return variable manually
-                    removeReturnTypeVariable.add(refTypeVariable);
-                }
-                propagateTypeVariableDownwardsToParameters(
-                        refTypeVariable, returnTypeVariable, parameterTypeVariables);
+    private void collectTypeParameters(PropagateDto dto) {
+        for (String parameterTypeVariable : dto.parameterTypeVariables) {
+            if (hasLowerTypeBounds(parameterTypeVariable)) {
+                IUnionTypeSymbol containerType = lowerTypeBounds.get(parameterTypeVariable);
+                searchForParametricTypes(dto, containerType);
+            }
+
+            if (hasUpperTypeBounds(parameterTypeVariable)) {
+                IIntersectionTypeSymbol containerType = upperTypeBounds.get(parameterTypeVariable);
+                searchForParametricTypes(dto, containerType);
             }
         }
     }
 
-    private void propagateTypeVariableDownwardsToParameters(
-            String refTypeVariable,
-            String returnTypeVariable,
-            Set<String> parameterTypeVariables) {
-
-        if (hasLowerRefBounds(refTypeVariable)) {
-            for (String refRefTypeVariable : lowerRefBounds.get(refTypeVariable)) {
-                Set<String> refRefUpperRefBounds = upperRefBounds.get(refRefTypeVariable);
-                if (!refRefUpperRefBounds.contains(returnTypeVariable)) {
-                    if (parameterTypeVariables.contains(refRefTypeVariable)) {
-                        refRefUpperRefBounds.add(returnTypeVariable);
+    private void searchForParametricTypes(PropagateDto dto, IContainerTypeSymbol containerType) {
+        if (!containerType.isFixed()) {
+            for (ITypeSymbol typeSymbol : containerType.getTypeSymbols().values()) {
+                if (typeSymbol instanceof IContainerTypeSymbol) {
+                    searchForParametricTypes(dto, (IContainerTypeSymbol) typeSymbol);
+                } else if (typeSymbol instanceof IParametricTypeSymbol) {
+                    IParametricTypeSymbol parametricTypeSymbol = (IParametricTypeSymbol) typeSymbol;
+                    if (!parametricTypeSymbol.isFixed() && parametricTypeSymbol.getOverloadBindings() == this) {
+                        dto.typeParameters.addAll(parametricTypeSymbol.getTypeVariables());
                     }
-                    propagateTypeVariableDownwardsToParameters(
-                            refRefTypeVariable, returnTypeVariable, parameterTypeVariables);
                 }
-
             }
         }
     }
 
-    private boolean propagateOrFixParameters(
-            String returnTypeVariable,
-            Set<String> parameterTypeVariables,
-            Map<String, Set<String>> typeVariablesToVisit,
-            Set<String> recursiveParameters) {
+    private boolean propagateOrFixParametricParameters(final PropagateDto dto, boolean hasAlreadyConstantReturn) {
+        boolean hasConstantReturn = hasAlreadyConstantReturn;
+        for (String typeParameter : dto.typeParameters) {
+            dto.removeReturnTypeVariable.remove(typeParameter);
+            dto.parameterTypeVariables.add(typeParameter);
+        }
 
-        boolean hasConstantReturn = true;
-        for (String parameterTypeVariable : parameterTypeVariables) {
-            Set<String> parameterUpperRefBounds = upperRefBounds.get(parameterTypeVariable);
-            if (hasReturnTypeVariableAsUpperAndNotFixedType(parameterTypeVariable, returnTypeVariable)) {
+        for (String parametricParameterTypeVariable : dto.typeParameters) {
+            Set<String> parameterUpperRefBounds = upperRefBounds.get(parametricParameterTypeVariable);
+            if (hasReturnTypeVariableAsUpperAndNotFixedType(parametricParameterTypeVariable, dto.returnTypeVariable)) {
                 hasConstantReturn = false;
                 for (String refTypeVariable : parameterUpperRefBounds) {
-                    if (!parameterTypeVariables.contains(refTypeVariable)) {
-                        propagateTypeVariableUpwards(
-                                refTypeVariable, parameterTypeVariable, parameterTypeVariables, recursiveParameters);
+                    if (!dto.parameterTypeVariables.contains(refTypeVariable)) {
+                        propagateTypeVariableUpwards(refTypeVariable, parametricParameterTypeVariable, dto);
                     }
                 }
             } else {
-                // if only upper type bounds (no lower type bounds) were defined for the parameter,
-                // then we need to propagate those to the upper refs (if there are any) before we fix all variables
-                // belonging to the type variable of the parameter, otherwise they might turn out to be mixed (which
-                // is less intuitive). see TINS-449 unused ad-hoc polymorphic parameters
-                if (hasUpperRefBoundAndOnlyUpperTypeBound(parameterTypeVariable)) {
-                    IIntersectionTypeSymbol upperTypeBound = upperTypeBounds.get(parameterTypeVariable);
-                    for (String refTypeVariable : parameterUpperRefBounds) {
-                        addToLowerUnionTypeSymbol(refTypeVariable, upperTypeBound);
-                    }
-                }
-
-                final boolean isNotParameter = false;
-                boolean typeVariableFixed = false;
-                for (String variableId : typeVariable2Variables.get(parameterTypeVariable)) {
-                    //Warning! start code duplication, more or less same as in fixTypeAfterContainsCheck
-                    ITypeVariableReference reference = variable2TypeVariable.get(variableId);
-                    if (!reference.hasFixedType()) {
-                        fixTypeVariable(variableId, reference);
-                        //no need to fix it multiple times, once is enough
-                        if (!typeVariableFixed) {
-                            String typeVariable = reference.getTypeVariable();
-                            fixTypeVariableType(isNotParameter, typeVariable);
-                            typeVariableFixed = true;
-                        }
-                    }
-                    //Warning! end code duplication, more or less same as in fixTypeAfterContainsCheck
-                }
+                fixParameter(parametricParameterTypeVariable);
+                dto.parameterTypeVariables.remove(parametricParameterTypeVariable);
             }
-            typeVariablesToVisit.remove(parameterTypeVariable);
+            dto.typeVariablesToVisit.remove(parametricParameterTypeVariable);
         }
         return hasConstantReturn;
     }
 
+    private void propagateReturnVariableToParameters(final PropagateDto dto) {
+        if (hasLowerRefBounds(dto.returnTypeVariable)) {
+            for (String refTypeVariable : lowerRefBounds.get(dto.returnTypeVariable)) {
+                if (isNotParameterNorTypeParameter(refTypeVariable, dto)) {
+                    //since non-parameters might be fixed we need to remove the return variable manually
+                    dto.removeReturnTypeVariable.add(refTypeVariable);
+                }
+                propagateTypeVariableDownwardsToParameters(refTypeVariable, dto);
+            }
+        }
+    }
+
+    private boolean isNotParameterNorTypeParameter(final String refTypeVariable, final PropagateDto dto) {
+        return !dto.parameterTypeVariables.contains(refTypeVariable)
+                && dto.typeParameters.contains(refTypeVariable);
+    }
+
+    private void propagateTypeVariableDownwardsToParameters(final String refTypeVariable, final PropagateDto dto) {
+        if (hasLowerRefBounds(refTypeVariable)) {
+            for (String refRefTypeVariable : lowerRefBounds.get(refTypeVariable)) {
+                Set<String> refRefUpperRefBounds = upperRefBounds.get(refRefTypeVariable);
+                if (!refRefUpperRefBounds.contains(dto.returnTypeVariable)) {
+                    if (isParameterOrTypeParameter(refRefTypeVariable, dto)) {
+                        refRefUpperRefBounds.add(dto.returnTypeVariable);
+                    }
+//                    if (!dto.parameterTypeVariables.contains(refRefTypeVariable)) {
+//                        dto.removeReturnTypeVariable.add(refRefTypeVariable);
+//                    }
+//                    refRefUpperRefBounds.add(dto.returnTypeVariable);
+                    propagateTypeVariableDownwardsToParameters(refRefTypeVariable, dto);
+                }
+            }
+        }
+    }
+
+    private boolean isParameterOrTypeParameter(String refRefTypeVariable, PropagateDto dto) {
+        return dto.parameterTypeVariables.contains(refRefTypeVariable)
+                || dto.typeParameters.contains(refRefTypeVariable);
+    }
+
+    private boolean propagateOrFixParameters(final PropagateDto dto) {
+
+        boolean hasConstantReturn = true;
+
+        for (String parameterTypeVariable : dto.parameterTypeVariables) {
+//        Iterator<String> iterator = parameterTypeVariables.iterator();
+//        while (iterator.hasNext()) {
+//            String parameterTypeVariable = iterator.next();
+            Set<String> parameterUpperRefBounds = upperRefBounds.get(parameterTypeVariable);
+            if (hasReturnTypeVariableAsUpperAndNotFixedType(parameterTypeVariable, dto.returnTypeVariable)) {
+                hasConstantReturn = false;
+                for (String refTypeVariable : parameterUpperRefBounds) {
+                    if (!dto.parameterTypeVariables.contains(refTypeVariable)) {
+                        propagateTypeVariableUpwards(refTypeVariable, parameterTypeVariable, dto);
+                    }
+                }
+            } else {
+//                iterator.remove();
+                fixParameter(parameterTypeVariable);
+            }
+
+            dto.typeVariablesToVisit.remove(parameterTypeVariable);
+        }
+
+        return hasConstantReturn;
+    }
+
+    private void fixParameter(String parameterTypeVariable) {
+        // if only upper type bounds (no lower type bounds) were defined for the parameter,
+        // then we need to propagate those to the upper refs (if there are any) before we fix all variables
+        // belonging to the type variable of the parameter, otherwise they might turn out to be mixed (which
+        // is less intuitive). see TINS-449 unused ad-hoc polymorphic parameters
+        if (hasUpperRefBoundAndOnlyUpperTypeBound(parameterTypeVariable)) {
+            IIntersectionTypeSymbol upperTypeBound = upperTypeBounds.get(parameterTypeVariable);
+            for (String refTypeVariable : upperRefBounds.get(parameterTypeVariable)) {
+                addToLowerUnionTypeSymbol(refTypeVariable, upperTypeBound);
+            }
+        }
+
+        final boolean isNotParameter = false;
+        boolean typeVariableFixed = false;
+        for (String variableId : typeVariable2Variables.get(parameterTypeVariable)) {
+            //Warning! start code duplication, more or less same as in fixTypeAfterContainsCheck
+            ITypeVariableReference reference = variable2TypeVariable.get(variableId);
+            if (!reference.hasFixedType()) {
+                fixTypeVariable(variableId, reference);
+                //no need to fix it multiple times, once is enough
+                if (!typeVariableFixed) {
+                    String typeVariable = reference.getTypeVariable();
+                    fixTypeVariableType(isNotParameter, typeVariable);
+                    typeVariableFixed = true;
+                }
+            }
+            //Warning! end code duplication, more or less same as in fixTypeAfterContainsCheck
+        }
+    }
 
     private boolean hasReturnTypeVariableAsUpperAndNotFixedType(String parameterTypeVariable,
             String returnTypeVariable) {
@@ -743,11 +818,7 @@ public class OverloadBindings implements IOverloadBindings
     }
 
 
-    private void propagateTypeVariableUpwards(
-            String refTypeVariable,
-            String parameterTypeVariable,
-            Set<String> parameterTypeVariables,
-            Set<String> recursiveParameters) {
+    private void propagateTypeVariableUpwards(String refTypeVariable, String parameterTypeVariable, PropagateDto dto) {
         if (hasUpperRefBounds(refTypeVariable)) {
             Set<String> refUpperRefBounds = upperRefBounds.get(refTypeVariable);
             for (String refRefTypeVariable : refUpperRefBounds) {
@@ -756,15 +827,11 @@ public class OverloadBindings implements IOverloadBindings
                 if (!refRefLowerRefBounds.contains(parameterTypeVariable)) {
                     if (isNotSelfReference(refRefTypeVariable, parameterTypeVariable)) {
                         refRefLowerRefBounds.add(parameterTypeVariable);
-                        if (!parameterTypeVariables.contains(refRefTypeVariable)) {
-                            propagateTypeVariableUpwards(
-                                    refRefTypeVariable,
-                                    parameterTypeVariable,
-                                    parameterTypeVariables,
-                                    recursiveParameters);
+                        if (!dto.parameterTypeVariables.contains(refRefTypeVariable)) {
+                            propagateTypeVariableUpwards(refRefTypeVariable, parameterTypeVariable, dto);
                         }
                     } else {
-                        recursiveParameters.add(parameterTypeVariable);
+                        dto.recursiveParameters.add(parameterTypeVariable);
                     }
                 }
             }

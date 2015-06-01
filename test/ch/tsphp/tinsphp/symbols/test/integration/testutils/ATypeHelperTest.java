@@ -84,8 +84,7 @@ public abstract class ATypeHelperTest extends ATypeTest
     }
 
     protected ConvertibleTypeSymbol createConvertibleType(ISymbolFactory theSymbolFactory, ITypeHelper theTypeHelper) {
-        return new ConvertibleTypeSymbol(
-                new OverloadBindings(theSymbolFactory, theTypeHelper));
+        return new ConvertibleTypeSymbol(new OverloadBindings(theSymbolFactory, theTypeHelper));
     }
 
     @SafeVarargs
