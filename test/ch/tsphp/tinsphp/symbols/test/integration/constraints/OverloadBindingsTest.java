@@ -12,7 +12,9 @@ import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
 import ch.tsphp.tinsphp.common.symbols.IConvertibleTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
+import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.symbols.constraints.OverloadBindings;
 import ch.tsphp.tinsphp.symbols.test.integration.testutils.ATypeHelperTest;
@@ -149,7 +151,7 @@ public class OverloadBindingsTest extends ATypeHelperTest
     }
 
     @Test
-    public void copyConstructor_HasBoundedType_IsCopied() {
+    public void copyConstructor_HasConvertibleInUpperBound_IsCopied() {
         OverloadBindings bindings1 = new OverloadBindings(symbolFactory, typeHelper);
         bindings1.addVariable("$a", new TypeVariableReference("T1"));
         bindings1.addVariable("$b", new TypeVariableReference("T2"));
@@ -164,6 +166,60 @@ public class OverloadBindingsTest extends ATypeHelperTest
                 varBinding("$a", "T1", null, asList("{as T2}"), false),
                 varBinding("$b", "T2", null, null, false)
         ));
+    }
+
+    @Test
+    public void copyConstructor_HasConvertibleInLowerBound_IsCopied() {
+        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, typeHelper);
+        bindings1.addVariable("$a", new TypeVariableReference("T1"));
+        bindings1.addVariable("$b", new TypeVariableReference("T2"));
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        bindings1.bind(convertibleTypeSymbol, asList("T2"));
+        bindings1.addLowerTypeBound("T1", convertibleTypeSymbol);
+
+        IOverloadBindings collection = createOverloadBindings(bindings1);
+        convertibleTypeSymbol.renameTypeVariable("T2", "T3");
+
+        assertThat(collection, withVariableBindings(
+                varBinding("$a", "T1", asList("{as T2}"), null, false),
+                varBinding("$b", "T2", null, null, false)
+        ));
+    }
+
+    //see TINS-486 rebinding convertible types does not always work
+    @Test
+    public void copyConstructor_HasConvertibleInUpperBound_IsReboundToNewOverloadBindings() {
+        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, typeHelper);
+        bindings1.addVariable("$a", new TypeVariableReference("T1"));
+        bindings1.addVariable("$b", new TypeVariableReference("T2"));
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        bindings1.bind(convertibleTypeSymbol, asList("T2"));
+        bindings1.addUpperTypeBound("T1", convertibleTypeSymbol);
+
+        IOverloadBindings collection = createOverloadBindings(bindings1);
+        IIntersectionTypeSymbol upperTypeBounds = collection.getUpperTypeBounds("T1");
+        IConvertibleTypeSymbol result
+                = (IConvertibleTypeSymbol) upperTypeBounds.getTypeSymbols().values().iterator().next();
+
+        assertThat(result.getOverloadBindings(), is(collection));
+    }
+
+    //see TINS-486 rebinding convertible types does not always work
+    @Test
+    public void copyConstructor_HasConvertibleInLowerBound_IsReboundToNewOverloadBindings() {
+        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, typeHelper);
+        bindings1.addVariable("$a", new TypeVariableReference("T1"));
+        bindings1.addVariable("$b", new TypeVariableReference("T2"));
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        bindings1.bind(convertibleTypeSymbol, asList("T2"));
+        bindings1.addLowerTypeBound("T1", convertibleTypeSymbol);
+
+        IOverloadBindings collection = createOverloadBindings(bindings1);
+        IUnionTypeSymbol lowerTypeBounds = collection.getLowerTypeBounds("T1");
+        IConvertibleTypeSymbol result
+                = (IConvertibleTypeSymbol) lowerTypeBounds.getTypeSymbols().values().iterator().next();
+
+        assertThat(result.getOverloadBindings(), is(collection));
     }
 
     @Test
