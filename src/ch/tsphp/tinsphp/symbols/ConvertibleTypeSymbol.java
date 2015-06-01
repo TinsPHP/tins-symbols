@@ -54,8 +54,9 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
                     + " but " + fixedTypeVariable + " was informed to be fixed.");
         }
 
-        notifyHasChanged();
+        notifyNameHasChanged();
         isFixed = true;
+        notifyWasFixed();
     }
 
     @Override
@@ -82,7 +83,7 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
 
         typeVariable = newTypeVariable;
 
-        notifyHasChanged();
+        notifyNameHasChanged();
     }
 
     @Override
@@ -100,7 +101,7 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
         }
         overloadBindings = bindings;
         typeVariable = newTypeVariable;
-        notifyHasChanged();
+        notifyNameHasChanged();
         wasBound = true;
     }
 
@@ -137,7 +138,7 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
     public boolean addLowerTypeBound(ITypeSymbol typeSymbol) {
         boolean hasChanged = overloadBindings.addLowerTypeBound(typeVariable, typeSymbol);
         if (hasChanged) {
-            notifyHasChanged();
+            notifyNameHasChanged();
         }
         return hasChanged;
     }
@@ -146,7 +147,7 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
     public boolean addUpperTypeBound(ITypeSymbol typeSymbol) {
         boolean hasChanged = overloadBindings.addUpperTypeBound(typeVariable, typeSymbol);
         if (hasChanged) {
-            notifyHasChanged();
+            notifyNameHasChanged();
         }
         return hasChanged;
     }

@@ -57,18 +57,24 @@ public class IntersectionTypeSymbol extends AContainerTypeSymbol implements IInt
                 //type in container could be a container as well - hence call not the parent method but this one
                 hasChanged = addTypeSymbol(otherTypeSymbols.values().iterator().next());
             } else {
-                isFixed = isFixed && containerTypeSymbol.isFixed();
-                containerTypeSymbol.register(this);
                 hasChanged = super.addTypeSymbol(typeSymbol);
+                if (hasChanged) {
+                    if (!containerTypeSymbol.isFixed()) {
+                        ++nonFixedTypesCount;
+                    }
+                    containerTypeSymbol.registerObservableListener(this);
+                }
             }
         } else {
-            if (isFixed && typeSymbol instanceof IPolymorphicTypeSymbol) {
-                isFixed = ((IPolymorphicTypeSymbol) typeSymbol).isFixed();
-            }
-            if (typeSymbol instanceof IObservableTypeSymbol) {
-                ((IObservableTypeSymbol) typeSymbol).register(this);
-            }
             hasChanged = super.addTypeSymbol(typeSymbol);
+            if (hasChanged) {
+                if (typeSymbol instanceof IPolymorphicTypeSymbol && !((IPolymorphicTypeSymbol) typeSymbol).isFixed()) {
+                    ++nonFixedTypesCount;
+                }
+                if (typeSymbol instanceof IObservableTypeSymbol) {
+                    ((IObservableTypeSymbol) typeSymbol).registerObservableListener(this);
+                }
+            }
         }
         return hasChanged;
     }
@@ -93,6 +99,7 @@ public class IntersectionTypeSymbol extends AContainerTypeSymbol implements IInt
             if (typeHelper.isFirstSameOrSubTypeOfSecond(newTypeSymbol, existingTypeInUnion, false)) {
                 //remove parent type, it does no longer add information to the intersection type
                 status = ETypeRelation.SUBTYPE;
+                unregisterAndDecreaseNonFixedCounter(existingTypeInUnion);
                 iterator.remove();
             } else if (status == ETypeRelation.NO_RELATION
                     && typeHelper.isFirstSameOrParentTypeOfSecond(newTypeSymbol, existingTypeInUnion, false)) {

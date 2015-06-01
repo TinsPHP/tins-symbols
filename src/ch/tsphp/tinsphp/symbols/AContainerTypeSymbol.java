@@ -10,6 +10,7 @@ import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IContainerTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IObservableTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IParametricTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IPolymorphicTypeSymbol;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 
 import java.util.ArrayDeque;
@@ -32,7 +33,7 @@ public abstract class AContainerTypeSymbol extends APolymorphicTypeSymbol implem
 
     protected final ITypeHelper typeHelper;
     protected final Map<String, ITypeSymbol> typeSymbols;
-    protected boolean isFixed = true;
+    protected int nonFixedTypesCount = 0;
 
     public AContainerTypeSymbol(ITypeHelper theTypeHelper) {
         super();
@@ -46,8 +47,8 @@ public abstract class AContainerTypeSymbol extends APolymorphicTypeSymbol implem
             Collection<IParametricTypeSymbol> parametricTypeSymbols) {
         typeHelper = theTypeHelper;
         typeSymbols = new HashMap<>(containerTypeSymbol.typeSymbols);
-        isFixed = containerTypeSymbol.isFixed;
-        if (!isFixed) {
+        nonFixedTypesCount = containerTypeSymbol.nonFixedTypesCount;
+        if (nonFixedTypesCount > 0) {
             deepenCopy(parametricTypeSymbols);
         }
     }
@@ -92,7 +93,21 @@ public abstract class AContainerTypeSymbol extends APolymorphicTypeSymbol implem
 
     @Override
     public void remove(String absoluteName) {
-        typeSymbols.remove(absoluteName);
+        ITypeSymbol typeSymbol = typeSymbols.remove(absoluteName);
+        unregisterAndDecreaseNonFixedCounter(typeSymbol);
+    }
+
+    protected void unregisterAndDecreaseNonFixedCounter(ITypeSymbol typeSymbol) {
+        if (typeSymbol instanceof IPolymorphicTypeSymbol
+                && !((IPolymorphicTypeSymbol) typeSymbol).isFixed()) {
+            --nonFixedTypesCount;
+            if (nonFixedTypesCount == 0) {
+                notifyWasFixed();
+            }
+        }
+        if (typeSymbol instanceof IObservableTypeSymbol) {
+            ((IObservableTypeSymbol) typeSymbol).removeObservableListener(this);
+        }
         hasAbsoluteNameChanged = true;
     }
 
@@ -155,14 +170,27 @@ public abstract class AContainerTypeSymbol extends APolymorphicTypeSymbol implem
 
     @Override
     public boolean isFixed() {
-        return isFixed;
+        return nonFixedTypesCount == 0;
     }
 
     @Override
     public void nameOfObservableHasChanged(IObservableTypeSymbol type, String oldAbsoluteName) {
         typeSymbols.remove(oldAbsoluteName);
         typeSymbols.put(type.getAbsoluteName(), type);
-        notifyHasChanged();
+        notifyNameHasChanged();
+    }
+
+    @Override
+    public void observableWasFixed(IObservableTypeSymbol type) {
+        String absoluteName = type.getAbsoluteName();
+        if (typeSymbols.containsKey(absoluteName)) {
+            // We trust the source/callee -- might be that the given type is not yet fixed or was already fixed.
+            // In this case we will blame the source for being buggy.
+            --nonFixedTypesCount;
+            if (nonFixedTypesCount == 0) {
+                notifyWasFixed();
+            }
+        }
     }
 
     @Override
