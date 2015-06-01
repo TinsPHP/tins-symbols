@@ -31,7 +31,7 @@ public class ConvertibleTypeSymbolTest extends ATypeHelperTest
         //assert in annotation
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = IllegalStateException.class)
     public void renameTypeVariable_WasNotBound_ThrowsIllegalArgumentException() {
         //no arrange necessary
 
