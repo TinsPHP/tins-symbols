@@ -1675,7 +1675,6 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         ));
     }
 
-
     private IOverloadBindings createOverloadBindings() {
         return createOverloadBindings(symbolFactory, typeHelper);
     }

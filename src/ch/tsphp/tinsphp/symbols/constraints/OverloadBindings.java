@@ -724,10 +724,6 @@ public class OverloadBindings implements IOverloadBindings
                     if (isParameterOrTypeParameter(refRefTypeVariable, dto)) {
                         refRefUpperRefBounds.add(dto.returnTypeVariable);
                     }
-//                    if (!dto.parameterTypeVariables.contains(refRefTypeVariable)) {
-//                        dto.removeReturnTypeVariable.add(refRefTypeVariable);
-//                    }
-//                    refRefUpperRefBounds.add(dto.returnTypeVariable);
                     propagateTypeVariableDownwardsToParameters(refRefTypeVariable, dto);
                 }
             }
@@ -744,9 +740,6 @@ public class OverloadBindings implements IOverloadBindings
         boolean hasConstantReturn = true;
 
         for (String parameterTypeVariable : dto.parameterTypeVariables) {
-//        Iterator<String> iterator = parameterTypeVariables.iterator();
-//        while (iterator.hasNext()) {
-//            String parameterTypeVariable = iterator.next();
             Set<String> parameterUpperRefBounds = upperRefBounds.get(parameterTypeVariable);
             if (hasReturnTypeVariableAsUpperAndNotFixedType(parameterTypeVariable, dto.returnTypeVariable)) {
                 hasConstantReturn = false;
@@ -756,7 +749,6 @@ public class OverloadBindings implements IOverloadBindings
                     }
                 }
             } else {
-//                iterator.remove();
                 fixParameter(parameterTypeVariable);
             }
 
@@ -793,6 +785,13 @@ public class OverloadBindings implements IOverloadBindings
                 }
             }
             //Warning! end code duplication, more or less same as in fixTypeAfterContainsCheck
+        }
+
+        //inform bounded parametric types that type variable is fixed
+        if (typeVariable2BoundTypes.containsKey(parameterTypeVariable)) {
+            for (IParametricTypeSymbol parametricTypeSymbol : typeVariable2BoundTypes.get(parameterTypeVariable)) {
+                parametricTypeSymbol.fix(parameterTypeVariable);
+            }
         }
     }
 

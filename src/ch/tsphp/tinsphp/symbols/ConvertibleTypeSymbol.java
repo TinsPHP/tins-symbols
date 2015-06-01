@@ -23,6 +23,7 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
     private String typeVariable = "T";
     private IOverloadBindings overloadBindings;
     private boolean wasBound = false;
+    private boolean isFixed = false;
 
     public ConvertibleTypeSymbol(IOverloadBindings theOverloadBindings) {
         overloadBindings = theOverloadBindings;
@@ -42,13 +43,29 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
     }
 
     @Override
-    public IConvertibleTypeSymbol copy(Collection<IParametricTypeSymbol> parametricTypeSymbols) {
-        return new ConvertibleTypeSymbol(this);
+    public void fix(String fixedTypeVariable) {
+        if (!wasBound) {
+            throw new IllegalStateException("cannot use this method if the convertible type was not bound to a "
+                    + "parametric type");
+        }
+
+        if (!typeVariable.equals(fixedTypeVariable)) {
+            throw new IllegalArgumentException("the convertible type was bound to " + typeVariable
+                    + " but " + fixedTypeVariable + " was informed to be fixed.");
+        }
+
+        notifyHasChanged();
+        isFixed = true;
     }
 
     @Override
     public boolean isFixed() {
-        return !wasBound;
+        return !wasBound || isFixed;
+    }
+
+    @Override
+    public IConvertibleTypeSymbol copy(Collection<IParametricTypeSymbol> parametricTypeSymbols) {
+        return new ConvertibleTypeSymbol(this);
     }
 
     @Override
@@ -59,7 +76,7 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
         }
 
         if (!wasBound) {
-            throw new IllegalArgumentException("can only rename the type variable if it is bound to another "
+            throw new IllegalStateException("can only rename the type variable if it is bound to another "
                     + "parametric polymorphic type");
         }
 
