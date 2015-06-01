@@ -1675,6 +1675,69 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         ));
     }
 
+    //see TINS-485 fixing functions with convertible types
+    @Test
+    public void tryToFix_PlusWithConvertibleCombinedWithPlusWithTwoConvertible_ReturnStaysParameteric() {
+        //corresponds:
+        //  function foo($x, $y, $z){ return $x + $y + $z; }
+        // where:
+        //   T x {as T} -> T \ T <: num
+        // was applied for e1 = $x + $y and
+        //   {as T} x {as T} -> T \ T <: num
+        // was applied for  e2 = e1 + $z
+        // resulting overload should be: (float | int) x {as (float | int)} x (float | int) -> (float | int)
+
+
+        //pre-act necessary for arrange
+        IOverloadBindings collection = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String tx = "Tx";
+        String $y = "$y";
+        String ty = "Ty";
+        String $z = "$z";
+        String tz = "Tz";
+        String e1 = "+@1|2";
+        String e2 = "+@1|4";
+        String te2 = "Te2";
+        String tReturn = "Treturn";
+
+        collection.addVariable($x, new TypeVariableReference(tx));
+        collection.addVariable($y, new TypeVariableReference(ty));
+        collection.addVariable(e1, new TypeVariableReference(tx));
+        collection.addVariable($z, new TypeVariableReference(tz));
+        collection.addVariable(e2, new TypeVariableReference(te2));
+        collection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        IConvertibleTypeSymbol asTx = createConvertibleType();
+        collection.bind(asTx, asList(tx));
+        collection.addUpperTypeBound(tx, numType);
+        collection.addUpperTypeBound(ty, asTx);
+        IConvertibleTypeSymbol asTe2 = createConvertibleType();
+        collection.bind(asTe2, asList(te2));
+        collection.addUpperTypeBound(te2, numType);
+        collection.addUpperTypeBound(tx, asTe2);
+        collection.addUpperTypeBound(tz, asTe2);
+        collection.addLowerRefBound(tReturn, new TypeVariableReference(te2));
+
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+        parameterTypeVariables.add(ty);
+        parameterTypeVariables.add(tz);
+
+        //act
+        collection.tryToFix(parameterTypeVariables);
+
+        assertThat(collection, withVariableBindings(
+                varBinding($x, tx, asList("num"), asList("num"), true),
+                varBinding($y, ty, asList("{as num}"), asList("{as num}"), true),
+                varBinding(e1, tx, asList("num"), asList("num"), true),
+                varBinding($z, tz, asList("{as Te2}"), asList("{as Te2}"), true),
+                varBinding(e2, te2, null, asList("num"), false),
+                varBinding(RETURN_VARIABLE_NAME, te2, null, asList("num"), false)
+        ));
+    }
+
     private IOverloadBindings createOverloadBindings() {
         return createOverloadBindings(symbolFactory, typeHelper);
     }
