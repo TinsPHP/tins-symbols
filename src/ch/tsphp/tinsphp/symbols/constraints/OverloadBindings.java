@@ -149,6 +149,7 @@ public class OverloadBindings implements IOverloadBindings
                     MapHelper.addToSetInMap(typeVariable2BoundTypes, typeVariable, parametricTypeSymbol);
                     MapHelper.addToSetInMap(typeVariablesWithUpperConvertible, upperTypeVariable, typeVariable);
                 }
+                rebindParametricTypeSymbols.add(parametricTypeSymbol);
             }
             upperTypeBounds.put(upperTypeVariable, copy);
         }
