@@ -391,31 +391,30 @@ public class IntersectionTypeSymbolAddTypeTest extends ATypeHelperTest
     }
 
     //see TINS-488 container type not fixed but should be
-    //TODO TINS-489 convertible types are subtypes of mixed
-//    @Test
-//    public void addTypeSymbol_ContainsAsNumInUnionAndAsIntAdded_IntersectionIsFixed() {
-//        //pre-act necessary for arrange
-//        IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol();
-//
-//        //arrange
-//        IOverloadBindings overloadBindings = new OverloadBindings(symbolFactory, typeHelper);
-//        overloadBindings.addVariable("$a", new TypeVariableReference("T1"));
-//        overloadBindings.addLowerTypeBound("T1", numType);
-//        overloadBindings.addUpperTypeBound("T1", numType);
-//        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
-//        overloadBindings.bind(convertibleTypeSymbol, asList("T1"));
-//        IUnionTypeSymbol unionTypeSymbol = createUnion(convertibleTypeSymbol, stringType);
-//        intersectionTypeSymbol.addTypeSymbol(unionTypeSymbol);
-//        IConvertibleTypeSymbol subtypeConvertible = createConvertibleType(intType, symbolFactory, typeHelper);
-//
-//        //act
-//        boolean result = intersectionTypeSymbol.addTypeSymbol(subtypeConvertible);
-//        Map<String, ITypeSymbol> symbols = intersectionTypeSymbol.getTypeSymbols();
-//
-//        assertThat(result, is(true));
-//        assertThat(symbols.keySet(), containsInAnyOrder("{as int}"));
-//        assertThat(intersectionTypeSymbol.isFixed(), is(true));
-//    }
+    @Test
+    public void addTypeSymbol_ContainsAsNumInUnionAndAsIntAdded_IntersectionIsFixed() {
+        //pre-act necessary for arrange
+        IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol();
+
+        //arrange
+        IOverloadBindings overloadBindings = new OverloadBindings(symbolFactory, typeHelper);
+        overloadBindings.addVariable("$a", new TypeVariableReference("T1"));
+        overloadBindings.addLowerTypeBound("T1", numType);
+        overloadBindings.addUpperTypeBound("T1", numType);
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        overloadBindings.bind(convertibleTypeSymbol, asList("T1"));
+        IUnionTypeSymbol unionTypeSymbol = createUnion(convertibleTypeSymbol, stringType);
+        intersectionTypeSymbol.addTypeSymbol(unionTypeSymbol);
+        IConvertibleTypeSymbol subtypeConvertible = createConvertibleType(intType, symbolFactory, typeHelper);
+
+        //act
+        boolean result = intersectionTypeSymbol.addTypeSymbol(subtypeConvertible);
+        Map<String, ITypeSymbol> symbols = intersectionTypeSymbol.getTypeSymbols();
+
+        assertThat(result, is(true));
+        assertThat(symbols.keySet(), containsInAnyOrder("{as int}"));
+        assertThat(intersectionTypeSymbol.isFixed(), is(true));
+    }
 
     //see TINS-488 container type not fixed but should be
     @Test
@@ -449,39 +448,37 @@ public class IntersectionTypeSymbolAddTypeTest extends ATypeHelperTest
     }
 
     //see TINS-488 container type not fixed but should be
-    //TODO TINS-489 convertible types are subtypes of mixed
-//    @Test
-//    public void addTypeSymbol_Contains2AsNumAndAsStringInUnionAndAsIntAdded_IntersectionIsFixed() {
-//        //pre-act necessary for arrange
-//        IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol();
-//
-//        //arrange
-//        IOverloadBindings overloadBindings = new OverloadBindings(symbolFactory, typeHelper);
-//        overloadBindings.addVariable("$a", new TypeVariableReference("T1"));
-//        overloadBindings.addVariable("$b", new TypeVariableReference("T2"));
-//        overloadBindings.addLowerTypeBound("T1", numType);
-//        overloadBindings.addUpperTypeBound("T1", numType);
-//        overloadBindings.addLowerTypeBound("T2", stringType);
-//        overloadBindings.addUpperTypeBound("T2", stringType);
-//        IConvertibleTypeSymbol convertibleTypeSymbol1 = createConvertibleType();
-//        overloadBindings.bind(convertibleTypeSymbol1, asList("T1"));
-//        IConvertibleTypeSymbol convertibleTypeSymbol2 = createConvertibleType();
-//        overloadBindings.bind(convertibleTypeSymbol2, asList("T2"));
-//        IUnionTypeSymbol unionTypeSymbol = createUnion(convertibleTypeSymbol1, convertibleTypeSymbol2);
-//        intersectionTypeSymbol.addTypeSymbol(unionTypeSymbol);
-//        IConvertibleTypeSymbol subtypeConvertible = createConvertibleType(numType, symbolFactory, typeHelper);
-//
-//        //act
-//        boolean result = intersectionTypeSymbol.addTypeSymbol(subtypeConvertible);
-//        Map<String, ITypeSymbol> symbols = intersectionTypeSymbol.getTypeSymbols();
-//
-//        assertThat(result, is(true));
-//        assertThat(symbols.keySet(), containsInAnyOrder("{as num}"));
-//        assertThat(intersectionTypeSymbol.isFixed(), is(true));
-//    }
+    @Test
+    public void addTypeSymbol_Contains2AsNumAndAsStringInUnionAndAsIntAdded_IntersectionIsFixed() {
+        //pre-act necessary for arrange
+        IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol();
+
+        //arrange
+        IOverloadBindings overloadBindings = new OverloadBindings(symbolFactory, typeHelper);
+        overloadBindings.addVariable("$a", new TypeVariableReference("T1"));
+        overloadBindings.addVariable("$b", new TypeVariableReference("T2"));
+        overloadBindings.addLowerTypeBound("T1", numType);
+        overloadBindings.addUpperTypeBound("T1", numType);
+        overloadBindings.addLowerTypeBound("T2", stringType);
+        overloadBindings.addUpperTypeBound("T2", stringType);
+        IConvertibleTypeSymbol convertibleTypeSymbol1 = createConvertibleType();
+        overloadBindings.bind(convertibleTypeSymbol1, asList("T1"));
+        IConvertibleTypeSymbol convertibleTypeSymbol2 = createConvertibleType();
+        overloadBindings.bind(convertibleTypeSymbol2, asList("T2"));
+        IUnionTypeSymbol unionTypeSymbol = createUnion(convertibleTypeSymbol1, convertibleTypeSymbol2);
+        intersectionTypeSymbol.addTypeSymbol(unionTypeSymbol);
+        IConvertibleTypeSymbol subtypeConvertible = createConvertibleType(numType, symbolFactory, typeHelper);
+
+        //act
+        boolean result = intersectionTypeSymbol.addTypeSymbol(subtypeConvertible);
+        Map<String, ITypeSymbol> symbols = intersectionTypeSymbol.getTypeSymbols();
+
+        assertThat(result, is(true));
+        assertThat(symbols.keySet(), containsInAnyOrder("{as num}"));
+        assertThat(intersectionTypeSymbol.isFixed(), is(true));
+    }
 
     //see TINS-488 container type not fixed but should be
-    //TODO TINS-489 convertible types are subtypes of mixed
     @Test
     public void addTypeSymbol_Contains2AsNumAndAsStringAndNothingAdded_IntersectionIsFixed() {
         //pre-act necessary for arrange
@@ -512,7 +509,6 @@ public class IntersectionTypeSymbolAddTypeTest extends ATypeHelperTest
     }
 
     //see TINS-488 container type not fixed but should be
-    //TODO TINS-489 convertible types are subtypes of mixed
     @Test
     public void addTypeSymbol_Contains2AsIntAndAsStringInUnionAndIntAdded_IntersectionIsFixed() {
         //pre-act necessary for arrange

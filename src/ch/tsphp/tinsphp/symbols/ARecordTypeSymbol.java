@@ -178,8 +178,6 @@ public abstract class ARecordTypeSymbol extends AScopedSymbol implements IRecord
         return modifiers.isNullable();
     }
 
-    //TODO same as in ATypeSymbol chance to move it out?
-
     /**
      * Returns itself, override in sub-classes for another behaviour (lazy types for instance).
      */
