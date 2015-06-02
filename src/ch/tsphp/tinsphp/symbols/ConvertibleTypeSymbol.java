@@ -33,7 +33,8 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
     private ConvertibleTypeSymbol(ConvertibleTypeSymbol convertibleTypeSymbol) {
         overloadBindings = convertibleTypeSymbol.overloadBindings;
         typeVariable = convertibleTypeSymbol.typeVariable;
-        wasBound = true;
+        wasBound = convertibleTypeSymbol.wasBound;
+        isFixed = convertibleTypeSymbol.isFixed;
         hasAbsoluteNameChanged = true;
     }
 
