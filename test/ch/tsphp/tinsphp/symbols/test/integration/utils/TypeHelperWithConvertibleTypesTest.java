@@ -8,7 +8,9 @@ package ch.tsphp.tinsphp.symbols.test.integration.utils;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.IConversionMethod;
+import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
+import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.common.utils.Pair;
 import ch.tsphp.tinsphp.symbols.ModifierHelper;
@@ -86,6 +88,177 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         //arrange
         ITypeSymbol actual = createConvertibleType(numType, symbolFactory, typeHelper);
         ITypeSymbol formal = intType;
+
+        //act
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result, is(false));
+    }
+
+    @Test
+    public void isFirstSameOrSubTypeOfSecond_AsNumToMixed_ReturnsTrue() {
+        //pre-act necessary for arrange
+        ITypeHelper typeHelper = createTypeHelperAndInit();
+        ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
+
+        //arrange
+        ITypeSymbol actual = createConvertibleType(numType, symbolFactory, typeHelper);
+        ITypeSymbol formal = mixedType;
+
+        //act
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void isFirstSameOrSubTypeOfSecond_AsNumToEmptyIntersection_ReturnsTrue() {
+        //pre-act necessary for arrange
+        ITypeHelper typeHelper = createTypeHelperAndInit();
+        ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
+
+        //arrange
+        ITypeSymbol actual = createConvertibleType(numType, symbolFactory, typeHelper);
+        ITypeSymbol formal = createIntersectionTypeSymbol(typeHelper);
+
+        //act
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void isFirstSameOrSubTypeOfSecond_AsNumToAsNumInIntersection_ReturnsTrue() {
+        //pre-act necessary for arrange
+        ITypeHelper typeHelper = createTypeHelperAndInit();
+        ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
+
+        //arrange
+        ITypeSymbol actual = createConvertibleType(numType, symbolFactory, typeHelper);
+        IIntersectionTypeSymbol formal = createIntersectionTypeSymbol(typeHelper);
+        formal.addTypeSymbol(createConvertibleType(numType, symbolFactory, typeHelper));
+
+        //act
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void isFirstSameOrSubTypeOfSecond_AsNumToAsNumInUnion_ReturnsTrue() {
+        //pre-act necessary for arrange
+        ITypeHelper typeHelper = createTypeHelperAndInit();
+        ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
+
+        //arrange
+        ITypeSymbol actual = createConvertibleType(numType, symbolFactory, typeHelper);
+        IUnionTypeSymbol formal = createUnionTypeSymbol(typeHelper);
+        formal.addTypeSymbol(createConvertibleType(numType, symbolFactory, typeHelper));
+
+        //act
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void isFirstSameOrSubTypeOfSecond_AsIntToAsNumInIntersection_ReturnsTrue() {
+        //pre-act necessary for arrange
+        ITypeHelper typeHelper = createTypeHelperAndInit();
+        ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
+
+        //arrange
+        ITypeSymbol actual = createConvertibleType(intType, symbolFactory, typeHelper);
+        IIntersectionTypeSymbol formal = createIntersectionTypeSymbol(typeHelper);
+        formal.addTypeSymbol(createConvertibleType(numType, symbolFactory, typeHelper));
+
+        //act
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void isFirstSameOrSubTypeOfSecond_AsIntToAsNumInUnion_ReturnsTrue() {
+        //pre-act necessary for arrange
+        ITypeHelper typeHelper = createTypeHelperAndInit();
+        ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
+
+        //arrange
+        ITypeSymbol actual = createConvertibleType(intType, symbolFactory, typeHelper);
+        IUnionTypeSymbol formal = createUnionTypeSymbol(typeHelper);
+        formal.addTypeSymbol(createConvertibleType(numType, symbolFactory, typeHelper));
+
+        //act
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void isFirstSameOrSubTypeOfSecond_AsIntToAsNumAndStringInUnion_ReturnsTrue() {
+        //pre-act necessary for arrange
+        ITypeHelper typeHelper = createTypeHelperAndInit();
+        ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
+
+        //arrange
+        ITypeSymbol actual = createConvertibleType(intType, symbolFactory, typeHelper);
+        IUnionTypeSymbol formal = createUnionTypeSymbol(typeHelper);
+        formal.addTypeSymbol(createConvertibleType(numType, symbolFactory, typeHelper));
+        formal.addTypeSymbol(stringType);
+
+        //act
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void isFirstSameOrSubTypeOfSecond_AsIntToBoolAndIntAndAsNumAndStringInUnion_ReturnsTrue() {
+        //pre-act necessary for arrange
+        ITypeHelper typeHelper = createTypeHelperAndInit();
+        ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
+
+        //arrange
+        ITypeSymbol actual = createConvertibleType(intType, symbolFactory, typeHelper);
+        IUnionTypeSymbol formal = createUnionTypeSymbol(typeHelper);
+        formal.addTypeSymbol(boolType);
+        formal.addTypeSymbol(createConvertibleType(numType, symbolFactory, typeHelper));
+        formal.addTypeSymbol(stringType);
+
+        //act
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void isFirstSameOrSubTypeOfSecond_AsNumToAsIntInIntersection_ReturnsFalse() {
+        //pre-act necessary for arrange
+        ITypeHelper typeHelper = createTypeHelperAndInit();
+        ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
+
+        //arrange
+        ITypeSymbol actual = createConvertibleType(numType, symbolFactory, typeHelper);
+        IIntersectionTypeSymbol formal = createIntersectionTypeSymbol(typeHelper);
+        formal.addTypeSymbol(createConvertibleType(intType, symbolFactory, typeHelper));
+
+        //act
+        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result, is(false));
+    }
+
+    @Test
+    public void isFirstSameOrSubTypeOfSecond_AsNumToAsIntInUnion_ReturnsFalse() {
+        //pre-act necessary for arrange
+        ITypeHelper typeHelper = createTypeHelperAndInit();
+        ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
+
+        //arrange
+        ITypeSymbol actual = createConvertibleType(numType, symbolFactory, typeHelper);
+        IUnionTypeSymbol formal = createUnionTypeSymbol(typeHelper);
+        formal.addTypeSymbol(createConvertibleType(intType, symbolFactory, typeHelper));
 
         //act
         boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
