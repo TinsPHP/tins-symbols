@@ -131,15 +131,32 @@ public class TypeHelper implements ITypeHelper
     }
 
     private boolean hasUpRelationFromConvertibleTo(TypeHelperDto dto) {
-        if (dto.toType instanceof IConvertibleTypeSymbol) {
+
+        boolean hasUpRelation = false;
+
+        if (areSame(dto.toType, mixedTypeSymbol)) {
+            hasUpRelation = true;
+        } else if (dto.toType instanceof IUnionTypeSymbol) {
+            Collection<ITypeSymbol> typeSymbols = ((IUnionTypeSymbol) dto.toType).getTypeSymbols().values();
+            hasUpRelation
+                    = isAtLeastOneSameOrParentType(typeSymbols, dto.fromType, dto.shallConsiderImplicitConversions);
+        } else if (dto.toType instanceof IIntersectionTypeSymbol) {
+            Map<String, ITypeSymbol> typeSymbols = ((IIntersectionTypeSymbol) dto.toType).getTypeSymbols();
+            int size = typeSymbols.size();
+            if (size == 0) {
+                hasUpRelation = true;
+            } else if (size == 1) {
+                dto.toType = typeSymbols.values().iterator().next();
+                hasUpRelation = hasUpRelationFromConvertibleTo(dto);
+            }
+        } else if (dto.toType instanceof IConvertibleTypeSymbol) {
             IConvertibleTypeSymbol fromType = (IConvertibleTypeSymbol) dto.fromType;
             IConvertibleTypeSymbol toType = (IConvertibleTypeSymbol) dto.toType;
             TypeHelperDto newDto = new TypeHelperDto(
                     fromType.getUpperTypeBounds(), toType.getUpperTypeBounds(), dto.shallConsiderImplicitConversions);
-            return hasUpRelationFromTo(newDto);
+            hasUpRelation = hasUpRelationFromTo(newDto);
         }
-        //A convertible type cannot be a subtype of another type if this type is not a convertible type.
-        return false;
+        return hasUpRelation;
     }
 
     private boolean hasUpRelationFromNominalToUnion(TypeHelperDto dto) {

@@ -110,10 +110,8 @@ public abstract class ATypeTest
 
         typeHelper = new TypeHelper();
         symbolFactory = mock(ISymbolFactory.class);
-        ITypeSymbol mixedTypeSymbol = mock(ITypeSymbol.class);
-        when(mixedTypeSymbol.getAbsoluteName()).thenReturn("mixed");
-
-        when(symbolFactory.getMixedTypeSymbol()).thenReturn(mixedTypeSymbol);
+        typeHelper.setMixedTypeSymbol(mixedType);
+        when(symbolFactory.getMixedTypeSymbol()).thenReturn(mixedType);
         when(symbolFactory.createUnionTypeSymbol()).then(new Answer<Object>()
         {
             @Override
