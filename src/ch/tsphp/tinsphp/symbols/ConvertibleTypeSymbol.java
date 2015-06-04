@@ -7,6 +7,7 @@
 package ch.tsphp.tinsphp.symbols;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
+import ch.tsphp.tinsphp.common.inference.constraints.BoundResultDto;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
 import ch.tsphp.tinsphp.common.symbols.IConvertibleTypeSymbol;
@@ -174,21 +175,21 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
     }
 
     @Override
-    public boolean addLowerTypeBound(ITypeSymbol typeSymbol) {
-        boolean hasChanged = overloadBindings.addLowerTypeBound(typeParameters.get(0), typeSymbol);
-        if (hasChanged) {
+    public BoundResultDto addLowerTypeBound(ITypeSymbol typeSymbol) {
+        BoundResultDto result = overloadBindings.addLowerTypeBound(typeParameters.get(0), typeSymbol);
+        if (result.hasChanged) {
             notifyNameHasChanged();
         }
-        return hasChanged;
+        return result;
     }
 
     @Override
-    public boolean addUpperTypeBound(ITypeSymbol typeSymbol) {
-        boolean hasChanged = overloadBindings.addUpperTypeBound(typeParameters.get(0), typeSymbol);
-        if (hasChanged) {
+    public BoundResultDto addUpperTypeBound(ITypeSymbol typeSymbol) {
+        BoundResultDto result = overloadBindings.addUpperTypeBound(typeParameters.get(0), typeSymbol);
+        if (result.hasChanged) {
             notifyNameHasChanged();
         }
-        return hasChanged;
+        return result;
     }
 
     @Override

@@ -9,6 +9,7 @@ package ch.tsphp.tinsphp.symbols.constraints;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.TinsPHPConstants;
+import ch.tsphp.tinsphp.common.inference.constraints.BoundResultDto;
 import ch.tsphp.tinsphp.common.inference.constraints.FixedTypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
@@ -203,7 +204,7 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     @Override
-    public boolean addLowerRefBound(String typeVariable, ITypeVariableReference reference) {
+    public BoundResultDto addLowerRefBound(String typeVariable, ITypeVariableReference reference) {
         if (!typeVariable2Variables.containsKey(typeVariable)) {
             throw new IllegalArgumentException("no variable has a binding for type variable \"" + typeVariable + "\".");
         }
@@ -219,8 +220,9 @@ public class OverloadBindings implements IOverloadBindings
         return addLowerRefBound(typeVariable, refTypeVariable, hasNotFixedType);
     }
 
-    private boolean addLowerRefBound(String typeVariable, String refTypeVariable, boolean hasNotFixedType) {
+    private BoundResultDto addLowerRefBound(String typeVariable, String refTypeVariable, boolean hasNotFixedType) {
         boolean hasChanged = false;
+        boolean usedImplicitConversions = false;
 
         // no need to actually add the dependency if it has a fixed type (then it is enough that we transfer the
         // type bounds)
@@ -245,15 +247,17 @@ public class OverloadBindings implements IOverloadBindings
             // The refTypeVariable needs to be the same or a subtype of typeVariable or we can narrow bounds in order
             // that this property holds.
 
+            BoundResultDto result;
+
             // First, the upper bound of refTypeVariable needs to be same or a subtype of typeVariable's upper bound in
             // order that we can use the refTypeVariable instead of typeVariable in a function call. Hence we add the
             // upper bound of typeVariable to refTypeVariable's upper bound. If refTypeVariable is not yet the same
             // or a subtype, then either the newly added upper bound will specialise the upper bound of the
             // refTypeVariable or will lead to a BoundException. ...
-            boolean changed;
             if (hasUpperTypeBounds(typeVariable)) {
-                changed = addUpperTypeBoundAfterContainsCheck(refTypeVariable, upperTypeBounds.get(typeVariable));
-                hasChanged = hasChanged || changed;
+                result = addUpperTypeBoundAfterContainsCheck(refTypeVariable, upperTypeBounds.get(typeVariable));
+                hasChanged = hasChanged || result.hasChanged;
+                usedImplicitConversions = usedImplicitConversions || result.usedImplicitConversion;
             }
 
             // ... Furthermore, typeVariable logically needs to be able to hold all types refTypeVariable can hold. Thus
@@ -265,12 +269,13 @@ public class OverloadBindings implements IOverloadBindings
             // it is beneficial to propagate the lower bound upwards since we need to check later on,
             // if variables have the same lower bound as parameters and thus can be unified.
             if (hasLowerTypeBounds(refTypeVariable)) {
-                changed = addLowerTypeBoundAfterContainsCheck(typeVariable, lowerTypeBounds.get(refTypeVariable));
-                hasChanged = hasChanged || changed;
+                result = addLowerTypeBoundAfterContainsCheck(typeVariable, lowerTypeBounds.get(refTypeVariable));
+                hasChanged = hasChanged || result.hasChanged;
+                usedImplicitConversions = usedImplicitConversions || result.usedImplicitConversion;
             }
         }
 
-        return hasChanged;
+        return new BoundResultDto(hasChanged, usedImplicitConversions);
     }
 
     private boolean isNotSelfReference(String typeVariable, String refTypeVariable) {
@@ -278,7 +283,7 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     @Override
-    public boolean addLowerTypeBound(String typeVariable, ITypeSymbol typeSymbol) {
+    public BoundResultDto addLowerTypeBound(String typeVariable, ITypeSymbol typeSymbol) {
         if (!typeVariable2Variables.containsKey(typeVariable)) {
             throw new IllegalArgumentException("no variable has a binding for type variable \"" + typeVariable + "\".");
         }
@@ -286,9 +291,8 @@ public class OverloadBindings implements IOverloadBindings
         return addLowerTypeBoundAfterContainsCheck(typeVariable, typeSymbol);
     }
 
-    private boolean addLowerTypeBoundAfterContainsCheck(String typeVariable, ITypeSymbol typeSymbol) {
-        checkUpperTypeBounds(typeVariable, typeSymbol);
-
+    private BoundResultDto addLowerTypeBoundAfterContainsCheck(String typeVariable, ITypeSymbol typeSymbol) {
+        boolean usedImplicitConversion = checkUpperTypeBounds(typeVariable, typeSymbol);
         boolean hasChanged = false;
 
         ITypeSymbol newTypeSymbol
@@ -303,24 +307,33 @@ public class OverloadBindings implements IOverloadBindings
                 }
             }
         }
-        return hasChanged;
+        return new BoundResultDto(hasChanged, usedImplicitConversion);
     }
 
-    private void checkUpperTypeBounds(String typeVariable, ITypeSymbol newLowerType) {
+    //Warning! start code duplication - very similar to checkLowerTypeBounds
+    private boolean checkUpperTypeBounds(String typeVariable, ITypeSymbol newLowerType) {
+        boolean usedImplicitConversion = false;
         if (hasUpperTypeBounds(typeVariable)) {
             IIntersectionTypeSymbol upperTypeSymbol = upperTypeBounds.get(typeVariable);
-            if (isFirstNotSameOrSubtype(newLowerType, upperTypeSymbol)) {
-                throw new UpperBoundException(
-                        "The new lower type " + newLowerType.getAbsoluteName()
-                                + " is not the same or a subtype of " + upperTypeSymbol.getAbsoluteName(),
-                        upperTypeSymbol,
-                        newLowerType);
+            ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(newLowerType, upperTypeSymbol);
+            switch (result) {
+                case HAS_COERCIVE_RELATION:
+                    usedImplicitConversion = true;
+                    break;
+                case HAS_NO_RELATION:
+                    throw new UpperBoundException(
+                            "The new lower type " + newLowerType.getAbsoluteName()
+                                    + " is not the same or a subtype of " + upperTypeSymbol.getAbsoluteName(),
+                            upperTypeSymbol,
+                            newLowerType);
             }
         }
+        return usedImplicitConversion;
     }
+    //Warning! end code duplication - very similar to checkLowerTypeBounds
 
-    private boolean isFirstNotSameOrSubtype(ITypeSymbol newLowerType, ITypeSymbol upperTypeSymbol) {
-        return typeHelper.isFirstSameOrSubTypeOfSecond(newLowerType, upperTypeSymbol)
+    private boolean isFirstNotSameOrSubtypeOfSecond(ITypeSymbol firstType, ITypeSymbol secondType) {
+        return typeHelper.isFirstSameOrSubTypeOfSecond(firstType, secondType)
                 == ETypeHelperResult.HAS_NO_RELATION;
     }
 
@@ -409,7 +422,7 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     @Override
-    public boolean addUpperTypeBound(String typeVariable, ITypeSymbol typeSymbol) {
+    public BoundResultDto addUpperTypeBound(String typeVariable, ITypeSymbol typeSymbol) {
         if (!typeVariable2Variables.containsKey(typeVariable)) {
             throw new IllegalArgumentException("No variable has a binding for type variable \"" + typeVariable + "\".");
         }
@@ -417,9 +430,8 @@ public class OverloadBindings implements IOverloadBindings
         return addUpperTypeBoundAfterContainsCheck(typeVariable, typeSymbol);
     }
 
-    private boolean addUpperTypeBoundAfterContainsCheck(String typeVariable, ITypeSymbol typeSymbol) {
-        checkLowerTypeBounds(typeVariable, typeSymbol);
-
+    private BoundResultDto addUpperTypeBoundAfterContainsCheck(String typeVariable, ITypeSymbol typeSymbol) {
+        boolean usedImplicitConversion = checkLowerTypeBounds(typeVariable, typeSymbol);
         boolean hasChanged = false;
 
         ITypeSymbol newTypeSymbol
@@ -437,7 +449,7 @@ public class OverloadBindings implements IOverloadBindings
             }
         }
 
-        return hasChanged;
+        return new BoundResultDto(hasChanged, usedImplicitConversion);
     }
 
     private void checkIfCanBeUsedInIntersectionWithOthers(String typeVariable, ITypeSymbol typeSymbol) {
@@ -459,20 +471,31 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     private boolean areNotInSameTypeHierarchy(ITypeSymbol typeSymbol, IIntersectionTypeSymbol upperBound) {
-        return isFirstNotSameOrSubtype(typeSymbol, upperBound) && isFirstNotSameOrSubtype(upperBound, typeSymbol);
+        return isFirstNotSameOrSubtypeOfSecond(typeSymbol, upperBound)
+                && isFirstNotSameOrSubtypeOfSecond(upperBound, typeSymbol);
     }
 
-    private void checkLowerTypeBounds(String typeVariable, ITypeSymbol newUpperTypeBound) {
+    //Warning! start code duplication - very similar to checkUpperTypeBounds
+    private boolean checkLowerTypeBounds(String typeVariable, ITypeSymbol newUpperTypeBound) {
+        boolean usedImplicitConversion = false;
         if (hasLowerTypeBounds(typeVariable)) {
             IUnionTypeSymbol lowerTypeSymbol = lowerTypeBounds.get(typeVariable);
-            if (isFirstNotSameOrSubtype(lowerTypeSymbol, newUpperTypeBound)) {
-                throw new LowerBoundException(
-                        "The new upper bound " + newUpperTypeBound.getAbsoluteName() + " is not the same or a parent "
-                                + "type of the current lower bound " + lowerTypeSymbol.getAbsoluteName(),
-                        lowerTypeSymbol, newUpperTypeBound);
+            ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(lowerTypeSymbol, newUpperTypeBound);
+            switch (result) {
+                case HAS_COERCIVE_RELATION:
+                    usedImplicitConversion = true;
+                    break;
+                case HAS_NO_RELATION:
+                    throw new LowerBoundException(
+                            "The new upper bound " + newUpperTypeBound.getAbsoluteName()
+                                    + " is not the same or a parent type of the current lower bound "
+                                    + lowerTypeSymbol.getAbsoluteName(),
+                            lowerTypeSymbol, newUpperTypeBound);
             }
         }
+        return usedImplicitConversion;
     }
+    //Warning! end code duplication - very similar to checkUpperTypeBounds
 
     private boolean addToUpperIntersectionTypeSymbol(String typeVariable, ITypeSymbol typeSymbol) {
         boolean hasChanged;

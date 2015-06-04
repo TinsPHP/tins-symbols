@@ -7,7 +7,9 @@
 package ch.tsphp.tinsphp.symbols.test.integration.constraints;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
+import ch.tsphp.tinsphp.common.IConversionMethod;
 import ch.tsphp.tinsphp.common.inference.constraints.BoundException;
+import ch.tsphp.tinsphp.common.inference.constraints.BoundResultDto;
 import ch.tsphp.tinsphp.common.inference.constraints.FixedTypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.IntersectionBoundException;
@@ -19,12 +21,17 @@ import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
+import ch.tsphp.tinsphp.common.utils.Pair;
 import ch.tsphp.tinsphp.symbols.constraints.OverloadBindings;
-import ch.tsphp.tinsphp.symbols.test.unit.testutils.ATypeTest;
+import ch.tsphp.tinsphp.symbols.test.integration.testutils.ATypeHelperTest;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.exceptions.base.MockitoAssertionError;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static ch.tsphp.tinsphp.common.utils.Pair.pair;
 import static ch.tsphp.tinsphp.symbols.test.integration.testutils.OverloadBindingsMatcher.varBinding;
 import static ch.tsphp.tinsphp.symbols.test.integration.testutils.OverloadBindingsMatcher.withVariableBindings;
 import static java.util.Arrays.asList;
@@ -38,7 +45,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-public class OverloadBindingsAddBoundTest extends ATypeTest
+public class OverloadBindingsAddBoundTest extends ATypeHelperTest
 {
 
 
@@ -64,11 +71,12 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addUpperTypeBound(typeVariable, numType);
 
         //act
-        boolean changed = overloadBindings.addLowerTypeBound(typeVariable, intType);
+        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(typeVariable, intType);
         IUnionTypeSymbol result = overloadBindings.getLowerTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("int"));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test
@@ -82,11 +90,12 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addUpperTypeBound(typeVariable, intType);
 
         //act
-        boolean changed = overloadBindings.addLowerTypeBound(typeVariable, intType);
+        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(typeVariable, intType);
         IUnionTypeSymbol result = overloadBindings.getLowerTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("int"));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test(expected = UpperBoundException.class)
@@ -117,11 +126,12 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addLowerTypeBound(typeVariable, intType);
 
         //act
-        boolean changed = overloadBindings.addLowerTypeBound(typeVariable, intType);
+        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(typeVariable, intType);
         IUnionTypeSymbol result = overloadBindings.getLowerTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("int"));
-        assertThat(changed, is(false));
+        assertThat(resultDto.hasChanged, is(false));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test
@@ -135,11 +145,12 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addLowerTypeBound(typeVariable, numType);
 
         //act
-        boolean changed = overloadBindings.addLowerTypeBound(typeVariable, intType);
+        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(typeVariable, intType);
         IUnionTypeSymbol result = overloadBindings.getLowerTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("num"));
-        assertThat(changed, is(false));
+        assertThat(resultDto.hasChanged, is(false));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test
@@ -153,11 +164,12 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addLowerTypeBound(typeVariable, intType);
 
         //act
-        boolean changed = overloadBindings.addLowerTypeBound(typeVariable, numType);
+        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(typeVariable, numType);
         IUnionTypeSymbol result = overloadBindings.getLowerTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("num"));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test
@@ -171,11 +183,12 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addLowerTypeBound(typeVariable, intType);
 
         //act
-        boolean changed = overloadBindings.addLowerTypeBound(typeVariable, boolType);
+        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(typeVariable, boolType);
         IUnionTypeSymbol result = overloadBindings.getLowerTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("int", "bool"));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     //see TINS-482 upper bound with convertible type which points to lower bound
@@ -191,10 +204,11 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         asTlhs.bindTo(overloadBindings, asList(tLhs));
 
         //act
-        boolean changed = overloadBindings.addLowerTypeBound(tLhs, asTlhs);
+        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(tLhs, asTlhs);
 
         assertThat(overloadBindings.getLowerTypeBounds(tLhs), is(nullValue()));
-        assertThat(changed, is(false));
+        assertThat(resultDto.hasChanged, is(false));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test
@@ -212,12 +226,97 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addLowerRefBound(tLhs, new TypeVariableReference(tRhs));
 
         //act
-        boolean changed = overloadBindings.addLowerTypeBound(tRhs, asTlhs);
+        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(tRhs, asTlhs);
 
         assertThat(overloadBindings.getLowerTypeBounds(tLhs), is(nullValue()));
         assertThat(overloadBindings.getLowerTypeBounds(tRhs).getTypeSymbols().keySet(),
                 containsInAnyOrder("{as Tlhs}"));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
+    }
+
+    @Test
+    public void addLowerTypeBound_AddIntAndUpperIsFloatAndIntToFloatIsImplicit_UpperIsFloatAndImplicitWasUsed() {
+        //pre-arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(intType, asList(floatType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+
+        //arrange
+        String tLhs = "Tlhs";
+        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
+        overloadBindings.addUpperTypeBound(tLhs, floatType);
+
+        //act
+        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(tLhs, intType);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding("$lhs", tLhs, asList("int"), asList("float"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(true));
+    }
+
+    @Test
+    public void
+    addLowerTypeBound_AddBoolAndUpperIsAsFloatAndBoolToIntIsExplAndIntToFloatImpl_LowerIsBoolAndImplicitWasUsed() {
+        //pre-arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(intType, asList(floatType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions
+                = createConversions(pair(boolType, asList(intType)));
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+
+        //arrange
+        String tLhs = "Tlhs";
+        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType(floatType, symbolFactory, typeHelper);
+        overloadBindings.addUpperTypeBound(tLhs, convertibleTypeSymbol);
+
+        //act
+        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(tLhs, boolType);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding("$lhs", tLhs, asList("bool"), asList("{as float}"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(true));
+    }
+
+    @Test
+    public void
+    addLowerTypeBound_AddBoolAndUpperIsAsIBAndBoolToIntIsExplAndIntToFooIsImpl_LowerIsBoolAndImplicitWasUsed() {
+        //pre-arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(intType, asList(fooType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions
+                = createConversions(pair(boolType, asList(intType)));
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+
+        //arrange
+        String tLhs = "Tlhs";
+        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType(interfaceBType, symbolFactory, typeHelper);
+        overloadBindings.addUpperTypeBound(tLhs, convertibleTypeSymbol);
+
+        //act
+        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(tLhs, boolType);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding("$lhs", tLhs, asList("bool"), asList("{as IB}"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(true));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -242,11 +341,12 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addLowerTypeBound(typeVariable, intType);
 
         //act
-        boolean changed = overloadBindings.addUpperTypeBound(typeVariable, numType);
+        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(typeVariable, numType);
         IIntersectionTypeSymbol result = overloadBindings.getUpperTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("num"));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test
@@ -260,11 +360,12 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addLowerTypeBound(typeVariable, intType);
 
         //act
-        boolean changed = overloadBindings.addUpperTypeBound(typeVariable, intType);
+        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(typeVariable, intType);
         IIntersectionTypeSymbol result = overloadBindings.getUpperTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("int"));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test(expected = LowerBoundException.class)
@@ -294,11 +395,12 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addUpperTypeBound(typeVariable, intType);
 
         //act
-        boolean changed = overloadBindings.addUpperTypeBound(typeVariable, intType);
+        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(typeVariable, intType);
         IIntersectionTypeSymbol result = overloadBindings.getUpperTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("int"));
-        assertThat(changed, is(false));
+        assertThat(resultDto.hasChanged, is(false));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test
@@ -312,11 +414,12 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addUpperTypeBound(typeVariable, numType);
 
         //act
-        boolean changed = overloadBindings.addUpperTypeBound(typeVariable, intType);
+        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(typeVariable, intType);
         IIntersectionTypeSymbol result = overloadBindings.getUpperTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("int"));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test
@@ -330,11 +433,12 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addUpperTypeBound(typeVariable, intType);
 
         //act
-        boolean changed = overloadBindings.addUpperTypeBound(typeVariable, numType);
+        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(typeVariable, numType);
         IIntersectionTypeSymbol result = overloadBindings.getUpperTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("int"));
-        assertThat(changed, is(false));
+        assertThat(resultDto.hasChanged, is(false));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test
@@ -348,11 +452,12 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addUpperTypeBound(typeVariable, interfaceAType);
 
         //act
-        boolean changed = overloadBindings.addUpperTypeBound(typeVariable, interfaceBType);
+        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(typeVariable, interfaceBType);
         IIntersectionTypeSymbol result = overloadBindings.getUpperTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("IA", "IB"));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test
@@ -366,11 +471,12 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addUpperTypeBound(typeVariable, interfaceAType);
 
         //act
-        boolean changed = overloadBindings.addUpperTypeBound(typeVariable, boolType);
+        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(typeVariable, boolType);
         IIntersectionTypeSymbol result = overloadBindings.getUpperTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("bool", "IA"));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test
@@ -384,11 +490,12 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addUpperTypeBound(typeVariable, intType);
 
         //act
-        boolean changed = overloadBindings.addUpperTypeBound(typeVariable, interfaceAType);
+        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(typeVariable, interfaceAType);
         IIntersectionTypeSymbol result = overloadBindings.getUpperTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("int", "IA"));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test(expected = IntersectionBoundException.class)
@@ -420,11 +527,12 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addUpperTypeBound(typeVariable, interfaceBType);
 
         //act
-        boolean changed = overloadBindings.addUpperTypeBound(typeVariable, interfaceSubAType);
+        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(typeVariable, interfaceSubAType);
         IIntersectionTypeSymbol result = overloadBindings.getUpperTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("ISubA", "IB"));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     //see TINS-482 upper bound with convertible type which points to lower bound
@@ -443,12 +551,13 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addLowerRefBound(tLhs, new TypeVariableReference(tRhs));
 
         //act
-        boolean changed = overloadBindings.addUpperTypeBound(tLhs, asTrhs);
+        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tLhs, asTrhs);
 
         assertThat(overloadBindings.getUpperTypeBounds(tRhs), is(nullValue()));
         assertThat(overloadBindings.getUpperTypeBounds(tLhs).getTypeSymbols().keySet(),
                 containsInAnyOrder("{as Trhs}"));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     //see TINS-482 upper bound with convertible type which points to lower bound
@@ -464,10 +573,95 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         asTlhs.bindTo(overloadBindings, asList(tLhs));
 
         //act
-        boolean changed = overloadBindings.addUpperTypeBound(tLhs, asTlhs);
+        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tLhs, asTlhs);
 
         assertThat(overloadBindings.getUpperTypeBounds(tLhs), is(nullValue()));
-        assertThat(changed, is(false));
+        assertThat(resultDto.hasChanged, is(false));
+        assertThat(resultDto.usedImplicitConversion, is(false));
+    }
+
+    @Test
+    public void addUpperTypeBound_AddFloatAndLowerIsIntAndIntToFloatIsImplicit_UpperIsFloatAndImplicitWasUsed() {
+        //pre-arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(intType, asList(floatType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+
+        //arrange
+        String tLhs = "Tlhs";
+        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
+        overloadBindings.addLowerTypeBound(tLhs, intType);
+
+        //act
+        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tLhs, floatType);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding("$lhs", tLhs, asList("int"), asList("float"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(true));
+    }
+
+    @Test
+    public void
+    addUpperTypeBound_AddAsFloatAndLowerIsBoolAndBoolToIntIsExplIntToFloatIsImpl_UpperIsAsFloatAndImplicitWasUsed() {
+        //pre-arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(intType, asList(floatType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions
+                = createConversions(pair(boolType, asList(intType)));
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+
+        //arrange
+        String tLhs = "Tlhs";
+        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
+        overloadBindings.addLowerTypeBound(tLhs, boolType);
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType(floatType, symbolFactory, typeHelper);
+
+        //act
+        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tLhs, convertibleTypeSymbol);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding("$lhs", tLhs, asList("bool"), asList("{as float}"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(true));
+    }
+
+    @Test
+    public void
+    addUpperTypeBound_AddAsIBAndLowerIsBoolAndBoolToIntIsExplAndIntToFooIsImpl_UpperIsAsIBAndImplicitWasUsed() {
+        //pre-arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(intType, asList(fooType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions
+                = createConversions(pair(boolType, asList(intType)));
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+
+        //arrange
+        String tLhs = "Tlhs";
+        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
+        overloadBindings.addLowerTypeBound(tLhs, boolType);
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType(interfaceBType, symbolFactory, typeHelper);
+
+        //act
+        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tLhs, convertibleTypeSymbol);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding("$lhs", tLhs, asList("bool"), asList("{as IB}"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(true));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -505,13 +699,14 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addVariable("$rhs", new TypeVariableReference(rhs));
 
         //act
-        boolean changed = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
+        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$lhs", lhs, asList("@Trhs"), null, false),
                 varBinding("$rhs", rhs, null, asList("@Tlhs"), false)
         ));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test
@@ -527,13 +722,14 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addUpperTypeBound(lhs, intType);
 
         //act
-        boolean changed = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
+        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$lhs", lhs, asList("@Trhs"), asList("int"), false),
                 varBinding("$rhs", rhs, null, asList("@Tlhs", "int"), false)
         ));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test
@@ -550,13 +746,14 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addUpperTypeBound(rhs, intType);
 
         //act
-        boolean changed = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
+        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$lhs", lhs, asList("@Trhs"), asList("int"), false),
                 varBinding("$rhs", rhs, null, asList("@Tlhs", "int"), false)
         ));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test
@@ -573,13 +770,14 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addUpperTypeBound(rhs, intType);
 
         //act
-        boolean changed = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
+        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$lhs", lhs, asList("@Trhs"), asList("num"), false),
                 varBinding("$rhs", rhs, null, asList("@Tlhs", "int"), false)
         ));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test
@@ -596,13 +794,14 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addUpperTypeBound(rhs, numType);
 
         //act
-        boolean changed = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
+        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$lhs", lhs, asList("@Trhs"), asList("int"), false),
                 varBinding("$rhs", rhs, null, asList("@Tlhs", "int"), false)
         ));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test
@@ -619,13 +818,14 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addLowerTypeBound(rhs, intType);
 
         //act
-        boolean changed = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
+        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$lhs", lhs, asList("int", "@Trhs"), asList("int"), false),
                 varBinding("$rhs", rhs, asList("int"), asList("@Tlhs", "int"), false)
         ));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test
@@ -642,13 +842,14 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addLowerTypeBound(rhs, intType);
 
         //act
-        boolean changed = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
+        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$lhs", lhs, asList("int", "@Trhs"), asList("num"), false),
                 varBinding("$rhs", rhs, asList("int"), asList("@Tlhs", "num"), false)
         ));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test(expected = BoundException.class)
@@ -683,13 +884,14 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addLowerTypeBound(rhs, intType);
 
         //act
-        boolean changed = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
+        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$lhs", lhs, asList("int", "@Trhs"), null, false),
                 varBinding("$rhs", rhs, asList("int"), asList("@Tlhs"), false)
         ));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test
@@ -706,14 +908,15 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addLowerTypeBound(rhs, intType);
 
         //act
-        boolean changed = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
+        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$lhs", lhs, asList("int", "@Trhs"), null, false),
                 varBinding("$rhs", rhs, asList("int"), asList("@Tlhs"), false)
         ));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test
@@ -730,13 +933,14 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addLowerTypeBound(rhs, intType);
 
         //act
-        boolean changed = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
+        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$lhs", lhs, asList("num", "@Trhs"), null, false),
                 varBinding("$rhs", rhs, asList("int"), asList("@Tlhs"), false)
         ));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test
@@ -753,13 +957,14 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addLowerTypeBound(rhs, numType);
 
         //act
-        boolean changed = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
+        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$lhs", lhs, asList("num", "@Trhs"), null, false),
                 varBinding("$rhs", rhs, asList("num"), asList("@Tlhs"), false)
         ));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test
@@ -775,7 +980,7 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addLowerTypeBound(rhs, numType);
 
         //act
-        boolean changed = overloadBindings.addLowerRefBound(lhs, new FixedTypeVariableReference(new
+        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new FixedTypeVariableReference(new
                 TypeVariableReference
                 (rhs)));
 
@@ -783,7 +988,8 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
                 varBinding("$lhs", lhs, asList("num"), null, false),
                 varBinding("$rhs", rhs, asList("num"), null, false)
         ));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
 
@@ -797,12 +1003,13 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addVariable("$lhs", new TypeVariableReference(lhs));
 
         //act
-        boolean changed = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(lhs));
+        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(lhs));
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$lhs", lhs, asList("@Tlhs"), asList("@Tlhs"), false)
         ));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test
@@ -816,12 +1023,13 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addUpperTypeBound(lhs, intType);
 
         //act
-        boolean changed = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(lhs));
+        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(lhs));
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$lhs", lhs, asList("@Tlhs"), asList("@Tlhs", "int"), false)
         ));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
         try {
             verify(overloadBindings, times(2)).addUpperTypeBound(anyString(), any(ITypeSymbol.class));
             Assert.fail("addUpperTypeBound was called but should not have been.");
@@ -841,12 +1049,13 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addLowerTypeBound(lhs, intType);
 
         //act
-        boolean changed = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(lhs));
+        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(lhs));
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$lhs", lhs, asList("@Tlhs", "int"), asList("@Tlhs"), false)
         ));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
         try {
             verify(overloadBindings, times(2)).addLowerTypeBound(anyString(), any(ITypeSymbol.class));
             Assert.fail("addUpperTypeBound was called but should not have been.");
@@ -867,12 +1076,13 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(lhs));
 
         //act
-        boolean changed = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(lhs));
+        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(lhs));
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$lhs", lhs, asList("@Tlhs"), asList("@Tlhs", "int"), false)
         ));
-        assertThat(changed, is(false));
+        assertThat(resultDto.hasChanged, is(false));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test
@@ -893,7 +1103,7 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addLowerRefBound(t2, new TypeVariableReference(t3));
 
         //act
-        boolean changed = overloadBindings.addLowerRefBound(t1, new TypeVariableReference(t2));
+        BoundResultDto resultDto = overloadBindings.addLowerRefBound(t1, new TypeVariableReference(t2));
 
 
         assertThat(overloadBindings, withVariableBindings(
@@ -901,7 +1111,8 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
                 varBinding("$b", "T2", asList("int", "@T3", "@T1"), asList("@T1"), false),
                 varBinding("$c", "T3", null, asList("num", "@T2"), false)
         ));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test
@@ -920,14 +1131,15 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addLowerRefBound(t3, new TypeVariableReference(t1));
 
         //act
-        boolean changed = overloadBindings.addLowerRefBound(t1, new TypeVariableReference(t2));
+        BoundResultDto resultDto = overloadBindings.addLowerRefBound(t1, new TypeVariableReference(t2));
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$a", "T1", asList("@T2"), asList("@T3"), false),
                 varBinding("$b", "T2", asList("@T3"), asList("@T1"), false),
                 varBinding("$c", "T3", asList("@T1"), asList("@T2"), false)
         ));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
 
@@ -949,14 +1161,15 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addUpperTypeBound(t2, numType);
 
         //act
-        boolean changed = overloadBindings.addLowerRefBound(t1, new TypeVariableReference(t2));
+        BoundResultDto resultDto = overloadBindings.addLowerRefBound(t1, new TypeVariableReference(t2));
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$a", "T1", asList("int", "@T2"), asList("num", "@T3"), false),
                 varBinding("$b", "T2", asList("int", "@T3"), asList("num", "@T1"), false),
                 varBinding("$c", "T3", asList("int", "@T1"), asList("num", "@T2"), false)
         ));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test
@@ -983,7 +1196,7 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addLowerRefBound(t3, new TypeVariableReference(t5));
 
         //act
-        boolean changed = overloadBindings.addLowerRefBound(t1, new TypeVariableReference(t2));
+        BoundResultDto resultDto = overloadBindings.addLowerRefBound(t1, new TypeVariableReference(t2));
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$a", "T1", asList("int", "@T2", "@T4"), asList("num", "@T3"), false),
@@ -992,7 +1205,8 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
                 varBinding("$d", "T4", null, asList("num", "@T1"), false),
                 varBinding("$e", "T5", null, asList("num", "@T3"), false)
         ));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     //see TINS-482 upper bound with convertible type which points to lower bound
@@ -1011,12 +1225,13 @@ public class OverloadBindingsAddBoundTest extends ATypeTest
         overloadBindings.addUpperTypeBound(tLhs, asTrhs);
 
         //act
-        boolean changed = overloadBindings.addLowerRefBound(tLhs, new TypeVariableReference(tRhs));
+        BoundResultDto resultDto = overloadBindings.addLowerRefBound(tLhs, new TypeVariableReference(tRhs));
         IIntersectionTypeSymbol result = overloadBindings.getUpperTypeBounds(tRhs);
 
         assertThat(result, is(nullValue()));
         assertThat(overloadBindings.getLowerRefBounds(tLhs), containsInAnyOrder(tRhs));
-        assertThat(changed, is(true));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     private IOverloadBindings createOverloadBindings() {
