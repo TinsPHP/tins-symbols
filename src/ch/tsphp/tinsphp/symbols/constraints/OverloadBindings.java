@@ -784,7 +784,9 @@ public class OverloadBindings implements IOverloadBindings
     private boolean propagateOrFixTypeParameters(final PropagateDto dto, boolean hasAlreadyConstantReturn) {
         boolean hasConstantReturn = hasAlreadyConstantReturn;
 
-        for (String parametricParameterTypeVariable : dto.typeParameters) {
+        Iterator<String> iterator = dto.typeParameters.iterator();
+        while (iterator.hasNext()) {
+            String parametricParameterTypeVariable = iterator.next();
             Set<String> parameterUpperRefBounds = upperRefBounds.get(parametricParameterTypeVariable);
             if (hasReturnTypeVariableAsUpperAndNotFixedType(parametricParameterTypeVariable, dto.returnTypeVariable)) {
                 hasConstantReturn = false;
@@ -795,7 +797,7 @@ public class OverloadBindings implements IOverloadBindings
                 }
             } else {
                 fixTypeParameter(parametricParameterTypeVariable);
-                dto.typeParameters.remove(parametricParameterTypeVariable);
+                iterator.remove();
             }
             dto.typeVariablesToVisit.remove(parametricParameterTypeVariable);
         }

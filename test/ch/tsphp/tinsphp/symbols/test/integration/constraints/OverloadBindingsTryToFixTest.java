@@ -1738,6 +1738,105 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         ));
     }
 
+
+    //see TINS-485 fixing functions with convertible types
+    @Test
+    public void tryToFix_PlusWithConvertibleWithoutReturn_AllFixed() {
+        //corresponds:
+        //  function foo($x){ $x + true; return 1; }
+        // where:
+        //   {as T} x {as T} -> T \ T <: num
+        // was applied for e1 = $x + true
+
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String tx = "Tx";
+        String e1 = "+@1|4";
+        String te1 = "Te1";
+        String tReturn = "Treturn";
+
+        overloadBindings.addVariable($x, new TypeVariableReference(tx));
+        overloadBindings.addVariable(e1, new TypeVariableReference(te1));
+        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        IConvertibleTypeSymbol asTe1 = createConvertibleType();
+        overloadBindings.bind(asTe1, asList(te1));
+        overloadBindings.addUpperTypeBound(tx, asTe1);
+        overloadBindings.addUpperTypeBound(te1, numType);
+        overloadBindings.addLowerTypeBound(tReturn, intType);
+
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+
+        //act
+        overloadBindings.tryToFix(parameterTypeVariables);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding($x, tx, asList("{as num}"), asList("{as num}"), true),
+                varBinding(e1, te1, asList("num"), asList("num"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), asList("int"), true)
+        ));
+    }
+
+    //see TINS-485 fixing functions with convertible types
+    @Test
+    public void tryToFix_PlusWithTwoConvertibleWithoutReturn_AllFixed() {
+        //corresponds:
+        //  function foo($x, $y){ $x + true; $y + null; return 1; }
+        // where:
+        //   {as T} x {as T} -> T \ T <: num
+        // was applied for e1 = $x + true and e2 = $y + null;
+
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String tx = "Tx";
+        String $y = "$y";
+        String ty = "Ty";
+        String e1 = "+@1|4";
+        String te1 = "Te1";
+        String e2 = "+@1|10";
+        String te2 = "Te2";
+        String tReturn = "Treturn";
+
+        overloadBindings.addVariable($x, new TypeVariableReference(tx));
+        overloadBindings.addVariable($y, new TypeVariableReference(ty));
+        overloadBindings.addVariable(e1, new TypeVariableReference(te1));
+        overloadBindings.addVariable(e2, new TypeVariableReference(te2));
+        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        IConvertibleTypeSymbol asTe1 = createConvertibleType();
+        overloadBindings.bind(asTe1, asList(te1));
+        overloadBindings.addUpperTypeBound(tx, asTe1);
+        IConvertibleTypeSymbol asTe2 = createConvertibleType();
+        overloadBindings.bind(asTe2, asList(te2));
+        overloadBindings.addUpperTypeBound(ty, asTe2);
+        overloadBindings.addUpperTypeBound(te1, numType);
+        overloadBindings.addUpperTypeBound(te2, numType);
+        overloadBindings.addLowerTypeBound(tReturn, intType);
+
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+        parameterTypeVariables.add(ty);
+
+        //act
+        overloadBindings.tryToFix(parameterTypeVariables);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding($x, tx, asList("{as num}"), asList("{as num}"), true),
+                varBinding($y, ty, asList("{as num}"), asList("{as num}"), true),
+                varBinding(e1, te1, asList("num"), asList("num"), true),
+                varBinding(e2, te2, asList("num"), asList("num"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), asList("int"), true)
+        ));
+    }
+
+
     private IOverloadBindings createOverloadBindings() {
         return createOverloadBindings(symbolFactory, typeHelper);
     }
