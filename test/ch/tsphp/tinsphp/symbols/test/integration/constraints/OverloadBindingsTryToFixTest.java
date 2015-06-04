@@ -1677,7 +1677,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
 
     //see TINS-485 fixing functions with convertible types
     @Test
-    public void tryToFix_PlusWithConvertibleCombinedWithPlusWithTwoConvertible_ReturnStaysParameteric() {
+    public void tryToFix_PlusWithConvertibleCombinedWithPlusWithTwoConvertible_ReturnStaysParametric() {
         //corresponds:
         //  function foo($x, $y, $z){ return $x + $y + $z; }
         // where:

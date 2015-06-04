@@ -25,6 +25,7 @@ import ch.tsphp.tinsphp.symbols.utils.TypeHelper;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -35,7 +36,7 @@ public class FunctionTypeTest extends ATypeTest
 {
 
     @Test
-    public void getSignature_FixedNoParamsReturnsInt_ReturnsEmptyParamArrowInt() {
+    public void getSignature_SimplifiedNoParamsReturnsInt_ReturnsEmptyParamArrowInt() {
         IOverloadBindings overloadBindings = createOverloadBindings();
         overloadBindings.addVariable(TinsPHPConstants.RETURN_VARIABLE_NAME,
                 new FixedTypeVariableReference(new TypeVariableReference("T")));
@@ -43,7 +44,7 @@ public class FunctionTypeTest extends ATypeTest
         overloadBindings.addUpperTypeBound("T", intType);
 
         IFunctionType function = createFunction("foo", overloadBindings, new ArrayList<IVariable>());
-        function.fix();
+        function.simplified(new HashSet<String>());
         String result = function.getSignature();
 
         assertThat(result, is("() -> int"));
@@ -62,7 +63,7 @@ public class FunctionTypeTest extends ATypeTest
         IVariable expr = new Variable("$expr");
 
         IFunctionType function = createFunction("foo", overloadBindings, asList(expr));
-        function.fix();
+        function.simplified(new HashSet<String>());
         String result = function.getSignature();
 
         assertThat(result, is("int -> float"));
@@ -76,7 +77,7 @@ public class FunctionTypeTest extends ATypeTest
         IVariable expr = new Variable("$expr");
 
         IFunctionType function = createFunction("foo", overloadBindings, asList(expr));
-        function.fix();
+        function.simplified(set("T"));
         String result = function.getSignature();
 
         assertThat(result, is("T -> T"));
@@ -93,7 +94,7 @@ public class FunctionTypeTest extends ATypeTest
         IVariable rhs = new Variable("$rhs");
 
         IFunctionType function = createFunction("foo", overloadBindings, asList(lhs, rhs));
-        function.fix();
+        function.simplified(set("T1", "T2"));
         String result = function.getSignature();
 
         assertThat(result, is("T1 x T2 -> T1 \\ T2 <: T1"));
@@ -115,7 +116,7 @@ public class FunctionTypeTest extends ATypeTest
         IVariable rhs = new Variable("$rhs");
 
         IFunctionType function = createFunction("foo", overloadBindings, asList(lhs, rhs));
-        function.fix();
+        function.simplified(set("T1", "T2", "T3"));
         String result = function.getSignature();
 
         assertThat(result, is("T1 x T2 -> T3 \\ int <: T1 <: num, T2 <: bool, (int | T1 | T2) <: T3"));
@@ -137,14 +138,14 @@ public class FunctionTypeTest extends ATypeTest
         IVariable rhs = new Variable("$rhs");
 
         IFunctionType function = createFunction("foo", overloadBindings, asList(lhs, rhs));
-        function.fix();
+        function.simplified(set("T1", "T2", "T3"));
         String result = function.getSignature();
 
         assertThat(result, is("T1 x T2 -> T3 \\ int <: T1 <: num, T2 <: bool, (int | T1 | T2) <: T3"));
     }
 
     @Test(expected = IllegalStateException.class)
-    public void getSignature_CalledFixTheSecondTime_ThrowsIllegalStateException() {
+    public void simplify_CalledTheSecondTime_ThrowsIllegalStateException() {
         IOverloadBindings overloadBindings = createOverloadBindings();
         overloadBindings.addVariable(TinsPHPConstants.RETURN_VARIABLE_NAME,
                 new FixedTypeVariableReference(new TypeVariableReference("T")));
@@ -152,8 +153,8 @@ public class FunctionTypeTest extends ATypeTest
         overloadBindings.addUpperTypeBound("T", intType);
 
         IFunctionType function = createFunction("foo", overloadBindings, new ArrayList<IVariable>());
-        function.fix();
-        function.fix();
+        function.simplify();
+        function.simplify();
 
         //assert in annotation
     }

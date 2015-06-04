@@ -14,27 +14,35 @@ import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IParametricTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements IConvertibleTypeSymbol
 {
-    private String typeVariable = "T";
+
+    private List<String> typeParameters;
+    private Set<String> nonFixedTypeParameters;
     private IOverloadBindings overloadBindings;
     private boolean wasBound = false;
-    private boolean isFixed = false;
 
     public ConvertibleTypeSymbol(IOverloadBindings theOverloadBindings) {
         overloadBindings = theOverloadBindings;
+        String typeVariable = "T";
+        typeParameters = new ArrayList<>(1);
+        typeParameters.add(typeVariable);
+        nonFixedTypeParameters = new HashSet<>(1);
+        nonFixedTypeParameters.add(typeVariable);
         overloadBindings.addVariable(typeVariable, new TypeVariableReference(typeVariable));
     }
 
     private ConvertibleTypeSymbol(ConvertibleTypeSymbol convertibleTypeSymbol) {
         overloadBindings = convertibleTypeSymbol.overloadBindings;
-        typeVariable = convertibleTypeSymbol.typeVariable;
+        typeParameters = new ArrayList<>(convertibleTypeSymbol.typeParameters);
+        nonFixedTypeParameters = new HashSet<>(convertibleTypeSymbol.nonFixedTypeParameters);
         wasBound = convertibleTypeSymbol.wasBound;
-        isFixed = convertibleTypeSymbol.isFixed;
         hasAbsoluteNameChanged = true;
     }
 
@@ -43,26 +51,30 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
         return wasBound;
     }
 
+
+    //Warning! start code duplication - very similar to the one in FunctionType
     @Override
-    public void fix(String fixedTypeVariable) {
-        if (!wasBound) {
-            throw new IllegalStateException("cannot use this method if the convertible type was not bound to a "
+    public void fix(String fixedTypeParameter) {
+        if (!wasBound()) {
+            throw new IllegalStateException("cannot fix a type parameter if this convertible type was not bound to a "
                     + "parametric type");
         }
 
-        if (!typeVariable.equals(fixedTypeVariable)) {
-            throw new IllegalArgumentException("the convertible type was bound to " + typeVariable
-                    + " but " + fixedTypeVariable + " was informed to be fixed.");
+        if (!nonFixedTypeParameters.remove(fixedTypeParameter)) {
+            throw new IllegalArgumentException("the convertible type was bound to " + typeParameters + " and its "
+                    + "non-fixed type parameters are " + nonFixedTypeParameters + " but it was indicated that "
+                    + fixedTypeParameter + " was fixed");
         }
 
         notifyNameHasChanged();
-        isFixed = true;
         notifyWasFixed();
     }
+    //Warning! end code duplication - very similar to the one in FunctionType
+
 
     @Override
     public boolean isFixed() {
-        return !wasBound || isFixed;
+        return !wasBound || nonFixedTypeParameters.isEmpty();
     }
 
     @Override
@@ -70,59 +82,85 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
         return new ConvertibleTypeSymbol(this);
     }
 
+
+    //Warning! start code duplication - very similar to the one in FunctionType
     @Override
-    public void renameTypeVariable(String theTypeVariable, String newTypeVariable) {
-        if (!typeVariable.equals(theTypeVariable)) {
-            throw new IllegalArgumentException("given type variable name \"" + theTypeVariable + "\" "
-                    + "was not the current type variable name \"" + typeVariable + "\"");
-        }
-
+    public void renameTypeVariable(String typeParameter, String newTypeParameter) {
         if (!wasBound) {
-            throw new IllegalStateException("can only rename the type variable if it is bound to another "
-                    + "parametric polymorphic type");
+            throw new IllegalStateException("can only rename a type parameter if this convertible type was bound to"
+                    + " another parametric polymorphic type");
         }
 
-        typeVariable = newTypeVariable;
+        String typeVariable = typeParameters.get(0);
+        if (!typeVariable.equals(typeParameter)) {
+            throw new IllegalArgumentException("the convertible type was bound to " + typeParameters
+                    + " but " + typeParameter + " should be renamed.");
+        }
+        renameTypeVariableAfterContainsCheck(typeParameter, newTypeParameter);
 
         notifyNameHasChanged();
     }
 
+    private void renameTypeVariableAfterContainsCheck(String typeParameter, String newTypeParameter) {
+        typeParameters.set(0, newTypeParameter);
+        if (nonFixedTypeParameters.remove(typeParameter)) {
+            nonFixedTypeParameters.add(newTypeParameter);
+        }
+    }
+    //Warning! end code duplication - very similar to the one in FunctionType
+
+
+    //Warning! start code duplication - very similar to the one in FunctionType
     @Override
-    public void bindTo(IOverloadBindings bindings, List<String> typeParameters) {
-        if (typeParameters.size() != 1) {
-            throw new IllegalArgumentException("a convertible type expects exactly one type parameter");
+    public void bindTo(IOverloadBindings newOverloadBindings, List<String> bindingTypeParameters) {
+        if (typeParameters.size() != bindingTypeParameters.size()) {
+            throw new IllegalArgumentException("This parametric type requires " + typeParameters.size()
+                    + " type parameter(s) but only " + bindingTypeParameters.size() + " provided");
         }
 
-        String newTypeVariable = typeParameters.get(0);
+        transferBounds(newOverloadBindings, bindingTypeParameters);
+
+        overloadBindings = newOverloadBindings;
+        renameTypeVariableAfterContainsCheck(typeParameters.get(0), bindingTypeParameters.get(0));
+        wasBound = true;
+
+        notifyNameHasChanged();
+    }
+    //Warning! end code duplication - very similar to the one in FunctionType
+
+
+    private void transferBounds(IOverloadBindings newOverloadBindings, List<String> bindingTypeParameters) {
+        String newTypeVariable = bindingTypeParameters.get(0);
         if (hasLowerTypeBounds()) {
-            bindings.addLowerTypeBound(newTypeVariable, getLowerTypeBounds());
+            newOverloadBindings.addLowerTypeBound(newTypeVariable, getLowerTypeBounds());
         }
         if (hasUpperTypeBounds()) {
-            bindings.addUpperTypeBound(newTypeVariable, getUpperTypeBounds());
+            newOverloadBindings.addUpperTypeBound(newTypeVariable, getUpperTypeBounds());
         }
-        overloadBindings = bindings;
-        typeVariable = newTypeVariable;
-        notifyNameHasChanged();
-        wasBound = true;
+
+        //a convertible type has only one type parameter and therefore cannot have lower ref bounds
     }
 
+
+    //Warning! end code duplication - same as in FunctionType
     @Override
-    public List<String> rebind(IOverloadBindings newOverloadBindings) {
+    public void rebind(IOverloadBindings newOverloadBindings) {
         if (!wasBound) {
             throw new IllegalStateException("can only rebind a convertible type if it was already bound before.");
         }
 
-        //ensures that the type variable exists in the new overload bindings
-        newOverloadBindings.renameTypeVariable(typeVariable, typeVariable);
-
         overloadBindings = newOverloadBindings;
+    }
+    //Warning! end code duplication - same as in FunctionType
 
-        return Arrays.asList(typeVariable);
+    @Override
+    public List<String> getTypeParameters() {
+        return typeParameters;
     }
 
     @Override
-    public List<String> getTypeVariables() {
-        return Arrays.asList(typeVariable);
+    public Set<String> getNonFixedTypeParameters() {
+        return nonFixedTypeParameters;
     }
 
     @Override
@@ -132,12 +170,12 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
 
     @Override
     public String getTypeVariable() {
-        return typeVariable;
+        return typeParameters.get(0);
     }
 
     @Override
     public boolean addLowerTypeBound(ITypeSymbol typeSymbol) {
-        boolean hasChanged = overloadBindings.addLowerTypeBound(typeVariable, typeSymbol);
+        boolean hasChanged = overloadBindings.addLowerTypeBound(typeParameters.get(0), typeSymbol);
         if (hasChanged) {
             notifyNameHasChanged();
         }
@@ -146,7 +184,7 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
 
     @Override
     public boolean addUpperTypeBound(ITypeSymbol typeSymbol) {
-        boolean hasChanged = overloadBindings.addUpperTypeBound(typeVariable, typeSymbol);
+        boolean hasChanged = overloadBindings.addUpperTypeBound(typeParameters.get(0), typeSymbol);
         if (hasChanged) {
             notifyNameHasChanged();
         }
@@ -155,22 +193,22 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
 
     @Override
     public boolean hasLowerTypeBounds() {
-        return overloadBindings.hasLowerTypeBounds(typeVariable);
+        return overloadBindings.hasLowerTypeBounds(typeParameters.get(0));
     }
 
     @Override
     public boolean hasUpperTypeBounds() {
-        return overloadBindings.hasUpperTypeBounds(typeVariable);
+        return overloadBindings.hasUpperTypeBounds(typeParameters.get(0));
     }
 
     @Override
     public IUnionTypeSymbol getLowerTypeBounds() {
-        return overloadBindings.getLowerTypeBounds(typeVariable);
+        return overloadBindings.getLowerTypeBounds(typeParameters.get(0));
     }
 
     @Override
     public IIntersectionTypeSymbol getUpperTypeBounds() {
-        return overloadBindings.getUpperTypeBounds(typeVariable);
+        return overloadBindings.getUpperTypeBounds(typeParameters.get(0));
     }
 
     @Override
@@ -178,6 +216,7 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
         IUnionTypeSymbol lowerTypeBounds = getLowerTypeBounds();
         IIntersectionTypeSymbol upperTypeBounds = getUpperTypeBounds();
         String absoluteName;
+        String typeVariable = typeParameters.get(0);
 
         if (lowerTypeBounds == null && upperTypeBounds == null) {
             absoluteName = "{as " + typeVariable + "}";

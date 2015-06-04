@@ -80,9 +80,15 @@ public class ConvertibleTypeSymbolTest extends ATypeHelperTest
 
     @Test(expected = IllegalArgumentException.class)
     public void renameTypeVariable_IsNotCurrentTypeVariable_ThrowsIllegalArgumentException() {
-        //no arrange necessary
-
+        //pre-act necessary for arrange
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+
+        //arrange
+        IOverloadBindings overloadBindings = new OverloadBindings(symbolFactory, typeHelper);
+        overloadBindings.addVariable("$a", new TypeVariableReference("Ta"));
+        convertibleTypeSymbol.bindTo(overloadBindings, asList("Ta"));
+
+        //act
         convertibleTypeSymbol.renameTypeVariable("NonExistingTypeVariable", "T");
 
         //assert in annotation

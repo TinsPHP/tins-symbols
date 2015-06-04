@@ -12,6 +12,7 @@ import ch.tsphp.tinsphp.common.TinsPHPConstants;
 import ch.tsphp.tinsphp.common.inference.constraints.FixedTypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
+import ch.tsphp.tinsphp.common.inference.constraints.IParametricType;
 import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.IntersectionBoundException;
 import ch.tsphp.tinsphp.common.inference.constraints.LowerBoundException;
@@ -38,7 +39,7 @@ import java.util.Set;
 
 public class OverloadBindings implements IOverloadBindings
 {
-    private static final String TEMP_VARIABLE_PREFIX = "!temp";
+    private static final String HELPER_VARIABLE_PREFIX = "!help";
 
     private final ISymbolFactory symbolFactory;
     private final ITypeHelper typeHelper;
@@ -51,12 +52,12 @@ public class OverloadBindings implements IOverloadBindings
     private final Map<String, ITypeVariableReference> variable2TypeVariable;
     private final Map<String, Set<String>> typeVariable2Variables;
     private final Map<String, IFunctionType> appliedOverloads;
-    private final Map<String, Set<IParametricTypeSymbol>> typeVariable2BoundTypes;
+    private final Map<String, Set<IParametricType>> typeVariable2BoundTypes;
     private final Map<String, Set<String>> typeVariablesWithLowerConvertible;
     private final Map<String, Set<String>> typeVariablesWithUpperConvertible;
 
     private int count = 1;
-    private int tempVariableCount = 0;
+    private int helperVariableCount = 0;
 
     public OverloadBindings(ISymbolFactory theSymbolFactory, ITypeHelper theTypeHelper) {
         symbolFactory = theSymbolFactory;
@@ -81,7 +82,7 @@ public class OverloadBindings implements IOverloadBindings
         mixedTypeSymbol = bindings.mixedTypeSymbol;
 
         count = bindings.count;
-        tempVariableCount = bindings.tempVariableCount;
+        helperVariableCount = bindings.helperVariableCount;
 
         //type variables need to be copied first since a lower or upper type bound might contain a parametric
         // polymorphic type which is bound to one of the type variables
@@ -131,7 +132,7 @@ public class OverloadBindings implements IOverloadBindings
             IUnionTypeSymbol copy = entry.getValue().copy(parametricTypeSymbols);
             String lowerTypeVariable = entry.getKey();
             for (IParametricTypeSymbol parametricTypeSymbol : parametricTypeSymbols) {
-                for (String typeVariable : parametricTypeSymbol.getTypeVariables()) {
+                for (String typeVariable : parametricTypeSymbol.getTypeParameters()) {
                     MapHelper.addToSetInMap(typeVariable2BoundTypes, typeVariable, parametricTypeSymbol);
                     MapHelper.addToSetInMap(typeVariablesWithLowerConvertible, lowerTypeVariable, typeVariable);
                 }
@@ -145,7 +146,7 @@ public class OverloadBindings implements IOverloadBindings
             IIntersectionTypeSymbol copy = entry.getValue().copy(parametricTypeSymbols);
             String upperTypeVariable = entry.getKey();
             for (IParametricTypeSymbol parametricTypeSymbol : parametricTypeSymbols) {
-                for (String typeVariable : parametricTypeSymbol.getTypeVariables()) {
+                for (String typeVariable : parametricTypeSymbol.getTypeParameters()) {
                     MapHelper.addToSetInMap(typeVariable2BoundTypes, typeVariable, parametricTypeSymbol);
                     MapHelper.addToSetInMap(typeVariablesWithUpperConvertible, upperTypeVariable, typeVariable);
                 }
@@ -164,19 +165,10 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     @Override
-    public ITypeVariableReference createTempVariable() {
+    public ITypeVariableReference createHelperVariable() {
         ITypeVariableReference nextTypeVariable = getNextTypeVariable();
-        addVariable(TEMP_VARIABLE_PREFIX + tempVariableCount++, nextTypeVariable);
+        addVariable(HELPER_VARIABLE_PREFIX + helperVariableCount++, nextTypeVariable);
         return nextTypeVariable;
-    }
-
-    @Override
-    public void removeTempVariables() {
-        for (int i = 0; i < tempVariableCount; ++i) {
-            ITypeVariableReference reference = variable2TypeVariable.remove(TEMP_VARIABLE_PREFIX + i);
-            typeVariable2Variables.get(reference.getTypeVariable()).remove(TEMP_VARIABLE_PREFIX + i);
-        }
-        tempVariableCount = 0;
     }
 
     @Override
@@ -568,15 +560,16 @@ public class OverloadBindings implements IOverloadBindings
         fixTypeAfterContainsCheck(variableId, true);
     }
 
+
     private void fixTypeAfterContainsCheck(String variableId, boolean isNotParameter) {
-        //Warning! start code duplication, more or less same as in fixParameter
+        //Warning! start code duplication, more or less same as in fixTypeParameter
         ITypeVariableReference reference = variable2TypeVariable.get(variableId);
         if (!reference.hasFixedType()) {
             String typeVariable = reference.getTypeVariable();
             fixTypeVariable(variableId, reference);
             fixTypeVariableType(isNotParameter, typeVariable);
         }
-        //Warning! start code duplication, more or less same as in fixParameter
+        //Warning! start code duplication, more or less same as in fixTypeParameter
     }
 
     private void fixTypeVariable(String variableId, ITypeVariableReference reference) {
@@ -605,14 +598,15 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     @Override
-    public void tryToFix(Set<String> parameterTypeVariables) {
+    public Set<String> tryToFix(Set<String> parameterTypeVariables) {
 
         String returnTypeVariable = variable2TypeVariable.get(TinsPHPConstants.RETURN_VARIABLE_NAME).getTypeVariable();
         Map<String, Set<String>> typeVariablesToVisit = new HashMap<>(typeVariable2Variables);
         Set<String> recursiveParameterTypeVariables = new HashSet<>();
         Set<String> parametricParameterTypeVariables = new HashSet<>();
         Set<String> removeReturnTypeVariable = new HashSet<>();
-        PropagateDto dto = new PropagateDto(returnTypeVariable,
+        PropagateDto dto = new PropagateDto(
+                returnTypeVariable,
                 parameterTypeVariables,
                 typeVariablesToVisit,
                 parametricParameterTypeVariables,
@@ -624,29 +618,33 @@ public class OverloadBindings implements IOverloadBindings
         propagateReturnVariableToParameters(dto);
 
         boolean hasConstantReturn = propagateOrFixParameters(dto);
-        hasConstantReturn = propagateOrFixParametricParameters(dto, hasConstantReturn);
+        hasConstantReturn = propagateOrFixTypeParameters(dto, hasConstantReturn);
 
         //in case of recursion
         removeUpperRefBounds(returnTypeVariable);
-
         if (hasConstantReturn) {
             removeRefBounds(returnTypeVariable);
         }
+
         for (String refTypeVariable : removeReturnTypeVariable) {
             upperRefBounds.get(refTypeVariable).remove(returnTypeVariable);
         }
 
-        Map<String, String> variablesToRename = identifyVariablesToRename(parameterTypeVariables, typeVariablesToVisit);
+        Map<String, String> variablesToRename = identifyVariablesToRename(dto);
         renameTypeVariables(variablesToRename);
-
         renameRecursiveParameters(recursiveParameterTypeVariables);
 
         //upper ref bounds are no longer needed
         upperRefBounds.clear();
+
+        return dto.typeParameters;
     }
 
     private void collectTypeParameters(PropagateDto dto) {
         for (String parameterTypeVariable : dto.parameterTypeVariables) {
+            //the type variables of parameters are potential type parameters as well,
+            // they are removed in propagateOrFixParameters if the parameter is fixed
+            dto.typeParameters.add(parameterTypeVariable);
             if (hasLowerTypeBounds(parameterTypeVariable)) {
                 IUnionTypeSymbol containerType = lowerTypeBounds.get(parameterTypeVariable);
                 searchForParametricTypes(dto, containerType);
@@ -667,42 +665,18 @@ public class OverloadBindings implements IOverloadBindings
                 } else if (typeSymbol instanceof IParametricTypeSymbol) {
                     IParametricTypeSymbol parametricTypeSymbol = (IParametricTypeSymbol) typeSymbol;
                     if (!parametricTypeSymbol.isFixed() && parametricTypeSymbol.getOverloadBindings() == this) {
-                        dto.typeParameters.addAll(parametricTypeSymbol.getTypeVariables());
+                        dto.typeParameters.addAll(parametricTypeSymbol.getTypeParameters());
                     }
                 }
             }
         }
-    }
-
-    private boolean propagateOrFixParametricParameters(final PropagateDto dto, boolean hasAlreadyConstantReturn) {
-        boolean hasConstantReturn = hasAlreadyConstantReturn;
-        for (String typeParameter : dto.typeParameters) {
-            dto.parameterTypeVariables.add(typeParameter);
-        }
-
-        for (String parametricParameterTypeVariable : dto.typeParameters) {
-            Set<String> parameterUpperRefBounds = upperRefBounds.get(parametricParameterTypeVariable);
-            if (hasReturnTypeVariableAsUpperAndNotFixedType(parametricParameterTypeVariable, dto.returnTypeVariable)) {
-                hasConstantReturn = false;
-                for (String refTypeVariable : parameterUpperRefBounds) {
-                    if (!dto.parameterTypeVariables.contains(refTypeVariable)) {
-                        propagateTypeVariableUpwards(refTypeVariable, parametricParameterTypeVariable, dto);
-                    }
-                }
-            } else {
-                fixParameter(parametricParameterTypeVariable);
-                dto.parameterTypeVariables.remove(parametricParameterTypeVariable);
-            }
-            dto.typeVariablesToVisit.remove(parametricParameterTypeVariable);
-        }
-        return hasConstantReturn;
     }
 
     private void propagateReturnVariableToParameters(final PropagateDto dto) {
         if (hasLowerRefBounds(dto.returnTypeVariable)) {
             for (String refTypeVariable : lowerRefBounds.get(dto.returnTypeVariable)) {
-                if (isNotParameterNorTypeParameter(refTypeVariable, dto)) {
-                    //since non-parameters might be fixed we need to remove the return variable manually
+                if (!dto.typeParameters.contains(refTypeVariable)) {
+                    //since normal type variables might be fixed we need to remove the return variable manually
                     dto.removeReturnTypeVariable.add(refTypeVariable);
                 }
                 propagateTypeVariableDownwardsToParameters(refTypeVariable, dto);
@@ -710,28 +684,18 @@ public class OverloadBindings implements IOverloadBindings
         }
     }
 
-    private boolean isNotParameterNorTypeParameter(final String refTypeVariable, final PropagateDto dto) {
-        return !dto.parameterTypeVariables.contains(refTypeVariable)
-                && !dto.typeParameters.contains(refTypeVariable);
-    }
-
     private void propagateTypeVariableDownwardsToParameters(final String refTypeVariable, final PropagateDto dto) {
         if (hasLowerRefBounds(refTypeVariable)) {
             for (String refRefTypeVariable : lowerRefBounds.get(refTypeVariable)) {
                 Set<String> refRefUpperRefBounds = upperRefBounds.get(refRefTypeVariable);
                 if (!refRefUpperRefBounds.contains(dto.returnTypeVariable)) {
-                    if (isParameterOrTypeParameter(refRefTypeVariable, dto)) {
+                    if (dto.typeParameters.contains(refRefTypeVariable)) {
                         refRefUpperRefBounds.add(dto.returnTypeVariable);
                     }
                     propagateTypeVariableDownwardsToParameters(refRefTypeVariable, dto);
                 }
             }
         }
-    }
-
-    private boolean isParameterOrTypeParameter(String refRefTypeVariable, PropagateDto dto) {
-        return dto.parameterTypeVariables.contains(refRefTypeVariable)
-                || dto.typeParameters.contains(refRefTypeVariable);
     }
 
     private boolean propagateOrFixParameters(final PropagateDto dto) {
@@ -748,51 +712,13 @@ public class OverloadBindings implements IOverloadBindings
                     }
                 }
             } else {
-                fixParameter(parameterTypeVariable);
+                fixTypeParameter(parameterTypeVariable);
                 dto.typeParameters.remove(parameterTypeVariable);
             }
-
             dto.typeVariablesToVisit.remove(parameterTypeVariable);
         }
 
         return hasConstantReturn;
-    }
-
-    private void fixParameter(String parameterTypeVariable) {
-        // if only upper type bounds (no lower type bounds) were defined for the parameter,
-        // then we need to propagate those to the upper refs (if there are any) before we fix all variables
-        // belonging to the type variable of the parameter, otherwise they might turn out to be mixed (which
-        // is less intuitive). see TINS-449 unused ad-hoc polymorphic parameters
-        if (hasUpperRefBoundAndOnlyUpperTypeBound(parameterTypeVariable)) {
-            IIntersectionTypeSymbol upperTypeBound = upperTypeBounds.get(parameterTypeVariable);
-            for (String refTypeVariable : upperRefBounds.get(parameterTypeVariable)) {
-                addToLowerUnionTypeSymbol(refTypeVariable, upperTypeBound);
-            }
-        }
-
-        final boolean isNotParameter = false;
-        boolean typeVariableFixed = false;
-        for (String variableId : typeVariable2Variables.get(parameterTypeVariable)) {
-            //Warning! start code duplication, more or less same as in fixTypeAfterContainsCheck
-            ITypeVariableReference reference = variable2TypeVariable.get(variableId);
-            if (!reference.hasFixedType()) {
-                fixTypeVariable(variableId, reference);
-                //no need to fix it multiple times, once is enough
-                if (!typeVariableFixed) {
-                    String typeVariable = reference.getTypeVariable();
-                    fixTypeVariableType(isNotParameter, typeVariable);
-                    typeVariableFixed = true;
-                }
-            }
-            //Warning! end code duplication, more or less same as in fixTypeAfterContainsCheck
-        }
-
-        //inform bounded parametric types that type variable is fixed
-        if (typeVariable2BoundTypes.containsKey(parameterTypeVariable)) {
-            for (IParametricTypeSymbol parametricTypeSymbol : typeVariable2BoundTypes.get(parameterTypeVariable)) {
-                parametricTypeSymbol.fix(parameterTypeVariable);
-            }
-        }
     }
 
     private boolean hasReturnTypeVariableAsUpperAndNotFixedType(String parameterTypeVariable,
@@ -811,10 +737,69 @@ public class OverloadBindings implements IOverloadBindings
         return has;
     }
 
+    @Override
+    public void fixTypeParameter(String typeParameter) {
+        // if only upper type bounds (no lower type bounds) were defined for the parameter,
+        // then we need to propagate those to the upper refs (if there are any) before we fix all variables
+        // belonging to the type variable of the parameter, otherwise they might turn out to be mixed (which
+        // is less intuitive). see TINS-449 unused ad-hoc polymorphic parameters
+        if (hasUpperRefBoundAndOnlyUpperTypeBound(typeParameter)) {
+            IIntersectionTypeSymbol upperTypeBound = upperTypeBounds.get(typeParameter);
+            for (String refTypeVariable : upperRefBounds.get(typeParameter)) {
+                addToLowerUnionTypeSymbol(refTypeVariable, upperTypeBound);
+            }
+        }
+
+        final boolean isNotParameter = false;
+        boolean typeVariableFixed = false;
+        for (String variableId : typeVariable2Variables.get(typeParameter)) {
+            //Warning! start code duplication, more or less same as in fixTypeAfterContainsCheck
+            ITypeVariableReference reference = variable2TypeVariable.get(variableId);
+            if (!reference.hasFixedType()) {
+                fixTypeVariable(variableId, reference);
+                //no need to fix it multiple times, once is enough
+                if (!typeVariableFixed) {
+                    String typeVariable = reference.getTypeVariable();
+                    fixTypeVariableType(isNotParameter, typeVariable);
+                    typeVariableFixed = true;
+                }
+            }
+            //Warning! end code duplication, more or less same as in fixTypeAfterContainsCheck
+        }
+
+        //inform bounded parametric types that type variable is fixed
+        if (typeVariable2BoundTypes.containsKey(typeParameter)) {
+            for (IParametricType parametricTypeSymbol : typeVariable2BoundTypes.get(typeParameter)) {
+                parametricTypeSymbol.fix(typeParameter);
+            }
+        }
+    }
+
     private boolean hasUpperRefBoundAndOnlyUpperTypeBound(String parameterTypeVariable) {
         return hasUpperRefBounds(parameterTypeVariable)
                 && !hasLowerTypeBounds(parameterTypeVariable)
                 && hasUpperTypeBounds(parameterTypeVariable);
+    }
+
+    private boolean propagateOrFixTypeParameters(final PropagateDto dto, boolean hasAlreadyConstantReturn) {
+        boolean hasConstantReturn = hasAlreadyConstantReturn;
+
+        for (String parametricParameterTypeVariable : dto.typeParameters) {
+            Set<String> parameterUpperRefBounds = upperRefBounds.get(parametricParameterTypeVariable);
+            if (hasReturnTypeVariableAsUpperAndNotFixedType(parametricParameterTypeVariable, dto.returnTypeVariable)) {
+                hasConstantReturn = false;
+                for (String refTypeVariable : parameterUpperRefBounds) {
+                    if (!dto.typeParameters.contains(refTypeVariable)) {
+                        propagateTypeVariableUpwards(refTypeVariable, parametricParameterTypeVariable, dto);
+                    }
+                }
+            } else {
+                fixTypeParameter(parametricParameterTypeVariable);
+                dto.typeParameters.remove(parametricParameterTypeVariable);
+            }
+            dto.typeVariablesToVisit.remove(parametricParameterTypeVariable);
+        }
+        return hasConstantReturn;
     }
 
 
@@ -827,7 +812,7 @@ public class OverloadBindings implements IOverloadBindings
                 if (!refRefLowerRefBounds.contains(parameterTypeVariable)) {
                     if (isNotSelfReference(refRefTypeVariable, parameterTypeVariable)) {
                         refRefLowerRefBounds.add(parameterTypeVariable);
-                        if (!dto.parameterTypeVariables.contains(refRefTypeVariable)) {
+                        if (!dto.typeParameters.contains(refRefTypeVariable)) {
                             propagateTypeVariableUpwards(refRefTypeVariable, parameterTypeVariable, dto);
                         }
                     } else {
@@ -855,14 +840,12 @@ public class OverloadBindings implements IOverloadBindings
         }
     }
 
-    private Map<String, String> identifyVariablesToRename(
-            Set<String> parameterTypeVariables, Map<String, Set<String>> typeVariablesToVisit) {
+    private Map<String, String> identifyVariablesToRename(PropagateDto dto) {
         Map<String, String> variablesToRename = new HashMap<>();
 
-        for (Map.Entry<String, Set<String>> entry : typeVariablesToVisit.entrySet()) {
+        for (Map.Entry<String, Set<String>> entry : dto.typeVariablesToVisit.entrySet()) {
             String typeVariable = entry.getKey();
-            String parameterTypeVariable = tryToReduceToParameter(
-                    typeVariable, parameterTypeVariables);
+            String parameterTypeVariable = tryToReduceToTypeParameter(typeVariable, dto.typeParameters);
             if (parameterTypeVariable != null) {
                 variablesToRename.put(typeVariable, parameterTypeVariable);
             } else if (!hasLowerRefBounds(typeVariable)) {
@@ -875,16 +858,16 @@ public class OverloadBindings implements IOverloadBindings
         return variablesToRename;
     }
 
-    private String tryToReduceToParameter(String typeVariable, Set<String> parameterTypeVariables) {
+    private String tryToReduceToTypeParameter(String typeVariable, Set<String> typeParameters) {
         String renameTo = null;
         if (hasLowerRefBounds(typeVariable)) {
-            removeNonParameterLowerRefBounds(typeVariable, parameterTypeVariables);
+            removeNonParameterLowerRefBounds(typeVariable, typeParameters);
 
-            String parameterTypeVariable = getParameterIfSingleLowerRefBound(typeVariable, parameterTypeVariables);
-            if (parameterTypeVariable != null) {
+            String typeParameter = getTypeParameterIfSingleLowerRefBound(typeVariable, typeParameters);
+            if (typeParameter != null) {
                 upperRefBounds.remove(typeVariable);
-                if (haveSameLowerTypeBound(typeVariable, parameterTypeVariable)) {
-                    renameTo = parameterTypeVariable;
+                if (haveSameLowerTypeBound(typeVariable, typeParameter)) {
+                    renameTo = typeParameter;
                 }
             }
         }
@@ -902,7 +885,7 @@ public class OverloadBindings implements IOverloadBindings
         }
     }
 
-    private String getParameterIfSingleLowerRefBound(String typeVariable, Set<String> parameterTypeVariables) {
+    private String getTypeParameterIfSingleLowerRefBound(String typeVariable, Set<String> parameterTypeVariables) {
         String parameterTypeVariable = null;
         Set<String> refTypeVariables = lowerRefBounds.get(typeVariable);
         if (refTypeVariables.size() == 1) {
@@ -915,19 +898,19 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     private boolean haveSameLowerTypeBound(String typeVariable, String parameterTypeVariable) {
-        boolean canBeUnified;
+        boolean canBeMerged;
         if (hasLowerTypeBounds(typeVariable)) {
-            canBeUnified = hasLowerTypeBounds(parameterTypeVariable);
-            if (canBeUnified) {
-                canBeUnified = typeHelper.areSame(
+            canBeMerged = hasLowerTypeBounds(parameterTypeVariable);
+            if (canBeMerged) {
+                canBeMerged = typeHelper.areSame(
                         lowerTypeBounds.get(typeVariable), lowerTypeBounds.get(parameterTypeVariable));
             }
         } else {
             // since the parameterTypeVariable is a lower ref bound of typeVariable it logically has also no
-            // lower type bound and it can be unified
-            canBeUnified = true;
+            // lower type bound and it can be merged
+            canBeMerged = true;
         }
-        return canBeUnified;
+        return canBeMerged;
     }
 
     private void renameTypeVariables(Map<String, String> typeVariablesToRename) {
@@ -989,7 +972,7 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     @Override
-    public void bind(IParametricTypeSymbol parametricType, List<String> typeVariables) {
+    public void bind(IParametricType parametricType, List<String> typeVariables) {
         int size = typeVariables.size();
         for (int i = 0; i < size; ++i) {
             String typeVariable = typeVariables.get(i);
@@ -1042,13 +1025,13 @@ public class OverloadBindings implements IOverloadBindings
         }
 
         if (typeVariable2BoundTypes.containsKey(typeVariable)) {
-            Set<IParametricTypeSymbol> boundTypes = typeVariable2BoundTypes.get(newTypeVariable);
+            Set<IParametricType> boundTypes = typeVariable2BoundTypes.get(newTypeVariable);
             if (boundTypes == null) {
                 boundTypes = new HashSet<>();
                 typeVariable2BoundTypes.put(newTypeVariable, boundTypes);
             }
 
-            for (IParametricTypeSymbol parametricType : typeVariable2BoundTypes.remove(typeVariable)) {
+            for (IParametricType parametricType : typeVariable2BoundTypes.remove(typeVariable)) {
                 parametricType.renameTypeVariable(typeVariable, newTypeVariable);
                 boundTypes.add(parametricType);
             }

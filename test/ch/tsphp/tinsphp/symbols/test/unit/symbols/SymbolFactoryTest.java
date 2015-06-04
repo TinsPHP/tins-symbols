@@ -332,13 +332,13 @@ public class SymbolFactoryTest
     }
 
     @Test
-    public void createFunctionType_Standard_TypeVariablesArePassedTypeVariables() {
-        IOverloadBindings typeVariables = mock(IOverloadBindings.class);
+    public void createFunctionType_Standard_OverloadBindingsArePassedOverloadBindings() {
+        IOverloadBindings overloadBindings = mock(IOverloadBindings.class);
 
         ISymbolFactory symbolFactory = createSymbolFactory();
-        IFunctionType result = symbolFactory.createFunctionType("+", typeVariables, new ArrayList<IVariable>());
+        IFunctionType result = symbolFactory.createFunctionType("+", overloadBindings, new ArrayList<IVariable>());
 
-        assertThat(result.getBindings(), is(typeVariables));
+        assertThat(result.getOverloadBindings(), is(overloadBindings));
     }
 
     @Test

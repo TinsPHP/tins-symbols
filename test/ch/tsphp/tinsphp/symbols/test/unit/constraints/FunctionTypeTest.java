@@ -37,13 +37,13 @@ public class FunctionTypeTest
     }
 
     @Test
-    public void getBindings_Standard_ReturnsTheOnePassedByConstructor() {
+    public void getOverloadBindings_Standard_ReturnsTheOnePassedByConstructor() {
         String name = "foo";
         IOverloadBindings bindings = mock(IOverloadBindings.class);
         ArrayList<IVariable> parameters = new ArrayList<>();
 
         IFunctionType function = createFunction(name, bindings, parameters);
-        IOverloadBindings result = function.getBindings();
+        IOverloadBindings result = function.getOverloadBindings();
 
         assertThat(result, is(bindings));
     }
@@ -122,14 +122,14 @@ public class FunctionTypeTest
         assertThat(result, is(nullValue()));
     }
 
-    @Test
-    public void getSignature_NotYetFixed_ReturnsNull() {
+    @Test(expected = IllegalStateException.class)
+    public void getSignature_NotYetFixed_ThrowsIllegalStateException() {
         //no arrange necessary
 
         IFunctionType function = createFunction();
-        String result = function.getSignature();
+        function.getSignature();
 
-        assertThat(result, is(nullValue()));
+        //assert in annotation
     }
 
     private IFunctionType createFunction() {

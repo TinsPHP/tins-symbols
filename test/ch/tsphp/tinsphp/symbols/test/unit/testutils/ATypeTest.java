@@ -144,7 +144,8 @@ public abstract class ATypeTest
         typeHelper.setConversionsProvider(conversionsProvider);
     }
 
-    protected static HashSet<ITypeSymbol> set(ITypeSymbol... symbols) {
+    @SafeVarargs
+    protected static <T> HashSet<T> set(T... symbols) {
         return new HashSet<>(Arrays.asList(symbols));
     }
 }
