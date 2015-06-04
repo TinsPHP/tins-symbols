@@ -13,10 +13,10 @@ import ch.tsphp.tinsphp.common.symbols.IParametricTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IPolymorphicTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.PrimitiveTypeNames;
+import ch.tsphp.tinsphp.common.utils.ETypeHelperResult;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 
 public class UnionTypeSymbol extends AContainerTypeSymbol implements IUnionTypeSymbol
@@ -82,39 +82,17 @@ public class UnionTypeSymbol extends AContainerTypeSymbol implements IUnionTypeS
     public IUnionTypeSymbol copy(Collection<IParametricTypeSymbol> parametricTypeSymbols) {
         return new UnionTypeSymbol(typeHelper, this, parametricTypeSymbols);
     }
-    //Warning! start code duplication - almost the same as in IntersectionTypeSymbol
-
+    //Warning! end code duplication - almost the same as in IntersectionTypeSymbol
 
     @Override
-    protected boolean addAndSimplify(String absoluteName, ITypeSymbol newTypeSymbol) {
-        boolean changedUnion = false;
+    protected boolean firstReplacesSecondType(ITypeSymbol newTypeSymbol, ITypeSymbol existingTypeSymbol) {
+        return typeHelper.isFirstSameOrParentTypeOfSecond(newTypeSymbol, existingTypeSymbol, false)
+                == ETypeHelperResult.HAS_RELATION;
+    }
 
-        //Warning! start code duplication - almost the same as in IntersectionTypeSymbol
-
-        ETypeRelation status = ETypeRelation.NO_RELATION;
-        Iterator<Map.Entry<String, ITypeSymbol>> iterator = typeSymbols.entrySet().iterator();
-        while (iterator.hasNext()) {
-            ITypeSymbol existingTypeInUnion = iterator.next().getValue();
-            if (typeHelper.isFirstSameOrParentTypeOfSecond(newTypeSymbol, existingTypeInUnion, false)) {
-                //remove subtype, it does no longer add information to the union type
-                status = ETypeRelation.PARENT_TYPE;
-                unregisterAndDecreaseNonFixedCounter(existingTypeInUnion);
-                iterator.remove();
-            } else if (status == ETypeRelation.NO_RELATION
-                    && typeHelper.isFirstSameOrSubTypeOfSecond(newTypeSymbol, existingTypeInUnion, false)) {
-                //new type is a subtype of an existing and hence it does not add new information to the union
-                status = ETypeRelation.SUBTYPE;
-                break;
-            }
-        }
-
-        if (status != ETypeRelation.SUBTYPE) {
-            changedUnion = true;
-            typeSymbols.put(absoluteName, newTypeSymbol);
-        }
-
-        //Warning! start code duplication - almost the same as in IntersectionTypeSymbol
-
-        return changedUnion;
+    @Override
+    protected boolean secondReplacesFirstType(ITypeSymbol newTypeSymbol, ITypeSymbol existingTypeSymbol) {
+        return typeHelper.isFirstSameOrSubTypeOfSecond(newTypeSymbol, existingTypeSymbol, false)
+                == ETypeHelperResult.HAS_RELATION;
     }
 }

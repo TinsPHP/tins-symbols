@@ -23,7 +23,7 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createUnion(intType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -34,7 +34,7 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createIntersectionType(intType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -105,7 +105,7 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createUnion(mixedType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -116,7 +116,7 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createUnion(mixedType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -127,7 +127,7 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createIntersectionType();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));
     }

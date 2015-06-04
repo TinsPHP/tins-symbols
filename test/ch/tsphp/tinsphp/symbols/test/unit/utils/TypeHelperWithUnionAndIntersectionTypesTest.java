@@ -7,6 +7,7 @@
 package ch.tsphp.tinsphp.symbols.test.unit.utils;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
+import ch.tsphp.tinsphp.common.utils.ETypeHelperResult;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.symbols.test.integration.testutils.ATypeHelperTest;
 import org.junit.Test;
@@ -29,9 +30,9 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createIntersectionType(interfaceBType, interfaceAType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
     @Test
@@ -40,9 +41,9 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createIntersectionType(intType, floatType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(false));
+        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
     }
 
 
@@ -54,9 +55,9 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createIntersectionType();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
     @Test
@@ -65,9 +66,9 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createIntersectionType();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
 
-        assertThat(result, is(false));
+        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
     }
 
     @Test
@@ -76,9 +77,9 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createUnion();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(false));
+        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
     }
 
     @Test
@@ -87,9 +88,9 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createUnion();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
 
@@ -101,9 +102,9 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createIntersectionType(mixedType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
     @Test
@@ -112,9 +113,9 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createIntersectionType(mixedType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
     @Test
@@ -123,9 +124,9 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createUnion(mixedType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
     @Test
@@ -134,8 +135,8 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createUnion(mixedType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 }

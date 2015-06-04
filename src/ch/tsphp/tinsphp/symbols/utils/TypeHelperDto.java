@@ -13,6 +13,8 @@ public class TypeHelperDto
     public ITypeSymbol fromType;
     public ITypeSymbol toType;
     boolean shallConsiderImplicitConversions;
+    boolean hasUsedImplicitConversion;
+    boolean isSubtype;
 
     public TypeHelperDto(
             ITypeSymbol theFromType, ITypeSymbol theToType, boolean considerImplicitConversions) {

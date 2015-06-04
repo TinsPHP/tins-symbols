@@ -12,11 +12,16 @@ import ch.tsphp.tinsphp.common.core.IConversionsProvider;
 import ch.tsphp.tinsphp.common.symbols.IConvertibleTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
+import ch.tsphp.tinsphp.common.utils.ETypeHelperResult;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.common.utils.Pair;
 
 import java.util.Collection;
 import java.util.Map;
+
+import static ch.tsphp.tinsphp.common.utils.ETypeHelperResult.HAS_COERCIVE_RELATION;
+import static ch.tsphp.tinsphp.common.utils.ETypeHelperResult.HAS_NO_RELATION;
+import static ch.tsphp.tinsphp.common.utils.ETypeHelperResult.HAS_RELATION;
 
 public class TypeHelper implements ITypeHelper
 {
@@ -40,34 +45,37 @@ public class TypeHelper implements ITypeHelper
     }
 
     @Override
-    public boolean isFirstSameOrSubTypeOfSecond(ITypeSymbol potentialSubType, ITypeSymbol typeSymbol) {
+    public ETypeHelperResult isFirstSameOrSubTypeOfSecond(ITypeSymbol potentialSubType, ITypeSymbol typeSymbol) {
         return isFirstSameOrSubTypeOfSecond(potentialSubType, typeSymbol, true);
     }
 
     @Override
-    public boolean isFirstSameOrSubTypeOfSecond(
+    public ETypeHelperResult isFirstSameOrSubTypeOfSecond(
             ITypeSymbol potentialSubType, ITypeSymbol typeSymbol, boolean shallConsiderImplicitConversions) {
         TypeHelperDto dto = new TypeHelperDto(potentialSubType, typeSymbol, shallConsiderImplicitConversions);
         return isFirstSameOrSubTypeOfSecond(dto);
     }
 
     @Override
-    public boolean isFirstSameOrParentTypeOfSecond(ITypeSymbol potentialParentType, ITypeSymbol typeSymbol) {
+    public ETypeHelperResult isFirstSameOrParentTypeOfSecond(ITypeSymbol potentialParentType, ITypeSymbol typeSymbol) {
         return isFirstSameOrParentTypeOfSecond(potentialParentType, typeSymbol, true);
     }
 
     @Override
-    public boolean isFirstSameOrParentTypeOfSecond(
+    public ETypeHelperResult isFirstSameOrParentTypeOfSecond(
             ITypeSymbol potentialParentType, ITypeSymbol typeSymbol, boolean shallConsiderImplicitConversions) {
         TypeHelperDto dto = new TypeHelperDto(typeSymbol, potentialParentType, shallConsiderImplicitConversions);
         return isFirstSameOrSubTypeOfSecond(dto);
     }
 
-    private boolean isFirstSameOrSubTypeOfSecond(TypeHelperDto dto) {
-        return areSame(dto.fromType, dto.toType) || hasUpRelationFromTo(dto);
+    private ETypeHelperResult isFirstSameOrSubTypeOfSecond(TypeHelperDto dto) {
+        if (areSame(dto.fromType, dto.toType)) {
+            return HAS_RELATION;
+        }
+        return hasUpRelationFromTo(dto);
     }
 
-    private boolean hasUpRelationFromTo(TypeHelperDto dto) {
+    private ETypeHelperResult hasUpRelationFromTo(TypeHelperDto dto) {
         if (dto.fromType instanceof IUnionTypeSymbol) {
             return hasUpRelationFromUnionTo(dto);
         } else if (dto.fromType instanceof IIntersectionTypeSymbol) {
@@ -78,7 +86,7 @@ public class TypeHelper implements ITypeHelper
         return hasUpRelationFromNominalTo(dto);
     }
 
-    private boolean hasUpRelationFromNominalTo(TypeHelperDto dto) {
+    private ETypeHelperResult hasUpRelationFromNominalTo(TypeHelperDto dto) {
         if (dto.toType instanceof IUnionTypeSymbol) {
             return hasUpRelationFromNominalToUnion(dto);
         } else if (dto.toType instanceof IIntersectionTypeSymbol) {
@@ -89,20 +97,20 @@ public class TypeHelper implements ITypeHelper
         return hasUpRelationFromNominalToNominal(dto);
     }
 
-    private boolean hasUpRelationFromUnionTo(TypeHelperDto dto) {
+    private ETypeHelperResult hasUpRelationFromUnionTo(TypeHelperDto dto) {
         Collection<ITypeSymbol> typeSymbols = ((IUnionTypeSymbol) dto.fromType).getTypeSymbols().values();
         if (!typeSymbols.isEmpty()) {
             return allAreSameOrSubtypes(typeSymbols, dto.toType, dto.shallConsiderImplicitConversions);
         }
         // an empty union is the bottom type of all types and hence is at least the same type as toType
         // (could also be a subtype)
-        return true;
+        return HAS_RELATION;
     }
 
-    private boolean hasUpRelationFromIntersectionTo(TypeHelperDto dto) {
+    private ETypeHelperResult hasUpRelationFromIntersectionTo(TypeHelperDto dto) {
         Collection<ITypeSymbol> typeSymbols = ((IIntersectionTypeSymbol) dto.fromType).getTypeSymbols().values();
 
-        boolean hasUpRelation;
+        ETypeHelperResult upRelation;
 
         if (!typeSymbols.isEmpty()) {
             if (dto.toType instanceof IIntersectionTypeSymbol) {
@@ -116,50 +124,50 @@ public class TypeHelper implements ITypeHelper
                 Collection<ITypeSymbol> formalParameterTypes
                         = ((IIntersectionTypeSymbol) dto.toType).getTypeSymbols().values();
 
-                hasUpRelation = allAreSameOrParentTypes(
+                upRelation = allAreSameOrParentTypes(
                         formalParameterTypes, dto.fromType, dto.shallConsiderImplicitConversions);
             } else {
-                hasUpRelation = isAtLeastOneSameOrSubtype(typeSymbols, dto.toType,
+                upRelation = isAtLeastOneSameOrSubtype(typeSymbols, dto.toType,
                         dto.shallConsiderImplicitConversions);
             }
         } else {
             dto.fromType = mixedTypeSymbol;
-            hasUpRelation = hasUpRelationFromNominalTo(dto);
+            upRelation = hasUpRelationFromNominalTo(dto);
         }
 
-        return hasUpRelation;
+        return upRelation;
     }
 
-    private boolean hasUpRelationFromConvertibleTo(TypeHelperDto dto) {
+    private ETypeHelperResult hasUpRelationFromConvertibleTo(TypeHelperDto dto) {
 
-        boolean hasUpRelation = false;
+        ETypeHelperResult upRelation = HAS_NO_RELATION;
 
         if (areSame(dto.toType, mixedTypeSymbol)) {
-            hasUpRelation = true;
+            upRelation = HAS_RELATION;
         } else if (dto.toType instanceof IUnionTypeSymbol) {
             Collection<ITypeSymbol> typeSymbols = ((IUnionTypeSymbol) dto.toType).getTypeSymbols().values();
-            hasUpRelation
+            upRelation
                     = isAtLeastOneSameOrParentType(typeSymbols, dto.fromType, dto.shallConsiderImplicitConversions);
         } else if (dto.toType instanceof IIntersectionTypeSymbol) {
             Map<String, ITypeSymbol> typeSymbols = ((IIntersectionTypeSymbol) dto.toType).getTypeSymbols();
             int size = typeSymbols.size();
             if (size == 0) {
-                hasUpRelation = true;
+                upRelation = HAS_RELATION;
             } else if (size == 1) {
                 dto.toType = typeSymbols.values().iterator().next();
-                hasUpRelation = hasUpRelationFromConvertibleTo(dto);
+                upRelation = hasUpRelationFromConvertibleTo(dto);
             }
         } else if (dto.toType instanceof IConvertibleTypeSymbol) {
             IConvertibleTypeSymbol fromType = (IConvertibleTypeSymbol) dto.fromType;
             IConvertibleTypeSymbol toType = (IConvertibleTypeSymbol) dto.toType;
             TypeHelperDto newDto = new TypeHelperDto(
                     fromType.getUpperTypeBounds(), toType.getUpperTypeBounds(), dto.shallConsiderImplicitConversions);
-            hasUpRelation = hasUpRelationFromTo(newDto);
+            upRelation = hasUpRelationFromTo(newDto);
         }
-        return hasUpRelation;
+        return upRelation;
     }
 
-    private boolean hasUpRelationFromNominalToUnion(TypeHelperDto dto) {
+    private ETypeHelperResult hasUpRelationFromNominalToUnion(TypeHelperDto dto) {
         //if union is empty, then it cannot be a subtype or the same (if actual was an empty union type then we would
         // already have stopped in hasUpRelationFromNominalToUnion and return true)
 
@@ -167,182 +175,246 @@ public class TypeHelper implements ITypeHelper
         return isAtLeastOneSameOrParentType(typeSymbols, dto.fromType, dto.shallConsiderImplicitConversions);
     }
 
-    private boolean hasUpRelationFromNominalToIntersection(TypeHelperDto dto) {
+    private ETypeHelperResult hasUpRelationFromNominalToIntersection(TypeHelperDto dto) {
 
         Collection<ITypeSymbol> typeSymbols = ((IIntersectionTypeSymbol) dto.toType).getTypeSymbols().values();
 
-        boolean hasUpRelation;
-
+        ETypeHelperResult upRelation;
         if (!typeSymbols.isEmpty()) {
-            hasUpRelation = allAreSameOrParentTypes(typeSymbols, dto.fromType, dto.shallConsiderImplicitConversions);
+            upRelation = allAreSameOrParentTypes(typeSymbols, dto.fromType, dto.shallConsiderImplicitConversions);
         } else {
             // an empty intersection is the top type of all types and hence is a parent type of all types,
             // it is represented by mixed
             dto.toType = mixedTypeSymbol;
-            hasUpRelation = hasUpRelationFromNominalToNominal(dto);
+            upRelation = hasUpRelationFromNominalToNominal(dto);
         }
 
-        return hasUpRelation;
+        return upRelation;
     }
 
-    private boolean hasUpRelationFromNominalToConvertible(TypeHelperDto dto) {
+    private ETypeHelperResult hasUpRelationFromNominalToConvertible(TypeHelperDto dto) {
         IConvertibleTypeSymbol convertibleTypeSymbol = (IConvertibleTypeSymbol) dto.toType;
         IIntersectionTypeSymbol upperTypeBounds = convertibleTypeSymbol.getUpperTypeBounds();
-        boolean canBeConverted;
+
+        ETypeHelperResult upRelation = HAS_NO_RELATION;
         if (upperTypeBounds != null) {
             dto.toType = upperTypeBounds;
-            canBeConverted = hasUpRelationFromNominalToIntersection(dto);
-            if (!canBeConverted) {
-                canBeConverted = hasConversionFromNominalToTarget(dto, conversionsProvider.getExplicitConversions());
+            boolean shallConsider = dto.shallConsiderImplicitConversions;
+            dto.shallConsiderImplicitConversions = false;
+            upRelation = hasUpRelationFromNominalToIntersection(dto);
+            if (upRelation == HAS_NO_RELATION) {
+                upRelation = hasConversionFromNominalToTarget(dto, conversionsProvider.getImplicitConversions());
             }
-        } else {
-            canBeConverted = !convertibleTypeSymbol.wasBound();
+            dto.shallConsiderImplicitConversions = shallConsider;
+            if (upRelation == HAS_NO_RELATION) {
+                upRelation = hasConversionFromNominalToTarget(dto, conversionsProvider.getExplicitConversions());
+            }
+        } else if (!convertibleTypeSymbol.wasBound()) {
+            upRelation = HAS_RELATION;
         }
-        return canBeConverted;
+        return upRelation;
     }
 
-    private boolean hasConversionFromNominalToTarget(
+    private ETypeHelperResult hasConversionFromNominalToTarget(
             TypeHelperDto dto, Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> conversionMap) {
+
         String fromAbsoluteName = dto.fromType.getAbsoluteName();
         String toTargetAbsoluteName = dto.toType.getAbsoluteName();
 
-        boolean canBeConverted;
+        ETypeHelperResult upRelation = HAS_NO_RELATION;
         Map<String, Pair<ITypeSymbol, IConversionMethod>> conversions = conversionMap.get(fromAbsoluteName);
-        canBeConverted = conversions != null && conversions.containsKey(toTargetAbsoluteName);
-
-        if (!canBeConverted) {
-            if (conversions != null) {
-                canBeConverted = isAtLeastOneSameOrSubtype(dto, conversions);
-            }
-            if (!canBeConverted) {
-                canBeConverted = hasParentsConversionToTarget(dto, conversionMap);
+        if (conversions != null) {
+            if (conversions.containsKey(toTargetAbsoluteName)) {
+                upRelation = HAS_RELATION;
+            } else {
+                upRelation = isAtLeastOneConversionTargetSameOrSubtype(dto, conversions);
             }
         }
-        return canBeConverted;
+        if (upRelation == HAS_NO_RELATION) {
+            upRelation = haveParentsConversionToTarget(dto, conversionMap);
+        }
+
+        return upRelation;
     }
 
-    private boolean isAtLeastOneSameOrSubtype(
+
+    //Warning! start code duplication - very similar to isAtLeastOneSameOrParentType and isAtLeastOneSameOrSubtype
+    private ETypeHelperResult isAtLeastOneConversionTargetSameOrSubtype(
             TypeHelperDto dto, Map<String, Pair<ITypeSymbol, IConversionMethod>> conversions) {
 
-        boolean oneIsSameOrSubtype = false;
+        ETypeHelperResult upRelation = HAS_NO_RELATION;
+        forLoop:
         for (Map.Entry<String, Pair<ITypeSymbol, IConversionMethod>> entry : conversions.entrySet()) {
             TypeHelperDto newDto = new TypeHelperDto(dto);
             newDto.fromType = entry.getValue().first;
-            boolean hasRelation = isFirstSameOrSubTypeOfSecond(newDto);
-            if (hasRelation) {
-                oneIsSameOrSubtype = true;
-                break;
+            ETypeHelperResult relation = isFirstSameOrSubTypeOfSecond(newDto);
+            switch (relation) {
+                case HAS_RELATION:
+                    upRelation = HAS_RELATION;
+                    break forLoop;
+                case HAS_COERCIVE_RELATION:
+                    upRelation = HAS_COERCIVE_RELATION;
+                    break;
             }
         }
-        return oneIsSameOrSubtype;
+        return upRelation;
     }
+    //Warning! end code duplication - very similar to isAtLeastOneSameOrParentType and isAtLeastOneSameOrSubtype
 
-    private boolean hasParentsConversionToTarget(
+
+    private ETypeHelperResult haveParentsConversionToTarget(
             TypeHelperDto dto, Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> conversionMap) {
-        boolean oneCanBeConverted = false;
+
+        ETypeHelperResult upRelation = HAS_NO_RELATION;
+        forLoop:
         for (ITypeSymbol typeSymbol : dto.fromType.getParentTypeSymbols()) {
             TypeHelperDto parentDto = new TypeHelperDto(dto);
             parentDto.fromType = typeSymbol;
-            boolean canBeConverted = hasConversionFromNominalToTarget(parentDto, conversionMap);
-            if (canBeConverted) {
-                oneCanBeConverted = true;
-                break;
+            ETypeHelperResult relation = hasConversionFromNominalToTarget(parentDto, conversionMap);
+            switch (relation) {
+                case HAS_RELATION:
+                    upRelation = HAS_RELATION;
+                    break forLoop;
+                case HAS_COERCIVE_RELATION:
+                    upRelation = HAS_COERCIVE_RELATION;
+                    break;
             }
         }
-        return oneCanBeConverted;
+        return upRelation;
     }
 
-
-    private boolean allAreSameOrParentTypes(
+    //Warning! start code duplication - very similar to allAreSameOrParentTypes
+    private ETypeHelperResult allAreSameOrSubtypes(
             Collection<ITypeSymbol> typeSymbols,
             ITypeSymbol typeSymbolToCompareWith,
             boolean shallConsiderImplicitConversions) {
 
-        boolean areAllSameOrParentTypes = true;
+        ETypeHelperResult subtypeRelation = HAS_RELATION;
+        forLoop:
         for (ITypeSymbol typeSymbol : typeSymbols) {
-            boolean hasRelation = isFirstSameOrParentTypeOfSecond(
+            ETypeHelperResult relation = isFirstSameOrSubTypeOfSecond(
                     typeSymbol, typeSymbolToCompareWith, shallConsiderImplicitConversions);
-            if (!hasRelation) {
-                areAllSameOrParentTypes = false;
-                break;
+            switch (relation) {
+                case HAS_NO_RELATION:
+                    subtypeRelation = HAS_NO_RELATION;
+                    break forLoop;
+                case HAS_COERCIVE_RELATION:
+                    subtypeRelation = HAS_COERCIVE_RELATION;
+                    break;
             }
         }
-        return areAllSameOrParentTypes;
+        return subtypeRelation;
     }
+    //Warning! end code duplication - very similar to allAreSameOrParentTypes
 
-    private boolean allAreSameOrSubtypes(
+
+    //Warning! start code duplication - very similar to allAreSameOrSubtypes
+    private ETypeHelperResult allAreSameOrParentTypes(
             Collection<ITypeSymbol> typeSymbols,
             ITypeSymbol typeSymbolToCompareWith,
             boolean shallConsiderImplicitConversions) {
 
-        boolean areAllSameOrSubtypes = true;
+        ETypeHelperResult parentTypeRelation = HAS_RELATION;
+        forLoop:
         for (ITypeSymbol typeSymbol : typeSymbols) {
-            boolean hasRelation = isFirstSameOrSubTypeOfSecond(
+            ETypeHelperResult relation = isFirstSameOrParentTypeOfSecond(
                     typeSymbol, typeSymbolToCompareWith, shallConsiderImplicitConversions);
-            if (!hasRelation) {
-                areAllSameOrSubtypes = false;
-                break;
+            switch (relation) {
+                case HAS_NO_RELATION:
+                    parentTypeRelation = HAS_NO_RELATION;
+                    break forLoop;
+                case HAS_COERCIVE_RELATION:
+                    parentTypeRelation = HAS_COERCIVE_RELATION;
+                    break;
             }
         }
-        return areAllSameOrSubtypes;
+        return parentTypeRelation;
     }
+    //Warning! end code duplication - very similar to allAreSameOrSubtypes
 
-    private boolean isAtLeastOneSameOrSubtype(
+
+    //Warning! start code duplication - very similar to isAtLeastOneSameOrParentType
+    // and isAtLeastOneConversionTargetSameOrSubtype
+    private ETypeHelperResult isAtLeastOneSameOrSubtype(
             Collection<ITypeSymbol> typeSymbols,
             ITypeSymbol typeSymbolToCompareWith,
             boolean shallConsiderImplicitConversions) {
 
-        boolean oneIsSameOrSubtype = false;
+        ETypeHelperResult subtypeRelation = HAS_NO_RELATION;
+        forLoop:
         for (ITypeSymbol typeSymbol : typeSymbols) {
-            boolean hasRelation = isFirstSameOrSubTypeOfSecond(
+            ETypeHelperResult relation = isFirstSameOrSubTypeOfSecond(
                     typeSymbol, typeSymbolToCompareWith, shallConsiderImplicitConversions);
-            if (hasRelation) {
-                oneIsSameOrSubtype = true;
-                break;
+            switch (relation) {
+                case HAS_RELATION:
+                    subtypeRelation = HAS_RELATION;
+                    break forLoop;
+                case HAS_COERCIVE_RELATION:
+                    subtypeRelation = HAS_COERCIVE_RELATION;
+                    break;
             }
         }
-        return oneIsSameOrSubtype;
+        return subtypeRelation;
     }
+    //Warning! end code duplication - very similar to isAtLeastOneSameOrParentType
+    // and isAtLeastOneConversionTargetSameOrSubtype
 
-    private boolean isAtLeastOneSameOrParentType(
+
+    //Warning! start code duplication - very similar to isAtLeastOneSameOrSubtype
+    // and isAtLeastOneConversionTargetSameOrSubtype
+    private ETypeHelperResult isAtLeastOneSameOrParentType(
             Collection<ITypeSymbol> typeSymbols,
             ITypeSymbol typeSymbolToCompareWith,
             boolean shallConsiderImplicitConversions) {
 
-        boolean oneIsParentType = false;
+        ETypeHelperResult parentTypeRelation = HAS_NO_RELATION;
+        forLoop:
         for (ITypeSymbol typeSymbol : typeSymbols) {
-            boolean hasRelation = isFirstSameOrParentTypeOfSecond(
+            ETypeHelperResult relation = isFirstSameOrParentTypeOfSecond(
                     typeSymbol, typeSymbolToCompareWith, shallConsiderImplicitConversions);
-            if (hasRelation) {
-                oneIsParentType = true;
-                break;
+            switch (relation) {
+                case HAS_RELATION:
+                    parentTypeRelation = HAS_RELATION;
+                    break forLoop;
+                case HAS_COERCIVE_RELATION:
+                    parentTypeRelation = HAS_COERCIVE_RELATION;
+                    break;
             }
         }
-        return oneIsParentType;
+        return parentTypeRelation;
     }
+    //Warning! end code duplication - very similar to isAtLeastOneSameOrSubtype
+    // and isAtLeastOneConversionTargetSameOrSubtype
 
-    private boolean hasUpRelationFromNominalToNominal(TypeHelperDto dto) {
-        boolean hasUpRelation = hasUpRelationViaNominalSubtyping(dto);
-        if (!hasUpRelation && dto.shallConsiderImplicitConversions && conversionsProvider != null) {
+
+    private ETypeHelperResult hasUpRelationFromNominalToNominal(TypeHelperDto dto) {
+        ETypeHelperResult upRelation = hasUpRelationViaNominalSubtyping(dto);
+        if (upRelation != HAS_RELATION && dto.shallConsiderImplicitConversions && conversionsProvider != null) {
             dto.shallConsiderImplicitConversions = false;
-            hasUpRelation = hasConversionFromNominalToTarget(dto, conversionsProvider.getImplicitConversions());
+            ETypeHelperResult relation
+                    = hasConversionFromNominalToTarget(dto, conversionsProvider.getImplicitConversions());
+            if (relation == HAS_RELATION) {
+                upRelation = ETypeHelperResult.HAS_COERCIVE_RELATION;
+            }
         }
-        return hasUpRelation;
+        return upRelation;
     }
 
-    private boolean hasUpRelationViaNominalSubtyping(TypeHelperDto dto) {
-        boolean hasUpRelation = areSame(dto.fromType, dto.toType);
-        if (!hasUpRelation) {
+    private ETypeHelperResult hasUpRelationViaNominalSubtyping(TypeHelperDto dto) {
+        ETypeHelperResult upRelation = HAS_NO_RELATION;
+        if (!areSame(dto.fromType, dto.toType)) {
             for (ITypeSymbol parentType : dto.fromType.getParentTypeSymbols()) {
                 TypeHelperDto parentDto = new TypeHelperDto(dto);
                 parentDto.fromType = parentType;
-                boolean hasRelation = hasUpRelationViaNominalSubtyping(parentDto);
-                if (hasRelation) {
-                    hasUpRelation = true;
+                ETypeHelperResult relation = hasUpRelationViaNominalSubtyping(parentDto);
+                if (relation == HAS_RELATION) {
+                    upRelation = HAS_RELATION;
                     break;
                 }
             }
+        } else {
+            upRelation = HAS_RELATION;
         }
-        return hasUpRelation;
+        return upRelation;
     }
 }

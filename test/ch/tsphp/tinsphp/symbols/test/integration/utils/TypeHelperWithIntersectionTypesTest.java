@@ -25,7 +25,7 @@ public class TypeHelperWithIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol formal = intType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));
     }
@@ -217,95 +217,16 @@ public class TypeHelperWithIntersectionTypesTest extends ATypeHelperTest
         assertThat(result, is(true));
     }
 
-
-//    @Test
-//    public void isFirstSubTypeOfSecond_EmptyToEmpty_ReturnsFalse() {
-//        ITypeSymbol actual = createIntersectionType();
-//        ITypeSymbol formal = createIntersectionType();
-//
-//        ITypeHelper typeHelper = createTypeHelperAndInit();
-//        boolean result = typeHelper.isFirstSubTypeOfSecond(actual, formal);
-//
-//        assertThat(result, is(false));
-//    }
-
-    @Test
-    public void isFirstSameOrSubTypeOfSecond_EmptyToEmpty_ReturnsTrue() {
-        ITypeSymbol actual = createIntersectionType();
-        ITypeSymbol formal = createIntersectionType();
-
-        ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
-
-        assertThat(result, is(true));
-    }
-
-    @Test
-    public void isFirstSameOrParentTypeOfSecond_EmptyToEmpty_ReturnsTrue() {
-        ITypeSymbol actual = createIntersectionType();
-        ITypeSymbol formal = createIntersectionType();
-
-        ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
-
-        assertThat(result, is(true));
-    }
-
-//    @Test
-//    public void isFirstParentTypeOfSecond_EmptyToEmpty_ReturnsFalse() {
-//        ITypeSymbol actual = createIntersectionType();
-//        ITypeSymbol formal = createIntersectionType();
-//
-//        ITypeHelper typeHelper = createTypeHelperAndInit();
-//        boolean result = typeHelper.isFirstParentTypeOfSecond(actual, formal);
-//
-//        assertThat(result, is(false));
-//    }
-
-
     //--------------------  special case intersection with mixed only on the left and on the right
 
-//    @Test
-//    public void isFirstSubTypeOfSecond_MixedToMixed_ReturnsFalse() {
-//         ITypeSymbol actual = createIntersectionType(mixedType);
-//        ITypeSymbol formal = createIntersectionType(mixedType);
-//
-//        ITypeHelper typeHelper = createTypeHelperAndInit();
-//        boolean result = typeHelper.isFirstSubTypeOfSecond(actual, formal);
-//
-//        assertThat(result, is(false));
-//    }
-
     @Test
-    public void isFirstSameOrSubTypeOfSecond_MixedToMixed_ReturnsTrue() {
+    public void areSame_MixedToMixed_ReturnsTrue() {
         ITypeSymbol actual = createIntersectionType(mixedType);
         ITypeSymbol formal = createIntersectionType(mixedType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        boolean result = typeHelper.areSame(actual, formal);
 
         assertThat(result, is(true));
     }
-
-    @Test
-    public void isFirstSameOrParentTypeOfSecond_MixedToMixed_ReturnsTrue() {
-        ITypeSymbol actual = createIntersectionType(mixedType);
-        ITypeSymbol formal = createIntersectionType(mixedType);
-
-        ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
-
-        assertThat(result, is(true));
-    }
-
-//    @Test
-//    public void isFirstParentTypeOfSecond_MixedToMixed_ReturnsFalse() {
-//        ITypeSymbol actual = createIntersectionType(mixedType);
-//        ITypeSymbol formal = createIntersectionType(mixedType);
-//
-//        ITypeHelper typeHelper = createTypeHelperAndInit();
-//        boolean result = typeHelper.isFirstParentTypeOfSecond(actual, formal);
-//
-//        assertThat(result, is(false));
-//    }
 }

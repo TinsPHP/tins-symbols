@@ -13,10 +13,10 @@ import ch.tsphp.tinsphp.common.symbols.IObservableTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IParametricTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IPolymorphicTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.PrimitiveTypeNames;
+import ch.tsphp.tinsphp.common.utils.ETypeHelperResult;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 
 public class IntersectionTypeSymbol extends AContainerTypeSymbol implements IIntersectionTypeSymbol
@@ -87,35 +87,14 @@ public class IntersectionTypeSymbol extends AContainerTypeSymbol implements IInt
 
 
     @Override
-    protected boolean addAndSimplify(String absoluteName, ITypeSymbol newTypeSymbol) {
-        boolean changedUnion = false;
+    protected boolean firstReplacesSecondType(ITypeSymbol newTypeSymbol, ITypeSymbol existingTypeSymbol) {
+        return typeHelper.isFirstSameOrSubTypeOfSecond(newTypeSymbol, existingTypeSymbol, false)
+                == ETypeHelperResult.HAS_RELATION;
+    }
 
-        //Warning! start code duplication - almost the same as in UnionTypeSymbol
-
-        ETypeRelation status = ETypeRelation.NO_RELATION;
-        Iterator<Map.Entry<String, ITypeSymbol>> iterator = typeSymbols.entrySet().iterator();
-        while (iterator.hasNext()) {
-            ITypeSymbol existingTypeInUnion = iterator.next().getValue();
-            if (typeHelper.isFirstSameOrSubTypeOfSecond(newTypeSymbol, existingTypeInUnion, false)) {
-                //remove parent type, it does no longer add information to the intersection type
-                status = ETypeRelation.SUBTYPE;
-                unregisterAndDecreaseNonFixedCounter(existingTypeInUnion);
-                iterator.remove();
-            } else if (status == ETypeRelation.NO_RELATION
-                    && typeHelper.isFirstSameOrParentTypeOfSecond(newTypeSymbol, existingTypeInUnion, false)) {
-                //new type is a parent type of an existing and hence it does not add new information to the union
-                status = ETypeRelation.PARENT_TYPE;
-                break;
-            }
-        }
-
-        if (status != ETypeRelation.PARENT_TYPE) {
-            changedUnion = true;
-            typeSymbols.put(absoluteName, newTypeSymbol);
-        }
-
-        //Warning! end code duplication - almost the same as in UnionTypeSymbol
-
-        return changedUnion;
+    @Override
+    protected boolean secondReplacesFirstType(ITypeSymbol newTypeSymbol, ITypeSymbol existingTypeSymbol) {
+        return typeHelper.isFirstSameOrParentTypeOfSecond(newTypeSymbol, existingTypeSymbol, false)
+                == ETypeHelperResult.HAS_RELATION;
     }
 }

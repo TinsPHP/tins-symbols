@@ -22,13 +22,18 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import static ch.tsphp.tinsphp.symbols.AContainerTypeSymbol.EAdditionStatus.CAN_BE_ADDED;
+import static ch.tsphp.tinsphp.symbols.AContainerTypeSymbol.EAdditionStatus.DOES_NOT_ADD_NEW_INFORMATION;
+import static ch.tsphp.tinsphp.symbols.AContainerTypeSymbol.EAdditionStatus.REPLACES_EXISTING;
+
 public abstract class AContainerTypeSymbol extends APolymorphicTypeSymbol implements IContainerTypeSymbol
 {
-    protected static enum ETypeRelation
+
+    protected static enum EAdditionStatus
     {
-        NO_RELATION,
-        PARENT_TYPE,
-        SUBTYPE
+        CAN_BE_ADDED,
+        DOES_NOT_ADD_NEW_INFORMATION,
+        REPLACES_EXISTING
     }
 
     protected final ITypeHelper typeHelper;
@@ -53,14 +58,16 @@ public abstract class AContainerTypeSymbol extends APolymorphicTypeSymbol implem
         }
     }
 
+    protected abstract boolean firstReplacesSecondType(ITypeSymbol newTypeSymbol, ITypeSymbol existingTypeSymbol);
+
+    protected abstract boolean secondReplacesFirstType(ITypeSymbol newTypeSymbol, ITypeSymbol existingTypeSymbol);
+
     public abstract String getTypeSeparator();
 
     /**
      * Returns the name of the type if no type is within the container
      */
     public abstract String getDefaultName();
-
-    protected abstract boolean addAndSimplify(String absoluteName, ITypeSymbol newTypeSymbol);
 
     protected void deepenCopy(Collection<IParametricTypeSymbol> parametricTypeSymbols) {
         Deque<IParametricTypeSymbol> tmpParametricTypeSymbols = new ArrayDeque<>();
@@ -148,6 +155,35 @@ public abstract class AContainerTypeSymbol extends APolymorphicTypeSymbol implem
         hasAbsoluteNameChanged = hasAbsoluteNameChanged || hasChanged;
 
         return hasChanged;
+    }
+
+    protected boolean addAndSimplify(String absoluteName, ITypeSymbol newTypeSymbol) {
+        boolean changedUnion = false;
+
+        EAdditionStatus status = CAN_BE_ADDED;
+        Iterator<Map.Entry<String, ITypeSymbol>> iterator = typeSymbols.entrySet().iterator();
+        while (iterator.hasNext()) {
+            ITypeSymbol existingTypeSymbol = iterator.next().getValue();
+            if (firstReplacesSecondType(newTypeSymbol, existingTypeSymbol)) {
+                // new type is more specific for the container type; hence the existing type does no longer provide
+                // useful information for this container type
+                status = REPLACES_EXISTING;
+                unregisterAndDecreaseNonFixedCounter(existingTypeSymbol);
+                iterator.remove();
+            } else if (status == CAN_BE_ADDED && secondReplacesFirstType(newTypeSymbol, existingTypeSymbol)) {
+                status = DOES_NOT_ADD_NEW_INFORMATION;
+                break;
+            }
+        }
+
+        if (status != DOES_NOT_ADD_NEW_INFORMATION) {
+            changedUnion = true;
+            typeSymbols.put(absoluteName, newTypeSymbol);
+        }
+
+        //Warning! end code duplication - almost the same as in UnionTypeSymbol
+
+        return changedUnion;
     }
 
     protected boolean merge(IContainerTypeSymbol containerTypeSymbol) {

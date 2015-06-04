@@ -9,6 +9,7 @@ package ch.tsphp.tinsphp.symbols.test.integration.utils;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.IConversionMethod;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
+import ch.tsphp.tinsphp.common.utils.ETypeHelperResult;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.common.utils.Pair;
 import ch.tsphp.tinsphp.symbols.ModifierHelper;
@@ -41,9 +42,9 @@ public class TypeHelperWithImplicitConversionsTest extends ATypeHelperTest
         ITypeSymbol formal = floatType;
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(false));
+        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
     }
 
     @Test
@@ -61,9 +62,9 @@ public class TypeHelperWithImplicitConversionsTest extends ATypeHelperTest
         ITypeSymbol formal = floatType;
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_COERCIVE_RELATION));
     }
 
     @Test
@@ -83,9 +84,9 @@ public class TypeHelperWithImplicitConversionsTest extends ATypeHelperTest
         ITypeSymbol formal = createConvertibleType(floatType, symbolFactory, typeHelper);
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_COERCIVE_RELATION));
     }
 
     private ISymbolFactory createSymbolFactory(ITypeHelper typeHelper) {

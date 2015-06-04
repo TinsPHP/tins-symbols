@@ -33,6 +33,16 @@ public class AContainerTypeSymbolTest
         }
 
         @Override
+        protected boolean firstReplacesSecondType(ITypeSymbol newTypeSymbol, ITypeSymbol existingTypeSymbol) {
+            return false;
+        }
+
+        @Override
+        protected boolean secondReplacesFirstType(ITypeSymbol newTypeSymbol, ITypeSymbol existingTypeSymbol) {
+            return false;
+        }
+
+        @Override
         public String getTypeSeparator() {
             return null;
         }
@@ -40,11 +50,6 @@ public class AContainerTypeSymbolTest
         @Override
         public String getDefaultName() {
             return null;
-        }
-
-        @Override
-        protected boolean addAndSimplify(String absoluteName, ITypeSymbol newTypeSymbol) {
-            return false;
         }
 
         @Override

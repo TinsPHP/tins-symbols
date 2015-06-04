@@ -24,6 +24,7 @@ import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IParametricTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
+import ch.tsphp.tinsphp.common.utils.ETypeHelperResult;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.common.utils.MapHelper;
 
@@ -308,13 +309,19 @@ public class OverloadBindings implements IOverloadBindings
     private void checkUpperTypeBounds(String typeVariable, ITypeSymbol newLowerType) {
         if (hasUpperTypeBounds(typeVariable)) {
             IIntersectionTypeSymbol upperTypeSymbol = upperTypeBounds.get(typeVariable);
-            if (!typeHelper.isFirstSameOrSubTypeOfSecond(newLowerType, upperTypeSymbol)) {
-                throw new UpperBoundException("The new lower type " + newLowerType.getAbsoluteName() + " is not the "
-                        + "same or a subtype of " + upperTypeSymbol.getAbsoluteName(),
+            if (isFirstNotSameOrSubtype(newLowerType, upperTypeSymbol)) {
+                throw new UpperBoundException(
+                        "The new lower type " + newLowerType.getAbsoluteName()
+                                + " is not the same or a subtype of " + upperTypeSymbol.getAbsoluteName(),
                         upperTypeSymbol,
                         newLowerType);
             }
         }
+    }
+
+    private boolean isFirstNotSameOrSubtype(ITypeSymbol newLowerType, ITypeSymbol upperTypeSymbol) {
+        return typeHelper.isFirstSameOrSubTypeOfSecond(newLowerType, upperTypeSymbol)
+                == ETypeHelperResult.HAS_NO_RELATION;
     }
 
     /**
@@ -451,16 +458,14 @@ public class OverloadBindings implements IOverloadBindings
         }
     }
 
-    private boolean areNotInSameTypeHierarchy(ITypeSymbol typeSymbol,
-            IIntersectionTypeSymbol upperBound) {
-        return !typeHelper.isFirstSameOrSubTypeOfSecond(typeSymbol, upperBound)
-                && !typeHelper.isFirstSameOrSubTypeOfSecond(upperBound, typeSymbol);
+    private boolean areNotInSameTypeHierarchy(ITypeSymbol typeSymbol, IIntersectionTypeSymbol upperBound) {
+        return isFirstNotSameOrSubtype(typeSymbol, upperBound) && isFirstNotSameOrSubtype(upperBound, typeSymbol);
     }
 
     private void checkLowerTypeBounds(String typeVariable, ITypeSymbol newUpperTypeBound) {
         if (hasLowerTypeBounds(typeVariable)) {
             IUnionTypeSymbol lowerTypeSymbol = lowerTypeBounds.get(typeVariable);
-            if (!typeHelper.isFirstSameOrSubTypeOfSecond(lowerTypeSymbol, newUpperTypeBound)) {
+            if (isFirstNotSameOrSubtype(lowerTypeSymbol, newUpperTypeBound)) {
                 throw new LowerBoundException(
                         "The new upper bound " + newUpperTypeBound.getAbsoluteName() + " is not the same or a parent "
                                 + "type of the current lower bound " + lowerTypeSymbol.getAbsoluteName(),

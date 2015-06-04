@@ -6,6 +6,7 @@
 
 package ch.tsphp.tinsphp.symbols.test.unit.utils;
 
+import ch.tsphp.tinsphp.common.utils.ETypeHelperResult;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.symbols.test.integration.testutils.ATypeHelperTest;
 import org.junit.Test;
@@ -46,24 +47,16 @@ public class TypeHelperTest extends ATypeHelperTest
         assertThat(result, is(false));
     }
 
-//    @Test
-//    public void isFirstSubTypeOfSecond_IntAndInt_ReturnsFalse() {
-//        //no arrange necessary
-//
-//        IOverloadRetypeHelper typeHelper = createTypeHelperAndInit();
-//        boolean result = typeHelper.isFirstSubTypeOfSecond(intType, intType);
-//
-//        assertThat(result, is(false));
-//    }
+    //----------------------------
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_IntAndInt_ReturnsTrue() {
         //no arrange necessary
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(intType, intType);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(intType, intType);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
     @Test
@@ -71,41 +64,21 @@ public class TypeHelperTest extends ATypeHelperTest
         //no arrange necessary
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrParentTypeOfSecond(intType, intType);
+        ETypeHelperResult result = typeHelper.isFirstSameOrParentTypeOfSecond(intType, intType);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
-//    @Test
-//    public void isFirstParentTypeOfSecond_IntAndInt_ReturnsFalse() {
-//        //no arrange necessary
-//
-//        IOverloadRetypeHelper typeHelper = createTypeHelperAndInit();
-//        boolean result = typeHelper.isFirstParentTypeOfSecond(intType, intType);
-//
-//        assertThat(result, is(false));
-//    }
-
     //----------------------------
-
-//    @Test
-//    public void isFirstSubTypeOfSecond_IntAndNum_ReturnsTrue() {
-//        //no arrange necessary
-//
-//        IOverloadRetypeHelper typeHelper = createTypeHelperAndInit();
-//        boolean result = typeHelper.isFirstSubTypeOfSecond(intType, numType);
-//
-//        assertThat(result, is(true));
-//    }
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_IntAndNum_ReturnsTrue() {
         //no arrange necessary
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(intType, numType);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(intType, numType);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
     @Test
@@ -113,41 +86,22 @@ public class TypeHelperTest extends ATypeHelperTest
         //no arrange necessary
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrParentTypeOfSecond(intType, numType);
+        ETypeHelperResult result = typeHelper.isFirstSameOrParentTypeOfSecond(intType, numType);
 
-        assertThat(result, is(false));
+        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
     }
 
-//    @Test
-//    public void isFirstParentTypeOfSecond_IntAndNum_ReturnsFalse() {
-//        //no arrange necessary
-//
-//        IOverloadRetypeHelper typeHelper = createTypeHelperAndInit();
-//        boolean result = typeHelper.isFirstParentTypeOfSecond(intType, numType);
-//
-//        assertThat(result, is(false));
-//    }
 
     //----------------------------
-
-//    @Test
-//    public void isFirstSubTypeOfSecond_IntToString_ReturnsFalse() {
-//        //no arrange necessary
-//
-//        IOverloadRetypeHelper typeHelper = createTypeHelperAndInit();
-//        boolean result = typeHelper.isFirstSubTypeOfSecond(intType, stringType);
-//
-//        assertThat(result, is(false));
-//    }
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_IntToString_ReturnsFalse() {
         //no arrange necessary
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(intType, stringType);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(intType, stringType);
 
-        assertThat(result, is(false));
+        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
     }
 
     @Test
@@ -155,41 +109,21 @@ public class TypeHelperTest extends ATypeHelperTest
         //no arrange necessary
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrParentTypeOfSecond(intType, stringType);
+        ETypeHelperResult result = typeHelper.isFirstSameOrParentTypeOfSecond(intType, stringType);
 
-        assertThat(result, is(false));
+        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
     }
 
-//    @Test
-//    public void isFirstParentTypeOfSecond_IntToString_ReturnsFalse() {
-//        //no arrange necessary
-//
-//        IOverloadRetypeHelper typeHelper = createTypeHelperAndInit();
-//        boolean result = typeHelper.isFirstParentTypeOfSecond(intType, stringType);
-//
-//        assertThat(result, is(false));
-//    }
-
     //----------------------------
-
-//    @Test
-//    public void isFirstSubTypeOfSecond_IntToScalar_ReturnsTrue() {
-//        //no arrange necessary
-//
-//        IOverloadRetypeHelper typeHelper = createTypeHelperAndInit();
-//        boolean result = typeHelper.isFirstSubTypeOfSecond(intType, scalarType);
-//
-//        assertThat(result, is(true));
-//    }
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_IntToScalar_ReturnsTrue() {
         //no arrange necessary
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(intType, scalarType);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(intType, scalarType);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
     @Test
@@ -197,41 +131,22 @@ public class TypeHelperTest extends ATypeHelperTest
         //no arrange necessary
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrParentTypeOfSecond(intType, scalarType);
+        ETypeHelperResult result = typeHelper.isFirstSameOrParentTypeOfSecond(intType, scalarType);
 
-        assertThat(result, is(false));
+        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
     }
 
-//    @Test
-//    public void isFirstParentTypeOfSecond_IntToScalar_ReturnsFalse() {
-//        //no arrange necessary
-//
-//        IOverloadRetypeHelper typeHelper = createTypeHelperAndInit();
-//        boolean result = typeHelper.isFirstParentTypeOfSecond(intType, scalarType);
-//
-//        assertThat(result, is(false));
-//    }
 
     //----------------------------
-
-//    @Test
-//    public void isFirstSubTypeOfSecond_IntToMixed_ReturnsTrue() {
-//        //no arrange necessary
-//
-//        IOverloadRetypeHelper typeHelper = createTypeHelperAndInit();
-//        boolean result = typeHelper.isFirstSubTypeOfSecond(intType, mixedType);
-//
-//        assertThat(result, is(true));
-//    }
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_IntToMixed_ReturnsTrue() {
         //no arrange necessary
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(intType, mixedType);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(intType, mixedType);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
     @Test
@@ -239,42 +154,21 @@ public class TypeHelperTest extends ATypeHelperTest
         //no arrange necessary
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrParentTypeOfSecond(intType, mixedType);
+        ETypeHelperResult result = typeHelper.isFirstSameOrParentTypeOfSecond(intType, mixedType);
 
-        assertThat(result, is(false));
+        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
     }
 
-//    @Test
-//    public void isFirstParentTypeOfSecond_IntToMixed_ReturnsFalse() {
-//        //no arrange necessary
-//
-//        IOverloadRetypeHelper typeHelper = createTypeHelperAndInit();
-//        boolean result = typeHelper.isFirstParentTypeOfSecond(intType, mixedType);
-//
-//        assertThat(result, is(false));
-//    }
-
     //----------------------------
-
-
-//    @Test
-//    public void isFirstSubTypeOfSecond_InterfaceAToFoo_ReturnsFalse() {
-//        //no arrange necessary
-//
-//        IOverloadRetypeHelper typeHelper = createTypeHelperAndInit();
-//        boolean result = typeHelper.isFirstSubTypeOfSecond(interfaceAType, fooType);
-//
-//        assertThat(result, is(false));
-//    }
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_InterfaceAToFoo_ReturnsFalse() {
         //no arrange necessary
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(interfaceAType, fooType);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(interfaceAType, fooType);
 
-        assertThat(result, is(false));
+        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
     }
 
     @Test
@@ -282,42 +176,21 @@ public class TypeHelperTest extends ATypeHelperTest
         //no arrange necessary
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrParentTypeOfSecond(interfaceAType, fooType);
+        ETypeHelperResult result = typeHelper.isFirstSameOrParentTypeOfSecond(interfaceAType, fooType);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
-//    @Test
-//    public void isFirstParentTypeOfSecond_InterfaceAToFoo_ReturnsTrue() {
-//        //no arrange necessary
-//
-//        IOverloadRetypeHelper typeHelper = createTypeHelperAndInit();
-//        boolean result = typeHelper.isFirstParentTypeOfSecond(interfaceAType, fooType);
-//
-//        assertThat(result, is(true));
-//    }
-
     //----------------------------
-
-
-//    @Test
-//    public void isFirstSubTypeOfSecond_MixedToNum_ReturnsFalse() {
-//        //no arrange necessary
-//
-//        IOverloadRetypeHelper typeHelper = createTypeHelperAndInit();
-//        boolean result = typeHelper.isFirstSubTypeOfSecond(mixedType, numType);
-//
-//        assertThat(result, is(false));
-//    }
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_MixedToNum_ReturnsFalse() {
         //no arrange necessary
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(mixedType, numType);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(mixedType, numType);
 
-        assertThat(result, is(false));
+        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
     }
 
     @Test
@@ -325,20 +198,10 @@ public class TypeHelperTest extends ATypeHelperTest
         //no arrange necessary
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        boolean result = typeHelper.isFirstSameOrParentTypeOfSecond(mixedType, numType);
+        ETypeHelperResult result = typeHelper.isFirstSameOrParentTypeOfSecond(mixedType, numType);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
-
-//    @Test
-//    public void isFirstParentTypeOfSecond_MixedToNum_ReturnsTrue() {
-//        //no arrange necessary
-//
-//        IOverloadRetypeHelper typeHelper = createTypeHelperAndInit();
-//        boolean result = typeHelper.isFirstParentTypeOfSecond(mixedType, numType);
-//
-//        assertThat(result, is(true));
-//    }
 
     //----------------------------
 

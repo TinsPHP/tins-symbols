@@ -11,6 +11,7 @@ import ch.tsphp.tinsphp.common.IConversionMethod;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
+import ch.tsphp.tinsphp.common.utils.ETypeHelperResult;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.common.utils.Pair;
 import ch.tsphp.tinsphp.symbols.ModifierHelper;
@@ -74,9 +75,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ITypeSymbol formal = intType;
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(false));
+        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
     }
 
     @Test
@@ -90,9 +91,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ITypeSymbol formal = intType;
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(false));
+        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
     }
 
     @Test
@@ -106,9 +107,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ITypeSymbol formal = mixedType;
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
     @Test
@@ -122,9 +123,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createIntersectionTypeSymbol(typeHelper);
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
     @Test
@@ -139,9 +140,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         formal.addTypeSymbol(createConvertibleType(numType, symbolFactory, typeHelper));
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
     @Test
@@ -156,9 +157,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         formal.addTypeSymbol(createConvertibleType(numType, symbolFactory, typeHelper));
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
     @Test
@@ -173,9 +174,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         formal.addTypeSymbol(createConvertibleType(numType, symbolFactory, typeHelper));
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
     @Test
@@ -190,9 +191,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         formal.addTypeSymbol(createConvertibleType(numType, symbolFactory, typeHelper));
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
     @Test
@@ -208,9 +209,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         formal.addTypeSymbol(stringType);
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
     @Test
@@ -227,9 +228,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         formal.addTypeSymbol(stringType);
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
     @Test
@@ -244,9 +245,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         formal.addTypeSymbol(createConvertibleType(intType, symbolFactory, typeHelper));
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(false));
+        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
     }
 
     @Test
@@ -261,9 +262,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         formal.addTypeSymbol(createConvertibleType(intType, symbolFactory, typeHelper));
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(false));
+        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
     }
 
     //--------------------  tests with convertible types on the right
@@ -283,9 +284,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createConvertibleType(intType, symbolFactory, typeHelper);
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(false));
+        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
     }
 
     @Test
@@ -304,9 +305,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createConvertibleType(intType, symbolFactory, typeHelper);
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(false));
+        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
     }
 
     @Test
@@ -324,9 +325,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createConvertibleType(intType, symbolFactory, typeHelper);
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
     @Test
@@ -344,9 +345,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createConvertibleType(numType, symbolFactory, typeHelper);
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
     @Test
@@ -365,9 +366,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createConvertibleType(floatType, symbolFactory, typeHelper);
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
     @Test
@@ -386,9 +387,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createConvertibleType(stringType, symbolFactory, typeHelper);
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
     @Test
@@ -407,9 +408,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createConvertibleType(stringType, symbolFactory, typeHelper);
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(false));
+        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
     }
 
     @Test
@@ -427,9 +428,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createConvertibleType(stringType, symbolFactory, typeHelper);
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
     @Test
@@ -448,9 +449,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createConvertibleType(scalarType, symbolFactory, typeHelper);
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
     @Test
@@ -468,9 +469,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createConvertibleType(stringType, symbolFactory, typeHelper);
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
     @Test
@@ -488,9 +489,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createConvertibleType(stringType, symbolFactory, typeHelper);
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
     //--------------------  tests with convertible types on the left and right
@@ -554,9 +555,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createConvertibleType(intType, symbolFactory, typeHelper);
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
     @Test
@@ -570,9 +571,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createConvertibleType(numType, symbolFactory, typeHelper);
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
     @Test
@@ -586,9 +587,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createConvertibleType(scalarType, symbolFactory, typeHelper);
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(true));
+        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
     }
 
     @Test
@@ -602,9 +603,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createConvertibleType(floatType, symbolFactory, typeHelper);
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(false));
+        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
     }
 
     @Test
@@ -618,9 +619,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createConvertibleType(floatType, symbolFactory, typeHelper);
 
         //act
-        boolean result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(false));
+        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
     }
 
     private ISymbolFactory createSymbolFactory(ITypeHelper typeHelper) {
