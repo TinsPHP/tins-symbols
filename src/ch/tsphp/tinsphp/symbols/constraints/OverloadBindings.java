@@ -596,6 +596,7 @@ public class OverloadBindings implements IOverloadBindings
             String typeVariable = reference.getTypeVariable();
             fixTypeVariable(variableId, reference);
             fixTypeVariableType(isNotParameter, typeVariable);
+            informBoundTypes(typeVariable);
         }
         //Warning! start code duplication, more or less same as in fixTypeParameter
     }
@@ -795,7 +796,11 @@ public class OverloadBindings implements IOverloadBindings
             //Warning! end code duplication, more or less same as in fixTypeAfterContainsCheck
         }
 
-        //inform bounded parametric types that type variable is fixed
+        informBoundTypes(typeParameter);
+    }
+
+    private void informBoundTypes(String typeParameter) {
+        //inform bound parametric types that type variable was fixed
         if (typeVariable2BoundTypes.containsKey(typeParameter)) {
             for (IParametricType parametricTypeSymbol : typeVariable2BoundTypes.get(typeParameter)) {
                 parametricTypeSymbol.fix(typeParameter);
