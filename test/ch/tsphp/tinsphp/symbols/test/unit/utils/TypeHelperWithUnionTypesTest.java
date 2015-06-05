@@ -7,8 +7,9 @@
 package ch.tsphp.tinsphp.symbols.test.unit.utils;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
-import ch.tsphp.tinsphp.common.utils.ETypeHelperResult;
+import ch.tsphp.tinsphp.common.utils.ERelation;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
+import ch.tsphp.tinsphp.common.utils.TypeHelperDto;
 import ch.tsphp.tinsphp.symbols.test.integration.testutils.ATypeHelperTest;
 import org.junit.Test;
 
@@ -21,115 +22,115 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
     //--------------------  tests with unions on the left
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_IntOrFloatToNum_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_IntOrFloatToNum_HasRelation() {
         ITypeSymbol actual = createUnion(intType, floatType);
         ITypeSymbol formal = numType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_StringOrIntOrFloatToScalar_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_StringOrIntOrFloatToScalar_HasRelation() {
         ITypeSymbol actual = createUnion(stringType, intType, floatType);
         ITypeSymbol formal = scalarType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_IntOrArrayToMixed_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_IntOrArrayToMixed_HasRelation() {
         ITypeSymbol actual = createUnion(intType, arrayType);
         ITypeSymbol formal = mixedType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_NumOrArrayToMixed_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_NumOrArrayToMixed_HasRelation() {
         ITypeSymbol actual = createUnion(numType, arrayType);
         ITypeSymbol formal = mixedType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_ArrayOrIntOrFooToMixed_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_ArrayOrIntOrFooToMixed_HasRelation() {
         ITypeSymbol actual = createUnion(arrayType, intType, fooType);
         ITypeSymbol formal = mixedType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_IntOrFloatToInt_ReturnsFalse() {
+    public void isFirstSameOrSubTypeOfSecond_IntOrFloatToInt_HasNoRelation() {
         ITypeSymbol actual = createUnion(intType, floatType);
         ITypeSymbol formal = intType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_NO_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_IntOrArrayOrFloatToNum_ReturnsFalse() {
+    public void isFirstSameOrSubTypeOfSecond_IntOrArrayOrFloatToNum_HasNoRelation() {
         ITypeSymbol actual = createUnion(intType, arrayType, floatType);
         ITypeSymbol formal = numType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_NO_RELATION));
     }
 
     //--------------------  tests with empty union on the left
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_EmptyToInt_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_EmptyToInt_HasRelation() {
         ITypeSymbol actual = createUnion();
         ITypeSymbol formal = intType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_EmptyToFoo_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_EmptyToFoo_HasRelation() {
         ITypeSymbol actual = createUnion();
         ITypeSymbol formal = fooType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_EmptyToMixed_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_EmptyToMixed_HasRelation() {
         ITypeSymbol actual = createUnion();
         ITypeSymbol formal = mixedType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
@@ -138,112 +139,112 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol formal = intType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_NO_RELATION));
     }
 
     //--------------------  tests with unions on the right
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_IntToIntOrFloat_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_IntToIntOrFloat_HasRelation() {
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createUnion(intType, floatType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_IntToNumOrFoo_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_IntToNumOrFoo_HasRelation() {
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createUnion(numType, fooType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_IntToArrayOrStringOrNumOrFoo_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_IntToArrayOrStringOrNumOrFoo_HasRelation() {
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createUnion(arrayType, stringType, numType, fooType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_IntToArrayOrScalar_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_IntToArrayOrScalar_HasRelation() {
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createUnion(arrayType, scalarType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_IntToFloatOrString_ReturnsFalse() {
+    public void isFirstSameOrSubTypeOfSecond_IntToFloatOrString_HasNoRelation() {
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createUnion(floatType, stringType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_NO_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_IntToArrayOrFoo_ReturnsFalse() {
+    public void isFirstSameOrSubTypeOfSecond_IntToArrayOrFoo_HasNoRelation() {
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createUnion(arrayType, fooType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_NO_RELATION));
     }
 
     //--------------------  tests with empty union on the right
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_IntToEmpty_ReturnsFalse() {
+    public void isFirstSameOrSubTypeOfSecond_IntToEmpty_HasNoRelation() {
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createUnion();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_NO_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_ArrayToEmpty_ReturnsFalse() {
+    public void isFirstSameOrSubTypeOfSecond_ArrayToEmpty_HasNoRelation() {
         ITypeSymbol actual = arrayType;
         ITypeSymbol formal = createUnion();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_NO_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_InterfaceAToEmpty_ReturnsFalse() {
+    public void isFirstSameOrSubTypeOfSecond_InterfaceAToEmpty_HasNoRelation() {
         ITypeSymbol actual = interfaceAType;
         ITypeSymbol formal = createUnion();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_NO_RELATION));
     }
 
     @Test
@@ -252,57 +253,57 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createUnion();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     //--------------------  tests with unions on the left and on the right
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_IntOrFloatToNumOrString_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_IntOrFloatToNumOrString_HasRelation() {
         ITypeSymbol actual = createUnion(intType, floatType);
         ITypeSymbol formal = createUnion(numType, stringType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_IntOrFooToScalarOrArrayOrIA_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_IntOrFooToScalarOrArrayOrIA_HasRelation() {
         ITypeSymbol actual = createUnion(intType, fooType);
         ITypeSymbol formal = createUnion(scalarType, arrayType, interfaceAType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_StringOrFooToNumOrArrayOrIA_ReturnsFalse() {
+    public void isFirstSameOrSubTypeOfSecond_StringOrFooToNumOrArrayOrIA_HasNoRelation() {
         ITypeSymbol actual = createUnion(stringType, fooType);
         ITypeSymbol formal = createUnion(numType, arrayType, interfaceAType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_NO_RELATION));
     }
 
     //--------------------  special case empty union on the left and on the right
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_EmptyToEmpty_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_EmptyToEmpty_HasRelation() {
         ITypeSymbol actual = createUnion();
         ITypeSymbol formal = createUnion();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
@@ -311,22 +312,22 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createUnion();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     //--------------------  special case union with mixed only on the left and on the right
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_MixedToMixed_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_MixedToMixed_HasRelation() {
         ITypeSymbol actual = createUnion(mixedType);
         ITypeSymbol formal = createUnion(mixedType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
@@ -335,9 +336,9 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createUnion(mixedType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
 }

@@ -7,8 +7,9 @@
 package ch.tsphp.tinsphp.symbols.test.unit.utils;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
-import ch.tsphp.tinsphp.common.utils.ETypeHelperResult;
+import ch.tsphp.tinsphp.common.utils.ERelation;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
+import ch.tsphp.tinsphp.common.utils.TypeHelperDto;
 import ch.tsphp.tinsphp.symbols.test.integration.testutils.ATypeHelperTest;
 import org.junit.Test;
 
@@ -21,137 +22,137 @@ public class TypeHelperWithIntersectionTypesTest extends ATypeHelperTest
     //--------------------  tests with intersection types on the left
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_IntAndFloatToNum_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_IntAndFloatToNum_HasRelation() {
         ITypeSymbol actual = createIntersectionType(intType, floatType);
         ITypeSymbol formal = numType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_StringAndIntAndFloatToScalar_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_StringAndIntAndFloatToScalar_HasRelation() {
         ITypeSymbol actual = createIntersectionType(stringType, intType, floatType);
         ITypeSymbol formal = scalarType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_IntAndArrayToMixed_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_IntAndArrayToMixed_HasRelation() {
         ITypeSymbol actual = createIntersectionType(intType, arrayType);
         ITypeSymbol formal = mixedType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_NumAndArrayToMixed_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_NumAndArrayToMixed_HasRelation() {
         ITypeSymbol actual = createIntersectionType(numType, arrayType);
         ITypeSymbol formal = mixedType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_ArrayAndIntAndFooToMixed_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_ArrayAndIntAndFooToMixed_HasRelation() {
         ITypeSymbol actual = createIntersectionType(arrayType, intType, fooType);
         ITypeSymbol formal = mixedType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_IntAndFloatToInt_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_IntAndFloatToInt_HasRelation() {
         ITypeSymbol actual = createIntersectionType(intType, floatType);
         ITypeSymbol formal = intType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_IntAndArrayAndFloatToNum_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_IntAndArrayAndFloatToNum_HasRelation() {
         ITypeSymbol actual = createIntersectionType(intType, arrayType, floatType);
         ITypeSymbol formal = numType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_ScalarAndBoolToNum_ReturnsFalse() {
+    public void isFirstSameOrSubTypeOfSecond_ScalarAndBoolToNum_HasNoRelation() {
         ITypeSymbol actual = createIntersectionType(scalarType, boolType);
         ITypeSymbol formal = numType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_NO_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_FooAndInterfaceBToArray_ReturnsFalse() {
+    public void isFirstSameOrSubTypeOfSecond_FooAndInterfaceBToArray_HasNoRelation() {
         ITypeSymbol actual = createIntersectionType(fooType, interfaceBType);
         ITypeSymbol formal = arrayType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_NO_RELATION));
     }
 
     //--------------------  tests with empty intersection on the left
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_EmptyToInt_ReturnsFalse() {
+    public void isFirstSameOrSubTypeOfSecond_EmptyToInt_HasNoRelation() {
         ITypeSymbol actual = createIntersectionType();
         ITypeSymbol formal = intType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_NO_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_EmptyToFoo_ReturnsFalse() {
+    public void isFirstSameOrSubTypeOfSecond_EmptyToFoo_HasNoRelation() {
         ITypeSymbol actual = createIntersectionType();
         ITypeSymbol formal = fooType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_NO_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_EmptyToMixed_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_EmptyToMixed_HasRelation() {
         ITypeSymbol actual = createIntersectionType();
         ITypeSymbol formal = mixedType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
@@ -160,9 +161,9 @@ public class TypeHelperWithIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol formal = mixedType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
@@ -171,9 +172,9 @@ public class TypeHelperWithIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol formal = intType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
@@ -182,90 +183,90 @@ public class TypeHelperWithIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol formal = fooType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     //--------------------  tests with intersection types on the right
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_FooToInterfaceBAndInterfaceA_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_FooToInterfaceBAndInterfaceA_HasRelation() {
         ITypeSymbol actual = fooType;
         ITypeSymbol formal = createIntersectionType(interfaceBType, interfaceAType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_FooToInterfaceBAndInterfaceSubA_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_FooToInterfaceBAndInterfaceSubA_HasRelation() {
         ITypeSymbol actual = fooType;
         ITypeSymbol formal = createIntersectionType(interfaceBType, interfaceSubAType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_IntToIntAndFloat_ReturnsFalse() {
+    public void isFirstSameOrSubTypeOfSecond_IntToIntAndFloat_HasNoRelation() {
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createIntersectionType(intType, floatType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_NO_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_IntToNumAndFoo_ReturnsFalse() {
+    public void isFirstSameOrSubTypeOfSecond_IntToNumAndFoo_HasNoRelation() {
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createIntersectionType(numType, fooType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_NO_RELATION));
     }
 
     //--------------------  tests with empty intersection on the right
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_IntToEmpty_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_IntToEmpty_HasRelation() {
         ITypeSymbol actual = intType;
         ITypeSymbol formal = createIntersectionType();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_ArrayToEmpty_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_ArrayToEmpty_HasRelation() {
         ITypeSymbol actual = arrayType;
         ITypeSymbol formal = createIntersectionType();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_InterfaceAToEmpty_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_InterfaceAToEmpty_HasRelation() {
         ITypeSymbol actual = interfaceAType;
         ITypeSymbol formal = createIntersectionType();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
@@ -274,79 +275,79 @@ public class TypeHelperWithIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createIntersectionType();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_NO_RELATION));
     }
 
     //--------------------  tests with intersection types on the left and on the right
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_IntAndFloatAndBoolToIntAndFloat_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_IntAndFloatAndBoolToIntAndFloat_HasRelation() {
         ITypeSymbol actual = createIntersectionType(intType, floatType, boolType);
         ITypeSymbol formal = createIntersectionType(intType, floatType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_IntAndFloatAndStringToNumAndString_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_IntAndFloatAndStringToNumAndString_HasRelation() {
         ITypeSymbol actual = createIntersectionType(intType, floatType, stringType);
         ITypeSymbol formal = createIntersectionType(numType, stringType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_ScalarAndArrayAndIAToIntAndFoo_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_ScalarAndArrayAndIAToIntAndFoo_HasRelation() {
         ITypeSymbol actual = createIntersectionType(scalarType, arrayType, interfaceAType);
         ITypeSymbol formal = createIntersectionType(intType, fooType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_NO_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_IntAndFloatToNumAndString_ReturnsFalse() {
+    public void isFirstSameOrSubTypeOfSecond_IntAndFloatToNumAndString_HasNoRelation() {
         ITypeSymbol actual = createIntersectionType(intType, floatType);
         ITypeSymbol formal = createIntersectionType(numType, stringType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_NO_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_IntAndFooToScalarAndArrayAndIA_ReturnsFalse() {
+    public void isFirstSameOrSubTypeOfSecond_IntAndFooToScalarAndArrayAndIA_HasNoRelation() {
         ITypeSymbol actual = createIntersectionType(intType, fooType);
         ITypeSymbol formal = createIntersectionType(scalarType, arrayType, interfaceAType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_NO_RELATION));
     }
 
     //--------------------  special case empty intersection on the left and on the right
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_EmptyToEmpty_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_EmptyToEmpty_HasRelation() {
         ITypeSymbol actual = createIntersectionType();
         ITypeSymbol formal = createIntersectionType();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
@@ -355,22 +356,22 @@ public class TypeHelperWithIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createIntersectionType();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     //--------------------  special case intersection with mixed only on the left and on the right
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_MixedToMixed_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_MixedToMixed_HasRelation() {
         ITypeSymbol actual = createIntersectionType(mixedType);
         ITypeSymbol formal = createIntersectionType(mixedType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
     @Test
@@ -379,9 +380,9 @@ public class TypeHelperWithIntersectionTypesTest extends ATypeHelperTest
         ITypeSymbol formal = createIntersectionType(mixedType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
-        ETypeHelperResult result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
     }
 
 }

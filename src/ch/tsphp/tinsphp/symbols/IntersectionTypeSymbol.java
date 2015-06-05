@@ -13,8 +13,9 @@ import ch.tsphp.tinsphp.common.symbols.IObservableTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IParametricTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IPolymorphicTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.PrimitiveTypeNames;
-import ch.tsphp.tinsphp.common.utils.ETypeHelperResult;
+import ch.tsphp.tinsphp.common.utils.ERelation;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
+import ch.tsphp.tinsphp.common.utils.TypeHelperDto;
 
 import java.util.Collection;
 import java.util.Map;
@@ -88,13 +89,13 @@ public class IntersectionTypeSymbol extends AContainerTypeSymbol implements IInt
 
     @Override
     protected boolean firstReplacesSecondType(ITypeSymbol newTypeSymbol, ITypeSymbol existingTypeSymbol) {
-        return typeHelper.isFirstSameOrSubTypeOfSecond(newTypeSymbol, existingTypeSymbol, false)
-                == ETypeHelperResult.HAS_RELATION;
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(newTypeSymbol, existingTypeSymbol, false);
+        return result.relation == ERelation.HAS_RELATION;
     }
 
     @Override
     protected boolean secondReplacesFirstType(ITypeSymbol newTypeSymbol, ITypeSymbol existingTypeSymbol) {
-        return typeHelper.isFirstSameOrParentTypeOfSecond(newTypeSymbol, existingTypeSymbol, false)
-                == ETypeHelperResult.HAS_RELATION;
+        TypeHelperDto result = typeHelper.isFirstSameOrParentTypeOfSecond(newTypeSymbol, existingTypeSymbol, false);
+        return result.relation == ERelation.HAS_RELATION;
     }
 }

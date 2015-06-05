@@ -9,9 +9,10 @@ package ch.tsphp.tinsphp.symbols.test.integration.utils;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.IConversionMethod;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
-import ch.tsphp.tinsphp.common.utils.ETypeHelperResult;
+import ch.tsphp.tinsphp.common.utils.ERelation;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.common.utils.Pair;
+import ch.tsphp.tinsphp.common.utils.TypeHelperDto;
 import ch.tsphp.tinsphp.symbols.ModifierHelper;
 import ch.tsphp.tinsphp.symbols.scopes.ScopeHelper;
 import ch.tsphp.tinsphp.symbols.test.integration.testutils.ATypeHelperTest;
@@ -29,7 +30,7 @@ public class TypeHelperWithImplicitConversionsTest extends ATypeHelperTest
 {
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_IntToFloatWithoutImplicitConversion_ReturnsFalse() {
+    public void isFirstSameOrSubTypeOfSecond_IntToFloatWithoutImplicitConversion_HasNoRelation() {
         //pre-act arrange
         Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions = new HashMap<>();
         Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
@@ -42,13 +43,13 @@ public class TypeHelperWithImplicitConversionsTest extends ATypeHelperTest
         ITypeSymbol formal = floatType;
 
         //act
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_NO_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_NO_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_IntToFloatWithImplicitConversion_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_IntToFloatWithImplicitConversion_HasCoerciveRelation() {
         //pre-act arrange
         Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
                 = createConversions(pair(intType, asList(floatType)));
@@ -62,13 +63,13 @@ public class TypeHelperWithImplicitConversionsTest extends ATypeHelperTest
         ITypeSymbol formal = floatType;
 
         //act
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_COERCIVE_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_COERCIVE_RELATION));
     }
 
     @Test
-    public void isFirstSameOrSubTypeOfSecond_BoolToAsFloatWithImplicitConversion_ReturnsTrue() {
+    public void isFirstSameOrSubTypeOfSecond_BoolToAsFloatWithImplicitConversion_HasCoerciveRelation() {
         //pre-act arrange
         Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
                 = createConversions(pair(intType, asList(floatType)));
@@ -84,9 +85,9 @@ public class TypeHelperWithImplicitConversionsTest extends ATypeHelperTest
         ITypeSymbol formal = createConvertibleType(floatType, symbolFactory, typeHelper);
 
         //act
-        ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
-        assertThat(result, is(ETypeHelperResult.HAS_COERCIVE_RELATION));
+        assertThat(result.relation, is(ERelation.HAS_COERCIVE_RELATION));
     }
 
     private ISymbolFactory createSymbolFactory(ITypeHelper typeHelper) {

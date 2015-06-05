@@ -25,9 +25,10 @@ import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IParametricTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
-import ch.tsphp.tinsphp.common.utils.ETypeHelperResult;
+import ch.tsphp.tinsphp.common.utils.ERelation;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.common.utils.MapHelper;
+import ch.tsphp.tinsphp.common.utils.TypeHelperDto;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
@@ -315,8 +316,8 @@ public class OverloadBindings implements IOverloadBindings
         boolean usedImplicitConversion = false;
         if (hasUpperTypeBounds(typeVariable)) {
             IIntersectionTypeSymbol upperTypeSymbol = upperTypeBounds.get(typeVariable);
-            ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(newLowerType, upperTypeSymbol);
-            switch (result) {
+            TypeHelperDto dto = typeHelper.isFirstSameOrSubTypeOfSecond(newLowerType, upperTypeSymbol);
+            switch (dto.relation) {
                 case HAS_COERCIVE_RELATION:
                     usedImplicitConversion = true;
                     break;
@@ -327,15 +328,26 @@ public class OverloadBindings implements IOverloadBindings
                             upperTypeSymbol,
                             newLowerType);
             }
+            applyTypeParameterConstraints(dto);
         }
         return usedImplicitConversion;
     }
-    //Warning! end code duplication - very similar to checkLowerTypeBounds
 
-    private boolean isFirstNotSameOrSubtypeOfSecond(ITypeSymbol firstType, ITypeSymbol secondType) {
-        return typeHelper.isFirstSameOrSubTypeOfSecond(firstType, secondType)
-                == ETypeHelperResult.HAS_NO_RELATION;
+    private void applyTypeParameterConstraints(TypeHelperDto dto) {
+        for (Map.Entry<String, List<ITypeSymbol>> entry : dto.lowerConstraints.entrySet()) {
+            String typeParameter = entry.getKey();
+            for (ITypeSymbol typeSymbol : entry.getValue()) {
+                addLowerTypeBoundAfterContainsCheck(typeParameter, typeSymbol);
+            }
+        }
+        for (Map.Entry<String, List<ITypeSymbol>> entry : dto.upperConstraints.entrySet()) {
+            String typeParameter = entry.getKey();
+            for (ITypeSymbol typeSymbol : entry.getValue()) {
+                addUpperTypeBoundAfterContainsCheck(typeParameter, typeSymbol);
+            }
+        }
     }
+    //Warning! end code duplication - very similar to checkLowerTypeBounds
 
     /**
      * Removes convertible types with self references and registers others which are bound to this overload bindings
@@ -471,8 +483,17 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     private boolean areNotInSameTypeHierarchy(ITypeSymbol typeSymbol, IIntersectionTypeSymbol upperBound) {
-        return isFirstNotSameOrSubtypeOfSecond(typeSymbol, upperBound)
-                && isFirstNotSameOrSubtypeOfSecond(upperBound, typeSymbol);
+        boolean areNot = true;
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(typeSymbol, upperBound, false);
+        if (result.relation != ERelation.HAS_NO_RELATION) {
+            areNot = false;
+        } else {
+            result = typeHelper.isFirstSameOrSubTypeOfSecond(upperBound, typeSymbol, false);
+            if (result.relation != ERelation.HAS_NO_RELATION) {
+                areNot = false;
+            }
+        }
+        return areNot;
     }
 
     //Warning! start code duplication - very similar to checkUpperTypeBounds
@@ -480,8 +501,8 @@ public class OverloadBindings implements IOverloadBindings
         boolean usedImplicitConversion = false;
         if (hasLowerTypeBounds(typeVariable)) {
             IUnionTypeSymbol lowerTypeSymbol = lowerTypeBounds.get(typeVariable);
-            ETypeHelperResult result = typeHelper.isFirstSameOrSubTypeOfSecond(lowerTypeSymbol, newUpperTypeBound);
-            switch (result) {
+            TypeHelperDto dto = typeHelper.isFirstSameOrSubTypeOfSecond(lowerTypeSymbol, newUpperTypeBound);
+            switch (dto.relation) {
                 case HAS_COERCIVE_RELATION:
                     usedImplicitConversion = true;
                     break;
@@ -492,6 +513,7 @@ public class OverloadBindings implements IOverloadBindings
                                     + lowerTypeSymbol.getAbsoluteName(),
                             lowerTypeSymbol, newUpperTypeBound);
             }
+            applyTypeParameterConstraints(dto);
         }
         return usedImplicitConversion;
     }
