@@ -29,6 +29,7 @@ import java.util.Map;
 import static ch.tsphp.tinsphp.common.utils.Pair.pair;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.hamcrest.core.Is.is;
 
@@ -630,8 +631,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
     }
 
     //--------------------  tests with bound convertible types
+
     @Test
-    public void isFirstSameOrSubTypeOfSecond_IntToAsNum_HasRelationAndLowerConstraint() {
+    public void isFirstSameOrSubTypeOfSecond_IntToAsNum_HasRelationAndLowerConstraintIsInt() {
         //pre-act necessary for arrange
         ITypeHelper typeHelper = createTypeHelperAndInit();
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
@@ -649,8 +651,212 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
 
         assertThat(result.relation, is(ERelation.HAS_RELATION));
         assertThat(result.lowerConstraints, hasEntry("Ta", asList(intType)));
+        assertThat(result.upperConstraints.size(), is(0));
     }
 
+    @Test
+    public void isFirstSameOrSubTypeOfSecond_BoolToAsNum_HasRelationAndLowerConstraintIsInt() {
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions = new HashMap<>();
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions
+                = createConversions(pair(boolType, asList(intType)));
+
+        //pre-act necessary for arrange
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+        ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
+
+        //arrange
+        ITypeSymbol actual = boolType;
+        IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
+        IOverloadBindings bindings = symbolFactory.createOverloadBindings();
+        bindings.addVariable("$a", new TypeVariableReference("Ta"));
+        bindings.addUpperTypeBound("Ta", numType);
+        bindings.bind(formal, asList("Ta"));
+
+        //act
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
+        assertThat(result.lowerConstraints, hasEntry("Ta", asList(intType)));
+        assertThat(result.upperConstraints.size(), is(0));
+    }
+
+    @Test
+    public void isFirstSameOrSubTypeOfSecond_BoolToAsFloat_HasCoerciveRelationAndLowerConstraintIsInt() {
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(intType, asList(floatType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions
+                = createConversions(pair(boolType, asList(intType)));
+
+        //pre-act necessary for arrange
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+        ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
+
+        //arrange
+        ITypeSymbol actual = boolType;
+        IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
+        IOverloadBindings bindings = symbolFactory.createOverloadBindings();
+        bindings.addVariable("$a", new TypeVariableReference("Ta"));
+        bindings.addUpperTypeBound("Ta", floatType);
+        bindings.bind(formal, asList("Ta"));
+
+        //act
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result.relation, is(ERelation.HAS_COERCIVE_RELATION));
+        assertThat(result.lowerConstraints, hasEntry("Ta", asList(intType)));
+        assertThat(result.upperConstraints.size(), is(0));
+    }
+
+    //see TINS-498 convertible types without upper bound
+    @Test
+    public void
+    isFirstSameOrSubTypeOfSecond_BoolToAsTWhereBoolLowerTAndIntToBoolIsExpl_HasRelationAndUpperConstraintIsBool() {
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions = new HashMap<>();
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+
+        //pre-act necessary for arrange
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+        ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
+
+        //arrange
+        ITypeSymbol actual = boolType;
+        IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
+        IOverloadBindings bindings = symbolFactory.createOverloadBindings();
+        bindings.addVariable("$a", new TypeVariableReference("Ta"));
+        bindings.bind(formal, asList("Ta"));
+        bindings.addLowerTypeBound("Ta", boolType);
+
+        //act
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
+        assertThat(result.lowerConstraints.size(), is(0));
+        IUnionTypeSymbol lowerTypeBounds = bindings.getLowerTypeBounds("Ta");
+        assertThat(lowerTypeBounds.getTypeSymbols().keySet(), containsInAnyOrder("bool"));
+        assertThat(result.upperConstraints, hasEntry("Ta", asList((ITypeSymbol) lowerTypeBounds)));
+    }
+
+    //see TINS-498 convertible types without upper bound
+    @Test
+    public void
+    isFirstSameOrSubTypeOfSecond_IntToAsTWhereBoolLowerTAndIntToBoolIsExpl_HasRelationAndUpperConstraintIsBool() {
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions = new HashMap<>();
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions
+                = createConversions(pair(intType, asList(boolType)));
+
+        //pre-act necessary for arrange
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+        ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
+
+        //arrange
+        ITypeSymbol actual = intType;
+        IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
+        IOverloadBindings bindings = symbolFactory.createOverloadBindings();
+        bindings.addVariable("$a", new TypeVariableReference("Ta"));
+        bindings.bind(formal, asList("Ta"));
+        bindings.addLowerTypeBound("Ta", boolType);
+
+        //act
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
+        assertThat(result.lowerConstraints.size(), is(0));
+        IUnionTypeSymbol lowerTypeBounds = bindings.getLowerTypeBounds("Ta");
+        assertThat(lowerTypeBounds.getTypeSymbols().keySet(), containsInAnyOrder("bool"));
+        assertThat(result.upperConstraints, hasEntry("Ta", asList((ITypeSymbol) lowerTypeBounds)));
+    }
+
+    //see TINS-498 convertible types without upper bound
+    @Test
+    public void
+    isFirstSameOrSubTypeOfSecond_BoolToAsTWhereFloatLowerT_HasCoerciveRelationAndUpperConstraintIsFloat() {
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(intType, asList(floatType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions
+                = createConversions(pair(boolType, asList(intType)));
+
+        //pre-act necessary for arrange
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+        ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
+
+        //arrange
+        ITypeSymbol actual = boolType;
+        IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
+        IOverloadBindings bindings = symbolFactory.createOverloadBindings();
+        bindings.addVariable("$a", new TypeVariableReference("Ta"));
+        bindings.bind(formal, asList("Ta"));
+        bindings.addLowerTypeBound("Ta", floatType);
+
+        //act
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result.relation, is(ERelation.HAS_COERCIVE_RELATION));
+        assertThat(result.lowerConstraints.size(), is(0));
+        IUnionTypeSymbol lowerTypeBounds = bindings.getLowerTypeBounds("Ta");
+        assertThat(lowerTypeBounds.getTypeSymbols().keySet(), containsInAnyOrder("float"));
+        assertThat(result.upperConstraints, hasEntry("Ta", asList((ITypeSymbol) lowerTypeBounds)));
+    }
+
+    //see TINS-498 convertible types without upper bound
+    @Test
+    public void
+    isFirstSameOrSubTypeOfSecond_IntToAsTWhereIALowerTAndIntToFooIsImpl_HasRelationAndUpperConstraintIsIA() {
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(intType, asList(fooType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+
+
+        //pre-act necessary for arrange
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+        ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
+
+        //arrange
+        ITypeSymbol actual = intType;
+        IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
+        IOverloadBindings bindings = symbolFactory.createOverloadBindings();
+        bindings.addVariable("$a", new TypeVariableReference("Ta"));
+        bindings.bind(formal, asList("Ta"));
+        bindings.addLowerTypeBound("Ta", interfaceAType);
+
+        //act
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
+        assertThat(result.lowerConstraints.size(), is(0));
+        IUnionTypeSymbol lowerTypeBounds = bindings.getLowerTypeBounds("Ta");
+        assertThat(lowerTypeBounds.getTypeSymbols().keySet(), containsInAnyOrder("IA"));
+        assertThat(result.upperConstraints, hasEntry("Ta", asList((ITypeSymbol) lowerTypeBounds)));
+    }
+
+    //see TINS-498 convertible types without upper bound
+    @Test
+    public void
+    isFirstSameOrSubTypeOfSecond_IntToAsTWhereIALowerTAndIntToFooIsExpl_HasRelationAndUpperConstraintIsIA() {
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions = new HashMap<>();
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions
+                = createConversions(pair(intType, asList(fooType)));
+
+        //pre-act necessary for arrange
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+        ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
+
+        //arrange
+        ITypeSymbol actual = intType;
+        IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
+        IOverloadBindings bindings = symbolFactory.createOverloadBindings();
+        bindings.addVariable("$a", new TypeVariableReference("Ta"));
+        bindings.bind(formal, asList("Ta"));
+        bindings.addLowerTypeBound("Ta", interfaceAType);
+
+        //act
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
+        assertThat(result.lowerConstraints.size(), is(0));
+        IUnionTypeSymbol lowerTypeBounds = bindings.getLowerTypeBounds("Ta");
+        assertThat(lowerTypeBounds.getTypeSymbols().keySet(), containsInAnyOrder("IA"));
+        assertThat(result.upperConstraints, hasEntry("Ta", asList((ITypeSymbol) lowerTypeBounds)));
+    }
 
     private ISymbolFactory createSymbolFactory(ITypeHelper typeHelper) {
         return createSymbolFactory(new ScopeHelper(), new ModifierHelper(), typeHelper);
