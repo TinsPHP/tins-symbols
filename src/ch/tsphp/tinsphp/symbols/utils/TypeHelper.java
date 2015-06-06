@@ -188,30 +188,49 @@ public class TypeHelper implements ITypeHelper
     private void hasUpRelationFromNominalToConvertible(TypeHelperDto dto) {
         IConvertibleTypeSymbol convertibleTypeSymbol = (IConvertibleTypeSymbol) dto.toType;
         IIntersectionTypeSymbol upperTypeBounds = convertibleTypeSymbol.getUpperTypeBounds();
+        IUnionTypeSymbol lowerTypeBounds = convertibleTypeSymbol.getLowerTypeBounds();
+
         String typeParameter = null;
         if (convertibleTypeSymbol.wasBound() && !convertibleTypeSymbol.isFixed()) {
             typeParameter = convertibleTypeSymbol.getTypeVariable();
         }
 
+        TypeHelperDto copy = new TypeHelperDto(dto.fromType, null, false);
         if (upperTypeBounds != null) {
-            TypeHelperDto copy = new TypeHelperDto(dto);
             copy.toType = upperTypeBounds;
-            copy.shallConsiderImplicitConversions = false;
             hasUpRelationFromNominalToIntersection(copy);
-            if (copy.relation == HAS_NO_RELATION) {
-                hasConversionFromNominalToTarget(copy, typeParameter, conversionsProvider.getImplicitConversions());
-            } else {
-                if (typeParameter != null) {
-                    MapHelper.addToListInMap(dto.lowerConstraints, typeParameter, dto.fromType);
+            if (typeParameter != null && copy.relation != HAS_NO_RELATION) {
+                MapHelper.addToListInMap(dto.lowerConstraints, typeParameter, dto.fromType);
+            }
+            hasExplicitOrImplicitConversion(dto, typeParameter, copy);
+        } else if (lowerTypeBounds != null && convertibleTypeSymbol.wasBound()) {
+            copy.toType = lowerTypeBounds;
+            hasUpRelationFromNominalToUnion(copy);
+            hasExplicitOrImplicitConversion(dto, typeParameter, copy);
+        } else {
+            copy.relation = HAS_NO_RELATION;
+        }
+
+        if (copy.relation != HAS_NO_RELATION) {
+            dto.relation = copy.relation;
+            if (typeParameter != null) {
+                if (upperTypeBounds != null) {
+                    dto.lowerConstraints.putAll(copy.lowerConstraints);
+                    dto.upperConstraints.putAll(copy.upperConstraints);
+                } else {
+                    MapHelper.addToListInMap(dto.upperConstraints, typeParameter, lowerTypeBounds);
                 }
             }
+        }
+    }
+
+    private void hasExplicitOrImplicitConversion(TypeHelperDto dto, String typeParameter, TypeHelperDto copy) {
+        if (copy.relation == HAS_NO_RELATION) {
+            hasConversionFromNominalToTarget(copy, typeParameter, conversionsProvider.getImplicitConversions());
+        }
+        if (copy.relation == HAS_NO_RELATION) {
             copy.shallConsiderImplicitConversions = dto.shallConsiderImplicitConversions;
-            if (copy.relation == HAS_NO_RELATION) {
-                hasConversionFromNominalToTarget(copy, typeParameter, conversionsProvider.getExplicitConversions());
-            }
-            dto.relation = copy.relation;
-        } else if (!convertibleTypeSymbol.wasBound()) {
-            dto.relation = HAS_RELATION;
+            hasConversionFromNominalToTarget(copy, typeParameter, conversionsProvider.getExplicitConversions());
         }
     }
 
@@ -227,7 +246,7 @@ public class TypeHelper implements ITypeHelper
         if (conversions != null) {
             if (conversions.containsKey(toTargetAbsoluteName)) {
                 if (typeParameter != null) {
-                    MapHelper.addToListInMap(dto.lowerConstraints, typeParameter, dto.fromType);
+                    MapHelper.addToListInMap(dto.lowerConstraints, typeParameter, dto.toType);
                 }
                 dto.relation = HAS_RELATION;
             } else {
