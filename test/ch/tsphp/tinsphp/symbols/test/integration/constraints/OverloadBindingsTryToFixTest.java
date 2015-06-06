@@ -1836,6 +1836,106 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         ));
     }
 
+    //see TINS-495 NullPointer when fixing function
+    @Test
+    public void tryToFix_LocalWithMultipleUpperRefIsLowerOfReturn1_DoesNotCauseNullPointer() {
+        //corresponds:
+        //  function bar($x){ if($x > 0){return foo(true, $x-1);} return $x;}
+        // where foo has the following overload:
+        //   bool x T -> (falseType | T)
+        // and int x int -> int was taken for e1 = $x - 1
+        // hence the return type of the function call foo is (falseType | int | Te1)
+
+        //same as proceedings method but this time te1 is T1 and tReturn T3 (in one of the methods te1 should be
+        // inspected first for renaming)
+
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String tx = "Tx";
+        String e1 = "+@1|4";
+        String te1 = "T1";
+        String localReturn = "return@1|2";
+        String tLocalReturn = "T2";
+        String tReturn = "T3";
+
+        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        overloadBindings.addVariable($x, new TypeVariableReference(tx));
+        overloadBindings.addVariable(e1, new TypeVariableReference(te1));
+        overloadBindings.addVariable(localReturn, new TypeVariableReference(tLocalReturn));
+        overloadBindings.addUpperTypeBound(tx, intType);
+        overloadBindings.addLowerTypeBound(te1, intType);
+        overloadBindings.addLowerTypeBound(tReturn, boolType);
+        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(te1));
+        overloadBindings.addLowerRefBound(tLocalReturn, new TypeVariableReference(te1));
+
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+
+        //act
+        overloadBindings.tryToFix(parameterTypeVariables);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding($x, tx, null, asList("int"), false),
+                varBinding(e1, te1, asList("int"), asList("int"), true),
+                varBinding(localReturn, tLocalReturn, asList("int"), asList("int"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int", "bool", "@" + tx), null, false)
+        ));
+    }
+
+    //see TINS-495 NullPointer when fixing function
+    @Test
+    public void tryToFix_LocalWithMultipleUpperRefIsLowerOfReturn2_DoesNotCauseNullPointer() {
+        //corresponds:
+        //  function bar($x){ if($x > 0){return foo(true, $x-1);} return $x;}
+        // where foo has the following overload:
+        //   bool x T -> (falseType | T)
+        // and int x int -> int was taken for e1 = $x - 1
+        // hence the return type of the function call foo is (falseType | int | Te1)
+
+        //same as previous method but this time te1 is T3 and tReturn T1 (in one of the methods te1 should be
+        // inspected first for renaming)
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String tx = "Tx";
+        String e1 = "+@1|4";
+        String te1 = "T3";
+        String localReturn = "return@1|2";
+        String tLocalReturn = "T2";
+        String tReturn = "T1";
+
+        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        overloadBindings.addVariable($x, new TypeVariableReference(tx));
+        overloadBindings.addVariable(e1, new TypeVariableReference(te1));
+        overloadBindings.addVariable(localReturn, new TypeVariableReference(tLocalReturn));
+        overloadBindings.addUpperTypeBound(tx, intType);
+        overloadBindings.addLowerTypeBound(te1, intType);
+        overloadBindings.addLowerTypeBound(tReturn, boolType);
+        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(te1));
+        overloadBindings.addLowerRefBound(tLocalReturn, new TypeVariableReference(te1));
+
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+
+        //act
+        overloadBindings.tryToFix(parameterTypeVariables);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding($x, tx, null, asList("int"), false),
+                varBinding(e1, te1, asList("int"), asList("int"), true),
+                varBinding(localReturn, tLocalReturn, asList("int"), asList("int"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int", "bool", "@" + tx), null, false)
+        ));
+    }
 
     private IOverloadBindings createOverloadBindings() {
         return createOverloadBindings(symbolFactory, typeHelper);
