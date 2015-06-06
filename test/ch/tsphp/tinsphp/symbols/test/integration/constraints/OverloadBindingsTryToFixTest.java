@@ -795,6 +795,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
     }
 
     //see TINS-415 same lower and upper type bound equals fix type
+    //see also TINS-500 multiple return and same lower as param upper
     @Test
     public void tryToFix_SameLowerAndUpperTypeBoundWithUpperRefToOtherParamWhichHasSameUpper_FixOnlyOne() {
         //corresponds:
@@ -829,8 +830,9 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding($x, tx, asList("string"), asList("string"), true),
-                varBinding($y, ty, null, asList("string"), false),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("string", "@Ty"), null, false)
+                //see TINS-500 multiple return and same lower as param upper - why Ty is fixed
+                varBinding($y, ty, asList("string"), asList("string"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("string"), asList("string"), true)
         ));
     }
 
@@ -1880,14 +1882,15 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding($x, tx, null, asList("int"), false),
+                varBinding($x, tx, asList("int"), asList("int"), true),
                 varBinding(e1, te1, asList("int"), asList("int"), true),
                 varBinding(localReturn, tLocalReturn, asList("int"), asList("int"), true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int", "bool", "@" + tx), null, false)
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int", "bool"), asList("(bool | int)"), true)
         ));
     }
 
     //see TINS-495 NullPointer when fixing function
+    //see also TINS-500 multiple return and same lower as param upper
     @Test
     public void tryToFix_LocalWithMultipleUpperRefIsLowerOfReturn2_DoesNotCauseNullPointer() {
         //corresponds:
@@ -1930,10 +1933,10 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding($x, tx, null, asList("int"), false),
+                varBinding($x, tx, asList("int"), asList("int"), true),
                 varBinding(e1, te1, asList("int"), asList("int"), true),
                 varBinding(localReturn, tLocalReturn, asList("int"), asList("int"), true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int", "bool", "@" + tx), null, false)
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int", "bool"), asList("(bool | int)"), true)
         ));
     }
 

@@ -688,6 +688,7 @@ public class OverloadBindings implements IOverloadBindings
             removeRefBounds(returnTypeVariable);
         }
 
+
         Map<String, String> variablesToRename = identifyVariablesToRename(dto);
         renameTypeVariables(variablesToRename);
         renameRecursiveParameters(recursiveParameterTypeVariables);
@@ -771,7 +772,7 @@ public class OverloadBindings implements IOverloadBindings
 
         for (String parameterTypeVariable : dto.parameterTypeVariables) {
             Set<String> parameterUpperRefBounds = upperRefBounds.get(parameterTypeVariable);
-            if (hasReturnTypeVariableAsUpperAndNotFixedType(parameterTypeVariable, dto.returnTypeVariable)) {
+            if (doesContributeToTheReturnType(parameterTypeVariable, dto.returnTypeVariable)) {
                 hasConstantReturn = false;
                 for (String refTypeVariable : parameterUpperRefBounds) {
                     if (!dto.parameterTypeVariables.contains(refTypeVariable)) {
@@ -788,20 +789,29 @@ public class OverloadBindings implements IOverloadBindings
         return hasConstantReturn;
     }
 
-    private boolean hasReturnTypeVariableAsUpperAndNotFixedType(String parameterTypeVariable,
-            String returnTypeVariable) {
-        boolean has = false;
+    private boolean doesContributeToTheReturnType(String parameterTypeVariable, String returnTypeVariable) {
+        boolean doesContribute = false;
         if (hasUpperRefBounds(parameterTypeVariable)) {
-            has = upperRefBounds.get(parameterTypeVariable).contains(returnTypeVariable);
-            if (has) {
-                IUnionTypeSymbol upperTypeBound = lowerTypeBounds.get(parameterTypeVariable);
-                IIntersectionTypeSymbol lowerTypeBound = upperTypeBounds.get(parameterTypeVariable);
+            doesContribute = upperRefBounds.get(parameterTypeVariable).contains(returnTypeVariable);
+            if (doesContribute) {
+                IIntersectionTypeSymbol upperTypeBound = upperTypeBounds.get(parameterTypeVariable);
+                IUnionTypeSymbol lowerTypeBound = lowerTypeBounds.get(parameterTypeVariable);
                 if (lowerTypeBound != null && upperTypeBound != null) {
-                    has = !typeHelper.areSame(lowerTypeBound, upperTypeBound);
+                    doesContribute = !typeHelper.areSame(lowerTypeBound, upperTypeBound);
+                }
+
+                //When a function has multiple returns then the parameter does not contribute to the return type if
+                // the return type variable lower type bound is a parent type of the upper type bound of the
+                // parameter's type variable
+                if (doesContribute && upperTypeBound != null && lowerTypeBounds.containsKey(returnTypeVariable)) {
+                    IUnionTypeSymbol returnLowerTypeBound = lowerTypeBounds.get(returnTypeVariable);
+                    TypeHelperDto dto = typeHelper.isFirstSameOrSubTypeOfSecond(
+                            upperTypeBound, returnLowerTypeBound, false);
+                    doesContribute = dto.relation == ERelation.HAS_NO_RELATION;
                 }
             }
         }
-        return has;
+        return doesContribute;
     }
 
     @Override
@@ -859,7 +869,7 @@ public class OverloadBindings implements IOverloadBindings
         while (iterator.hasNext()) {
             String parametricParameterTypeVariable = iterator.next();
             Set<String> parameterUpperRefBounds = upperRefBounds.get(parametricParameterTypeVariable);
-            if (hasReturnTypeVariableAsUpperAndNotFixedType(parametricParameterTypeVariable, dto.returnTypeVariable)) {
+            if (doesContributeToTheReturnType(parametricParameterTypeVariable, dto.returnTypeVariable)) {
                 hasConstantReturn = false;
                 for (String refTypeVariable : parameterUpperRefBounds) {
                     if (!dto.typeParameters.contains(refTypeVariable)) {
