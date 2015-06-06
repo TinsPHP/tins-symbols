@@ -1937,6 +1937,39 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         ));
     }
 
+    //see TINS-497 fixing recursive functions leaves param non-fixed
+    @Test
+    public void tryToFix_RecursiveAndReturnHasFixedBound_AllAreFixed() {
+        //corresponds: function fac($n){ return $n > 0 ? $n * fac($n-1) : $n;}
+        // where int x int -> int was taken for $n - 1
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String tx = "Tx";
+        String tReturn = "Treturn";
+
+        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        overloadBindings.addVariable($x, new TypeVariableReference(tx));
+        overloadBindings.addUpperTypeBound(tx, intType);
+        overloadBindings.addLowerTypeBound(tReturn, intType);
+        overloadBindings.addUpperTypeBound(tReturn, intType);
+        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+
+        //act
+        overloadBindings.tryToFix(parameterTypeVariables);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding($x, tx, asList("int"), asList("int"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), asList("int"), true)
+        ));
+    }
+
     private IOverloadBindings createOverloadBindings() {
         return createOverloadBindings(symbolFactory, typeHelper);
     }
