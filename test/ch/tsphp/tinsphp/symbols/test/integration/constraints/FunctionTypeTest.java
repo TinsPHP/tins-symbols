@@ -12,6 +12,7 @@ import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
+import ch.tsphp.tinsphp.common.symbols.IConvertibleTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.symbols.ModifierHelper;
@@ -25,6 +26,7 @@ import ch.tsphp.tinsphp.symbols.utils.TypeHelper;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
@@ -142,6 +144,34 @@ public class FunctionTypeTest extends ATypeTest
         String result = function.getSignature();
 
         assertThat(result, is("T1 x T2 -> T3 \\ int <: T1 <: num, T2 <: bool, (int | T1 | T2) <: T3"));
+    }
+
+    @Test
+    public void
+    getSignature_WithHelperTypeParameterCorrespondsPlusAssign_ReturnsSignatureIncludingHelperTypeParameter() {
+        IOverloadBindings overloadBindings = createOverloadBindings();
+        String tLhs = "Tlhs";
+        String tRhs = "Trhs";
+        String tHelper = "T";
+        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
+        overloadBindings.addVariable("$rhs", new FixedTypeVariableReference(new TypeVariableReference(tRhs)));
+        overloadBindings.addVariable("!help'", new TypeVariableReference(tHelper));
+        overloadBindings.addVariable(TinsPHPConstants.RETURN_VARIABLE_NAME, new TypeVariableReference(tLhs));
+        IConvertibleTypeSymbol asT = symbolFactory.createConvertibleTypeSymbol();
+        overloadBindings.bind(asT, Arrays.asList("T"));
+        overloadBindings.addLowerRefBound(tLhs, new TypeVariableReference(tHelper));
+        overloadBindings.addUpperTypeBound(tLhs, asT);
+        overloadBindings.addUpperTypeBound(tRhs, asT);
+        overloadBindings.addUpperTypeBound(tHelper, numType);
+
+        IVariable lhs = new Variable("$lhs");
+        IVariable rhs = new Variable("$rhs");
+
+        IFunctionType function = createFunction("foo", overloadBindings, asList(lhs, rhs));
+        function.simplified(set(tLhs, tHelper));
+        String result = function.getSignature();
+
+        assertThat(result, is("Tlhs x {as T} -> Tlhs \\ T <: Tlhs <: {as T}, T <: num"));
     }
 
     @Test(expected = IllegalStateException.class)

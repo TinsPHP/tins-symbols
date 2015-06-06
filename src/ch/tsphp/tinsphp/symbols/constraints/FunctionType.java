@@ -345,6 +345,13 @@ public class FunctionType implements IFunctionType
         sb.append(" -> ");
         appendParameter(sb, numberOfParameters, typeVariablesAdded, sbTypeParameters);
 
+        for (String nonFixedTypeParameter : nonFixedTypeParameters) {
+            if (!typeVariablesAdded.contains(nonFixedTypeParameter)) {
+                typeVariablesAdded.add(nonFixedTypeParameter);
+                appendTypeParameter(sbTypeParameters, nonFixedTypeParameter);
+            }
+        }
+
         if (sbTypeParameters.length() > 0) {
             sb.append(sbTypeParameters);
         }
