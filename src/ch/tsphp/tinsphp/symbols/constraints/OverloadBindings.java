@@ -673,12 +673,15 @@ public class OverloadBindings implements IOverloadBindings
 
         //in case of recursion
         removeUpperRefBounds(returnTypeVariable);
-        if (hasConstantReturn) {
-            removeRefBounds(returnTypeVariable);
-        }
 
+        Set<String> returnVariableLowerRefs = lowerRefBounds.get(returnTypeVariable);
         for (String refTypeVariable : removeReturnTypeVariable) {
             upperRefBounds.get(refTypeVariable).remove(returnTypeVariable);
+            returnVariableLowerRefs.remove(refTypeVariable);
+        }
+
+        if (hasConstantReturn) {
+            removeRefBounds(returnTypeVariable);
         }
 
         Map<String, String> variablesToRename = identifyVariablesToRename(dto);
