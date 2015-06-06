@@ -666,7 +666,11 @@ public class OverloadBindings implements IOverloadBindings
 
         collectTypeParameters(dto);
 
-        propagateReturnVariableToParameters(dto);
+        if (returnIsNotFixed(returnTypeVariable)) {
+            propagateReturnVariableToParameters(dto);
+        } else {
+            fixType(TinsPHPConstants.RETURN_VARIABLE_NAME);
+        }
 
         boolean hasConstantReturn = propagateOrFixParameters(dto);
         hasConstantReturn = propagateOrFixTypeParameters(dto, hasConstantReturn);
@@ -724,6 +728,15 @@ public class OverloadBindings implements IOverloadBindings
                 }
             }
         }
+    }
+
+    private boolean returnIsNotFixed(String returnTypeVariable) {
+        boolean isNotFixed = !hasLowerTypeBounds(returnTypeVariable) || !hasUpperTypeBounds(returnTypeVariable);
+        if (!isNotFixed) {
+            isNotFixed = !typeHelper.areSame(
+                    lowerTypeBounds.get(returnTypeVariable), upperTypeBounds.get(returnTypeVariable));
+        }
+        return isNotFixed;
     }
 
     private void propagateReturnVariableToParameters(final PropagateDto dto) {
