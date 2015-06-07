@@ -10,6 +10,7 @@ import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.IConversionMethod;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
+import ch.tsphp.tinsphp.common.symbols.IConvertibleTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IParametricTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
@@ -852,8 +853,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
     public void
     isFirstSameOrSubTypeOfSecond_NumOrStringToAsTWhereTUpperIsNumOrString_HasRelationAndLowerConstraintsNumAndString() {
         Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions = new HashMap<>();
-        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions
-                = createConversions(pair(intType, asList(fooType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
 
         //pre-act necessary for arrange
         ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
@@ -873,6 +873,94 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
 
         assertThat(result.relation, is(ERelation.HAS_RELATION));
         assertThat(result.lowerConstraints, isConstraints(pair("Ta", asList("num", "string"))));
+        assertThat(result.upperConstraints.size(), is(0));
+    }
+
+    //see TINS-504 intersection type as lower type constraint of parametric type
+    @Test
+    public void
+    isFirstSameOrSubTypeOfSecond_IBAndISubAToAsTWhereTUpperIsA_HasRelationAndLowerConstraintsIBAndISubA() {
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions = new HashMap<>();
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+
+        //pre-act necessary for arrange
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+        ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
+
+        //arrange
+        IIntersectionTypeSymbol IBAndISubA = createIntersectionType(typeHelper, interfaceBType, interfaceSubAType);
+        ITypeSymbol actual = IBAndISubA;
+        IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
+        IOverloadBindings bindings = symbolFactory.createOverloadBindings();
+        bindings.addVariable("$a", new TypeVariableReference("Ta"));
+        bindings.bind(formal, asList("Ta"));
+        bindings.addUpperTypeBound("Ta", interfaceAType);
+
+        //act
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
+        assertThat(result.lowerConstraints, isConstraints(pair("Ta", asList("(IB & ISubA)"))));
+        assertThat(result.upperConstraints.size(), is(0));
+    }
+
+    //see TINS-504 intersection type as lower type constraint of parametric type
+    @Test
+    public void
+    isFirstSameOrSubTypeOfSecond_IBAndISubAToAsTWhereTUpperIsIAOrIB_HasRelationAndLowerConstraintsIBAndISubA() {
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions = new HashMap<>();
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+
+        //pre-act necessary for arrange
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+        ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
+
+        //arrange
+        IIntersectionTypeSymbol IBAndISubA = createIntersectionType(typeHelper, interfaceBType, interfaceSubAType);
+        ITypeSymbol actual = IBAndISubA;
+        IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
+        IOverloadBindings bindings = symbolFactory.createOverloadBindings();
+        bindings.addVariable("$a", new TypeVariableReference("Ta"));
+        bindings.bind(formal, asList("Ta"));
+        IUnionTypeSymbol isIAOrIB = createUnion(typeHelper, interfaceBType, interfaceAType);
+        bindings.addUpperTypeBound("Ta", isIAOrIB);
+
+        //act
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
+        assertThat(result.lowerConstraints, isConstraints(pair("Ta", asList("(IB & ISubA)"))));
+        assertThat(result.upperConstraints.size(), is(0));
+    }
+
+    //see TINS-504 intersection type as lower type constraint of parametric type
+    @Test
+    public void
+    isFirstSameOrSubTypeOfSecond_IBAndAsISubAOrIAToAsTWhereTUpperIsIAOrIB_HasRelationAndLowerConstraintsIBAndISubA() {
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions = new HashMap<>();
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+
+        //pre-act necessary for arrange
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+        ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
+
+        //arrange
+        IConvertibleTypeSymbol asISubA = createConvertibleType(interfaceSubAType, symbolFactory, typeHelper);
+        IIntersectionTypeSymbol IBAndAsISubA = createIntersectionType(typeHelper, interfaceBType, asISubA);
+        IUnionTypeSymbol IBAndAsISubAOrIA = createUnion(typeHelper, IBAndAsISubA, interfaceAType);
+        ITypeSymbol actual = IBAndAsISubAOrIA;
+        IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
+        IOverloadBindings bindings = symbolFactory.createOverloadBindings();
+        bindings.addVariable("$a", new TypeVariableReference("Ta"));
+        bindings.bind(formal, asList("Ta"));
+        IUnionTypeSymbol isIAOrIB = createUnion(typeHelper, interfaceBType, interfaceAType);
+        bindings.addUpperTypeBound("Ta", isIAOrIB);
+
+        //act
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
+        assertThat(result.lowerConstraints, isConstraints(pair("Ta", asList("(IB & {as ISubA})", "IA"))));
         assertThat(result.upperConstraints.size(), is(0));
     }
 
