@@ -2045,9 +2045,9 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
 
     //see TINS-500 multiple return and same lower as param upper
     @Test
-    public void tryToFix_RecursiveAndReturnHasSameLowerAsLowerRefsUpper2_AllAreFixed() {
-        //corresponds: function fac($x){ $a = 1.5; if($x - 1 > 0){return 1;} else if($a - 1.5 > 0){return $a;} return
-        // $x;}
+    public void tryToFix_MultipleReturnIntAndTxAndTaWhereTxHasUpperIntAndTaIsFloat_AllFixed() {
+        //corresponds:
+        // function fac($x){ $a = 1.5; if($x - 1 > 0){return 1;} else if($a - 1.5 > 0){return $a;} return $x;}
 
         //pre-act necessary for arrange
         IOverloadBindings overloadBindings = createOverloadBindings();
@@ -2082,6 +2082,84 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         ));
     }
 
+    //see TINS-500 multiple return and same lower as param upper
+    @Test
+    public void tryToFix_TyIsLowerOfTxAndTxLowerIsIntAndTyUpperIsIntAndReturnLowerIsIntAndReturnIsTxTy_TyIsFixed() {
+        //corresponds:
+        // function foo($x, $y){ $x = $y; $x = 1; $y + 1; return $x; return $y; }
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String tx = "Tx";
+        String $y = "$y";
+        String ty = "Ty";
+        String tReturn = "Treturn";
+
+        overloadBindings.addVariable($x, new TypeVariableReference(tx));
+        overloadBindings.addVariable($y, new TypeVariableReference(ty));
+        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ty));
+        overloadBindings.addLowerTypeBound(tx, intType);
+        overloadBindings.addUpperTypeBound(ty, intType);
+        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(ty));
+
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+        parameterTypeVariables.add(ty);
+
+        //act
+        overloadBindings.tryToFix(parameterTypeVariables);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding($x, tx, asList("int"), null, false),
+                varBinding($y, ty, asList("int"), asList("int"), true),
+                varBinding(RETURN_VARIABLE_NAME, tx, asList("int"), null, false)
+        ));
+    }
+
+    //see TINS-500 multiple return and same lower as param upper
+    @Test
+    public void tryToFix_TyIsLowerOfTxAndTyUpperIsIntAndReturnLowerIsIntAndReturnIsTxTy_TyIsFixed() {
+        //corresponds:
+        // function foo($x, $y){ $x = $y; $y + 1; return $x; return $y; }
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String tx = "Tx";
+        String $y = "$y";
+        String ty = "Ty";
+        String tReturn = "Treturn";
+
+        overloadBindings.addVariable($x, new TypeVariableReference(tx));
+        overloadBindings.addVariable($y, new TypeVariableReference(ty));
+        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ty));
+        overloadBindings.addLowerTypeBound(tx, intType);
+        overloadBindings.addUpperTypeBound(ty, intType);
+        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(ty));
+
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+        parameterTypeVariables.add(ty);
+
+        //act
+        overloadBindings.tryToFix(parameterTypeVariables);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding($x, tx, asList("int"), null, false),
+                varBinding($y, ty, asList("int"), asList("int"), true),
+                varBinding(RETURN_VARIABLE_NAME, tx, asList("int"), null, false)
+        ));
+    }
+
     private IOverloadBindings createOverloadBindings() {
         return createOverloadBindings(symbolFactory, typeHelper);
     }
@@ -2092,5 +2170,6 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
     }
 
 }
+
 
 
