@@ -74,6 +74,11 @@ public class FunctionType implements IFunctionType
     }
 
     @Override
+    public boolean wasSimplified() {
+        return wasSimplified;
+    }
+
+    @Override
     public void simplified(Set<String> theNonFixedTypeParameters) {
         if (wasSimplified) {
             throw new IllegalStateException("function " + name + " was already simplified before.");
@@ -242,6 +247,10 @@ public class FunctionType implements IFunctionType
     //Warning! start code duplication - very similar to the one in ConvertibleTypeSymbol
     @Override
     public void bindTo(IOverloadBindings newOverloadBindings, List<String> bindingTypeParameters) {
+        if (!wasSimplified) {
+            throw new IllegalStateException("function " + name + " was not yet simplified, cannot bind it yet.");
+        }
+
         int size = typeParameters.size();
         if (size != bindingTypeParameters.size()) {
             throw new IllegalArgumentException("This parametric type requires " + size
