@@ -386,12 +386,13 @@ public class TypeHelper implements ITypeHelper
     //Warning! start code duplication - very similar to isAtLeastOneSameOrParentTypeOfFromType
     // and isAtLeastOneConversionTargetSubtype
     private void isAtLeastOneSameOrSubtypeOfToType(Collection<ITypeSymbol> typeSymbols, TypeHelperDto dto) {
-        ITypeSymbol tmpFromType = dto.fromType;
+
+        TypeHelperDto newDto = new TypeHelperDto(null, dto.toType, dto.shallConsiderImplicitConversions);
         forLoop:
         for (ITypeSymbol typeSymbol : typeSymbols) {
-            dto.fromType = typeSymbol;
-            isFirstSameOrSubTypeOfSecond(dto);
-            switch (dto.relation) {
+            newDto.fromType = typeSymbol;
+            isFirstSameOrSubTypeOfSecond(newDto);
+            switch (newDto.relation) {
                 case HAS_RELATION:
                     dto.relation = HAS_RELATION;
                     break forLoop;
@@ -400,7 +401,14 @@ public class TypeHelper implements ITypeHelper
                     break;
             }
         }
-        dto.fromType = tmpFromType;
+
+        dto.relation = newDto.relation;
+        for (String typeVariable : newDto.lowerConstraints.keySet()) {
+            MapHelper.addToListInMap(dto.lowerConstraints, typeVariable, dto.fromType);
+        }
+        for (String typeVariable : newDto.upperConstraints.keySet()) {
+            MapHelper.addToListInMap(dto.upperConstraints, typeVariable, dto.fromType);
+        }
     }
     //Warning! end code duplication - very similar to isAtLeastOneSameOrParentTypeOfFromType
     // and isAtLeastOneConversionTargetSubtype
