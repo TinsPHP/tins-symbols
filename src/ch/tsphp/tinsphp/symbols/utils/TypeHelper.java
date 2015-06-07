@@ -18,6 +18,7 @@ import ch.tsphp.tinsphp.common.utils.MapHelper;
 import ch.tsphp.tinsphp.common.utils.Pair;
 import ch.tsphp.tinsphp.common.utils.TypeHelperDto;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -215,8 +216,8 @@ public class TypeHelper implements ITypeHelper
             dto.relation = copy.relation;
             if (typeParameter != null) {
                 if (upperTypeBounds != null) {
-                    dto.lowerConstraints.putAll(copy.lowerConstraints);
-                    dto.upperConstraints.putAll(copy.upperConstraints);
+                    transferConstraintsFromTo(copy.lowerConstraints, dto.lowerConstraints);
+                    transferConstraintsFromTo(copy.upperConstraints, dto.upperConstraints);
                 } else {
                     MapHelper.addToListInMap(dto.upperConstraints, typeParameter, lowerTypeBounds);
                 }
@@ -324,19 +325,31 @@ public class TypeHelper implements ITypeHelper
                     subtypeRelation = HAS_COERCIVE_RELATION;
                     //fall through on purpose
                 default:
-                    lowerConstraints.putAll(resultDto.lowerConstraints);
-                    upperConstraints.putAll(resultDto.upperConstraints);
+                    transferConstraintsFromTo(resultDto.lowerConstraints, lowerConstraints);
+                    transferConstraintsFromTo(resultDto.upperConstraints, upperConstraints);
             }
         }
 
         if (subtypeRelation != HAS_NO_RELATION) {
             dto.relation = subtypeRelation;
-            dto.lowerConstraints.putAll(lowerConstraints);
-            dto.upperConstraints.putAll(upperConstraints);
+            transferConstraintsFromTo(lowerConstraints, dto.lowerConstraints);
+            transferConstraintsFromTo(upperConstraints, dto.upperConstraints);
         }
     }
     //Warning! end code duplication - very similar to allAreSameOrParentTypesOfFromType
 
+    private void transferConstraintsFromTo(Map<String, List<ITypeSymbol>> from, Map<String, List<ITypeSymbol>> to) {
+        for (Map.Entry<String, List<ITypeSymbol>> entry : from.entrySet()) {
+            String typeVariable = entry.getKey();
+            List<ITypeSymbol> fromList = entry.getValue();
+            if (to.containsKey(typeVariable)) {
+                to.get(typeVariable).addAll(fromList);
+            } else {
+                List<ITypeSymbol> toList = new ArrayList<>(fromList);
+                to.put(typeVariable, toList);
+            }
+        }
+    }
 
     //Warning! start code duplication - very similar to allAreSameOrSubtypesOfToType
     private void allAreSameOrParentTypesOfFromType(Collection<ITypeSymbol> typeSymbols, TypeHelperDto dto) {
@@ -356,15 +369,15 @@ public class TypeHelper implements ITypeHelper
                     parentTypeRelation = HAS_COERCIVE_RELATION;
                     //fall through on purpose
                 default:
-                    lowerConstraints.putAll(resultDto.lowerConstraints);
-                    upperConstraints.putAll(resultDto.upperConstraints);
+                    transferConstraintsFromTo(resultDto.lowerConstraints, lowerConstraints);
+                    transferConstraintsFromTo(resultDto.upperConstraints, upperConstraints);
             }
         }
 
         if (parentTypeRelation != HAS_NO_RELATION) {
             dto.relation = parentTypeRelation;
-            dto.lowerConstraints.putAll(lowerConstraints);
-            dto.upperConstraints.putAll(upperConstraints);
+            transferConstraintsFromTo(lowerConstraints, dto.lowerConstraints);
+            transferConstraintsFromTo(upperConstraints, dto.upperConstraints);
         }
     }
     //Warning! end code duplication - very similar to allAreSameOrSubtypesOfToType
