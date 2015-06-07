@@ -457,9 +457,11 @@ public class FunctionType implements IFunctionType
             int numberOfParameters = parameterAndReturn2TypeParameterIndex.size() - 1;
             for (int index = 0; index < numberOfParameters; ++index) {
                 String typeVariable = typeParameters.get(parameterAndReturn2TypeParameterIndex.get(index));
+                sb.append(parameters.get(index).getAbsoluteName()).append(":");
                 appendVariable(sb, typeVariable, !nonFixedTypeParameters.contains(typeVariable)).append(", ");
             }
             String typeVariable = typeParameters.get(parameterAndReturn2TypeParameterIndex.get(numberOfParameters));
+            sb.append(TinsPHPConstants.RETURN_VARIABLE_NAME).append(":");
             appendVariable(sb, typeVariable, !nonFixedTypeParameters.contains(typeVariable)).append(", ");
         }
         sb.append("]");
