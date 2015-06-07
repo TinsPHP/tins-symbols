@@ -39,7 +39,11 @@ public abstract class ATypeHelperTest extends ATypeTest
 {
 
     protected IUnionTypeSymbol createUnion(ITypeSymbol... typeSymbols) {
-        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol();
+        return createUnion(typeHelper, typeSymbols);
+    }
+
+    protected IUnionTypeSymbol createUnion(ITypeHelper theTypeHelper, ITypeSymbol... typeSymbols) {
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(theTypeHelper);
         for (ITypeSymbol typeSymbol : typeSymbols) {
             unionTypeSymbol.addTypeSymbol(typeSymbol);
         }
@@ -54,9 +58,12 @@ public abstract class ATypeHelperTest extends ATypeTest
         return new UnionTypeSymbol(typeHelper);
     }
 
-
     protected IIntersectionTypeSymbol createIntersectionType(ITypeSymbol... typeSymbols) {
-        IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol();
+        return createIntersectionType(typeHelper, typeSymbols);
+    }
+
+    protected IIntersectionTypeSymbol createIntersectionType(ITypeHelper theTypeHelper, ITypeSymbol... typeSymbols) {
+        IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol(theTypeHelper);
         for (ITypeSymbol typeSymbol : typeSymbols) {
             intersectionTypeSymbol.addTypeSymbol(typeSymbol);
         }

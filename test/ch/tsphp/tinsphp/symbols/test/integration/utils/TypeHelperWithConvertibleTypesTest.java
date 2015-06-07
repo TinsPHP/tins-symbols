@@ -27,10 +27,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static ch.tsphp.tinsphp.common.utils.Pair.pair;
+import static ch.tsphp.tinsphp.symbols.test.integration.testutils.TypeParameterConstraintsMatcher.isConstraints;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
-import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.hamcrest.core.Is.is;
 
 public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
@@ -650,7 +649,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result.relation, is(ERelation.HAS_RELATION));
-        assertThat(result.lowerConstraints, hasEntry("Ta", asList(intType)));
+        assertThat(result.lowerConstraints, isConstraints(pair("Ta", asList("int"))));
         assertThat(result.upperConstraints.size(), is(0));
     }
 
@@ -676,7 +675,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result.relation, is(ERelation.HAS_RELATION));
-        assertThat(result.lowerConstraints, hasEntry("Ta", asList(intType)));
+        assertThat(result.lowerConstraints, isConstraints(pair("Ta", asList("int"))));
         assertThat(result.upperConstraints.size(), is(0));
     }
 
@@ -703,7 +702,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
 
         assertThat(result.relation, is(ERelation.HAS_COERCIVE_RELATION));
-        assertThat(result.lowerConstraints, hasEntry("Ta", asList(intType)));
+        assertThat(result.lowerConstraints, isConstraints(pair("Ta", asList("int"))));
         assertThat(result.upperConstraints.size(), is(0));
     }
 
@@ -731,9 +730,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
 
         assertThat(result.relation, is(ERelation.HAS_RELATION));
         assertThat(result.lowerConstraints.size(), is(0));
-        IUnionTypeSymbol lowerTypeBounds = bindings.getLowerTypeBounds("Ta");
-        assertThat(lowerTypeBounds.getTypeSymbols().keySet(), containsInAnyOrder("bool"));
-        assertThat(result.upperConstraints, hasEntry("Ta", asList((ITypeSymbol) lowerTypeBounds)));
+        assertThat(result.upperConstraints, isConstraints(pair("Ta", asList("bool"))));
     }
 
     //see TINS-498 convertible types without upper bound
@@ -761,9 +758,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
 
         assertThat(result.relation, is(ERelation.HAS_RELATION));
         assertThat(result.lowerConstraints.size(), is(0));
-        IUnionTypeSymbol lowerTypeBounds = bindings.getLowerTypeBounds("Ta");
-        assertThat(lowerTypeBounds.getTypeSymbols().keySet(), containsInAnyOrder("bool"));
-        assertThat(result.upperConstraints, hasEntry("Ta", asList((ITypeSymbol) lowerTypeBounds)));
+        assertThat(result.upperConstraints, isConstraints(pair("Ta", asList("bool"))));
     }
 
     //see TINS-498 convertible types without upper bound
@@ -792,9 +787,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
 
         assertThat(result.relation, is(ERelation.HAS_COERCIVE_RELATION));
         assertThat(result.lowerConstraints.size(), is(0));
-        IUnionTypeSymbol lowerTypeBounds = bindings.getLowerTypeBounds("Ta");
-        assertThat(lowerTypeBounds.getTypeSymbols().keySet(), containsInAnyOrder("float"));
-        assertThat(result.upperConstraints, hasEntry("Ta", asList((ITypeSymbol) lowerTypeBounds)));
+        assertThat(result.upperConstraints, isConstraints(pair("Ta", asList("float"))));
     }
 
     //see TINS-498 convertible types without upper bound
@@ -823,9 +816,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
 
         assertThat(result.relation, is(ERelation.HAS_RELATION));
         assertThat(result.lowerConstraints.size(), is(0));
-        IUnionTypeSymbol lowerTypeBounds = bindings.getLowerTypeBounds("Ta");
-        assertThat(lowerTypeBounds.getTypeSymbols().keySet(), containsInAnyOrder("IA"));
-        assertThat(result.upperConstraints, hasEntry("Ta", asList((ITypeSymbol) lowerTypeBounds)));
+        assertThat(result.upperConstraints, isConstraints(pair("Ta", asList("IA"))));
     }
 
     //see TINS-498 convertible types without upper bound
@@ -853,9 +844,36 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
 
         assertThat(result.relation, is(ERelation.HAS_RELATION));
         assertThat(result.lowerConstraints.size(), is(0));
-        IUnionTypeSymbol lowerTypeBounds = bindings.getLowerTypeBounds("Ta");
-        assertThat(lowerTypeBounds.getTypeSymbols().keySet(), containsInAnyOrder("IA"));
-        assertThat(result.upperConstraints, hasEntry("Ta", asList((ITypeSymbol) lowerTypeBounds)));
+        assertThat(result.upperConstraints, isConstraints(pair("Ta", asList("IA"))));
+    }
+
+    //TINS-503 multiple constraints are not propagated
+    @Test
+    public void
+    isFirstSameOrSubTypeOfSecond_NumOrStringToAsTWhereTUpperIsNumOrString_HasRelationAndLowerConstraintsNumAndString() {
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions = new HashMap<>();
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions
+                = createConversions(pair(intType, asList(fooType)));
+
+        //pre-act necessary for arrange
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+        ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
+
+        //arrange
+        IUnionTypeSymbol numOrString = createUnion(typeHelper, numType, stringType);
+        ITypeSymbol actual = numOrString;
+        IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
+        IOverloadBindings bindings = symbolFactory.createOverloadBindings();
+        bindings.addVariable("$a", new TypeVariableReference("Ta"));
+        bindings.bind(formal, asList("Ta"));
+        bindings.addUpperTypeBound("Ta", numOrString);
+
+        //act
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
+        assertThat(result.lowerConstraints, isConstraints(pair("Ta", asList("num", "string"))));
+        assertThat(result.upperConstraints.size(), is(0));
     }
 
     private ISymbolFactory createSymbolFactory(ITypeHelper typeHelper) {
