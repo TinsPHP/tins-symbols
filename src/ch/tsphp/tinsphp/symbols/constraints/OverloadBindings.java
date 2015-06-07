@@ -847,6 +847,13 @@ public class OverloadBindings implements IOverloadBindings
         informBoundTypes(typeParameter);
     }
 
+    @Override
+    public void fixTypeParameters() {
+        for (String typeParameter : typeVariable2BoundTypes.keySet()) {
+            fixTypeParameter(typeParameter);
+        }
+    }
+
     private void informBoundTypes(String typeParameter) {
         //inform bound parametric types that type variable was fixed
         if (typeVariable2BoundTypes.containsKey(typeParameter)) {
