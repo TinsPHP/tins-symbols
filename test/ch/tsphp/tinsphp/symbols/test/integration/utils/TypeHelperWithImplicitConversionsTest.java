@@ -90,6 +90,70 @@ public class TypeHelperWithImplicitConversionsTest extends ATypeHelperTest
         assertThat(result.relation, is(ERelation.HAS_COERCIVE_RELATION));
     }
 
+    //see TINS-513 implicit conversions and num addition 0.4.0
+    @Test
+    public void isFirstSameOrSubTypeOfSecond_IntOrFloatToFloatAndIntToFloatImpl_HasNoRelation() {
+        //pre-act arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(intType, asList(floatType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+
+        //pre-act necessary for arrange
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //arrange
+        ITypeSymbol actual = createUnion(typeHelper, intType, floatType);
+        ITypeSymbol formal = floatType;
+
+        //act
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result.relation, is(ERelation.HAS_NO_RELATION));
+    }
+
+    //see TINS-513 implicit conversions and num addition 0.4.0
+    @Test
+    public void isFirstSameOrSubTypeOfSecond_IntInUnionToFloatAndIntToFloatImpl_HasCoerciveRelation() {
+        //pre-act arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(intType, asList(floatType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+
+        //pre-act necessary for arrange
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //arrange
+        ITypeSymbol actual = createUnion(typeHelper, intType);
+        ITypeSymbol formal = floatType;
+
+        //act
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result.relation, is(ERelation.HAS_COERCIVE_RELATION));
+    }
+
+    //see TINS-513 implicit conversions and num addition 0.4.0
+    @Test
+    public void
+    isFirstSameOrSubTypeOfSecond_IntOrStringToFloatAndIntToFloatAsWellAsStringToFloatImpl_HasCoerciveRelation() {
+        //pre-act arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(intType, asList(floatType)), pair(stringType, asList(floatType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+
+        //pre-act necessary for arrange
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //arrange
+        ITypeSymbol actual = createUnion(typeHelper, intType, stringType);
+        ITypeSymbol formal = floatType;
+
+        //act
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result.relation, is(ERelation.HAS_COERCIVE_RELATION));
+    }
+
     private ISymbolFactory createSymbolFactory(ITypeHelper typeHelper) {
         return createSymbolFactory(new ScopeHelper(), new ModifierHelper(), typeHelper);
     }
