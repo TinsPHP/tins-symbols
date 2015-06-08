@@ -32,7 +32,6 @@ import ch.tsphp.tinsphp.common.utils.TypeHelperDto;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -100,7 +99,7 @@ public class OverloadBindings implements IOverloadBindings
         typeVariable2BoundTypes = new HashMap<>(bindings.typeVariable2BoundTypes.size());
         typeVariablesWithUpperConvertible = new HashMap<>(bindings.typeVariablesWithUpperConvertible.size());
         typeVariablesWithLowerConvertible = new HashMap<>(bindings.typeVariablesWithLowerConvertible.size());
-        Deque<IParametricTypeSymbol> rebindParametricTypeSymbols = new ArrayDeque<>();
+        Set<IParametricTypeSymbol> rebindParametricTypeSymbols = new HashSet<>();
         copyBounds(bindings, rebindParametricTypeSymbols);
 
         appliedOverloads = new HashMap<>(bindings.appliedOverloads);
@@ -129,7 +128,7 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     private void copyBounds(
-            OverloadBindings bindings, Deque<IParametricTypeSymbol> rebindParametricTypeSymbols) {
+            OverloadBindings bindings, Set<IParametricTypeSymbol> rebindParametricTypeSymbols) {
         for (Map.Entry<String, IUnionTypeSymbol> entry : bindings.lowerTypeBounds.entrySet()) {
             Collection<IParametricTypeSymbol> parametricTypeSymbols = new ArrayDeque<>();
             IUnionTypeSymbol copy = entry.getValue().copy(parametricTypeSymbols);

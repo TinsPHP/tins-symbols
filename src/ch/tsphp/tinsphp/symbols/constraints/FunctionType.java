@@ -280,6 +280,9 @@ public class FunctionType implements IFunctionType
             String typeParameter = typeParameters.get(i);
             String bindingTypeParameter = bindingTypeParameters.get(i);
 
+            //TODO rstoll TINS-512 - function binding
+            // parametric types need to be bound to the newOverload bindings as well
+
             if (overloadBindings.hasLowerTypeBounds(typeParameter)) {
                 IUnionTypeSymbol lowerTypeBounds = overloadBindings.getLowerTypeBounds(typeParameter);
                 newOverloadBindings.addLowerTypeBound(bindingTypeParameter, lowerTypeBounds);
