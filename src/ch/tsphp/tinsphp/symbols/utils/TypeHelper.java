@@ -110,6 +110,15 @@ public class TypeHelper implements ITypeHelper
         Collection<ITypeSymbol> typeSymbols = ((IUnionTypeSymbol) dto.fromType).getTypeSymbols().values();
         if (!typeSymbols.isEmpty()) {
             allAreSameOrSubtypesOfToType(typeSymbols, dto);
+            if (dto.relation == HAS_COERCIVE_RELATION) {
+                //does not have a coercive subtyping relation if the opposite has a regular relation
+                //see TINS-513 implicit conversions and num addition for an explanation
+                TypeHelperDto oppositeDto = new TypeHelperDto(dto.toType, dto.fromType, false);
+                isFirstSameOrSubTypeOfSecond(oppositeDto);
+                if (oppositeDto.relation == HAS_RELATION) {
+                    dto.relation = HAS_NO_RELATION;
+                }
+            }
         } else {
             // an empty union is the bottom type of all types and hence is at least the same type as toType
             // (could also be a subtype)
