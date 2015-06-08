@@ -174,6 +174,32 @@ public class FunctionTypeTest extends ATypeTest
         assertThat(result, is("Tlhs x {as T} -> Tlhs \\ T <: Tlhs <: {as T}, T <: num"));
     }
 
+    //see TINS-514 function signature calculation NullPointer
+    @Test
+    public void getSignature_TxAndTyAndReturnHasTxAndTyAsLowerRef_ReturnsSignatureAccordingly() {
+        IOverloadBindings overloadBindings = createOverloadBindings();
+        String tLhs = "Tlhs";
+        String tRhs = "Trhs";
+        String tReturn = "Treturn";
+        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
+        overloadBindings.addVariable("$rhs", new FixedTypeVariableReference(new TypeVariableReference(tRhs)));
+        overloadBindings.addVariable(TinsPHPConstants.RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+
+        overloadBindings.addUpperTypeBound(tLhs, numType);
+        overloadBindings.addUpperTypeBound(tRhs, stringType);
+        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tLhs));
+        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tRhs));
+
+        IVariable lhs = new Variable("$lhs");
+        IVariable rhs = new Variable("$rhs");
+
+        IFunctionType function = createFunction("foo", overloadBindings, asList(lhs, rhs));
+        function.manuallySimplified(set(tLhs, tRhs), 0, false);
+        String result = function.getSignature();
+
+        assertThat(result, is("Tlhs x Trhs -> Treturn \\ Tlhs <: num, Trhs <: string, (Tlhs | Trhs) <: Treturn"));
+    }
+
     @Test(expected = IllegalStateException.class)
     public void simplify_CalledTheSecondTime_ThrowsIllegalStateException() {
         IOverloadBindings overloadBindings = createOverloadBindings();
