@@ -452,22 +452,22 @@ public class FunctionType implements IFunctionType
     }
 
     private void appendParameter(
-            StringBuilder sb,
+            StringBuilder stringBuilder,
             int parameterAndReturnIndex,
             Set<String> typeVariablesAdded,
             StringBuilder sbTypeParameters) {
         int typeParameterIndex = parameterAndReturn2TypeParameterIndex.get(parameterAndReturnIndex);
         String typeVariable = typeParameters.get(typeParameterIndex);
-        if (!nonFixedTypeParameters.contains(typeVariable)) {
+        if (!nonFixedTypeParameters.contains(typeVariable) && !overloadBindings.hasLowerRefBounds(typeVariable)) {
             ITypeSymbol typeSymbol;
             if (overloadBindings.hasUpperTypeBounds(typeVariable)) {
                 typeSymbol = overloadBindings.getUpperTypeBounds(typeVariable);
             } else {
                 typeSymbol = overloadBindings.getLowerTypeBounds(typeVariable);
             }
-            sb.append(typeSymbol.getAbsoluteName());
+            stringBuilder.append(typeSymbol.getAbsoluteName());
         } else {
-            sb.append(typeVariable);
+            stringBuilder.append(typeVariable);
             if (!typeVariablesAdded.contains(typeVariable)) {
                 typeVariablesAdded.add(typeVariable);
                 appendTypeParameter(sbTypeParameters, typeVariable);
@@ -499,19 +499,7 @@ public class FunctionType implements IFunctionType
                 SortedSet<String> sortedSet = new TreeSet<>(overloadBindings.getLowerRefBounds(typeVariable));
                 lowerBounds.addAll(sortedSet);
             }
-            if (lowerBounds.size() != 1) {
-                sbTypeParameters.append("(");
-                Iterator<String> iterator = lowerBounds.iterator();
-                if (iterator.hasNext()) {
-                    sbTypeParameters.append(iterator.next());
-                }
-                while (iterator.hasNext()) {
-                    sbTypeParameters.append(" | ").append(iterator.next());
-                }
-                sbTypeParameters.append(")");
-            } else {
-                sbTypeParameters.append(lowerBounds.get(0));
-            }
+            appendLowerBound(sbTypeParameters, lowerBounds);
             sbTypeParameters.append(" <: ");
         }
 
@@ -522,6 +510,22 @@ public class FunctionType implements IFunctionType
         if (hasUpperTypeBounds) {
             sbTypeParameters.append(" <: ");
             sbTypeParameters.append(overloadBindings.getUpperTypeBounds(typeVariable).getAbsoluteName());
+        }
+    }
+
+    private void appendLowerBound(StringBuilder stringBuilder, Collection<String> lowerBounds) {
+        if (lowerBounds.size() != 1) {
+            stringBuilder.append("(");
+            Iterator<String> iterator = lowerBounds.iterator();
+            if (iterator.hasNext()) {
+                stringBuilder.append(iterator.next());
+            }
+            while (iterator.hasNext()) {
+                stringBuilder.append(" | ").append(iterator.next());
+            }
+            stringBuilder.append(")");
+        } else {
+            stringBuilder.append(lowerBounds.iterator().next());
         }
     }
 
