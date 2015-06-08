@@ -11,6 +11,7 @@ import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.symbols.IMinimalMethodSymbol;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class MinimalMethodSymbol extends ASymbol implements IMinimalMethodSymbol
@@ -27,7 +28,7 @@ public class MinimalMethodSymbol extends ASymbol implements IMinimalMethodSymbol
     }
 
     @Override
-    public List<IFunctionType> getOverloads() {
+    public Collection<IFunctionType> getOverloads() {
         return overloads;
     }
 }

@@ -46,7 +46,7 @@ public class FunctionTypeTest extends ATypeTest
         overloadBindings.addUpperTypeBound("T", intType);
 
         IFunctionType function = createFunction("foo", overloadBindings, new ArrayList<IVariable>());
-        function.simplified(new HashSet<String>());
+        function.manuallySimplified(new HashSet<String>(), 0, false);
         String result = function.getSignature();
 
         assertThat(result, is("() -> int"));
@@ -65,7 +65,7 @@ public class FunctionTypeTest extends ATypeTest
         IVariable expr = new Variable("$expr");
 
         IFunctionType function = createFunction("foo", overloadBindings, asList(expr));
-        function.simplified(new HashSet<String>());
+        function.manuallySimplified(new HashSet<String>(), 0, false);
         String result = function.getSignature();
 
         assertThat(result, is("int -> float"));
@@ -79,7 +79,7 @@ public class FunctionTypeTest extends ATypeTest
         IVariable expr = new Variable("$expr");
 
         IFunctionType function = createFunction("foo", overloadBindings, asList(expr));
-        function.simplified(set("T"));
+        function.manuallySimplified(set("T"), 0, false);
         String result = function.getSignature();
 
         assertThat(result, is("T -> T"));
@@ -96,7 +96,7 @@ public class FunctionTypeTest extends ATypeTest
         IVariable rhs = new Variable("$rhs");
 
         IFunctionType function = createFunction("foo", overloadBindings, asList(lhs, rhs));
-        function.simplified(set("T1", "T2"));
+        function.manuallySimplified(set("T1", "T2"), 0, false);
         String result = function.getSignature();
 
         assertThat(result, is("T1 x T2 -> T1 \\ T2 <: T1"));
@@ -118,7 +118,7 @@ public class FunctionTypeTest extends ATypeTest
         IVariable rhs = new Variable("$rhs");
 
         IFunctionType function = createFunction("foo", overloadBindings, asList(lhs, rhs));
-        function.simplified(set("T1", "T2", "T3"));
+        function.manuallySimplified(set("T1", "T2", "T3"), 0, false);
         String result = function.getSignature();
 
         assertThat(result, is("T1 x T2 -> T3 \\ int <: T1 <: num, T2 <: bool, (int | T1 | T2) <: T3"));
@@ -140,7 +140,7 @@ public class FunctionTypeTest extends ATypeTest
         IVariable rhs = new Variable("$rhs");
 
         IFunctionType function = createFunction("foo", overloadBindings, asList(lhs, rhs));
-        function.simplified(set("T1", "T2", "T3"));
+        function.manuallySimplified(set("T1", "T2", "T3"), 0, false);
         String result = function.getSignature();
 
         assertThat(result, is("T1 x T2 -> T3 \\ int <: T1 <: num, T2 <: bool, (int | T1 | T2) <: T3"));
@@ -168,7 +168,7 @@ public class FunctionTypeTest extends ATypeTest
         IVariable rhs = new Variable("$rhs");
 
         IFunctionType function = createFunction("foo", overloadBindings, asList(lhs, rhs));
-        function.simplified(set(tLhs, tHelper));
+        function.manuallySimplified(set(tLhs, tHelper), 0, true);
         String result = function.getSignature();
 
         assertThat(result, is("Tlhs x {as T} -> Tlhs \\ T <: Tlhs <: {as T}, T <: num"));

@@ -11,10 +11,11 @@ import ch.tsphp.tinsphp.common.symbols.IMinimalMethodSymbol;
 import ch.tsphp.tinsphp.symbols.MinimalMethodSymbol;
 import org.junit.Test;
 
-import java.util.List;
+import java.util.Collection;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.mockito.Mockito.mock;
 
 public class MinimalMethodSymbolTest
@@ -25,7 +26,7 @@ public class MinimalMethodSymbolTest
         //no arrange necessary
 
         IMinimalMethodSymbol symbol = createMinimalMethodSymbol("foo");
-        List<IFunctionType> result = symbol.getOverloads();
+        Collection<IFunctionType> result = symbol.getOverloads();
 
         assertThat(result.size(), is(0));
     }
@@ -36,10 +37,9 @@ public class MinimalMethodSymbolTest
 
         IMinimalMethodSymbol symbol = createMinimalMethodSymbol("foo");
         symbol.addOverload(functionTypeSymbol);
-        List<IFunctionType> result = symbol.getOverloads();
+        Collection<IFunctionType> result = symbol.getOverloads();
 
-        assertThat(result.size(), is(1));
-        assertThat(result.get(0), is(functionTypeSymbol));
+        assertThat(result, contains(functionTypeSymbol));
     }
 
     protected IMinimalMethodSymbol createMinimalMethodSymbol(String name) {

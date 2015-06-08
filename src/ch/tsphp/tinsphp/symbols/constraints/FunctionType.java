@@ -14,6 +14,8 @@ import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
+import ch.tsphp.tinsphp.common.symbols.IContainerTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IConvertibleTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IParametricTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
@@ -42,9 +44,11 @@ public class FunctionType implements IFunctionType
     private Set<String> nonFixedTypeParameters;
     private List<Integer> parameterAndReturn2TypeParameterIndex;
     private Map<String, Integer> typeParameter2Index;
+    private int numberOfConvertibleApplications;
+    private boolean hasConvertibleParameterTypes;
 
     private boolean wasSimplified;
-    private boolean wasBound = false;
+    private boolean wasBound;
     private boolean hasSignatureChanged = true;
 
     public FunctionType(String theName, IOverloadBindings theOverloadBindings, List<IVariable> theParameterVariables) {
@@ -69,6 +73,24 @@ public class FunctionType implements IFunctionType
     }
 
     @Override
+    public int getNumberOfConvertibleApplications() {
+        if (!wasSimplified) {
+            throw new IllegalStateException("function " + name + " was not yet simplified, "
+                    + "cannot report the number of convertible types.");
+        }
+        return numberOfConvertibleApplications;
+    }
+
+    @Override
+    public boolean hasConvertibleParameterTypes() {
+        if (!wasSimplified) {
+            throw new IllegalStateException("function " + name + " was not yet simplified, "
+                    + "cannot report the number of convertible types.");
+        }
+        return hasConvertibleParameterTypes;
+    }
+
+    @Override
     public String getName() {
         return name;
     }
@@ -79,12 +101,19 @@ public class FunctionType implements IFunctionType
     }
 
     @Override
-    public void simplified(Set<String> theNonFixedTypeParameters) {
+    public void manuallySimplified(
+            Set<String> theNonFixedTypeParameters,
+            int theNumberOfConvertibleTypes,
+            boolean hasItConvertibleParameterTypes) {
         if (wasSimplified) {
             throw new IllegalStateException("function " + name + " was already simplified before.");
         }
         wasSimplified = true;
+
         nonFixedTypeParameters = theNonFixedTypeParameters;
+        numberOfConvertibleApplications = theNumberOfConvertibleTypes;
+        hasConvertibleParameterTypes = hasItConvertibleParameterTypes;
+
         calculateTypeParameters();
     }
 
@@ -101,8 +130,49 @@ public class FunctionType implements IFunctionType
             parameterTypeVariables.add(overloadBindings.getTypeVariableReference(parameterId).getTypeVariable());
         }
         nonFixedTypeParameters = overloadBindings.tryToFix(parameterTypeVariables);
+        numberOfConvertibleApplications = overloadBindings.getNumberOfConvertibleApplications();
 
         calculateTypeParameters();
+
+        searchConvertibleTypeInTypeBounds();
+    }
+
+    private void searchConvertibleTypeInTypeBounds() {
+        for (String typeParameter : typeParameters) {
+            if (overloadBindings.hasUpperTypeBounds(typeParameter)) {
+                IIntersectionTypeSymbol upperTypeBounds = overloadBindings.getUpperTypeBounds(typeParameter);
+                hasConvertibleParameterTypes = containsConvertibleType(upperTypeBounds);
+                if (hasConvertibleParameterTypes) {
+                    break;
+                }
+            }
+
+            if (overloadBindings.hasLowerTypeBounds(typeParameter)) {
+                IUnionTypeSymbol lowerTypeBounds = overloadBindings.getLowerTypeBounds(typeParameter);
+                hasConvertibleParameterTypes = containsConvertibleType(lowerTypeBounds);
+                if (hasConvertibleParameterTypes) {
+                    break;
+                }
+            }
+        }
+    }
+
+    private boolean containsConvertibleType(IContainerTypeSymbol typeSymbol) {
+        boolean convertibleTypeFound = false;
+        if (!typeSymbol.isFixed()) {
+            for (ITypeSymbol innerTypeSymbol : typeSymbol.getTypeSymbols().values()) {
+                if (innerTypeSymbol instanceof IConvertibleTypeSymbol) {
+                    convertibleTypeFound = true;
+                    break;
+                } else if (innerTypeSymbol instanceof IContainerTypeSymbol) {
+                    convertibleTypeFound = containsConvertibleType((IContainerTypeSymbol) innerTypeSymbol);
+                    if (convertibleTypeFound) {
+                        break;
+                    }
+                }
+            }
+        }
+        return convertibleTypeFound;
     }
 
     private void calculateTypeParameters() {

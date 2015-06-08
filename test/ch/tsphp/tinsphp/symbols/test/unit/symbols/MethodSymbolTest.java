@@ -23,6 +23,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -186,7 +187,7 @@ public class MethodSymbolTest
         //nothing to arrange
 
         IMethodSymbol methodSymbol = createMethodSymbol();
-        List<IFunctionType> result = methodSymbol.getOverloads();
+        Collection<IFunctionType> result = methodSymbol.getOverloads();
 
         Assert.assertThat(result, is(empty()));
     }
@@ -197,7 +198,7 @@ public class MethodSymbolTest
 
         IMethodSymbol methodSymbol = createMethodSymbol();
         methodSymbol.addOverload(functionType);
-        List<IFunctionType> result = methodSymbol.getOverloads();
+        Collection<IFunctionType> result = methodSymbol.getOverloads();
 
         Assert.assertThat(result, contains(functionType));
     }

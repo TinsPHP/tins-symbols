@@ -27,7 +27,10 @@ import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.symbols.constraints.ConstraintCollection;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
 {
@@ -35,7 +38,7 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
     private final List<IVariableSymbol> parameters = new ArrayList<>();
     private final IMinimalVariableSymbol returnVariable;
     private final IModifierSet returnTypeModifiers;
-    private final List<IFunctionType> overloads = new ArrayList<>();
+    private final Map<String, IFunctionType> overloads = new HashMap<>();
     private final IConstraintCollection constraintCollection;
 
     @SuppressWarnings("checkstyle:parameternumber")
@@ -157,12 +160,20 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
 
     @Override
     public void addOverload(IFunctionType overload) {
-        overloads.add(overload);
+        String signature = overload.getSignature();
+        if (!overloads.containsKey(signature)) {
+            overloads.put(signature, overload);
+        } else {
+            IFunctionType currentOverload = overloads.get(signature);
+            if (overload.getNumberOfConvertibleApplications() < currentOverload.getNumberOfConvertibleApplications()) {
+                overloads.put(signature, overload);
+            }
+        }
     }
 
     @Override
-    public List<IFunctionType> getOverloads() {
-        return overloads;
+    public Collection<IFunctionType> getOverloads() {
+        return overloads.values();
     }
 
 }

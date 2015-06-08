@@ -60,6 +60,7 @@ public class OverloadBindings implements IOverloadBindings
 
     private int count = 1;
     private int helperVariableCount = 0;
+    private int numberOfConvertibleApplications = 0;
 
     public OverloadBindings(ISymbolFactory theSymbolFactory, ITypeHelper theTypeHelper) {
         symbolFactory = theSymbolFactory;
@@ -85,6 +86,7 @@ public class OverloadBindings implements IOverloadBindings
 
         count = bindings.count;
         helperVariableCount = bindings.helperVariableCount;
+        numberOfConvertibleApplications = bindings.numberOfConvertibleApplications;
 
         //type variables need to be copied first since a lower or upper type bound might contain a parametric
         // polymorphic type which is bound to one of the type variables
@@ -598,7 +600,14 @@ public class OverloadBindings implements IOverloadBindings
         if (!variable2TypeVariable.containsKey(variableId)) {
             throw new IllegalArgumentException("variable with id " + variableId + " does not exist in this binding.");
         }
+        if (appliedOverloads.containsKey(variableId)
+                && appliedOverloads.get(variableId).hasConvertibleParameterTypes()) {
+            --numberOfConvertibleApplications;
+        }
         appliedOverloads.put(variableId, overload);
+        if (overload.hasConvertibleParameterTypes()) {
+            ++numberOfConvertibleApplications;
+        }
     }
 
     @Override
@@ -1086,6 +1095,11 @@ public class OverloadBindings implements IOverloadBindings
         }
     }
 
+    @Override
+    public int getNumberOfConvertibleApplications() {
+        return numberOfConvertibleApplications;
+    }
+
     private void renameTypeVariableAfterContainsCheck(String typeVariable, String newTypeVariable) {
         if (hasLowerTypeBounds(typeVariable)) {
             addLowerTypeBoundAfterContainsCheck(newTypeVariable, lowerTypeBounds.remove(typeVariable));
@@ -1180,5 +1194,4 @@ public class OverloadBindings implements IOverloadBindings
         sb.append("]");
         return sb.toString();
     }
-
 }
