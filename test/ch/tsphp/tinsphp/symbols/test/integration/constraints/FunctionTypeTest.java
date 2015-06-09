@@ -102,6 +102,7 @@ public class FunctionTypeTest extends ATypeTest
         assertThat(result, is("T1 x T2 -> T1 \\ T2 <: T1"));
     }
 
+    //see also TINS-516 improve function signature with unions
     @Test
     public void
     getSignature_T1xT2ArrowT3AndIntLowerT1LowerNumAndT2LowerBoolAndT1OrT2LowerT3_ReturnsSignatureWithTypeParameters() {
@@ -118,12 +119,13 @@ public class FunctionTypeTest extends ATypeTest
         IVariable rhs = new Variable("$rhs");
 
         IFunctionType function = createFunction("foo", overloadBindings, asList(lhs, rhs));
-        function.manuallySimplified(set("T1", "T2", "T3"), 0, false);
+        function.manuallySimplified(set("T1", "T2"), 0, false);
         String result = function.getSignature();
 
-        assertThat(result, is("T1 x T2 -> T3 \\ int <: T1 <: num, T2 <: bool, (int | T1 | T2) <: T3"));
+        assertThat(result, is("T1 x T2 -> (int | T1 | T2) \\ int <: T1 <: num, T2 <: bool"));
     }
 
+    //see also TINS-516 improve function signature with unions
     @Test
     public void
     getSignature_T1xT2ArrowT3AndIntLowerT1LowerNumAndT2LowerBoolAndT2OrT1LowerT3_ReturnsSignatureWithTypeParameters() {
@@ -140,10 +142,10 @@ public class FunctionTypeTest extends ATypeTest
         IVariable rhs = new Variable("$rhs");
 
         IFunctionType function = createFunction("foo", overloadBindings, asList(lhs, rhs));
-        function.manuallySimplified(set("T1", "T2", "T3"), 0, false);
+        function.manuallySimplified(set("T1", "T2"), 0, false);
         String result = function.getSignature();
 
-        assertThat(result, is("T1 x T2 -> T3 \\ int <: T1 <: num, T2 <: bool, (int | T1 | T2) <: T3"));
+        assertThat(result, is("T1 x T2 -> (int | T1 | T2) \\ int <: T1 <: num, T2 <: bool"));
     }
 
     @Test
@@ -175,6 +177,7 @@ public class FunctionTypeTest extends ATypeTest
     }
 
     //see TINS-514 function signature calculation NullPointer
+    //see also TINS-516 improve function signature with unions
     @Test
     public void getSignature_TxAndTyAndReturnHasTxAndTyAsLowerRef_ReturnsSignatureAccordingly() {
         IOverloadBindings overloadBindings = createOverloadBindings();
@@ -197,7 +200,7 @@ public class FunctionTypeTest extends ATypeTest
         function.manuallySimplified(set(tLhs, tRhs), 0, false);
         String result = function.getSignature();
 
-        assertThat(result, is("Tlhs x Trhs -> Treturn \\ Tlhs <: num, Trhs <: string, (Tlhs | Trhs) <: Treturn"));
+        assertThat(result, is("Tlhs x Trhs -> (Tlhs | Trhs) \\ Tlhs <: num, Trhs <: string"));
     }
 
     //see TINS-403 rename TypeVariables to reflect order of parameters
@@ -216,7 +219,7 @@ public class FunctionTypeTest extends ATypeTest
         function.simplify();
         String result = function.getSignature();
 
-        assertThat(result, is("T1 -> T1"));
+        assertThat(result, is("T -> T"));
     }
 
     //see TINS-403 rename TypeVariables to reflect order of parameters
@@ -236,7 +239,7 @@ public class FunctionTypeTest extends ATypeTest
         function.simplify();
         String result = function.getSignature();
 
-        assertThat(result, is("T1 -> T1 \\ T1 <: num"));
+        assertThat(result, is("T -> T \\ T <: num"));
     }
 
     //see TINS-403 rename TypeVariables to reflect order of parameters
@@ -266,7 +269,7 @@ public class FunctionTypeTest extends ATypeTest
         function.simplify();
         String result = function.getSignature();
 
-        assertThat(result, is("{as T1} x {as T1} -> T1 \\ T1 <: num"));
+        assertThat(result, is("{as T} x {as T} -> T \\ T <: num"));
     }
 
     //see TINS-403 rename TypeVariables to reflect order of parameters
@@ -297,11 +300,12 @@ public class FunctionTypeTest extends ATypeTest
         function.simplify();
         String result = function.getSignature();
 
-        assertThat(result, is("{as T1} x {as T1} -> T1 \\ int <: T1 <: num"));
+        assertThat(result, is("{as T} x {as T} -> T \\ int <: T <: num"));
     }
 
     //see TINS-403 rename TypeVariables to reflect order of parameters
     //see also TINS-517 param lower of other and both lower of return
+    //see also TINS-516 improve function signature with unions
     @Test
     public void simplify_TxAndTyWhereTxLowerTyAndTyLowerTRtnAndIntLowerTRtn_TypeParametersReflectOrderOfParameters() {
         //corresponds: function foo($x, $y){if($y > 10){$y = $x; return $y;} return 1;}
@@ -322,10 +326,11 @@ public class FunctionTypeTest extends ATypeTest
         function.simplify();
         String result = function.getSignature();
 
-        assertThat(result, is("T1 x T2 -> T3 \\ T1 <: T2, (int | T2) <: T3"));
+        assertThat(result, is("T1 x T2 -> (int | T2) \\ T1 <: T2"));
     }
 
     //see TINS-403 rename TypeVariables to reflect order of parameters
+    //see also TINS-516 improve function signature with unions
     @Test
     public void simplify_TxAndTyWhereTyLowerTxAndTyLowerTRtnAndIntLowerTRtn_TypeParametersReflectOrderOfParameters() {
         //corresponds: function foo($x, $y){if($y > 10){$x = $y; return $y;} return 1;}
@@ -346,7 +351,7 @@ public class FunctionTypeTest extends ATypeTest
         function.simplify();
         String result = function.getSignature();
 
-        assertThat(result, is("mixed x T1 -> T2 \\ (int | T1) <: T2"));
+        assertThat(result, is("mixed x T -> (int | T)"));
     }
 
     //see TINS-403 rename TypeVariables to reflect order of parameters
@@ -371,7 +376,7 @@ public class FunctionTypeTest extends ATypeTest
         function.simplify();
         String result = function.getSignature();
 
-        assertThat(result, is("T1 x T2 -> T3 \\ T2 <: T1, (int | T1) <: T3"));
+        assertThat(result, is("T1 x T2 -> (int | T1) \\ T2 <: T1"));
     }
 
     @Test(expected = IllegalStateException.class)
