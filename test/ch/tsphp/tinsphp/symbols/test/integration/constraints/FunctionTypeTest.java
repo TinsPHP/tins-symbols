@@ -379,6 +379,33 @@ public class FunctionTypeTest extends ATypeTest
         assertThat(result, is("T1 x T2 -> (int | T1) \\ T2 <: T1"));
     }
 
+    //see TINS-403 rename TypeVariables to reflect order of parameters
+    @Test
+    public void simplify_AsTe1UpperTxAndTe1LowerReturn_HelperTypeVariableIsRenamed() {
+        //corresponds: function foo($x){ if($x + 1 > 0){ return $x; } return []; }
+        //where {as T} x {as T} -> T was taken for $x + 1;
+        IOverloadBindings overloadBindings = createOverloadBindings();
+        String tx = "V3";
+        String te1 = "V2";
+        String tReturn = "V1";
+        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
+        overloadBindings.addVariable("+@1|2", new TypeVariableReference(te1));
+        overloadBindings.addVariable(TinsPHPConstants.RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        IConvertibleTypeSymbol asTe1 = symbolFactory.createConvertibleTypeSymbol();
+        overloadBindings.bind(asTe1, asList(te1));
+        overloadBindings.addUpperTypeBound(te1, intType);
+        overloadBindings.addUpperTypeBound(tx, asTe1);
+        overloadBindings.addLowerTypeBound(tReturn, arrayType);
+        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(te1));
+        IVariable $x = new Variable("$x");
+
+        IFunctionType function = createFunction("foo", overloadBindings, asList($x));
+        function.simplify();
+        String result = function.getSignature();
+
+        assertThat(result, is("{as T} -> (array | T) \\ T <: int"));
+    }
+
     @Test(expected = IllegalStateException.class)
     public void simplify_CalledTheSecondTime_ThrowsIllegalStateException() {
         IOverloadBindings overloadBindings = createOverloadBindings();

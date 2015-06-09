@@ -211,9 +211,7 @@ public class FunctionType implements IFunctionType
         for (String nonFixedTypeParameter : nonFixedTypeParameters) {
             //Warning ! start code duplication, very similar to addTypeVariableToTypeParameters
             if (!typeVariablesAdded.contains(nonFixedTypeParameter)) {
-                typeParameters.add(nonFixedTypeParameter);
-                typeVariablesAdded.add(nonFixedTypeParameter);
-                typeParameter2Index.put(nonFixedTypeParameter, ++dto.count);
+                addNonFixedTypeVariableToTypeParameters(dto, nonFixedTypeParameter);
             }
             //Warning ! end code duplication, very similar to addTypeVariableToTypeParameters
         }
@@ -222,25 +220,29 @@ public class FunctionType implements IFunctionType
     private void addTypeVariableToTypeParameters(AddToTypeParameterDto dto) {
         String typeVariable = dto.typeVariableReference.getTypeVariable();
         if (!dto.typeVariablesAdded.contains(typeVariable)) {
-            String typeParameter = typeVariable;
-            if (dto.shallRenameTypeVariables && nonFixedTypeParameters.contains(typeParameter)) {
-                if (dto.useSuffix) {
-                    typeParameter = "T" + dto.typeParameterSuffix++;
-                } else {
-                    typeParameter = "T";
-                }
-                overloadBindings.transformIntoTypeParameter(typeVariable, typeParameter);
-                nonFixedTypeParameters.remove(typeVariable);
-                nonFixedTypeParameters.add(typeParameter);
-            }
-            typeParameters.add(typeParameter);
-            dto.typeVariablesAdded.add(typeParameter);
-            typeParameter2Index.put(typeParameter, dto.count);
-            parameterAndReturn2TypeParameterIndex.add(dto.count);
-            ++dto.count;
+            addNonFixedTypeVariableToTypeParameters(dto, typeVariable);
         } else {
             parameterAndReturn2TypeParameterIndex.add(typeParameter2Index.get(typeVariable));
         }
+    }
+
+    private void addNonFixedTypeVariableToTypeParameters(AddToTypeParameterDto dto, String typeVariable) {
+        String typeParameter = typeVariable;
+        if (dto.shallRenameTypeVariables && nonFixedTypeParameters.contains(typeParameter)) {
+            if (dto.useSuffix) {
+                typeParameter = "T" + dto.typeParameterSuffix++;
+            } else {
+                typeParameter = "T";
+            }
+            overloadBindings.transformIntoTypeParameter(typeVariable, typeParameter);
+            nonFixedTypeParameters.remove(typeVariable);
+            nonFixedTypeParameters.add(typeParameter);
+        }
+        typeParameters.add(typeParameter);
+        dto.typeVariablesAdded.add(typeParameter);
+        typeParameter2Index.put(typeParameter, dto.count);
+        parameterAndReturn2TypeParameterIndex.add(dto.count);
+        ++dto.count;
     }
 
     @Override
