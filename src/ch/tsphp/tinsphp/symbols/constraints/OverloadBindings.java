@@ -177,7 +177,7 @@ public class OverloadBindings implements IOverloadBindings
 
     @Override
     public ITypeVariableReference getNextTypeVariable() {
-        return new TypeVariableReference("T" + count++);
+        return new TypeVariableReference("V" + count++);
     }
 
     @Override
@@ -675,7 +675,7 @@ public class OverloadBindings implements IOverloadBindings
         collectTypeParameters(dto);
 
         if (returnIsNotFixed(returnTypeVariable)) {
-            propagateReturnVariableToParameters(dto);
+            propagateReturnTypeVariableToParameters(dto);
         } else {
             fixType(TinsPHPConstants.RETURN_VARIABLE_NAME);
         }
@@ -696,13 +696,9 @@ public class OverloadBindings implements IOverloadBindings
             removeRefBounds(returnTypeVariable);
         }
 
-
         Map<String, String> variablesToRename = identifyVariablesToRename(dto);
         renameTypeVariables(variablesToRename);
         renameRecursiveParameters(recursiveParameterTypeVariables);
-
-        //upper ref bounds are no longer needed
-        upperRefBounds.clear();
 
         return dto.typeParameters;
     }
@@ -748,28 +744,45 @@ public class OverloadBindings implements IOverloadBindings
         return isNotFixed;
     }
 
-    private void propagateReturnVariableToParameters(final PropagateDto dto) {
+    private void propagateReturnTypeVariableToParameters(final PropagateDto dto) {
         if (hasLowerRefBounds(dto.returnTypeVariable)) {
             for (String refTypeVariable : lowerRefBounds.get(dto.returnTypeVariable)) {
+                boolean passedATypeParameter = false;
                 if (!dto.typeParameters.contains(refTypeVariable)) {
                     //since normal type variables might be fixed we need to remove the return variable manually
                     dto.removeReturnTypeVariable.add(refTypeVariable);
+                } else {
+                    passedATypeParameter = true;
                 }
-                propagateTypeVariableDownwardsToParameters(refTypeVariable, dto);
+                propagateReturnTypeVariableDownwardsToParameters(refTypeVariable, dto, passedATypeParameter);
             }
         }
     }
 
-    private void propagateTypeVariableDownwardsToParameters(final String refTypeVariable, final PropagateDto dto) {
+    private void propagateReturnTypeVariableDownwardsToParameters(
+            final String refTypeVariable, final PropagateDto dto, boolean passedATypeParameter) {
         if (hasLowerRefBounds(refTypeVariable)) {
             for (String refRefTypeVariable : lowerRefBounds.get(refTypeVariable)) {
+                boolean tmpPassedATypeParameter = passedATypeParameter;
                 Set<String> refRefUpperRefBounds = upperRefBounds.get(refRefTypeVariable);
                 if (!refRefUpperRefBounds.contains(dto.returnTypeVariable)) {
                     if (dto.typeParameters.contains(refRefTypeVariable)) {
+                        //a type parameter which has the return type variable as upper bound only through another
+                        // parameter can be removed from lower ref bounds of the return type variable
+                        if (passedATypeParameter && !refRefUpperRefBounds.contains(dto.returnTypeVariable)) {
+                            dto.removeReturnTypeVariable.add(refRefTypeVariable);
+                        } else {
+                            //since it might be added onto the list before above we remove it now since it has the
+                            // return type variable as upper bound also via another path (without parameter)
+                            dto.removeReturnTypeVariable.remove(refRefTypeVariable);
+                        }
+
+                        passedATypeParameter = true;
                         refRefUpperRefBounds.add(dto.returnTypeVariable);
                     }
-                    propagateTypeVariableDownwardsToParameters(refRefTypeVariable, dto);
+                    propagateReturnTypeVariableDownwardsToParameters(refRefTypeVariable, dto, passedATypeParameter);
                 }
+                passedATypeParameter = tmpPassedATypeParameter;
             }
         }
     }
@@ -960,10 +973,12 @@ public class OverloadBindings implements IOverloadBindings
         String renameTo = null;
         if (hasLowerRefBounds(typeVariable)) {
             removeNonParameterLowerRefBounds(typeVariable, typeParameters);
+            if (hasLowerRefBounds(typeVariable)) {
+                upperRefBounds.remove(typeVariable);
+            }
 
             String typeParameter = getTypeParameterIfSingleLowerRefBound(typeVariable, typeParameters);
             if (typeParameter != null) {
-                upperRefBounds.remove(typeVariable);
                 if (haveSameLowerTypeBound(typeVariable, typeParameter)) {
                     renameTo = typeParameter;
                 }
@@ -1018,6 +1033,7 @@ public class OverloadBindings implements IOverloadBindings
             // need to remove the existing ref between typeVariable and parameterTypeVariable before we rename
             // otherwise we create inadvertently a self ref even though we do not have one
             lowerRefBounds.get(typeVariable).remove(parameterTypeVariable);
+            upperRefBounds.get(parameterTypeVariable).remove(typeVariable);
             renameTypeVariableAfterContainsCheck(typeVariable, parameterTypeVariable);
         }
     }
@@ -1066,6 +1082,66 @@ public class OverloadBindings implements IOverloadBindings
 
         if (isNotSelfReference(typeVariable, newTypeVariable)) {
             renameTypeVariableAfterContainsCheck(typeVariable, newTypeVariable);
+        }
+    }
+
+    @Override
+    public void transformIntoTypeParameter(String typeVariable, String typeParameter) {
+        if (!typeVariable2Variables.containsKey(typeVariable)) {
+            throw new IllegalArgumentException("no variable has a binding for type variable \"" + typeVariable + "\"");
+        }
+
+        if (typeVariable2Variables.containsKey(typeParameter)) {
+            throw new IllegalArgumentException("cannot use \"" + typeParameter + "\" as name of the type parameter "
+                    + "since it is already used as type variable in this binding");
+        }
+
+        if (isNotSelfReference(typeVariable, typeParameter)) {
+            transformIntoTypParameterAfterContainsCheck(typeVariable, typeParameter);
+        }
+    }
+
+    private void transformIntoTypParameterAfterContainsCheck(String typeVariable, String typeParameter) {
+        IUnionTypeSymbol lowerBound = lowerTypeBounds.remove(typeVariable);
+        if (lowerBound != null) {
+            lowerTypeBounds.put(typeParameter, lowerBound);
+        }
+        IIntersectionTypeSymbol upperBound = upperTypeBounds.remove(typeVariable);
+        if (upperBound != null) {
+            upperTypeBounds.put(typeParameter, upperBound);
+        }
+
+        if (hasLowerRefBounds(typeVariable)) {
+            Set<String> refBounds = lowerRefBounds.remove(typeVariable);
+            lowerRefBounds.put(typeParameter, refBounds);
+            for (String lowerRefTypeVariable : refBounds) {
+                Set<String> refRefBounds = upperRefBounds.get(lowerRefTypeVariable);
+                refRefBounds.remove(typeVariable);
+                refRefBounds.add(typeParameter);
+            }
+        }
+        if (hasUpperRefBounds(typeVariable)) {
+            Set<String> refBounds = upperRefBounds.remove(typeVariable);
+            upperRefBounds.put(typeParameter, refBounds);
+            for (String upperRefTypeVariable : refBounds) {
+                Set<String> refRefBounds = lowerRefBounds.get(upperRefTypeVariable);
+                refRefBounds.remove(typeVariable);
+                refRefBounds.add(typeParameter);
+            }
+        }
+
+        Set<String> variables = typeVariable2Variables.remove(typeVariable);
+        typeVariable2Variables.put(typeParameter, variables);
+        for (String variableId : variables) {
+            variable2TypeVariable.get(variableId).setTypeVariable(typeParameter);
+        }
+
+        if (typeVariable2BoundTypes.containsKey(typeVariable)) {
+            Set<IParametricType> boundTypes = typeVariable2BoundTypes.remove(typeVariable);
+            typeVariable2BoundTypes.put(typeParameter, boundTypes);
+            for (IParametricType parametricType : boundTypes) {
+                parametricType.renameTypeVariable(typeVariable, typeParameter);
+            }
         }
     }
 

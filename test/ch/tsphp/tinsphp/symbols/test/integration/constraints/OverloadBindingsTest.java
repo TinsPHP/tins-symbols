@@ -223,24 +223,24 @@ public class OverloadBindingsTest extends ATypeHelperTest
     }
 
     @Test
-    public void getNextTypeVariable_FirstCall_ReturnsT1() {
+    public void getNextTypeVariable_FirstCall_ReturnsV1() {
         //no arrange necessary
 
         IOverloadBindings overloadBindings = createOverloadBindings();
         ITypeVariableReference result = overloadBindings.getNextTypeVariable();
 
-        assertThat(result.getTypeVariable(), is("T1"));
+        assertThat(result.getTypeVariable(), is("V1"));
     }
 
     @Test
-    public void getNextTypeVariable_SecondCallAfterCopy_ReturnsT2() {
+    public void getNextTypeVariable_SecondCallAfterCopy_ReturnsV2() {
         OverloadBindings bindings1 = new OverloadBindings(symbolFactory, typeHelper);
         bindings1.getNextTypeVariable();
 
         IOverloadBindings overloadBindings = createOverloadBindings(bindings1);
         ITypeVariableReference result = overloadBindings.getNextTypeVariable();
 
-        assertThat(result.getTypeVariable(), is("T2"));
+        assertThat(result.getTypeVariable(), is("V2"));
     }
 
     @Test

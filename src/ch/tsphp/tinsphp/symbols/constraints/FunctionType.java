@@ -114,7 +114,7 @@ public class FunctionType implements IFunctionType
         numberOfConvertibleApplications = theNumberOfConvertibleTypes;
         hasConvertibleParameterTypes = hasItConvertibleParameterTypes;
 
-        calculateTypeParameters();
+        calculateTypeParameters(false);
     }
 
     @Override
@@ -132,7 +132,7 @@ public class FunctionType implements IFunctionType
         nonFixedTypeParameters = overloadBindings.tryToFix(parameterTypeVariables);
         numberOfConvertibleApplications = overloadBindings.getNumberOfConvertibleApplications();
 
-        calculateTypeParameters();
+        calculateTypeParameters(true);
 
         searchConvertibleTypeInTypeBounds();
     }
@@ -175,51 +175,66 @@ public class FunctionType implements IFunctionType
         return convertibleTypeFound;
     }
 
-    private void calculateTypeParameters() {
+    private void calculateTypeParameters(boolean shallRenameTypeVariables) {
         typeParameters = new ArrayList<>();
         Set<String> typeVariablesAdded = new HashSet<>();
         typeParameter2Index = new HashMap<>();
         int numberOfParameters = parameters.size();
         parameterAndReturn2TypeParameterIndex = new ArrayList<>(numberOfParameters + 1);
-        //TODO TINS-403 rename TypeVariables to reflect order of parameters
-        int count = 0;
+
+        AddToTypeParameterDto dto = new AddToTypeParameterDto(
+                typeVariablesAdded,
+                shallRenameTypeVariables,
+                //TODO TINS-516 improve function signature with unions
+                //use "nonFixedTypeParameters.size() > 1" instead as soon as return types use unions
+                true);
+
+
         for (int i = 0; i < numberOfParameters; ++i) {
             IVariable parameter = parameters.get(i);
             String parameterId = parameter.getAbsoluteName();
-            ITypeVariableReference typeVariableReference = overloadBindings.getTypeVariableReference(parameterId);
-            String typeVariable = typeVariableReference.getTypeVariable();
-            count = addTypeVariableToTypeParameters(typeVariable, typeVariablesAdded, count);
+            dto.typeVariableReference = overloadBindings.getTypeVariableReference(parameterId);
+            addTypeVariableToTypeParameters(dto);
         }
 
-        ITypeVariableReference typeVariableReference
+        dto.typeVariableReference
                 = overloadBindings.getTypeVariableReference(TinsPHPConstants.RETURN_VARIABLE_NAME);
-        String typeVariable = typeVariableReference.getTypeVariable();
-        count = addTypeVariableToTypeParameters(typeVariable, typeVariablesAdded, count);
+        addTypeVariableToTypeParameters(dto);
 
         for (String nonFixedTypeParameter : nonFixedTypeParameters) {
             //Warning ! start code duplication, very similar to addTypeVariableToTypeParameters
             if (!typeVariablesAdded.contains(nonFixedTypeParameter)) {
                 typeParameters.add(nonFixedTypeParameter);
                 typeVariablesAdded.add(nonFixedTypeParameter);
-                typeParameter2Index.put(nonFixedTypeParameter, ++count);
+                typeParameter2Index.put(nonFixedTypeParameter, ++dto.count);
             }
             //Warning ! end code duplication, very similar to addTypeVariableToTypeParameters
         }
     }
 
-    private int addTypeVariableToTypeParameters(String typeVariable, Set<String> typeVariablesAdded, int count) {
-        if (!typeVariablesAdded.contains(typeVariable)) {
-            typeParameters.add(typeVariable);
-            typeVariablesAdded.add(typeVariable);
-            typeParameter2Index.put(typeVariable, count);
-            parameterAndReturn2TypeParameterIndex.add(count);
-            ++count;
+    private void addTypeVariableToTypeParameters(AddToTypeParameterDto dto) {
+        String typeVariable = dto.typeVariableReference.getTypeVariable();
+        if (!dto.typeVariablesAdded.contains(typeVariable)) {
+            String typeParameter = typeVariable;
+            if (dto.shallRenameTypeVariables && !dto.typeVariableReference.hasFixedType()) {
+                if (dto.useSuffix) {
+                    typeParameter = "T" + dto.typeParameterSuffix++;
+                } else {
+                    typeParameter = "T";
+                }
+                overloadBindings.transformIntoTypeParameter(typeVariable, typeParameter);
+                nonFixedTypeParameters.remove(typeVariable);
+                nonFixedTypeParameters.add(typeParameter);
+            }
+            typeParameters.add(typeParameter);
+            dto.typeVariablesAdded.add(typeParameter);
+            typeParameter2Index.put(typeParameter, dto.count);
+            parameterAndReturn2TypeParameterIndex.add(dto.count);
+            ++dto.count;
         } else {
             parameterAndReturn2TypeParameterIndex.add(typeParameter2Index.get(typeVariable));
         }
-        return count;
     }
-
 
     @Override
     public String getSuffix(String translatorId) {
@@ -574,5 +589,25 @@ public class FunctionType implements IFunctionType
             sb.append("#");
         }
         return sb;
+    }
+
+    @SuppressWarnings("checkstyle:visibilitymodifier")
+    private class AddToTypeParameterDto
+    {
+        public ITypeVariableReference typeVariableReference;
+        public Set<String> typeVariablesAdded;
+        public int count = 0;
+        public boolean shallRenameTypeVariables;
+        public int typeParameterSuffix = 1;
+        public boolean useSuffix;
+
+        private AddToTypeParameterDto(
+                Set<String> theTypeVariablesAdded,
+                boolean mustRenameTypeVariables,
+                boolean shallUseSuffix) {
+            typeVariablesAdded = theTypeVariablesAdded;
+            shallRenameTypeVariables = mustRenameTypeVariables;
+            useSuffix = shallUseSuffix;
+        }
     }
 }

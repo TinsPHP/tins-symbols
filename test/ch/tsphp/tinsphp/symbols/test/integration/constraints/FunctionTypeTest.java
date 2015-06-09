@@ -200,6 +200,180 @@ public class FunctionTypeTest extends ATypeTest
         assertThat(result, is("Tlhs x Trhs -> Treturn \\ Tlhs <: num, Trhs <: string, (Tlhs | Trhs) <: Treturn"));
     }
 
+    //see TINS-403 rename TypeVariables to reflect order of parameters
+    @Test
+    public void simplify_Identity_ReturnsIdentitySignature() {
+        //corresponds: function foo($x){return $x;}
+        IOverloadBindings overloadBindings = createOverloadBindings();
+        String tx = "V2";
+        String tReturn = "V1";
+        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
+        overloadBindings.addVariable(TinsPHPConstants.RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        IVariable $x = new Variable("$x");
+
+        IFunctionType function = createFunction("foo", overloadBindings, asList($x));
+        function.simplify();
+        String result = function.getSignature();
+
+        assertThat(result, is("T1 -> T1"));
+    }
+
+    //see TINS-403 rename TypeVariables to reflect order of parameters
+    @Test
+    public void simplify_IdentityWithNumAsUpper_ReturnsIdentitySignatureWithConstraint() {
+        //corresponds: function foo($x){return $x + 1;}
+        IOverloadBindings overloadBindings = createOverloadBindings();
+        String tx = "V2";
+        String tReturn = "V1";
+        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
+        overloadBindings.addVariable(TinsPHPConstants.RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        overloadBindings.addUpperTypeBound(tx, numType);
+        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        IVariable $x = new Variable("$x");
+
+        IFunctionType function = createFunction("foo", overloadBindings, asList($x));
+        function.simplify();
+        String result = function.getSignature();
+
+        assertThat(result, is("T1 -> T1 \\ T1 <: num"));
+    }
+
+    //see TINS-403 rename TypeVariables to reflect order of parameters
+    @Test
+    public void simplify_PlusWithConvertible_UseOnlyT() {
+        //corresponds: function foo($x, $y){return $x + $y;}
+        //where {as T} x {as T} -> T \ T <: num is used for the + operator
+        IOverloadBindings overloadBindings = createOverloadBindings();
+        String tx = "V3";
+        String ty = "V4";
+        String tReturn = "V1";
+        String te1 = "V2";
+        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
+        overloadBindings.addVariable("$y", new TypeVariableReference(ty));
+        overloadBindings.addVariable("+@1|2", new TypeVariableReference(te1));
+        overloadBindings.addVariable(TinsPHPConstants.RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        IConvertibleTypeSymbol asTe1 = symbolFactory.createConvertibleTypeSymbol();
+        overloadBindings.bind(asTe1, Arrays.asList(te1));
+        overloadBindings.addUpperTypeBound(tx, asTe1);
+        overloadBindings.addUpperTypeBound(ty, asTe1);
+        overloadBindings.addUpperTypeBound(te1, numType);
+        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(te1));
+        IVariable $x = new Variable("$x");
+        IVariable $y = new Variable("$y");
+
+        IFunctionType function = createFunction("foo", overloadBindings, asList($x, $y));
+        function.simplify();
+        String result = function.getSignature();
+
+        assertThat(result, is("{as T1} x {as T1} -> T1 \\ T1 <: num"));
+    }
+
+    //see TINS-403 rename TypeVariables to reflect order of parameters
+    @Test
+    public void simplify_PlusWithConvertibleWithLowerBound_UseOnlyT() {
+        //corresponds: function foo($x, $y){return $x + $y + 1;}
+        //where {as T} x {as T} -> T \ T <: num is used for the first + operator
+        IOverloadBindings overloadBindings = createOverloadBindings();
+        String tx = "V3";
+        String ty = "V4";
+        String tReturn = "V1";
+        String te1 = "V2";
+        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
+        overloadBindings.addVariable("$y", new TypeVariableReference(ty));
+        overloadBindings.addVariable("+@1|2", new TypeVariableReference(te1));
+        overloadBindings.addVariable(TinsPHPConstants.RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        IConvertibleTypeSymbol asTe1 = symbolFactory.createConvertibleTypeSymbol();
+        overloadBindings.bind(asTe1, Arrays.asList(te1));
+        overloadBindings.addUpperTypeBound(tx, asTe1);
+        overloadBindings.addUpperTypeBound(ty, asTe1);
+        overloadBindings.addLowerTypeBound(te1, intType);
+        overloadBindings.addUpperTypeBound(te1, numType);
+        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(te1));
+        IVariable $x = new Variable("$x");
+        IVariable $y = new Variable("$y");
+
+        IFunctionType function = createFunction("foo", overloadBindings, asList($x, $y));
+        function.simplify();
+        String result = function.getSignature();
+
+        assertThat(result, is("{as T1} x {as T1} -> T1 \\ int <: T1 <: num"));
+    }
+
+    //see TINS-403 rename TypeVariables to reflect order of parameters
+    //see also TINS-517 param lower of other and both lower of return
+    @Test
+    public void simplify_TxAndTyWhereTxLowerTyAndTyLowerTRtnAndIntLowerTRtn_TypeParametersReflectOrderOfParameters() {
+        //corresponds: function foo($x, $y){if($y > 10){$y = $x; return $y;} return 1;}
+        IOverloadBindings overloadBindings = createOverloadBindings();
+        String tx = "V3";
+        String ty = "V4";
+        String tReturn = "V1";
+        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
+        overloadBindings.addVariable("$y", new TypeVariableReference(ty));
+        overloadBindings.addVariable(TinsPHPConstants.RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        overloadBindings.addLowerRefBound(ty, new TypeVariableReference(tx));
+        overloadBindings.addLowerTypeBound(tReturn, intType);
+        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(ty));
+        IVariable $x = new Variable("$x");
+        IVariable $y = new Variable("$y");
+
+        IFunctionType function = createFunction("foo", overloadBindings, asList($x, $y));
+        function.simplify();
+        String result = function.getSignature();
+
+        assertThat(result, is("T1 x T2 -> T3 \\ T1 <: T2, (int | T2) <: T3"));
+    }
+
+    //see TINS-403 rename TypeVariables to reflect order of parameters
+    @Test
+    public void simplify_TxAndTyWhereTyLowerTxAndTyLowerTRtnAndIntLowerTRtn_TypeParametersReflectOrderOfParameters() {
+        //corresponds: function foo($x, $y){if($y > 10){$x = $y; return $y;} return 1;}
+        IOverloadBindings overloadBindings = createOverloadBindings();
+        String tx = "V3";
+        String ty = "V4";
+        String tReturn = "V1";
+        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
+        overloadBindings.addVariable("$y", new TypeVariableReference(ty));
+        overloadBindings.addVariable(TinsPHPConstants.RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ty));
+        overloadBindings.addLowerTypeBound(tReturn, intType);
+        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(ty));
+        IVariable $x = new Variable("$x");
+        IVariable $y = new Variable("$y");
+
+        IFunctionType function = createFunction("foo", overloadBindings, asList($x, $y));
+        function.simplify();
+        String result = function.getSignature();
+
+        assertThat(result, is("mixed x T1 -> T2 \\ (int | T1) <: T2"));
+    }
+
+    //see TINS-403 rename TypeVariables to reflect order of parameters
+    //see also TINS-517 param lower of other and both lower of return
+    @Test
+    public void simplify_TxAndTyWhereTyLowerTxAndTxLowerTRtnAndIntLowerTRtn_TypeParametersReflectOrderOfParameters() {
+        //corresponds: function foo($x, $y){if($y > 10){$x = $y; return $x;} return 1;}
+        IOverloadBindings overloadBindings = createOverloadBindings();
+        String tx = "V3";
+        String ty = "V4";
+        String tReturn = "V1";
+        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
+        overloadBindings.addVariable("$y", new TypeVariableReference(ty));
+        overloadBindings.addVariable(TinsPHPConstants.RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ty));
+        overloadBindings.addLowerTypeBound(tReturn, intType);
+        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        IVariable $x = new Variable("$x");
+        IVariable $y = new Variable("$y");
+
+        IFunctionType function = createFunction("foo", overloadBindings, asList($x, $y));
+        function.simplify();
+        String result = function.getSignature();
+
+        assertThat(result, is("T1 x T2 -> T3 \\ T2 <: T1, (int | T1) <: T3"));
+    }
+
     @Test(expected = IllegalStateException.class)
     public void simplify_CalledTheSecondTime_ThrowsIllegalStateException() {
         IOverloadBindings overloadBindings = createOverloadBindings();
@@ -219,6 +393,7 @@ public class FunctionTypeTest extends ATypeTest
         ITypeHelper typeHelper = new TypeHelper();
         typeHelper.setMixedTypeSymbol(mixedType);
         ISymbolFactory symbolFactory = new SymbolFactory(new ScopeHelper(), new ModifierHelper(), typeHelper);
+        symbolFactory.setMixedTypeSymbol(mixedType);
         return new OverloadBindings(symbolFactory, typeHelper);
     }
 
