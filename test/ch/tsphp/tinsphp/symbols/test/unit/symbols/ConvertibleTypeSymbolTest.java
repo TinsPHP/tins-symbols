@@ -89,7 +89,7 @@ public class ConvertibleTypeSymbolTest extends ATypeHelperTest
         convertibleTypeSymbol.bindTo(overloadBindings, asList("Ta"));
 
         //act
-        convertibleTypeSymbol.renameTypeVariable("NonExistingTypeVariable", "T");
+        convertibleTypeSymbol.renameTypeParameter("NonExistingTypeVariable", "T");
 
         //assert in annotation
     }
@@ -99,7 +99,7 @@ public class ConvertibleTypeSymbolTest extends ATypeHelperTest
         //no arrange necessary
 
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
-        convertibleTypeSymbol.renameTypeVariable(convertibleTypeSymbol.getTypeVariable(), "T2");
+        convertibleTypeSymbol.renameTypeParameter(convertibleTypeSymbol.getTypeVariable(), "T2");
 
         //assert in annotation
     }
@@ -115,7 +115,7 @@ public class ConvertibleTypeSymbolTest extends ATypeHelperTest
         convertibleTypeSymbol.bindTo(overloadBindings, asList("Ta"));
 
         //act
-        convertibleTypeSymbol.renameTypeVariable(convertibleTypeSymbol.getTypeVariable(), "T2");
+        convertibleTypeSymbol.renameTypeParameter(convertibleTypeSymbol.getTypeVariable(), "T2");
         String result = convertibleTypeSymbol.getTypeVariable();
 
         assertThat(result, is("T2"));
@@ -134,7 +134,7 @@ public class ConvertibleTypeSymbolTest extends ATypeHelperTest
         convertibleTypeSymbol.bindTo(overloadBindings, asList("Ta"));
 
         //act
-        convertibleTypeSymbol.renameTypeVariable(convertibleTypeSymbol.getTypeVariable(), "T2");
+        convertibleTypeSymbol.renameTypeParameter(convertibleTypeSymbol.getTypeVariable(), "T2");
 
         verify(listener).nameOfObservableHasChanged(convertibleTypeSymbol, "{as Ta}");
     }

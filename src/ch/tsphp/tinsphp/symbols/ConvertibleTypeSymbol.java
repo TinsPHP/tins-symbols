@@ -86,7 +86,7 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
 
     //Warning! start code duplication - very similar to the one in FunctionType
     @Override
-    public void renameTypeVariable(String typeParameter, String newTypeParameter) {
+    public void renameTypeParameter(String typeParameter, String newTypeParameter) {
         if (!wasBound) {
             throw new IllegalStateException("can only rename a type parameter if this convertible type was bound to"
                     + " another parametric polymorphic type");

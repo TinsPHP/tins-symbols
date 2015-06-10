@@ -124,8 +124,8 @@ public class OverloadBindingsTest extends ATypeHelperTest
 
 
         IOverloadBindings overloadBindings = createOverloadBindings(bindings1);
-        bindings1.renameTypeVariable("T1", "T3");
-        overloadBindings.renameTypeVariable("T3", "T2");
+        bindings1.mergeFirstIntoSecond("T1", "T3");
+        overloadBindings.mergeFirstIntoSecond("T3", "T2");
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$a", "T1", null, null, false),
@@ -160,7 +160,7 @@ public class OverloadBindingsTest extends ATypeHelperTest
         bindings1.addUpperTypeBound("T1", convertibleTypeSymbol);
 
         IOverloadBindings overloadBindings = createOverloadBindings(bindings1);
-        convertibleTypeSymbol.renameTypeVariable("T2", "T3");
+        convertibleTypeSymbol.renameTypeParameter("T2", "T3");
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$a", "T1", null, asList("{as T2}"), false),
@@ -178,7 +178,7 @@ public class OverloadBindingsTest extends ATypeHelperTest
         bindings1.addLowerTypeBound("T1", convertibleTypeSymbol);
 
         IOverloadBindings overloadBindings = createOverloadBindings(bindings1);
-        convertibleTypeSymbol.renameTypeVariable("T2", "T3");
+        convertibleTypeSymbol.renameTypeParameter("T2", "T3");
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$a", "T1", asList("{as T2}"), null, false),

@@ -1044,7 +1044,7 @@ public class OverloadBindings implements IOverloadBindings
             // otherwise we create inadvertently a self ref even though we do not have one
             lowerRefBounds.get(typeVariable).remove(parameterTypeVariable);
             upperRefBounds.get(parameterTypeVariable).remove(typeVariable);
-            renameTypeVariableAfterContainsCheck(typeVariable, parameterTypeVariable);
+            mergeFirstIntoSecondAfterContainsCheck(typeVariable, parameterTypeVariable);
         }
     }
 
@@ -1063,7 +1063,7 @@ public class OverloadBindings implements IOverloadBindings
                             // need to remove the existing ref before we rename otherwise we create a self ref (and
                             // cause a ConcurrentModificationException)
                             typeVariableLowerRefBounds.remove(parameterTypeVariable);
-                            renameTypeVariableAfterContainsCheck(typeVariable, parameterTypeVariable);
+                            mergeFirstIntoSecondAfterContainsCheck(typeVariable, parameterTypeVariable);
                             typeVariablesToRemove.add(typeVariable);
                         }
                     }
@@ -1080,77 +1080,78 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     @Override
-    public void renameTypeVariable(String typeVariable, String newTypeVariable) {
-        if (!typeVariable2Variables.containsKey(typeVariable)) {
-            throw new IllegalArgumentException("no variable has a binding for type variable \"" + typeVariable + "\"");
+    public void mergeFirstIntoSecond(String firstTypeVariable, String secondTypeVariable) {
+        if (!typeVariable2Variables.containsKey(firstTypeVariable)) {
+            throw new IllegalArgumentException("no variable has a binding for type variable \"" + firstTypeVariable +
+                    "\"");
         }
 
-        if (!typeVariable2Variables.containsKey(newTypeVariable)) {
+        if (!typeVariable2Variables.containsKey(secondTypeVariable)) {
             throw new IllegalArgumentException(
-                    "no variable has a binding for type variable \"" + newTypeVariable + "\"");
+                    "no variable has a binding for type variable \"" + secondTypeVariable + "\"");
         }
 
-        if (isNotSelfReference(typeVariable, newTypeVariable)) {
-            renameTypeVariableAfterContainsCheck(typeVariable, newTypeVariable);
+        if (isNotSelfReference(firstTypeVariable, secondTypeVariable)) {
+            mergeFirstIntoSecondAfterContainsCheck(firstTypeVariable, secondTypeVariable);
         }
     }
 
     @Override
-    public void transformIntoTypeParameter(String typeVariable, String typeParameter) {
+    public void renameTypeVariable(String typeVariable, String newName) {
         if (!typeVariable2Variables.containsKey(typeVariable)) {
             throw new IllegalArgumentException("no variable has a binding for type variable \"" + typeVariable + "\"");
         }
 
-        if (typeVariable2Variables.containsKey(typeParameter)) {
-            throw new IllegalArgumentException("cannot use \"" + typeParameter + "\" as name of the type parameter "
+        if (typeVariable2Variables.containsKey(newName)) {
+            throw new IllegalArgumentException("cannot use \"" + newName + "\" as name of the type parameter "
                     + "since it is already used as type variable in this binding");
         }
 
-        if (isNotSelfReference(typeVariable, typeParameter)) {
-            transformIntoTypParameterAfterContainsCheck(typeVariable, typeParameter);
+        if (isNotSelfReference(typeVariable, newName)) {
+            renameTypeVariableAfterContainsCheck(typeVariable, newName);
         }
     }
 
-    private void transformIntoTypParameterAfterContainsCheck(String typeVariable, String typeParameter) {
+    private void renameTypeVariableAfterContainsCheck(String typeVariable, String newName) {
         IUnionTypeSymbol lowerBound = lowerTypeBounds.remove(typeVariable);
         if (lowerBound != null) {
-            lowerTypeBounds.put(typeParameter, lowerBound);
+            lowerTypeBounds.put(newName, lowerBound);
         }
         IIntersectionTypeSymbol upperBound = upperTypeBounds.remove(typeVariable);
         if (upperBound != null) {
-            upperTypeBounds.put(typeParameter, upperBound);
+            upperTypeBounds.put(newName, upperBound);
         }
 
         if (hasLowerRefBounds(typeVariable)) {
             Set<String> refBounds = lowerRefBounds.remove(typeVariable);
-            lowerRefBounds.put(typeParameter, refBounds);
+            lowerRefBounds.put(newName, refBounds);
             for (String lowerRefTypeVariable : refBounds) {
                 Set<String> refRefBounds = upperRefBounds.get(lowerRefTypeVariable);
                 refRefBounds.remove(typeVariable);
-                refRefBounds.add(typeParameter);
+                refRefBounds.add(newName);
             }
         }
         if (hasUpperRefBounds(typeVariable)) {
             Set<String> refBounds = upperRefBounds.remove(typeVariable);
-            upperRefBounds.put(typeParameter, refBounds);
+            upperRefBounds.put(newName, refBounds);
             for (String upperRefTypeVariable : refBounds) {
                 Set<String> refRefBounds = lowerRefBounds.get(upperRefTypeVariable);
                 refRefBounds.remove(typeVariable);
-                refRefBounds.add(typeParameter);
+                refRefBounds.add(newName);
             }
         }
 
         Set<String> variables = typeVariable2Variables.remove(typeVariable);
-        typeVariable2Variables.put(typeParameter, variables);
+        typeVariable2Variables.put(newName, variables);
         for (String variableId : variables) {
-            variable2TypeVariable.get(variableId).setTypeVariable(typeParameter);
+            variable2TypeVariable.get(variableId).setTypeVariable(newName);
         }
 
         if (typeVariable2BoundTypes.containsKey(typeVariable)) {
             Set<IParametricType> boundTypes = typeVariable2BoundTypes.remove(typeVariable);
-            typeVariable2BoundTypes.put(typeParameter, boundTypes);
+            typeVariable2BoundTypes.put(newName, boundTypes);
             for (IParametricType parametricType : boundTypes) {
-                parametricType.renameTypeVariable(typeVariable, typeParameter);
+                parametricType.renameTypeParameter(typeVariable, newName);
             }
         }
     }
@@ -1186,7 +1187,7 @@ public class OverloadBindings implements IOverloadBindings
         return numberOfConvertibleApplications;
     }
 
-    private void renameTypeVariableAfterContainsCheck(String typeVariable, String newTypeVariable) {
+    private void mergeFirstIntoSecondAfterContainsCheck(String typeVariable, String newTypeVariable) {
         if (hasLowerTypeBounds(typeVariable)) {
             addLowerTypeBoundAfterContainsCheck(newTypeVariable, lowerTypeBounds.remove(typeVariable));
         }
@@ -1221,7 +1222,7 @@ public class OverloadBindings implements IOverloadBindings
             }
 
             for (IParametricType parametricType : typeVariable2BoundTypes.remove(typeVariable)) {
-                parametricType.renameTypeVariable(typeVariable, newTypeVariable);
+                parametricType.renameTypeParameter(typeVariable, newTypeVariable);
                 boundTypes.add(parametricType);
             }
         }

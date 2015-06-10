@@ -236,7 +236,7 @@ public class FunctionType implements IFunctionType
             } else {
                 typeParameter = "T";
             }
-            overloadBindings.transformIntoTypeParameter(typeVariable, typeParameter);
+            overloadBindings.renameTypeVariable(typeVariable, typeParameter);
             nonFixedTypeParameters.remove(typeVariable);
             nonFixedTypeParameters.add(typeParameter);
         }
@@ -306,7 +306,7 @@ public class FunctionType implements IFunctionType
 
     //Warning! start code duplication - very similar to the one in ConvertibleTypeSymbol
     @Override
-    public void renameTypeVariable(String typeParameter, String newTypeParameter) {
+    public void renameTypeParameter(String typeParameter, String newTypeParameter) {
         if (!wasBound) {
             throw new IllegalStateException("can only rename a type parameter if this function type was bound to"
                     + " another parametric polymorphic type");

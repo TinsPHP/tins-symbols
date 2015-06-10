@@ -27,7 +27,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-public class OverloadBindingsRenameTest extends ATypeHelperTest
+public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
 {
     @Test(expected = IllegalArgumentException.class)
     public void renameTypeVariable_UnknownTypeVariable_ThrowsIllegalArgumentException() {
@@ -39,7 +39,7 @@ public class OverloadBindingsRenameTest extends ATypeHelperTest
         overloadBindings.addVariable("$lhs", new TypeVariableReference(lhs));
 
         //act
-        overloadBindings.renameTypeVariable("T", lhs);
+        overloadBindings.mergeFirstIntoSecond("T", lhs);
 
         //assert in annotation
     }
@@ -54,7 +54,7 @@ public class OverloadBindingsRenameTest extends ATypeHelperTest
         overloadBindings.addVariable("$lhs", new TypeVariableReference(lhs));
 
         //act
-        overloadBindings.renameTypeVariable(lhs, "T");
+        overloadBindings.mergeFirstIntoSecond(lhs, "T");
 
         //assert in annotation
     }
@@ -70,7 +70,7 @@ public class OverloadBindingsRenameTest extends ATypeHelperTest
         overloadBindings.addVariable("$lhs", constraint);
 
         //act
-        overloadBindings.renameTypeVariable(lhs, lhs);
+        overloadBindings.mergeFirstIntoSecond(lhs, lhs);
 
         try {
             verify(constraint).setTypeVariable(anyString());
@@ -94,7 +94,7 @@ public class OverloadBindingsRenameTest extends ATypeHelperTest
         overloadBindings.addUpperTypeBound(lhs, numType);
 
         //act
-        overloadBindings.renameTypeVariable(lhs, rhs);
+        overloadBindings.mergeFirstIntoSecond(lhs, rhs);
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$lhs", rhs, asList("int"), asList("num"), false),
@@ -120,7 +120,7 @@ public class OverloadBindingsRenameTest extends ATypeHelperTest
         overloadBindings.addUpperTypeBound(lhs, numType);
 
         //act
-        overloadBindings.renameTypeVariable(lhs, rhs);
+        overloadBindings.mergeFirstIntoSecond(lhs, rhs);
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$lhs", rhs, asList("int"), asList("num", "@" + upperRhs), false),
@@ -147,7 +147,7 @@ public class OverloadBindingsRenameTest extends ATypeHelperTest
         overloadBindings.addLowerRefBound(t2, new TypeVariableReference(lhs));
 
         //act
-        overloadBindings.renameTypeVariable(lhs, rhs);
+        overloadBindings.mergeFirstIntoSecond(lhs, rhs);
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$lhs", rhs, asList("@T1"), asList("@T2"), false),
@@ -175,7 +175,7 @@ public class OverloadBindingsRenameTest extends ATypeHelperTest
         overloadBindings.addUpperTypeBound(t3, convertibleTypeSymbol);
 
         //act
-        overloadBindings.renameTypeVariable(t1, t2);
+        overloadBindings.mergeFirstIntoSecond(t1, t2);
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$t1", t2, null, null, false),
@@ -202,7 +202,7 @@ public class OverloadBindingsRenameTest extends ATypeHelperTest
         overloadBindings.addLowerTypeBound(t3, convertibleTypeSymbol);
 
         //act
-        overloadBindings.renameTypeVariable(t1, t2);
+        overloadBindings.mergeFirstIntoSecond(t1, t2);
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$t1", t2, null, null, false),
@@ -231,7 +231,7 @@ public class OverloadBindingsRenameTest extends ATypeHelperTest
         overloadBindings.addUpperTypeBound(t3, unionTypeSymbol);
 
         //act
-        overloadBindings.renameTypeVariable(t1, t2);
+        overloadBindings.mergeFirstIntoSecond(t1, t2);
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$t1", t2, null, asList("string"), false),
@@ -260,7 +260,7 @@ public class OverloadBindingsRenameTest extends ATypeHelperTest
         overloadBindings.addLowerTypeBound(t3, unionTypeSymbol);
 
         //act
-        overloadBindings.renameTypeVariable(t1, t2);
+        overloadBindings.mergeFirstIntoSecond(t1, t2);
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$t1", t2, null, asList("string"), false),
@@ -289,7 +289,7 @@ public class OverloadBindingsRenameTest extends ATypeHelperTest
         overloadBindings.addUpperTypeBound(t3, unionTypeSymbol);
 
         //act
-        overloadBindings.renameTypeVariable(t1, t2);
+        overloadBindings.mergeFirstIntoSecond(t1, t2);
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$t1", t2, null, asList("Foo"), false),
@@ -318,7 +318,7 @@ public class OverloadBindingsRenameTest extends ATypeHelperTest
         overloadBindings.addLowerTypeBound(t3, unionTypeSymbol);
 
         //act
-        overloadBindings.renameTypeVariable(t1, t2);
+        overloadBindings.mergeFirstIntoSecond(t1, t2);
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$t1", t2, null, asList("Foo"), false),
@@ -346,7 +346,7 @@ public class OverloadBindingsRenameTest extends ATypeHelperTest
 
         //act
         IOverloadBindings overloadBindings = createOverloadBindings((OverloadBindings) bindings);
-        overloadBindings.renameTypeVariable(t1, t2);
+        overloadBindings.mergeFirstIntoSecond(t1, t2);
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$t1", t2, null, null, false),
@@ -375,7 +375,7 @@ public class OverloadBindingsRenameTest extends ATypeHelperTest
 
         //act
         IOverloadBindings overloadBindings = createOverloadBindings((OverloadBindings) bindings);
-        overloadBindings.renameTypeVariable(t1, t2);
+        overloadBindings.mergeFirstIntoSecond(t1, t2);
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$t1", t2, null, null, false),
@@ -406,7 +406,7 @@ public class OverloadBindingsRenameTest extends ATypeHelperTest
 
         //act
         IOverloadBindings overloadBindings = createOverloadBindings((OverloadBindings) bindings);
-        overloadBindings.renameTypeVariable(t1, t2);
+        overloadBindings.mergeFirstIntoSecond(t1, t2);
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$t1", t2, null, asList("Foo"), false),
@@ -437,7 +437,7 @@ public class OverloadBindingsRenameTest extends ATypeHelperTest
 
         //act
         IOverloadBindings overloadBindings = createOverloadBindings((OverloadBindings) bindings);
-        overloadBindings.renameTypeVariable(t1, t2);
+        overloadBindings.mergeFirstIntoSecond(t1, t2);
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$t1", t2, null, asList("Foo"), false),
@@ -479,7 +479,7 @@ public class OverloadBindingsRenameTest extends ATypeHelperTest
         //act
         IOverloadBindings overloadBindings1 = createOverloadBindings((OverloadBindings) bindings);
         IOverloadBindings overloadBindings = createOverloadBindings((OverloadBindings) overloadBindings1);
-        overloadBindings.renameTypeVariable(t1, t2);
+        overloadBindings.mergeFirstIntoSecond(t1, t2);
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$t1", t2, null, asList("Foo"), false),
@@ -508,7 +508,7 @@ public class OverloadBindingsRenameTest extends ATypeHelperTest
         overloadBindings.addUpperTypeBound(t1, asT2);
 
         //act
-        overloadBindings.renameTypeVariable(t1, t2);
+        overloadBindings.mergeFirstIntoSecond(t1, t2);
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$t1", t2, null, asList("int", "IB"), false),
@@ -535,7 +535,7 @@ public class OverloadBindingsRenameTest extends ATypeHelperTest
         overloadBindings.addUpperTypeBound(t2, asT1);
 
         //act
-        overloadBindings.renameTypeVariable(t1, t2);
+        overloadBindings.mergeFirstIntoSecond(t1, t2);
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$t1", t2, null, asList("int", "IB"), false),
@@ -560,7 +560,7 @@ public class OverloadBindingsRenameTest extends ATypeHelperTest
         overloadBindings.addUpperTypeBound(t2, asT1);
 
         //act
-        overloadBindings.renameTypeVariable(t1, t2);
+        overloadBindings.mergeFirstIntoSecond(t1, t2);
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$t1", t2, null, null, false),
