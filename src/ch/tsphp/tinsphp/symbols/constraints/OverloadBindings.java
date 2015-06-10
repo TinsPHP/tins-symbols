@@ -804,7 +804,7 @@ public class OverloadBindings implements IOverloadBindings
                 hasConstantReturn = false;
                 for (String refTypeVariable : parameterUpperRefBounds) {
                     if (!dto.parameterTypeVariables.contains(refTypeVariable)) {
-                        propagateTypeVariableUpwards(refTypeVariable, parameterTypeVariable, dto);
+                        propagateTypeParameterUpwards(refTypeVariable, parameterTypeVariable, dto);
                     }
                 }
             } else {
@@ -908,7 +908,7 @@ public class OverloadBindings implements IOverloadBindings
                 hasConstantReturn = false;
                 for (String refTypeVariable : parameterUpperRefBounds) {
                     if (!dto.typeParameters.contains(refTypeVariable)) {
-                        propagateTypeVariableUpwards(refTypeVariable, parametricParameterTypeVariable, dto);
+                        propagateTypeParameterUpwards(refTypeVariable, parametricParameterTypeVariable, dto);
                     }
                 }
             } else {
@@ -921,17 +921,20 @@ public class OverloadBindings implements IOverloadBindings
     }
 
 
-    private void propagateTypeVariableUpwards(String refTypeVariable, String parameterTypeVariable, PropagateDto dto) {
+    private void propagateTypeParameterUpwards(String refTypeVariable, String parameterTypeVariable, PropagateDto dto) {
         if (hasUpperRefBounds(refTypeVariable)) {
             Set<String> refUpperRefBounds = upperRefBounds.get(refTypeVariable);
             for (String refRefTypeVariable : refUpperRefBounds) {
                 Set<String> refRefLowerRefBounds = lowerRefBounds.get(refRefTypeVariable);
-                refRefLowerRefBounds.remove(refTypeVariable);
+                //we remove non type parameters, they are no longer required
+                if (!dto.typeParameters.contains(refTypeVariable)) {
+                    refRefLowerRefBounds.remove(refTypeVariable);
+                }
                 if (!refRefLowerRefBounds.contains(parameterTypeVariable)) {
                     if (isNotSelfReference(refRefTypeVariable, parameterTypeVariable)) {
                         refRefLowerRefBounds.add(parameterTypeVariable);
                         if (!dto.typeParameters.contains(refRefTypeVariable)) {
-                            propagateTypeVariableUpwards(refRefTypeVariable, parameterTypeVariable, dto);
+                            propagateTypeParameterUpwards(refRefTypeVariable, parameterTypeVariable, dto);
                         }
                     } else {
                         dto.recursiveParameters.add(parameterTypeVariable);
