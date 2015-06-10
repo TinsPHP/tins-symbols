@@ -200,13 +200,33 @@ public class OverloadBindingsCopyTest extends ATypeHelperTest
 
     //see TINS-488 container type not fixed but should be
     @Test
-    public void copyConstructor_HasConvertibleInUpperBound_IsRegisteredToLowerBoundInNewOverloadBindings() {
+    public void copyConstructor_HasConvertibleInUpperBound_NewUpperBoundIsRegisteredToNewConvertible() {
         OverloadBindings bindings1 = new OverloadBindings(symbolFactory, typeHelper);
         bindings1.addVariable("$a", new TypeVariableReference("T1"));
         bindings1.addVariable("$b", new TypeVariableReference("T2"));
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
         bindings1.bind(convertibleTypeSymbol, asList("T2"));
         bindings1.addUpperTypeBound("T1", convertibleTypeSymbol);
+
+        IOverloadBindings overloadBindings = createOverloadBindings(bindings1);
+        IIntersectionTypeSymbol upperTypeBounds = overloadBindings.getUpperTypeBounds("T1");
+        //should no non-fixed now
+        assertThat(upperTypeBounds.isFixed(), is(false));
+        overloadBindings.fixTypeParameter("T2");
+
+        assertThat(upperTypeBounds.isFixed(), is(true));
+    }
+
+    //see TINS-488 container type not fixed but should be
+    @Test
+    public void copyConstructor_HasConvertibleInUpperBoundInUnion_NewUpperBoundIsRegisteredToNewConvertible() {
+        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, typeHelper);
+        bindings1.addVariable("$a", new TypeVariableReference("T1"));
+        bindings1.addVariable("$b", new TypeVariableReference("T2"));
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        bindings1.bind(convertibleTypeSymbol, asList("T2"));
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(convertibleTypeSymbol, interfaceBType);
+        bindings1.addUpperTypeBound("T1", unionTypeSymbol);
 
         IOverloadBindings overloadBindings = createOverloadBindings(bindings1);
         IIntersectionTypeSymbol upperTypeBounds = overloadBindings.getUpperTypeBounds("T1");
@@ -237,13 +257,35 @@ public class OverloadBindingsCopyTest extends ATypeHelperTest
 
     //see TINS-488 container type not fixed but should be
     @Test
-    public void copyConstructor_HasConvertibleInLowerBound_IsRegisteredToLowerBoundInNewOverloadBindings() {
+    public void copyConstructor_HasConvertibleInLowerBound_NewLowerBoundIsRegisteredToNewConvertible() {
         OverloadBindings bindings1 = new OverloadBindings(symbolFactory, typeHelper);
         bindings1.addVariable("$a", new TypeVariableReference("T1"));
         bindings1.addVariable("$b", new TypeVariableReference("T2"));
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
         bindings1.bind(convertibleTypeSymbol, asList("T2"));
         bindings1.addLowerTypeBound("T1", convertibleTypeSymbol);
+
+        IOverloadBindings overloadBindings = createOverloadBindings(bindings1);
+        IUnionTypeSymbol lowerTypeBounds = overloadBindings.getLowerTypeBounds("T1");
+        //should no non-fixed now
+        assertThat(lowerTypeBounds.isFixed(), is(false));
+        overloadBindings.fixTypeParameter("T2");
+
+        assertThat(lowerTypeBounds.isFixed(), is(true));
+    }
+
+    //see TINS-488 container type not fixed but should be
+    @Test
+    public void copyConstructor_HasConvertibleInIntersectionInLowerBound_NewLowerBoundIsRegisteredToNewConvertible() {
+        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, typeHelper);
+        bindings1.addVariable("$a", new TypeVariableReference("T1"));
+        bindings1.addVariable("$b", new TypeVariableReference("T2"));
+        bindings1.addUpperTypeBound("T2", numType);
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        bindings1.bind(convertibleTypeSymbol, asList("T2"));
+        IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol(
+                convertibleTypeSymbol, interfaceBType);
+        bindings1.addLowerTypeBound("T1", intersectionTypeSymbol);
 
         IOverloadBindings overloadBindings = createOverloadBindings(bindings1);
         IUnionTypeSymbol lowerTypeBounds = overloadBindings.getLowerTypeBounds("T1");
