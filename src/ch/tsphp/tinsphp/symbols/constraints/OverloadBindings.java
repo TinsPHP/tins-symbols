@@ -1082,8 +1082,8 @@ public class OverloadBindings implements IOverloadBindings
     @Override
     public void mergeFirstIntoSecond(String firstTypeVariable, String secondTypeVariable) {
         if (!typeVariable2Variables.containsKey(firstTypeVariable)) {
-            throw new IllegalArgumentException("no variable has a binding for type variable \"" + firstTypeVariable +
-                    "\"");
+            throw new IllegalArgumentException("no variable has a binding for type variable "
+                    + "\"" + firstTypeVariable + "\"");
         }
 
         if (!typeVariable2Variables.containsKey(secondTypeVariable)) {
