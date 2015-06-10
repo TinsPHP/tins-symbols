@@ -79,9 +79,11 @@ public abstract class AContainerTypeSymbol extends APolymorphicTypeSymbol implem
             ITypeSymbol typeSymbol = copyEntry.getValue();
             if (isContainerTypeAndNotFixed(typeSymbol)) {
                 iterator.remove();
+                --nonFixedTypesCount;
                 containerTypeSymbols.add((IContainerTypeSymbol) typeSymbol);
             } else if (isParametricTypeAndNotFixed(typeSymbol)) {
                 iterator.remove();
+                --nonFixedTypesCount;
                 tmpParametricTypeSymbols.add((IParametricTypeSymbol) typeSymbol);
             }
         }
