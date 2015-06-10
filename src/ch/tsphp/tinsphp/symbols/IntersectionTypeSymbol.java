@@ -9,9 +9,7 @@ package ch.tsphp.tinsphp.symbols;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IContainerTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
-import ch.tsphp.tinsphp.common.symbols.IObservableTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IParametricTypeSymbol;
-import ch.tsphp.tinsphp.common.symbols.IPolymorphicTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.PrimitiveTypeNames;
 import ch.tsphp.tinsphp.common.utils.ERelation;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
@@ -59,23 +57,9 @@ public class IntersectionTypeSymbol extends AContainerTypeSymbol implements IInt
                 hasChanged = addTypeSymbol(otherTypeSymbols.values().iterator().next());
             } else {
                 hasChanged = super.addTypeSymbol(typeSymbol);
-                if (hasChanged) {
-                    if (!containerTypeSymbol.isFixed()) {
-                        ++nonFixedTypesCount;
-                    }
-                    containerTypeSymbol.registerObservableListener(this);
-                }
             }
         } else {
             hasChanged = super.addTypeSymbol(typeSymbol);
-            if (hasChanged) {
-                if (typeSymbol instanceof IPolymorphicTypeSymbol && !((IPolymorphicTypeSymbol) typeSymbol).isFixed()) {
-                    ++nonFixedTypesCount;
-                }
-                if (typeSymbol instanceof IObservableTypeSymbol) {
-                    ((IObservableTypeSymbol) typeSymbol).registerObservableListener(this);
-                }
-            }
         }
         return hasChanged;
     }

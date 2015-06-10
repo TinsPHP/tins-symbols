@@ -21,7 +21,7 @@ public class TypeHelperWithIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_IntInIntersectionToInt_ReturnsTrue() {
-        ITypeSymbol actual = createIntersectionType(intType);
+        ITypeSymbol actual = createIntersectionTypeSymbol(intType);
         ITypeSymbol formal = intType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
@@ -32,7 +32,7 @@ public class TypeHelperWithIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_IntInIntersectionToMixed_ReturnsFalse() {
-        ITypeSymbol actual = createIntersectionType(intType);
+        ITypeSymbol actual = createIntersectionTypeSymbol(intType);
         ITypeSymbol formal = mixedType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
@@ -43,7 +43,7 @@ public class TypeHelperWithIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_MixedInIntersectionToInt_ReturnsFalse() {
-        ITypeSymbol actual = createIntersectionType(mixedType);
+        ITypeSymbol actual = createIntersectionTypeSymbol(mixedType);
         ITypeSymbol formal = intType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
@@ -56,7 +56,7 @@ public class TypeHelperWithIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_EmptyIntersectionToInt_ReturnsFalse() {
-        ITypeSymbol actual = createIntersectionType();
+        ITypeSymbol actual = createIntersectionTypeSymbol();
         ITypeSymbol formal = intType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
@@ -67,7 +67,7 @@ public class TypeHelperWithIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_EmptyIntersectionToMixed_ReturnsTrue() {
-        ITypeSymbol actual = createIntersectionType();
+        ITypeSymbol actual = createIntersectionTypeSymbol();
         ITypeSymbol formal = mixedType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
@@ -81,7 +81,7 @@ public class TypeHelperWithIntersectionTypesTest extends ATypeHelperTest
     @Test
     public void areSameType_IntToIntInIntersection_ReturnsTrue() {
         ITypeSymbol actual = intType;
-        ITypeSymbol formal = createIntersectionType(intType);
+        ITypeSymbol formal = createIntersectionTypeSymbol(intType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -92,7 +92,7 @@ public class TypeHelperWithIntersectionTypesTest extends ATypeHelperTest
     @Test
     public void areSameType_MixedToIntInIntersection_ReturnsFalse() {
         ITypeSymbol actual = mixedType;
-        ITypeSymbol formal = createIntersectionType(intType);
+        ITypeSymbol formal = createIntersectionTypeSymbol(intType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -103,7 +103,7 @@ public class TypeHelperWithIntersectionTypesTest extends ATypeHelperTest
     @Test
     public void areSameType_IntToMixedInIntersection_ReturnsFalse() {
         ITypeSymbol actual = intType;
-        ITypeSymbol formal = createIntersectionType(mixedType);
+        ITypeSymbol formal = createIntersectionTypeSymbol(mixedType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -116,7 +116,7 @@ public class TypeHelperWithIntersectionTypesTest extends ATypeHelperTest
     @Test
     public void areSameType_IntToEmptyIntersection_ReturnsFalse() {
         ITypeSymbol actual = intType;
-        ITypeSymbol formal = createIntersectionType();
+        ITypeSymbol formal = createIntersectionTypeSymbol();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -127,7 +127,7 @@ public class TypeHelperWithIntersectionTypesTest extends ATypeHelperTest
     @Test
     public void areSameType_MixedToEmptyIntersection_ReturnsTrue() {
         ITypeSymbol actual = mixedType;
-        ITypeSymbol formal = createIntersectionType();
+        ITypeSymbol formal = createIntersectionTypeSymbol();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -139,8 +139,8 @@ public class TypeHelperWithIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_IntToInt_ReturnsTrue() {
-        ITypeSymbol actual = createIntersectionType(intType);
-        ITypeSymbol formal = createIntersectionType(intType);
+        ITypeSymbol actual = createIntersectionTypeSymbol(intType);
+        ITypeSymbol formal = createIntersectionTypeSymbol(intType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -150,8 +150,8 @@ public class TypeHelperWithIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_IAAndIBToIAAndIB_ReturnsTrue() {
-        ITypeSymbol actual = createIntersectionType(interfaceAType, interfaceBType);
-        ITypeSymbol formal = createIntersectionType(interfaceAType, interfaceBType);
+        ITypeSymbol actual = createIntersectionTypeSymbol(interfaceAType, interfaceBType);
+        ITypeSymbol formal = createIntersectionTypeSymbol(interfaceAType, interfaceBType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -161,8 +161,8 @@ public class TypeHelperWithIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_IAndIBToIBAndIA_ReturnsTrue() {
-        ITypeSymbol actual = createIntersectionType(interfaceAType, interfaceBType);
-        ITypeSymbol formal = createIntersectionType(interfaceBType, interfaceAType);
+        ITypeSymbol actual = createIntersectionTypeSymbol(interfaceAType, interfaceBType);
+        ITypeSymbol formal = createIntersectionTypeSymbol(interfaceBType, interfaceAType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -172,8 +172,8 @@ public class TypeHelperWithIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_ISubAndIBToIBAndIA_ReturnsFalse() {
-        ITypeSymbol actual = createIntersectionType(interfaceSubAType, interfaceBType);
-        ITypeSymbol formal = createIntersectionType(interfaceBType, interfaceAType);
+        ITypeSymbol actual = createIntersectionTypeSymbol(interfaceSubAType, interfaceBType);
+        ITypeSymbol formal = createIntersectionTypeSymbol(interfaceBType, interfaceAType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -184,8 +184,8 @@ public class TypeHelperWithIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_IAndIBToMixedInIntersection_ReturnsFalse() {
-        ITypeSymbol actual = createIntersectionType(interfaceAType, interfaceBType);
-        ITypeSymbol formal = createIntersectionType(mixedType);
+        ITypeSymbol actual = createIntersectionTypeSymbol(interfaceAType, interfaceBType);
+        ITypeSymbol formal = createIntersectionTypeSymbol(mixedType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -195,8 +195,8 @@ public class TypeHelperWithIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_MixedInIntersectionToIAAndIB_ReturnsFalse() {
-        ITypeSymbol actual = createIntersectionType(mixedType);
-        ITypeSymbol formal = createIntersectionType(interfaceBType, interfaceAType);
+        ITypeSymbol actual = createIntersectionTypeSymbol(mixedType);
+        ITypeSymbol formal = createIntersectionTypeSymbol(interfaceBType, interfaceAType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -208,8 +208,8 @@ public class TypeHelperWithIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_EmptyToEmpty_ReturnsTrue() {
-        ITypeSymbol actual = createIntersectionType();
-        ITypeSymbol formal = createIntersectionType();
+        ITypeSymbol actual = createIntersectionTypeSymbol();
+        ITypeSymbol formal = createIntersectionTypeSymbol();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -221,8 +221,8 @@ public class TypeHelperWithIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSame_MixedToMixed_ReturnsTrue() {
-        ITypeSymbol actual = createIntersectionType(mixedType);
-        ITypeSymbol formal = createIntersectionType(mixedType);
+        ITypeSymbol actual = createIntersectionTypeSymbol(mixedType);
+        ITypeSymbol formal = createIntersectionTypeSymbol(mixedType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);

@@ -10,6 +10,7 @@ import ch.tsphp.common.IScope;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IContainerTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IParametricTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IPolymorphicTypeSymbol;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.symbols.AContainerTypeSymbol;
 import ch.tsphp.tinsphp.symbols.ModifierSet;
@@ -21,6 +22,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class AContainerTypeSymbolTest
 {
@@ -59,21 +61,66 @@ public class AContainerTypeSymbolTest
     }
 
     @Test
+    public void isFixed_NothingAdded_ReturnsTrue() {
+        //no arrange necessary
+
+        AContainerTypeSymbol containerTypeSymbol = createContainerTypeSymbol();
+        boolean result = containerTypeSymbol.isFixed();
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void isFixed_AddingNonPolymorphicType_ReturnsTrue() {
+        ITypeSymbol typeSymbol = mock(ITypeSymbol.class);
+
+        AContainerTypeSymbol containerTypeSymbol = createContainerTypeSymbol();
+        containerTypeSymbol.addTypeSymbol(typeSymbol);
+        boolean result = containerTypeSymbol.isFixed();
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void isFixed_AddingAFixedPolymorphicType_ReturnsTrue() {
+        IPolymorphicTypeSymbol typeSymbol = mock(IPolymorphicTypeSymbol.class);
+        when(typeSymbol.isFixed()).thenReturn(true);
+
+        AContainerTypeSymbol containerTypeSymbol = createContainerTypeSymbol();
+        containerTypeSymbol.addTypeSymbol(typeSymbol);
+        boolean result = containerTypeSymbol.isFixed();
+
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void isFixed_AddingANonFixedPolymorphicType_ReturnsFalse() {
+        IPolymorphicTypeSymbol typeSymbol = mock(IPolymorphicTypeSymbol.class);
+        when(typeSymbol.isFixed()).thenReturn(false);
+
+        AContainerTypeSymbol containerTypeSymbol = createContainerTypeSymbol();
+        containerTypeSymbol.addTypeSymbol(typeSymbol);
+        boolean result = containerTypeSymbol.isFixed();
+
+        assertThat(result, is(false));
+    }
+
+    @Test
     public void evalSelf_Standard_ReturnsThis() {
         //no arrange necessary
 
-        AContainerTypeSymbol typeSymbol = createContainerTypeSymbol();
-        ITypeSymbol result = typeSymbol.evalSelf();
+        AContainerTypeSymbol containerTypeSymbol = createContainerTypeSymbol();
+        ITypeSymbol result = containerTypeSymbol.evalSelf();
 
-        assertThat(result, is((ITypeSymbol) typeSymbol));
+        assertThat(result, is((ITypeSymbol) containerTypeSymbol));
     }
 
     @Test
     public void getDefinitionScope_Standard_ReturnsNull() {
         //no arrange necessary
 
-        AContainerTypeSymbol typeSymbol = createContainerTypeSymbol();
-        IScope result = typeSymbol.getDefinitionScope();
+        AContainerTypeSymbol containerTypeSymbol = createContainerTypeSymbol();
+        IScope result = containerTypeSymbol.getDefinitionScope();
 
         assertThat(result, is(nullValue()));
     }
@@ -82,8 +129,8 @@ public class AContainerTypeSymbolTest
     public void getParentTypeSymbols_Standard_ThrowsUnsupportedOperationException() {
         //no arrange necessary
 
-        AContainerTypeSymbol typeSymbol = createContainerTypeSymbol();
-        typeSymbol.getParentTypeSymbols();
+        AContainerTypeSymbol containerTypeSymbol = createContainerTypeSymbol();
+        containerTypeSymbol.getParentTypeSymbols();
 
         //assert in annotation
     }
@@ -92,8 +139,8 @@ public class AContainerTypeSymbolTest
     public void getDefaultValue_Standard_ThrowsUnsupportedOperationException() {
         //no arrange necessary
 
-        AContainerTypeSymbol typeSymbol = createContainerTypeSymbol();
-        typeSymbol.getDefaultValue();
+        AContainerTypeSymbol containerTypeSymbol = createContainerTypeSymbol();
+        containerTypeSymbol.getDefaultValue();
 
         //assert in annotation
     }
@@ -102,8 +149,8 @@ public class AContainerTypeSymbolTest
     public void addModifier_Standard_ThrowsUnsupportedOperationException() {
         //no arrange necessary
 
-        AContainerTypeSymbol typeSymbol = createContainerTypeSymbol();
-        typeSymbol.addModifier(123);
+        AContainerTypeSymbol containerTypeSymbol = createContainerTypeSymbol();
+        containerTypeSymbol.addModifier(123);
 
         //assert in annotation
     }
@@ -112,8 +159,8 @@ public class AContainerTypeSymbolTest
     public void removeModifier_Standard_ThrowsUnsupportedOperationException() {
         //no arrange necessary
 
-        AContainerTypeSymbol typeSymbol = createContainerTypeSymbol();
-        typeSymbol.removeModifier(123);
+        AContainerTypeSymbol containerTypeSymbol = createContainerTypeSymbol();
+        containerTypeSymbol.removeModifier(123);
 
         //assert in annotation
     }
@@ -122,8 +169,8 @@ public class AContainerTypeSymbolTest
     public void getModifiers_Standard_ThrowsUnsupportedOperationException() {
         //no arrange necessary
 
-        AContainerTypeSymbol typeSymbol = createContainerTypeSymbol();
-        typeSymbol.getModifiers();
+        AContainerTypeSymbol containerTypeSymbol = createContainerTypeSymbol();
+        containerTypeSymbol.getModifiers();
 
         //assert in annotation
     }
@@ -132,8 +179,8 @@ public class AContainerTypeSymbolTest
     public void setModifiers_Standard_ThrowsUnsupportedOperationException() {
         //no arrange necessary
 
-        AContainerTypeSymbol typeSymbol = createContainerTypeSymbol();
-        typeSymbol.setModifiers(new ModifierSet());
+        AContainerTypeSymbol containerTypeSymbol = createContainerTypeSymbol();
+        containerTypeSymbol.setModifiers(new ModifierSet());
 
         //assert in annotation
     }
@@ -142,8 +189,8 @@ public class AContainerTypeSymbolTest
     public void getDefinitionAst_Standard_ThrowsUnsupportedOperationException() {
         //no arrange necessary
 
-        AContainerTypeSymbol typeSymbol = createContainerTypeSymbol();
-        typeSymbol.getDefinitionAst();
+        AContainerTypeSymbol containerTypeSymbol = createContainerTypeSymbol();
+        containerTypeSymbol.getDefinitionAst();
 
         //assert in annotation
     }
@@ -152,8 +199,8 @@ public class AContainerTypeSymbolTest
     public void setDefinitionScope_Standard_ThrowsUnsupportedOperationException() {
         //no arrange necessary
 
-        AContainerTypeSymbol typeSymbol = createContainerTypeSymbol();
-        typeSymbol.setDefinitionScope(mock(IScope.class));
+        AContainerTypeSymbol containerTypeSymbol = createContainerTypeSymbol();
+        containerTypeSymbol.setDefinitionScope(mock(IScope.class));
 
         //assert in annotation
     }
@@ -162,8 +209,8 @@ public class AContainerTypeSymbolTest
     public void getType_Standard_ThrowsUnsupportedOperationException() {
         //no arrange necessary
 
-        AContainerTypeSymbol typeSymbol = createContainerTypeSymbol();
-        typeSymbol.getType();
+        AContainerTypeSymbol containerTypeSymbol = createContainerTypeSymbol();
+        containerTypeSymbol.getType();
 
         //assert in annotation
     }
@@ -172,8 +219,8 @@ public class AContainerTypeSymbolTest
     public void setType_Standard_ThrowsUnsupportedOperationException() {
         //no arrange necessary
 
-        AContainerTypeSymbol typeSymbol = createContainerTypeSymbol();
-        typeSymbol.setType(mock(ITypeSymbol.class));
+        AContainerTypeSymbol containerTypeSymbol = createContainerTypeSymbol();
+        containerTypeSymbol.setType(mock(ITypeSymbol.class));
 
         //assert in annotation
     }
@@ -182,8 +229,8 @@ public class AContainerTypeSymbolTest
     public void isFalseable_Standard_ThrowsUnsupportedOperationException() {
         //no arrange necessary
 
-        AContainerTypeSymbol typeSymbol = createContainerTypeSymbol();
-        typeSymbol.isFalseable();
+        AContainerTypeSymbol containerTypeSymbol = createContainerTypeSymbol();
+        containerTypeSymbol.isFalseable();
 
         //assert in annotation
     }
@@ -192,8 +239,8 @@ public class AContainerTypeSymbolTest
     public void isNullable_Standard_ThrowsUnsupportedOperationException() {
         //no arrange necessary
 
-        AContainerTypeSymbol typeSymbol = createContainerTypeSymbol();
-        typeSymbol.isNullable();
+        AContainerTypeSymbol containerTypeSymbol = createContainerTypeSymbol();
+        containerTypeSymbol.isNullable();
 
         //assert in annotation
     }

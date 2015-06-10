@@ -21,7 +21,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_IntInUnionToInt_ReturnsTrue() {
-        ITypeSymbol actual = createUnion(intType);
+        ITypeSymbol actual = createUnionTypeSymbol(intType);
         ITypeSymbol formal = intType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
@@ -32,7 +32,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_IntInUnionToMixed_ReturnsFalse() {
-        ITypeSymbol actual = createUnion(intType);
+        ITypeSymbol actual = createUnionTypeSymbol(intType);
         ITypeSymbol formal = mixedType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
@@ -43,7 +43,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_MixedInUnionToInt_ReturnsFalse() {
-        ITypeSymbol actual = createUnion(mixedType);
+        ITypeSymbol actual = createUnionTypeSymbol(mixedType);
         ITypeSymbol formal = intType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
@@ -56,7 +56,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_EmptyUnionToMixed_ReturnsFalse() {
-        ITypeSymbol actual = createUnion();
+        ITypeSymbol actual = createUnionTypeSymbol();
         ITypeSymbol formal = mixedType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
@@ -70,7 +70,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
     @Test
     public void areSameType_IntToIntInUnion_ReturnsTrue() {
         ITypeSymbol actual = intType;
-        ITypeSymbol formal = createUnion(intType);
+        ITypeSymbol formal = createUnionTypeSymbol(intType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -81,7 +81,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
     @Test
     public void areSameType_MixedToIntInUnion_ReturnsFalse() {
         ITypeSymbol actual = mixedType;
-        ITypeSymbol formal = createUnion(intType);
+        ITypeSymbol formal = createUnionTypeSymbol(intType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -92,7 +92,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
     @Test
     public void areSameType_IntToMixedInUnion_ReturnsFalse() {
         ITypeSymbol actual = intType;
-        ITypeSymbol formal = createUnion(mixedType);
+        ITypeSymbol formal = createUnionTypeSymbol(mixedType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -105,7 +105,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
     @Test
     public void areSameType_MixedToEmptyUnion_ReturnsFalse() {
         ITypeSymbol actual = mixedType;
-        ITypeSymbol formal = createUnion();
+        ITypeSymbol formal = createUnionTypeSymbol();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -118,8 +118,8 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_IntToInt_ReturnsTrue() {
-        ITypeSymbol actual = createUnion(intType);
-        ITypeSymbol formal = createUnion(intType);
+        ITypeSymbol actual = createUnionTypeSymbol(intType);
+        ITypeSymbol formal = createUnionTypeSymbol(intType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -129,8 +129,8 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_IntAndFloatToIntAndFloat_ReturnsTrue() {
-        ITypeSymbol actual = createUnion(intType, floatType);
-        ITypeSymbol formal = createUnion(intType, floatType);
+        ITypeSymbol actual = createUnionTypeSymbol(intType, floatType);
+        ITypeSymbol formal = createUnionTypeSymbol(intType, floatType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -140,8 +140,8 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_IntAndFloatToFloatAndInt_ReturnsTrue() {
-        ITypeSymbol actual = createUnion(intType, floatType);
-        ITypeSymbol formal = createUnion(floatType, intType);
+        ITypeSymbol actual = createUnionTypeSymbol(intType, floatType);
+        ITypeSymbol formal = createUnionTypeSymbol(floatType, intType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -152,8 +152,8 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_IntAndBoolToIntAndFloat_ReturnsFalse() {
-        ITypeSymbol actual = createUnion(intType, boolType);
-        ITypeSymbol formal = createUnion(intType, floatType);
+        ITypeSymbol actual = createUnionTypeSymbol(intType, boolType);
+        ITypeSymbol formal = createUnionTypeSymbol(intType, floatType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -163,8 +163,8 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_IntAndFloatToMixedInUnion_ReturnsFalse() {
-        ITypeSymbol actual = createUnion(intType, floatType);
-        ITypeSymbol formal = createUnion(mixedType);
+        ITypeSymbol actual = createUnionTypeSymbol(intType, floatType);
+        ITypeSymbol formal = createUnionTypeSymbol(mixedType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -174,8 +174,8 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_MixedInUnionToIntAndFloat_ReturnsFalse() {
-        ITypeSymbol actual = createUnion(mixedType);
-        ITypeSymbol formal = createUnion(intType, floatType);
+        ITypeSymbol actual = createUnionTypeSymbol(mixedType);
+        ITypeSymbol formal = createUnionTypeSymbol(intType, floatType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -187,8 +187,8 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_EmptyToEmpty_ReturnsTrue() {
-        ITypeSymbol actual = createUnion();
-        ITypeSymbol formal = createUnion();
+        ITypeSymbol actual = createUnionTypeSymbol();
+        ITypeSymbol formal = createUnionTypeSymbol();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -200,8 +200,8 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_MixedToMixed_ReturnsTrue() {
-        ITypeSymbol actual = createUnion(mixedType);
-        ITypeSymbol formal = createUnion(mixedType);
+        ITypeSymbol actual = createUnionTypeSymbol(mixedType);
+        ITypeSymbol formal = createUnionTypeSymbol(mixedType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);

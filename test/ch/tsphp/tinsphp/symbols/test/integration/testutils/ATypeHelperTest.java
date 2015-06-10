@@ -38,11 +38,11 @@ import static org.mockito.Mockito.when;
 public abstract class ATypeHelperTest extends ATypeTest
 {
 
-    protected IUnionTypeSymbol createUnion(ITypeSymbol... typeSymbols) {
-        return createUnion(typeHelper, typeSymbols);
+    protected IUnionTypeSymbol createUnionTypeSymbol(ITypeSymbol... typeSymbols) {
+        return createUnionTypeSymbol(typeHelper, typeSymbols);
     }
 
-    protected IUnionTypeSymbol createUnion(ITypeHelper theTypeHelper, ITypeSymbol... typeSymbols) {
+    protected IUnionTypeSymbol createUnionTypeSymbol(ITypeHelper theTypeHelper, ITypeSymbol... typeSymbols) {
         IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(theTypeHelper);
         for (ITypeSymbol typeSymbol : typeSymbols) {
             unionTypeSymbol.addTypeSymbol(typeSymbol);
@@ -58,11 +58,12 @@ public abstract class ATypeHelperTest extends ATypeTest
         return new UnionTypeSymbol(typeHelper);
     }
 
-    protected IIntersectionTypeSymbol createIntersectionType(ITypeSymbol... typeSymbols) {
-        return createIntersectionType(typeHelper, typeSymbols);
+    protected IIntersectionTypeSymbol createIntersectionTypeSymbol(ITypeSymbol... typeSymbols) {
+        return createIntersectionTypeSymbol(typeHelper, typeSymbols);
     }
 
-    protected IIntersectionTypeSymbol createIntersectionType(ITypeHelper theTypeHelper, ITypeSymbol... typeSymbols) {
+    protected IIntersectionTypeSymbol createIntersectionTypeSymbol(
+            ITypeHelper theTypeHelper, ITypeSymbol... typeSymbols) {
         IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol(theTypeHelper);
         for (ITypeSymbol typeSymbol : typeSymbols) {
             intersectionTypeSymbol.addTypeSymbol(typeSymbol);

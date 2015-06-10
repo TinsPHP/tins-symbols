@@ -23,7 +23,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_IntOrFloatToNum_HasRelation() {
-        ITypeSymbol actual = createUnion(intType, floatType);
+        ITypeSymbol actual = createUnionTypeSymbol(intType, floatType);
         ITypeSymbol formal = numType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
@@ -34,7 +34,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_StringOrIntOrFloatToScalar_HasRelation() {
-        ITypeSymbol actual = createUnion(stringType, intType, floatType);
+        ITypeSymbol actual = createUnionTypeSymbol(stringType, intType, floatType);
         ITypeSymbol formal = scalarType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
@@ -45,7 +45,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_IntOrArrayToMixed_HasRelation() {
-        ITypeSymbol actual = createUnion(intType, arrayType);
+        ITypeSymbol actual = createUnionTypeSymbol(intType, arrayType);
         ITypeSymbol formal = mixedType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
@@ -56,7 +56,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_NumOrArrayToMixed_HasRelation() {
-        ITypeSymbol actual = createUnion(numType, arrayType);
+        ITypeSymbol actual = createUnionTypeSymbol(numType, arrayType);
         ITypeSymbol formal = mixedType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
@@ -67,7 +67,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_ArrayOrIntOrFooToMixed_HasRelation() {
-        ITypeSymbol actual = createUnion(arrayType, intType, fooType);
+        ITypeSymbol actual = createUnionTypeSymbol(arrayType, intType, fooType);
         ITypeSymbol formal = mixedType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
@@ -78,7 +78,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_IntOrFloatToInt_HasNoRelation() {
-        ITypeSymbol actual = createUnion(intType, floatType);
+        ITypeSymbol actual = createUnionTypeSymbol(intType, floatType);
         ITypeSymbol formal = intType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
@@ -89,7 +89,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_IntOrArrayOrFloatToNum_HasNoRelation() {
-        ITypeSymbol actual = createUnion(intType, arrayType, floatType);
+        ITypeSymbol actual = createUnionTypeSymbol(intType, arrayType, floatType);
         ITypeSymbol formal = numType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
@@ -102,7 +102,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_EmptyToInt_HasRelation() {
-        ITypeSymbol actual = createUnion();
+        ITypeSymbol actual = createUnionTypeSymbol();
         ITypeSymbol formal = intType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
@@ -113,7 +113,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_EmptyToFoo_HasRelation() {
-        ITypeSymbol actual = createUnion();
+        ITypeSymbol actual = createUnionTypeSymbol();
         ITypeSymbol formal = fooType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
@@ -124,7 +124,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_EmptyToMixed_HasRelation() {
-        ITypeSymbol actual = createUnion();
+        ITypeSymbol actual = createUnionTypeSymbol();
         ITypeSymbol formal = mixedType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
@@ -135,7 +135,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void isFirstSameOrParentTypeOfSecond_EmptyToInt_ReturnFalse() {
-        ITypeSymbol actual = createUnion();
+        ITypeSymbol actual = createUnionTypeSymbol();
         ITypeSymbol formal = intType;
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
@@ -149,7 +149,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
     @Test
     public void isFirstSameOrSubTypeOfSecond_IntToIntOrFloat_HasRelation() {
         ITypeSymbol actual = intType;
-        ITypeSymbol formal = createUnion(intType, floatType);
+        ITypeSymbol formal = createUnionTypeSymbol(intType, floatType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -160,7 +160,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
     @Test
     public void isFirstSameOrSubTypeOfSecond_IntToNumOrFoo_HasRelation() {
         ITypeSymbol actual = intType;
-        ITypeSymbol formal = createUnion(numType, fooType);
+        ITypeSymbol formal = createUnionTypeSymbol(numType, fooType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -171,7 +171,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
     @Test
     public void isFirstSameOrSubTypeOfSecond_IntToArrayOrStringOrNumOrFoo_HasRelation() {
         ITypeSymbol actual = intType;
-        ITypeSymbol formal = createUnion(arrayType, stringType, numType, fooType);
+        ITypeSymbol formal = createUnionTypeSymbol(arrayType, stringType, numType, fooType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -182,7 +182,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
     @Test
     public void isFirstSameOrSubTypeOfSecond_IntToArrayOrScalar_HasRelation() {
         ITypeSymbol actual = intType;
-        ITypeSymbol formal = createUnion(arrayType, scalarType);
+        ITypeSymbol formal = createUnionTypeSymbol(arrayType, scalarType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -193,7 +193,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
     @Test
     public void isFirstSameOrSubTypeOfSecond_IntToFloatOrString_HasNoRelation() {
         ITypeSymbol actual = intType;
-        ITypeSymbol formal = createUnion(floatType, stringType);
+        ITypeSymbol formal = createUnionTypeSymbol(floatType, stringType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -204,7 +204,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
     @Test
     public void isFirstSameOrSubTypeOfSecond_IntToArrayOrFoo_HasNoRelation() {
         ITypeSymbol actual = intType;
-        ITypeSymbol formal = createUnion(arrayType, fooType);
+        ITypeSymbol formal = createUnionTypeSymbol(arrayType, fooType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -217,7 +217,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
     @Test
     public void isFirstSameOrSubTypeOfSecond_IntToEmpty_HasNoRelation() {
         ITypeSymbol actual = intType;
-        ITypeSymbol formal = createUnion();
+        ITypeSymbol formal = createUnionTypeSymbol();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -228,7 +228,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
     @Test
     public void isFirstSameOrSubTypeOfSecond_ArrayToEmpty_HasNoRelation() {
         ITypeSymbol actual = arrayType;
-        ITypeSymbol formal = createUnion();
+        ITypeSymbol formal = createUnionTypeSymbol();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -239,7 +239,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
     @Test
     public void isFirstSameOrSubTypeOfSecond_InterfaceAToEmpty_HasNoRelation() {
         ITypeSymbol actual = interfaceAType;
-        ITypeSymbol formal = createUnion();
+        ITypeSymbol formal = createUnionTypeSymbol();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -250,7 +250,7 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
     @Test
     public void isFirstSameOrParentTypeOfSecond_InterfaceAToEmpty_ReturnsTrue() {
         ITypeSymbol actual = interfaceAType;
-        ITypeSymbol formal = createUnion();
+        ITypeSymbol formal = createUnionTypeSymbol();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         TypeHelperDto result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
@@ -262,8 +262,8 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_IntOrFloatToNumOrString_HasRelation() {
-        ITypeSymbol actual = createUnion(intType, floatType);
-        ITypeSymbol formal = createUnion(numType, stringType);
+        ITypeSymbol actual = createUnionTypeSymbol(intType, floatType);
+        ITypeSymbol formal = createUnionTypeSymbol(numType, stringType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -273,8 +273,8 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_IntOrFooToScalarOrArrayOrIA_HasRelation() {
-        ITypeSymbol actual = createUnion(intType, fooType);
-        ITypeSymbol formal = createUnion(scalarType, arrayType, interfaceAType);
+        ITypeSymbol actual = createUnionTypeSymbol(intType, fooType);
+        ITypeSymbol formal = createUnionTypeSymbol(scalarType, arrayType, interfaceAType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -284,8 +284,8 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_StringOrFooToNumOrArrayOrIA_HasNoRelation() {
-        ITypeSymbol actual = createUnion(stringType, fooType);
-        ITypeSymbol formal = createUnion(numType, arrayType, interfaceAType);
+        ITypeSymbol actual = createUnionTypeSymbol(stringType, fooType);
+        ITypeSymbol formal = createUnionTypeSymbol(numType, arrayType, interfaceAType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -297,8 +297,8 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_EmptyToEmpty_HasRelation() {
-        ITypeSymbol actual = createUnion();
-        ITypeSymbol formal = createUnion();
+        ITypeSymbol actual = createUnionTypeSymbol();
+        ITypeSymbol formal = createUnionTypeSymbol();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -308,8 +308,8 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void isFirstSameOrParentTypeOfSecond_EmptyToEmpty_ReturnsTrue() {
-        ITypeSymbol actual = createUnion();
-        ITypeSymbol formal = createUnion();
+        ITypeSymbol actual = createUnionTypeSymbol();
+        ITypeSymbol formal = createUnionTypeSymbol();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         TypeHelperDto result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
@@ -321,8 +321,8 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_MixedToMixed_HasRelation() {
-        ITypeSymbol actual = createUnion(mixedType);
-        ITypeSymbol formal = createUnion(mixedType);
+        ITypeSymbol actual = createUnionTypeSymbol(mixedType);
+        ITypeSymbol formal = createUnionTypeSymbol(mixedType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -332,8 +332,8 @@ public class TypeHelperWithUnionTypesTest extends ATypeHelperTest
 
     @Test
     public void isFirstSameOrParentTypeOfSecond_MixedToMixed_ReturnsTrue() {
-        ITypeSymbol actual = createUnion(mixedType);
-        ITypeSymbol formal = createUnion(mixedType);
+        ITypeSymbol actual = createUnionTypeSymbol(mixedType);
+        ITypeSymbol formal = createUnionTypeSymbol(mixedType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         TypeHelperDto result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);

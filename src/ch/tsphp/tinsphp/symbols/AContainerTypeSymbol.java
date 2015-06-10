@@ -152,7 +152,15 @@ public abstract class AContainerTypeSymbol extends APolymorphicTypeSymbol implem
             hasChanged = addAndSimplify(absoluteName, typeSymbol);
         }
 
-        hasAbsoluteNameChanged = hasAbsoluteNameChanged || hasChanged;
+        if (hasChanged) {
+            if (typeSymbol instanceof IPolymorphicTypeSymbol && !((IPolymorphicTypeSymbol) typeSymbol).isFixed()) {
+                ++nonFixedTypesCount;
+            }
+            if (typeSymbol instanceof IObservableTypeSymbol) {
+                ((IObservableTypeSymbol) typeSymbol).registerObservableListener(this);
+            }
+            hasAbsoluteNameChanged = true;
+        }
 
         return hasChanged;
     }

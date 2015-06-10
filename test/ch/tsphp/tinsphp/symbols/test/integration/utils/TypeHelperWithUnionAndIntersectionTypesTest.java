@@ -19,8 +19,8 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_IntInIntersectionToIntInUnion_ReturnsTrue() {
-        ITypeSymbol actual = createIntersectionType(intType);
-        ITypeSymbol formal = createUnion(intType);
+        ITypeSymbol actual = createIntersectionTypeSymbol(intType);
+        ITypeSymbol formal = createUnionTypeSymbol(intType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -30,8 +30,8 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_IntInUnionToIntInIntersection_ReturnsTrue() {
-        ITypeSymbol actual = createUnion(intType);
-        ITypeSymbol formal = createIntersectionType(intType);
+        ITypeSymbol actual = createUnionTypeSymbol(intType);
+        ITypeSymbol formal = createIntersectionTypeSymbol(intType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -41,8 +41,8 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_IntInIntersectionToMixedInUnion_ReturnsFalse() {
-        ITypeSymbol actual = createIntersectionType(intType);
-        ITypeSymbol formal = createUnion(mixedType);
+        ITypeSymbol actual = createIntersectionTypeSymbol(intType);
+        ITypeSymbol formal = createUnionTypeSymbol(mixedType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -52,8 +52,8 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_IntInUnionToMixedInIntersection_ReturnsFalse() {
-        ITypeSymbol actual = createUnion(intType);
-        ITypeSymbol formal = createIntersectionType(mixedType);
+        ITypeSymbol actual = createUnionTypeSymbol(intType);
+        ITypeSymbol formal = createIntersectionTypeSymbol(mixedType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -65,8 +65,8 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_EmptyUnionToEmptyIntersection_ReturnsFalse() {
-        ITypeSymbol actual = createUnion();
-        ITypeSymbol formal = createIntersectionType();
+        ITypeSymbol actual = createUnionTypeSymbol();
+        ITypeSymbol formal = createIntersectionTypeSymbol();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -77,8 +77,8 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSameType_EmptyIntersectionToEmptyUnion_ReturnsFalse() {
-        ITypeSymbol actual = createIntersectionType();
-        ITypeSymbol formal = createUnion();
+        ITypeSymbol actual = createIntersectionTypeSymbol();
+        ITypeSymbol formal = createUnionTypeSymbol();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -90,8 +90,8 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSame_UnionWithMixedToIntersectionWithMixed_ReturnsTrue() {
-        ITypeSymbol actual = createUnion(mixedType);
-        ITypeSymbol formal = createIntersectionType(mixedType);
+        ITypeSymbol actual = createUnionTypeSymbol(mixedType);
+        ITypeSymbol formal = createIntersectionTypeSymbol(mixedType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -101,8 +101,8 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSame_IntersectionWithMixedToUnionWithMixed_ReturnsTrue() {
-        ITypeSymbol actual = createIntersectionType(mixedType);
-        ITypeSymbol formal = createUnion(mixedType);
+        ITypeSymbol actual = createIntersectionTypeSymbol(mixedType);
+        ITypeSymbol formal = createUnionTypeSymbol(mixedType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -112,8 +112,8 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSame_EmptyIntersectionToUnionWithMixed_ReturnsTrue() {
-        ITypeSymbol actual = createIntersectionType();
-        ITypeSymbol formal = createUnion(mixedType);
+        ITypeSymbol actual = createIntersectionTypeSymbol();
+        ITypeSymbol formal = createUnionTypeSymbol(mixedType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);
@@ -123,8 +123,8 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void areSame_UnionWithMixedToEmptyIntersection_ReturnsTrue() {
-        ITypeSymbol actual = createUnion(mixedType);
-        ITypeSymbol formal = createIntersectionType();
+        ITypeSymbol actual = createUnionTypeSymbol(mixedType);
+        ITypeSymbol formal = createIntersectionTypeSymbol();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         boolean result = typeHelper.areSame(actual, formal);

@@ -130,7 +130,7 @@ public class IntersectionTypeSymbolAddTypeTest extends ATypeHelperTest
 
     @Test
     public void addTypeSymbol_EmptyAndIsUnionContainingIntAndFloat_ReturnsTrueAndIntersectionContainsUnion() {
-        IUnionTypeSymbol unionTypeSymbol = createUnion(intType, floatType);
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(intType, floatType);
 
         //act
         IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol();
@@ -148,7 +148,7 @@ public class IntersectionTypeSymbolAddTypeTest extends ATypeHelperTest
 
         //arrange
         intersectionTypeSymbol.addTypeSymbol(intType);
-        IUnionTypeSymbol unionTypeSymbol = createUnion(intType, boolType);
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(intType, boolType);
 
         //act
         boolean result = intersectionTypeSymbol.addTypeSymbol(unionTypeSymbol);
@@ -161,7 +161,7 @@ public class IntersectionTypeSymbolAddTypeTest extends ATypeHelperTest
     //see TINS-406 add single type in intersection to union
     @Test
     public void addTypeSymbol_EmptyAndIsUnionContainingInt_ReturnsTrueAndIntersectionContainsIntAsSingleType() {
-        IUnionTypeSymbol unionTypeSymbol = createUnion(intType);
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(intType);
 
         //act
         IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol();
@@ -181,7 +181,7 @@ public class IntersectionTypeSymbolAddTypeTest extends ATypeHelperTest
 
         //arrange
         intersectionTypeSymbol.addTypeSymbol(floatType);
-        IUnionTypeSymbol unionTypeSymbol = createUnion(intType);
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(intType);
 
         //act
         boolean result = intersectionTypeSymbol.addTypeSymbol(unionTypeSymbol);
@@ -353,7 +353,7 @@ public class IntersectionTypeSymbolAddTypeTest extends ATypeHelperTest
         overloadBindings.addUpperTypeBound("T1", intType);
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
         overloadBindings.bind(convertibleTypeSymbol, asList("T1"));
-        IUnionTypeSymbol unionTypeSymbol = createUnion(convertibleTypeSymbol, stringType);
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(convertibleTypeSymbol, stringType);
         intersectionTypeSymbol.addTypeSymbol(unionTypeSymbol);
 
         //act
@@ -403,7 +403,7 @@ public class IntersectionTypeSymbolAddTypeTest extends ATypeHelperTest
         overloadBindings.addUpperTypeBound("T1", numType);
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
         overloadBindings.bind(convertibleTypeSymbol, asList("T1"));
-        IUnionTypeSymbol unionTypeSymbol = createUnion(convertibleTypeSymbol, stringType);
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(convertibleTypeSymbol, stringType);
         intersectionTypeSymbol.addTypeSymbol(unionTypeSymbol);
         IConvertibleTypeSymbol subtypeConvertible = createConvertibleType(intType, symbolFactory, typeHelper);
 
@@ -465,7 +465,7 @@ public class IntersectionTypeSymbolAddTypeTest extends ATypeHelperTest
         overloadBindings.bind(convertibleTypeSymbol1, asList("T1"));
         IConvertibleTypeSymbol convertibleTypeSymbol2 = createConvertibleType();
         overloadBindings.bind(convertibleTypeSymbol2, asList("T2"));
-        IUnionTypeSymbol unionTypeSymbol = createUnion(convertibleTypeSymbol1, convertibleTypeSymbol2);
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(convertibleTypeSymbol1, convertibleTypeSymbol2);
         intersectionTypeSymbol.addTypeSymbol(unionTypeSymbol);
         IConvertibleTypeSymbol subtypeConvertible = createConvertibleType(numType, symbolFactory, typeHelper);
 
@@ -526,7 +526,7 @@ public class IntersectionTypeSymbolAddTypeTest extends ATypeHelperTest
         overloadBindings.bind(convertibleTypeSymbol1, asList("T1"));
         IConvertibleTypeSymbol convertibleTypeSymbol2 = createConvertibleType();
         overloadBindings.bind(convertibleTypeSymbol2, asList("T2"));
-        IUnionTypeSymbol unionTypeSymbol = createUnion(convertibleTypeSymbol1, convertibleTypeSymbol2);
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(convertibleTypeSymbol1, convertibleTypeSymbol2);
         intersectionTypeSymbol.addTypeSymbol(unionTypeSymbol);
 
         //act
@@ -572,7 +572,7 @@ public class IntersectionTypeSymbolAddTypeTest extends ATypeHelperTest
         overloadBindings.addUpperTypeBound("T1", intType);
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
         overloadBindings.bind(convertibleTypeSymbol, asList("T1"));
-        IUnionTypeSymbol unionTypeSymbol = createUnion(convertibleTypeSymbol, stringType);
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(convertibleTypeSymbol, stringType);
         intersectionTypeSymbol.addTypeSymbol(unionTypeSymbol);
 
         //act
@@ -627,7 +627,7 @@ public class IntersectionTypeSymbolAddTypeTest extends ATypeHelperTest
         overloadBindings.bind(convertibleTypeSymbol1, asList("T1"));
         IConvertibleTypeSymbol convertibleTypeSymbol2 = createConvertibleType();
         overloadBindings.bind(convertibleTypeSymbol2, asList("T2"));
-        IUnionTypeSymbol unionTypeSymbol = createUnion(convertibleTypeSymbol1, convertibleTypeSymbol2);
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(convertibleTypeSymbol1, convertibleTypeSymbol2);
         intersectionTypeSymbol.addTypeSymbol(unionTypeSymbol);
 
         //act
@@ -654,7 +654,7 @@ public class IntersectionTypeSymbolAddTypeTest extends ATypeHelperTest
         overloadBindings.bind(convertibleTypeSymbol1, asList("T1"));
         IConvertibleTypeSymbol convertibleTypeSymbol2 = createConvertibleType();
         overloadBindings.bind(convertibleTypeSymbol2, asList("T2"));
-        IUnionTypeSymbol unionTypeSymbol = createUnion(convertibleTypeSymbol1, convertibleTypeSymbol2);
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(convertibleTypeSymbol1, convertibleTypeSymbol2);
         intersectionTypeSymbol.addTypeSymbol(unionTypeSymbol);
 
         //act

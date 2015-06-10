@@ -860,7 +860,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
-        IUnionTypeSymbol numOrString = createUnion(typeHelper, numType, stringType);
+        IUnionTypeSymbol numOrString = createUnionTypeSymbol(typeHelper, numType, stringType);
         ITypeSymbol actual = numOrString;
         IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
         IOverloadBindings bindings = symbolFactory.createOverloadBindings();
@@ -888,7 +888,8 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
-        IIntersectionTypeSymbol IBAndISubA = createIntersectionType(typeHelper, interfaceBType, interfaceSubAType);
+        IIntersectionTypeSymbol IBAndISubA = createIntersectionTypeSymbol(typeHelper, interfaceBType,
+                interfaceSubAType);
         ITypeSymbol actual = IBAndISubA;
         IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
         IOverloadBindings bindings = symbolFactory.createOverloadBindings();
@@ -916,13 +917,13 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
-        IIntersectionTypeSymbol IBAndISubA = createIntersectionType(typeHelper, interfaceBType, interfaceSubAType);
+        IIntersectionTypeSymbol IBAndISubA = createIntersectionTypeSymbol(typeHelper, interfaceBType, interfaceSubAType);
         ITypeSymbol actual = IBAndISubA;
         IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
         IOverloadBindings bindings = symbolFactory.createOverloadBindings();
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.bind(formal, asList("Ta"));
-        IUnionTypeSymbol isIAOrIB = createUnion(typeHelper, interfaceBType, interfaceAType);
+        IUnionTypeSymbol isIAOrIB = createUnionTypeSymbol(typeHelper, interfaceBType, interfaceAType);
         bindings.addUpperTypeBound("Ta", isIAOrIB);
 
         //act
@@ -946,14 +947,14 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
 
         //arrange
         IConvertibleTypeSymbol asISubA = createConvertibleType(interfaceSubAType, symbolFactory, typeHelper);
-        IIntersectionTypeSymbol IBAndAsISubA = createIntersectionType(typeHelper, interfaceBType, asISubA);
-        IUnionTypeSymbol IBAndAsISubAOrIA = createUnion(typeHelper, IBAndAsISubA, interfaceAType);
+        IIntersectionTypeSymbol IBAndAsISubA = createIntersectionTypeSymbol(typeHelper, interfaceBType, asISubA);
+        IUnionTypeSymbol IBAndAsISubAOrIA = createUnionTypeSymbol(typeHelper, IBAndAsISubA, interfaceAType);
         ITypeSymbol actual = IBAndAsISubAOrIA;
         IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
         IOverloadBindings bindings = symbolFactory.createOverloadBindings();
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.bind(formal, asList("Ta"));
-        IUnionTypeSymbol isIAOrIB = createUnion(typeHelper, interfaceBType, interfaceAType);
+        IUnionTypeSymbol isIAOrIB = createUnionTypeSymbol(typeHelper, interfaceBType, interfaceAType);
         bindings.addUpperTypeBound("Ta", isIAOrIB);
 
         //act

@@ -102,7 +102,7 @@ public class TypeHelperWithImplicitConversionsTest extends ATypeHelperTest
         ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
 
         //arrange
-        ITypeSymbol actual = createUnion(typeHelper, intType, floatType);
+        ITypeSymbol actual = createUnionTypeSymbol(typeHelper, intType, floatType);
         ITypeSymbol formal = floatType;
 
         //act
@@ -123,7 +123,7 @@ public class TypeHelperWithImplicitConversionsTest extends ATypeHelperTest
         ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
 
         //arrange
-        ITypeSymbol actual = createUnion(typeHelper, intType);
+        ITypeSymbol actual = createUnionTypeSymbol(typeHelper, intType);
         ITypeSymbol formal = floatType;
 
         //act
@@ -145,7 +145,7 @@ public class TypeHelperWithImplicitConversionsTest extends ATypeHelperTest
         ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
 
         //arrange
-        ITypeSymbol actual = createUnion(typeHelper, intType, stringType);
+        ITypeSymbol actual = createUnionTypeSymbol(typeHelper, intType, stringType);
         ITypeSymbol formal = floatType;
 
         //act

@@ -27,8 +27,8 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
         when(barType.getParentTypeSymbols()).thenReturn(set(interfaceAType, interfaceBType));
         when(barType.getAbsoluteName()).thenReturn("Bar");
 
-        ITypeSymbol actual = createUnion(fooType, barType);
-        ITypeSymbol formal = createIntersectionType(interfaceBType, interfaceAType);
+        ITypeSymbol actual = createUnionTypeSymbol(fooType, barType);
+        ITypeSymbol formal = createIntersectionTypeSymbol(interfaceBType, interfaceAType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -38,8 +38,8 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_IntOrFloatToIntAndFloat_HasNoRelation() {
-        ITypeSymbol actual = createUnion(intType, floatType);
-        ITypeSymbol formal = createIntersectionType(intType, floatType);
+        ITypeSymbol actual = createUnionTypeSymbol(intType, floatType);
+        ITypeSymbol formal = createIntersectionTypeSymbol(intType, floatType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -52,8 +52,8 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_EmptyUnionToEmptyIntersection_HasRelation() {
-        ITypeSymbol actual = createUnion();
-        ITypeSymbol formal = createIntersectionType();
+        ITypeSymbol actual = createUnionTypeSymbol();
+        ITypeSymbol formal = createIntersectionTypeSymbol();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -63,8 +63,8 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void isFirstSameOrParentTypeOfSecond_EmptyUnionToEmptyIntersection_ReturnsFalse() {
-        ITypeSymbol actual = createUnion();
-        ITypeSymbol formal = createIntersectionType();
+        ITypeSymbol actual = createUnionTypeSymbol();
+        ITypeSymbol formal = createIntersectionTypeSymbol();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         TypeHelperDto result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
@@ -74,8 +74,8 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_EmptyIntersectionToEmptyUnion_HasNoRelation() {
-        ITypeSymbol actual = createIntersectionType();
-        ITypeSymbol formal = createUnion();
+        ITypeSymbol actual = createIntersectionTypeSymbol();
+        ITypeSymbol formal = createUnionTypeSymbol();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -85,8 +85,8 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void isFirstSameOrParentTypeOfSecond_EmptyIntersectionToEmptyUnion_ReturnsTrue() {
-        ITypeSymbol actual = createIntersectionType();
-        ITypeSymbol formal = createUnion();
+        ITypeSymbol actual = createIntersectionTypeSymbol();
+        ITypeSymbol formal = createUnionTypeSymbol();
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         TypeHelperDto result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
@@ -99,8 +99,8 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_UnionWithMixedToIntersectionWithMixed_HasRelation() {
-        ITypeSymbol actual = createUnion(mixedType);
-        ITypeSymbol formal = createIntersectionType(mixedType);
+        ITypeSymbol actual = createUnionTypeSymbol(mixedType);
+        ITypeSymbol formal = createIntersectionTypeSymbol(mixedType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -110,8 +110,8 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void isFirstSameOrParentTypeOfSecond_UnionWithMixedToIntersectionMixed_ReturnsTrue() {
-        ITypeSymbol actual = createUnion(mixedType);
-        ITypeSymbol formal = createIntersectionType(mixedType);
+        ITypeSymbol actual = createUnionTypeSymbol(mixedType);
+        ITypeSymbol formal = createIntersectionTypeSymbol(mixedType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         TypeHelperDto result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);
@@ -121,8 +121,8 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void isFirstSameOrSubTypeOfSecond_IntersectionWithMixedToUnionWithMixed_HasRelation() {
-        ITypeSymbol actual = createIntersectionType(mixedType);
-        ITypeSymbol formal = createUnion(mixedType);
+        ITypeSymbol actual = createIntersectionTypeSymbol(mixedType);
+        ITypeSymbol formal = createUnionTypeSymbol(mixedType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -132,8 +132,8 @@ public class TypeHelperWithUnionAndIntersectionTypesTest extends ATypeHelperTest
 
     @Test
     public void isFirstSameOrParentTypeOfSecond_IntersectionMixedToUnionWithMixed_ReturnsTrue() {
-        ITypeSymbol actual = createIntersectionType(mixedType);
-        ITypeSymbol formal = createUnion(mixedType);
+        ITypeSymbol actual = createIntersectionTypeSymbol(mixedType);
+        ITypeSymbol formal = createUnionTypeSymbol(mixedType);
 
         ITypeHelper typeHelper = createTypeHelperAndInit();
         TypeHelperDto result = typeHelper.isFirstSameOrParentTypeOfSecond(actual, formal);

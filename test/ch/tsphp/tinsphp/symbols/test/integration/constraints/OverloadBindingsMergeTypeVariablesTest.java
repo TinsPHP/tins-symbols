@@ -227,7 +227,7 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
         overloadBindings.addUpperTypeBound(t1, stringType);
         overloadBindings.bind(convertibleTypeSymbol, asList(t1));
-        IUnionTypeSymbol unionTypeSymbol = createUnion(convertibleTypeSymbol);
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(convertibleTypeSymbol);
         overloadBindings.addUpperTypeBound(t3, unionTypeSymbol);
 
         //act
@@ -256,7 +256,7 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
         overloadBindings.addUpperTypeBound(t1, stringType);
         overloadBindings.bind(convertibleTypeSymbol, asList(t1));
-        IUnionTypeSymbol unionTypeSymbol = createUnion(convertibleTypeSymbol);
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(convertibleTypeSymbol);
         overloadBindings.addLowerTypeBound(t3, unionTypeSymbol);
 
         //act
@@ -285,7 +285,7 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
         overloadBindings.addUpperTypeBound(t1, fooType);
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
         overloadBindings.bind(convertibleTypeSymbol, asList(t1));
-        IUnionTypeSymbol unionTypeSymbol = createUnion(intType, convertibleTypeSymbol);
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(intType, convertibleTypeSymbol);
         overloadBindings.addUpperTypeBound(t3, unionTypeSymbol);
 
         //act
@@ -314,7 +314,7 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
         overloadBindings.addUpperTypeBound(t1, fooType);
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
         overloadBindings.bind(convertibleTypeSymbol, asList(t1));
-        IUnionTypeSymbol unionTypeSymbol = createUnion(intType, convertibleTypeSymbol);
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(intType, convertibleTypeSymbol);
         overloadBindings.addLowerTypeBound(t3, unionTypeSymbol);
 
         //act
@@ -370,7 +370,7 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
         bindings.addVariable("$t3", new TypeVariableReference(t3));
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
         bindings.bind(convertibleTypeSymbol, asList(t1));
-        IUnionTypeSymbol unionTypeSymbol = createUnion(convertibleTypeSymbol);
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(convertibleTypeSymbol);
         bindings.addUpperTypeBound(t3, unionTypeSymbol);
 
         //act
@@ -401,7 +401,7 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
         bindings.addUpperTypeBound(t1, fooType);
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
         bindings.bind(convertibleTypeSymbol, asList(t1));
-        IUnionTypeSymbol unionTypeSymbol = createUnion(floatType, convertibleTypeSymbol);
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(floatType, convertibleTypeSymbol);
         bindings.addUpperTypeBound(t3, unionTypeSymbol);
 
         //act
@@ -432,7 +432,7 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
         bindings.addUpperTypeBound(t1, fooType);
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
         bindings.bind(convertibleTypeSymbol, asList(t1));
-        IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionType(floatType, convertibleTypeSymbol);
+        IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol(floatType, convertibleTypeSymbol);
         bindings.addLowerTypeBound(t3, intersectionTypeSymbol);
 
         //act
@@ -468,12 +468,12 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
 
         IConvertibleTypeSymbol asT1 = createConvertibleType();
         bindings.bind(asT1, asList(t1));
-        IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionType(floatType, asT1);
-        IUnionTypeSymbol unionTypeSymbol = createUnion(intType, intersectionTypeSymbol);
+        IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol(floatType, asT1);
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(intType, intersectionTypeSymbol);
         bindings.addUpperTypeBound(t3, unionTypeSymbol);
 
-        IUnionTypeSymbol unionTypeSymbol2 = createUnion(interfaceSubAType, asT1);
-        IIntersectionTypeSymbol intersectionTypeSymbol2 = createIntersectionType(arrayType, unionTypeSymbol2);
+        IUnionTypeSymbol unionTypeSymbol2 = createUnionTypeSymbol(interfaceSubAType, asT1);
+        IIntersectionTypeSymbol intersectionTypeSymbol2 = createIntersectionTypeSymbol(arrayType, unionTypeSymbol2);
         bindings.addLowerTypeBound(t4, intersectionTypeSymbol2);
 
         //act
