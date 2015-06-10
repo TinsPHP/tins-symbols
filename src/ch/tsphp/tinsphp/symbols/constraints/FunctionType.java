@@ -208,7 +208,9 @@ public class FunctionType implements IFunctionType
                 = overloadBindings.getTypeVariableReference(TinsPHPConstants.RETURN_VARIABLE_NAME);
         addTypeVariableToTypeParameters(dto);
 
-        for (String nonFixedTypeParameter : nonFixedTypeParameters) {
+        //need to make a copy since they might be renamed in addNonFixedTypeVariableToTypeParameters
+        Set<String> copyNonFixedTypeParamter = new HashSet<>(nonFixedTypeParameters);
+        for (String nonFixedTypeParameter : copyNonFixedTypeParamter) {
             //Warning ! start code duplication, very similar to addTypeVariableToTypeParameters
             if (!typeVariablesAdded.contains(nonFixedTypeParameter)) {
                 addNonFixedTypeVariableToTypeParameters(dto, nonFixedTypeParameter);

@@ -78,8 +78,9 @@ public class TypeHelper implements ITypeHelper
     private void isFirstSameOrSubTypeOfSecond(TypeHelperDto dto) {
         if (areSame(dto.fromType, dto.toType)) {
             dto.relation = HAS_RELATION;
+        } else {
+            hasUpRelationFromTo(dto);
         }
-        hasUpRelationFromTo(dto);
     }
 
     private void hasUpRelationFromTo(TypeHelperDto dto) {

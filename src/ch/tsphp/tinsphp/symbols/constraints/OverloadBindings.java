@@ -455,6 +455,13 @@ public class OverloadBindings implements IOverloadBindings
 
             hasChanged = addToUpperIntersectionTypeSymbol(typeVariable, newTypeSymbol);
 
+            if (!hasChanged && newTypeSymbol instanceof IConvertibleTypeSymbol) {
+                IConvertibleTypeSymbol convertibleTypeSymbol = (IConvertibleTypeSymbol) newTypeSymbol;
+                if (convertibleTypeSymbol.getOverloadBindings() == this) {
+                    addLowerRefBound(convertibleTypeSymbol.getTypeVariable(), typeVariable, true);
+                }
+            }
+
             if (hasChanged && hasLowerRefBounds(typeVariable)) {
                 for (String refTypeVariable : lowerRefBounds.get(typeVariable)) {
                     addUpperTypeBoundAfterContainsCheck(refTypeVariable, newTypeSymbol);
