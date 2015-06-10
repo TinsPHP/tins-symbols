@@ -9,16 +9,16 @@ package ch.tsphp.tinsphp.symbols.constraints;
 import java.util.Map;
 import java.util.Set;
 
-public class PropagateDto
+public class PropagationDto
 {
     public final String returnTypeVariable;
     public final Set<String> parameterTypeVariables;
     public final Map<String, Set<String>> typeVariablesToVisit;
     public final Set<String> typeParameters;
-    public final Set<String> recursiveParameters;
+    public final Set<String> recursiveTypeParameters;
     public final Set<String> removeReturnTypeVariable;
 
-    public PropagateDto(
+    public PropagationDto(
             String theReturnTypeVariable,
             Set<String> theParameterTypeVariables,
             Map<String, Set<String>> theTypeVariablesToVisit,
@@ -29,7 +29,7 @@ public class PropagateDto
         parameterTypeVariables = theParameterTypeVariables;
         typeVariablesToVisit = theTypeVariablesToVisit;
         typeParameters = theParametricParameterTypeVariables;
-        recursiveParameters = theRecursiveParameters;
+        recursiveTypeParameters = theRecursiveParameters;
         removeReturnTypeVariable = theRemoveReturnTypeVariable;
     }
 }

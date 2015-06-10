@@ -668,15 +668,15 @@ public class OverloadBindings implements IOverloadBindings
 
         String returnTypeVariable = variable2TypeVariable.get(TinsPHPConstants.RETURN_VARIABLE_NAME).getTypeVariable();
         Map<String, Set<String>> typeVariablesToVisit = new HashMap<>(typeVariable2Variables);
-        Set<String> recursiveParameterTypeVariables = new HashSet<>();
-        Set<String> parametricParameterTypeVariables = new HashSet<>();
+        Set<String> typeParameters = new HashSet<>();
+        Set<String> recursiveTypeParameters = new HashSet<>();
         Set<String> removeReturnTypeVariable = new HashSet<>();
-        PropagateDto dto = new PropagateDto(
+        PropagationDto dto = new PropagationDto(
                 returnTypeVariable,
                 parameterTypeVariables,
                 typeVariablesToVisit,
-                parametricParameterTypeVariables,
-                recursiveParameterTypeVariables,
+                typeParameters,
+                recursiveTypeParameters,
                 removeReturnTypeVariable);
 
         collectTypeParameters(dto);
@@ -693,24 +693,28 @@ public class OverloadBindings implements IOverloadBindings
         //in case of recursion
         removeUpperRefBounds(returnTypeVariable);
 
-        Set<String> returnVariableLowerRefs = lowerRefBounds.get(returnTypeVariable);
-        for (String refTypeVariable : removeReturnTypeVariable) {
-            upperRefBounds.get(refTypeVariable).remove(returnTypeVariable);
-            returnVariableLowerRefs.remove(refTypeVariable);
-        }
+        returnTypeVariable = renameToRecursiveTypeParameters(dto);
 
-        if (hasConstantReturn) {
-            removeRefBounds(returnTypeVariable);
+        //if we had a recursive type parameter (hence return type variable changed), then we already did this
+        if (returnTypeVariable.equals(dto.returnTypeVariable)) {
+            Set<String> returnVariableLowerRefs = lowerRefBounds.get(dto.returnTypeVariable);
+            for (String refTypeVariable : dto.removeReturnTypeVariable) {
+                upperRefBounds.get(refTypeVariable).remove(dto.returnTypeVariable);
+                returnVariableLowerRefs.remove(refTypeVariable);
+            }
+
+            if (hasConstantReturn) {
+                removeRefBounds(returnTypeVariable);
+            }
         }
 
         Map<String, String> variablesToRename = identifyVariablesToRename(dto);
         renameTypeVariables(variablesToRename);
-        renameRecursiveParameters(recursiveParameterTypeVariables);
 
         return dto.typeParameters;
     }
 
-    private void collectTypeParameters(PropagateDto dto) {
+    private void collectTypeParameters(PropagationDto dto) {
         for (String parameterTypeVariable : dto.parameterTypeVariables) {
             //the type variables of parameters are potential type parameters as well,
             // they are removed in propagateOrFixParameters if the parameter is fixed
@@ -727,7 +731,7 @@ public class OverloadBindings implements IOverloadBindings
         }
     }
 
-    private void searchForParametricTypes(PropagateDto dto, IContainerTypeSymbol containerType) {
+    private void searchForParametricTypes(PropagationDto dto, IContainerTypeSymbol containerType) {
         if (!containerType.isFixed()) {
             for (ITypeSymbol typeSymbol : containerType.getTypeSymbols().values()) {
                 if (typeSymbol instanceof IContainerTypeSymbol) {
@@ -751,7 +755,7 @@ public class OverloadBindings implements IOverloadBindings
         return isNotFixed;
     }
 
-    private void propagateReturnTypeVariableToParameters(final PropagateDto dto) {
+    private void propagateReturnTypeVariableToParameters(final PropagationDto dto) {
         if (hasLowerRefBounds(dto.returnTypeVariable)) {
             for (String refTypeVariable : lowerRefBounds.get(dto.returnTypeVariable)) {
                 boolean passedATypeParameter = false;
@@ -767,7 +771,7 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     private void propagateReturnTypeVariableDownwardsToParameters(
-            final String refTypeVariable, final PropagateDto dto, boolean passedATypeParameter) {
+            final String refTypeVariable, final PropagationDto dto, boolean passedATypeParameter) {
         if (hasLowerRefBounds(refTypeVariable)) {
             for (String refRefTypeVariable : lowerRefBounds.get(refTypeVariable)) {
                 boolean tmpPassedATypeParameter = passedATypeParameter;
@@ -794,7 +798,7 @@ public class OverloadBindings implements IOverloadBindings
         }
     }
 
-    private boolean propagateOrFixParameters(final PropagateDto dto) {
+    private boolean propagateOrFixParameters(final PropagationDto dto) {
 
         boolean hasConstantReturn = true;
 
@@ -802,11 +806,18 @@ public class OverloadBindings implements IOverloadBindings
             Set<String> parameterUpperRefBounds = upperRefBounds.get(parameterTypeVariable);
             if (doesContributeToTheReturnType(parameterTypeVariable, dto.returnTypeVariable)) {
                 hasConstantReturn = false;
+
+                Set<String> addToUpperRef = new HashSet<>();
                 for (String refTypeVariable : parameterUpperRefBounds) {
-                    if (!dto.parameterTypeVariables.contains(refTypeVariable)) {
-                        propagateTypeParameterUpwards(refTypeVariable, parameterTypeVariable, dto);
+                    if (!dto.typeParameters.contains(refTypeVariable)) {
+                        propagateTypeParameterUpwards(refTypeVariable, parameterTypeVariable, addToUpperRef, dto);
                     }
                 }
+
+                for (String refTypeVariable : addToUpperRef) {
+                    parameterUpperRefBounds.add(refTypeVariable);
+                }
+
             } else {
                 fixTypeParameter(parameterTypeVariable);
                 dto.typeParameters.remove(parameterTypeVariable);
@@ -897,31 +908,40 @@ public class OverloadBindings implements IOverloadBindings
                 && hasUpperTypeBounds(parameterTypeVariable);
     }
 
-    private boolean propagateOrFixTypeParameters(final PropagateDto dto, boolean hasAlreadyConstantReturn) {
+    private boolean propagateOrFixTypeParameters(final PropagationDto dto, boolean hasAlreadyConstantReturn) {
         boolean hasConstantReturn = hasAlreadyConstantReturn;
 
         Iterator<String> iterator = dto.typeParameters.iterator();
         while (iterator.hasNext()) {
-            String parametricParameterTypeVariable = iterator.next();
-            Set<String> parameterUpperRefBounds = upperRefBounds.get(parametricParameterTypeVariable);
-            if (doesContributeToTheReturnType(parametricParameterTypeVariable, dto.returnTypeVariable)) {
+            String typeParameter = iterator.next();
+            Set<String> parameterUpperRefBounds = upperRefBounds.get(typeParameter);
+            if (doesContributeToTheReturnType(typeParameter, dto.returnTypeVariable)) {
                 hasConstantReturn = false;
+
+                Set<String> addToUpperRef = new HashSet<>();
                 for (String refTypeVariable : parameterUpperRefBounds) {
                     if (!dto.typeParameters.contains(refTypeVariable)) {
-                        propagateTypeParameterUpwards(refTypeVariable, parametricParameterTypeVariable, dto);
+                        propagateTypeParameterUpwards(refTypeVariable, typeParameter, addToUpperRef, dto);
                     }
                 }
+
+                for (String refTypeVariable : addToUpperRef) {
+                    parameterUpperRefBounds.add(refTypeVariable);
+                }
+
             } else {
-                fixTypeParameter(parametricParameterTypeVariable);
+                fixTypeParameter(typeParameter);
                 iterator.remove();
             }
-            dto.typeVariablesToVisit.remove(parametricParameterTypeVariable);
+            dto.typeVariablesToVisit.remove(typeParameter);
         }
         return hasConstantReturn;
     }
 
 
-    private void propagateTypeParameterUpwards(String refTypeVariable, String parameterTypeVariable, PropagateDto dto) {
+    private void propagateTypeParameterUpwards(
+            String refTypeVariable, String typeParameter, Set<String> addToUpperRef, PropagationDto dto) {
+
         if (hasUpperRefBounds(refTypeVariable)) {
             Set<String> refUpperRefBounds = upperRefBounds.get(refTypeVariable);
             for (String refRefTypeVariable : refUpperRefBounds) {
@@ -930,14 +950,15 @@ public class OverloadBindings implements IOverloadBindings
                 if (!dto.typeParameters.contains(refTypeVariable)) {
                     refRefLowerRefBounds.remove(refTypeVariable);
                 }
-                if (!refRefLowerRefBounds.contains(parameterTypeVariable)) {
-                    if (isNotSelfReference(refRefTypeVariable, parameterTypeVariable)) {
-                        refRefLowerRefBounds.add(parameterTypeVariable);
+                if (!refRefLowerRefBounds.contains(typeParameter)) {
+                    if (isNotSelfReference(refRefTypeVariable, typeParameter)) {
+                        refRefLowerRefBounds.add(typeParameter);
+                        addToUpperRef.add(refRefTypeVariable);
                         if (!dto.typeParameters.contains(refRefTypeVariable)) {
-                            propagateTypeParameterUpwards(refRefTypeVariable, parameterTypeVariable, dto);
+                            propagateTypeParameterUpwards(refRefTypeVariable, typeParameter, addToUpperRef, dto);
                         }
                     } else {
-                        dto.recursiveParameters.add(parameterTypeVariable);
+                        dto.recursiveTypeParameters.add(typeParameter);
                     }
                 }
             }
@@ -961,12 +982,12 @@ public class OverloadBindings implements IOverloadBindings
         }
     }
 
-    private Map<String, String> identifyVariablesToRename(PropagateDto dto) {
+    private Map<String, String> identifyVariablesToRename(PropagationDto dto) {
         Map<String, String> variablesToRename = new HashMap<>();
 
         for (Map.Entry<String, Set<String>> entry : dto.typeVariablesToVisit.entrySet()) {
             String typeVariable = entry.getKey();
-            String parameterTypeVariable = tryToReduceToTypeParameter(typeVariable, dto.typeParameters);
+            String parameterTypeVariable = tryToReduceToTypeParameter(typeVariable, dto);
             if (parameterTypeVariable != null) {
                 variablesToRename.put(typeVariable, parameterTypeVariable);
             } else if (!hasLowerRefBounds(typeVariable)) {
@@ -979,15 +1000,16 @@ public class OverloadBindings implements IOverloadBindings
         return variablesToRename;
     }
 
-    private String tryToReduceToTypeParameter(String typeVariable, Set<String> typeParameters) {
+    private String tryToReduceToTypeParameter(String typeVariable, PropagationDto dto) {
         String renameTo = null;
         if (hasLowerRefBounds(typeVariable)) {
-            removeNonParameterLowerRefBounds(typeVariable, typeParameters);
+            removeNonParameterLowerRefBounds(typeVariable, dto);
+            //only remove upper ref if type variable has at least one type parameter as lower ref
             if (hasLowerRefBounds(typeVariable)) {
                 upperRefBounds.remove(typeVariable);
             }
 
-            String typeParameter = getTypeParameterIfSingleLowerRefBound(typeVariable, typeParameters);
+            String typeParameter = getTypeParameterIfSingleLowerRefBound(typeVariable, dto);
             if (typeParameter != null) {
                 if (haveSameLowerTypeBound(typeVariable, typeParameter)) {
                     renameTo = typeParameter;
@@ -997,23 +1019,23 @@ public class OverloadBindings implements IOverloadBindings
         return renameTo;
     }
 
-    private void removeNonParameterLowerRefBounds(String typeVariable, Set<String> parameterTypeVariables) {
+    private void removeNonParameterLowerRefBounds(String typeVariable, PropagationDto dto) {
         Iterator<String> iterator = lowerRefBounds.get(typeVariable).iterator();
         while (iterator.hasNext()) {
             String refTypeVariable = iterator.next();
-            if (!parameterTypeVariables.contains(refTypeVariable)) {
+            if (!dto.typeParameters.contains(refTypeVariable)) {
                 iterator.remove();
                 upperRefBounds.get(refTypeVariable).remove(typeVariable);
             }
         }
     }
 
-    private String getTypeParameterIfSingleLowerRefBound(String typeVariable, Set<String> parameterTypeVariables) {
+    private String getTypeParameterIfSingleLowerRefBound(String typeVariable, PropagationDto dto) {
         String parameterTypeVariable = null;
         Set<String> refTypeVariables = lowerRefBounds.get(typeVariable);
         if (refTypeVariables.size() == 1) {
             String refTypeVariable = refTypeVariables.iterator().next();
-            if (parameterTypeVariables.contains(refTypeVariable)) {
+            if (dto.typeParameters.contains(refTypeVariable)) {
                 parameterTypeVariable = refTypeVariable;
             }
         }
@@ -1044,39 +1066,61 @@ public class OverloadBindings implements IOverloadBindings
             // otherwise we create inadvertently a self ref even though we do not have one
             lowerRefBounds.get(typeVariable).remove(parameterTypeVariable);
             upperRefBounds.get(parameterTypeVariable).remove(typeVariable);
-            mergeFirstIntoSecondAfterContainsCheck(typeVariable, parameterTypeVariable);
+            mergeFirstIntoSecondAfterContainsCheck(typeVariable, parameterTypeVariable, false);
         }
     }
 
-    private void renameRecursiveParameters(Set<String> recursiveParameterTypeVariables) {
-        for (String parameterTypeVariable : recursiveParameterTypeVariables) {
+    private String renameToRecursiveTypeParameters(PropagationDto dto) {
+        String returnTypeVariable = dto.returnTypeVariable;
+        boolean needToRemoveReturnTypeVariable = true;
+
+        for (String typeParameter : dto.recursiveTypeParameters) {
             //could be already renamed by now
-            if (hasLowerRefBounds(parameterTypeVariable)) {
-                // typeVariablesToRemove is required since using an iterator does not work -- renaming could add
-                // further ref bounds (lower and upper)
-                Set<String> typeVariablesToRemove = new HashSet<>();
-                Set<String> parameterLowerRefs = lowerRefBounds.get(parameterTypeVariable);
-                for (String typeVariable : parameterLowerRefs) {
-                    if (hasLowerRefBounds(typeVariable)) {
-                        Set<String> typeVariableLowerRefBounds = lowerRefBounds.get(typeVariable);
-                        if (typeVariableLowerRefBounds.contains(parameterTypeVariable)) {
-                            // need to remove the existing ref before we rename otherwise we create a self ref (and
-                            // cause a ConcurrentModificationException)
-                            typeVariableLowerRefBounds.remove(parameterTypeVariable);
-                            mergeFirstIntoSecondAfterContainsCheck(typeVariable, parameterTypeVariable);
-                            typeVariablesToRemove.add(typeVariable);
+            if (hasUpperBounds(typeParameter)) {
+                Set<String> parameterUpperRefs = upperRefBounds.get(typeParameter);
+                boolean mergedOne = true;
+                //
+                while (mergedOne) {
+                    mergedOne = false;
+                    for (String typeVariable : parameterUpperRefs) {
+                        boolean isReturnTypeVariable = typeVariable.equals(returnTypeVariable);
+                        if (isReturnTypeVariable || hasReturnTypeVariableAsUpper(typeVariable, returnTypeVariable)) {
+                            dto.typeVariablesToVisit.remove(typeVariable);
+                            if (isReturnTypeVariable) {
+                                if (needToRemoveReturnTypeVariable) {
+                                    Set<String> returnVariableLowerRefs = lowerRefBounds.get(dto.returnTypeVariable);
+                                    for (String refTypeVariable : dto.removeReturnTypeVariable) {
+                                        if (hasUpperRefBounds(refTypeVariable)) {
+                                            upperRefBounds.get(refTypeVariable).remove(dto.returnTypeVariable);
+                                            returnVariableLowerRefs.remove(refTypeVariable);
+                                        }
+                                    }
+                                    needToRemoveReturnTypeVariable = false;
+                                }
+                                returnTypeVariable = typeParameter;
+                            }
+
+                            //could be a type parameter hence remove it, does not matter if it was not,
+                            // then it is not on the list (fast then using contains first)
+                            dto.typeParameters.remove(typeVariable);
+
+                            mergeFirstIntoSecondAfterContainsCheck(typeVariable, typeParameter, true);
+                            mergedOne = true;
+
+                            //need to break since parameterUpperRef might have changed
+                            break;
                         }
                     }
                 }
-
-                for (String typeVariable : typeVariablesToRemove) {
-                    //remove all lower otherwise we keep the cyclic ref
-                    parameterLowerRefs.remove(typeVariable);
-                }
-                //remove potential self ref
-                parameterLowerRefs.remove(parameterTypeVariable);
             }
         }
+        return returnTypeVariable;
+    }
+
+
+    private boolean hasReturnTypeVariableAsUpper(String typeVariable, String returnTypeVariable) {
+        return hasUpperBounds(typeVariable)
+                && upperRefBounds.get(typeVariable).contains(returnTypeVariable);
     }
 
     @Override
@@ -1092,7 +1136,7 @@ public class OverloadBindings implements IOverloadBindings
         }
 
         if (isNotSelfReference(firstTypeVariable, secondTypeVariable)) {
-            mergeFirstIntoSecondAfterContainsCheck(firstTypeVariable, secondTypeVariable);
+            mergeFirstIntoSecondAfterContainsCheck(firstTypeVariable, secondTypeVariable, false);
         }
     }
 
@@ -1187,7 +1231,8 @@ public class OverloadBindings implements IOverloadBindings
         return numberOfConvertibleApplications;
     }
 
-    private void mergeFirstIntoSecondAfterContainsCheck(String typeVariable, String newTypeVariable) {
+    private void mergeFirstIntoSecondAfterContainsCheck(String typeVariable, String newTypeVariable,
+            boolean avoidSelfRef) {
         if (hasLowerTypeBounds(typeVariable)) {
             addLowerTypeBoundAfterContainsCheck(newTypeVariable, lowerTypeBounds.remove(typeVariable));
         }
@@ -1197,13 +1242,17 @@ public class OverloadBindings implements IOverloadBindings
 
         if (hasLowerRefBounds(typeVariable)) {
             for (String lowerRefTypeVariable : lowerRefBounds.remove(typeVariable)) {
-                addLowerRefBound(newTypeVariable, lowerRefTypeVariable, true);
+                if (!avoidSelfRef || !newTypeVariable.equals(lowerRefTypeVariable)) {
+                    addLowerRefBound(newTypeVariable, lowerRefTypeVariable, true);
+                }
                 upperRefBounds.get(lowerRefTypeVariable).remove(typeVariable);
             }
         }
         if (hasUpperRefBounds(typeVariable)) {
             for (String upperRefTypeVariable : upperRefBounds.remove(typeVariable)) {
-                addLowerRefBound(upperRefTypeVariable, newTypeVariable, true);
+                if (!avoidSelfRef || !newTypeVariable.equals(upperRefTypeVariable)) {
+                    addLowerRefBound(upperRefTypeVariable, newTypeVariable, true);
+                }
                 lowerRefBounds.get(upperRefTypeVariable).remove(typeVariable);
             }
         }
