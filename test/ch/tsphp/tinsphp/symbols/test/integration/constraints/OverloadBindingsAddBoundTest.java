@@ -702,6 +702,41 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
+    //TINS-526 bool and arithmetic operators
+    @Test
+    public void
+    addUpperTypeBound_AddTwiceAsTWhereTLowerStringAndLowerIsIntOrFloatAndIntAsWellAsFloatHaveExplToString_LowerConstraintContainsString() {
+        //pre-arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions = new HashMap<>();
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions
+                = createConversions(pair(intType, asList(stringType)), pair(floatType, asList(stringType)));
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+
+        //arrange
+        String tx = "Tx";
+        String ty = "Ty";
+        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
+        overloadBindings.addVariable("$y", new TypeVariableReference(ty));
+        overloadBindings.addLowerTypeBound(tx, createUnionTypeSymbol(intType, floatType));
+        overloadBindings.addUpperTypeBound(ty, stringType);
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType(symbolFactory, typeHelper);
+        overloadBindings.bind(convertibleTypeSymbol, asList(ty));
+
+        //act
+        overloadBindings.addUpperTypeBound(tx, convertibleTypeSymbol);
+        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tx, convertibleTypeSymbol);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding("$x", tx, asList("int", "float"), asList("{as " + ty + "}"), false),
+                varBinding("$y", ty, asList("string"), asList("string"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(false));
+        assertThat(resultDto.usedImplicitConversion, is(false));
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void addLowerRefBound_ForNonExistingBinding_ThrowsIllegalArgumentException() {
         //no arrange necessary

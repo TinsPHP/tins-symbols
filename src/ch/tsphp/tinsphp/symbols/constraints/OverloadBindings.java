@@ -295,7 +295,7 @@ public class OverloadBindings implements IOverloadBindings
 
     private BoundResultDto addLowerTypeBoundAfterContainsCheck(String typeVariable, ITypeSymbol typeSymbol) {
         BoundResultDto checkUpperResult = checkUpperTypeBounds(typeVariable, typeSymbol);
-        boolean hasChanged = checkUpperResult.hasChanged;
+        boolean hasChanged = false;
 
         ITypeSymbol newTypeSymbol
                 = checkForAndRegisterConvertibleType(typeVariable, typeSymbol, typeVariablesWithLowerConvertible);
@@ -309,7 +309,7 @@ public class OverloadBindings implements IOverloadBindings
                 }
             }
         }
-        return new BoundResultDto(hasChanged, checkUpperResult.usedImplicitConversion);
+        return new BoundResultDto(hasChanged || checkUpperResult.hasChanged, checkUpperResult.usedImplicitConversion);
     }
 
     //Warning! start code duplication - very similar to checkLowerTypeBounds
@@ -342,7 +342,6 @@ public class OverloadBindings implements IOverloadBindings
             for (ITypeSymbol typeSymbol : entry.getValue()) {
                 BoundResultDto resultDto = addLowerTypeBoundAfterContainsCheck(typeParameter, typeSymbol);
                 hasChanged = hasChanged || resultDto.hasChanged;
-
             }
         }
         for (Map.Entry<String, List<ITypeSymbol>> entry : dto.upperConstraints.entrySet()) {
@@ -451,7 +450,7 @@ public class OverloadBindings implements IOverloadBindings
 
     private BoundResultDto addUpperTypeBoundAfterContainsCheck(String typeVariable, ITypeSymbol typeSymbol) {
         BoundResultDto lowerCheckResult = checkLowerTypeBounds(typeVariable, typeSymbol);
-        boolean hasChanged = lowerCheckResult.hasChanged;
+        boolean hasChanged = false;
 
         ITypeSymbol newTypeSymbol
                 = checkForAndRegisterConvertibleType(typeVariable, typeSymbol, typeVariablesWithUpperConvertible);
@@ -461,7 +460,7 @@ public class OverloadBindings implements IOverloadBindings
 
             hasChanged = addToUpperIntersectionTypeSymbol(typeVariable, newTypeSymbol);
 
-            if (!hasChanged && !lowerCheckResult.hasChanged && newTypeSymbol instanceof IConvertibleTypeSymbol) {
+            if (!hasChanged && !hasLowerTypeBounds(typeVariable) && newTypeSymbol instanceof IConvertibleTypeSymbol) {
                 IConvertibleTypeSymbol convertibleTypeSymbol = (IConvertibleTypeSymbol) newTypeSymbol;
                 if (convertibleTypeSymbol.getOverloadBindings() == this) {
                     addLowerRefBound(convertibleTypeSymbol.getTypeVariable(), typeVariable, true);
@@ -475,7 +474,7 @@ public class OverloadBindings implements IOverloadBindings
             }
         }
 
-        return new BoundResultDto(hasChanged, lowerCheckResult.usedImplicitConversion);
+        return new BoundResultDto(hasChanged || lowerCheckResult.hasChanged, lowerCheckResult.usedImplicitConversion);
     }
 
     private void checkIfCanBeUsedInIntersectionWithOthers(String typeVariable, ITypeSymbol typeSymbol) {
