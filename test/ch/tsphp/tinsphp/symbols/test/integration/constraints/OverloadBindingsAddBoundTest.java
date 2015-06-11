@@ -581,7 +581,7 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     }
 
     @Test
-    public void addUpperTypeBound_AddFloatAndLowerIsIntAndIntToFloatIsImplicit_UpperIsFloatAndImplicitWasUsed() {
+    public void addUpperTypeBound_AddFloatAndLowerIsIntAndIntToFloatIsImplicit_UpperIsIntAndImplicitWasUsed() {
         //pre-arrange
         Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
                 = createConversions(pair(intType, asList(floatType)));
@@ -599,6 +599,10 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         //act
         BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tLhs, floatType);
 
+        //TODO TINS-525 using implicit needs to restrict upper bound as well
+//        assertThat(overloadBindings, withVariableBindings(
+//                varBinding("$lhs", tLhs, asList("int"), asList("int"), false)
+//        ));
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$lhs", tLhs, asList("int"), asList("float"), false)
         ));
@@ -662,6 +666,40 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         ));
         assertThat(resultDto.hasChanged, is(true));
         assertThat(resultDto.usedImplicitConversion, is(true));
+    }
+
+    //TINS-526 bool and arithmetic operators
+    @Test
+    public void
+    addUpperTypeBound_AddAsTWhereTLowerStringAndLowerIsIntOrFloatAndIntAsWellAsFloatHaveExplToString_LowerConstraintContainsString() {
+        //pre-arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions = new HashMap<>();
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions
+                = createConversions(pair(intType, asList(stringType)), pair(floatType, asList(stringType)));
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+
+        //arrange
+        String tx = "Tx";
+        String ty = "Ty";
+        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
+        overloadBindings.addVariable("$y", new TypeVariableReference(ty));
+        overloadBindings.addLowerTypeBound(tx, createUnionTypeSymbol(intType, floatType));
+        overloadBindings.addUpperTypeBound(ty, stringType);
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType(symbolFactory, typeHelper);
+        overloadBindings.bind(convertibleTypeSymbol, asList(ty));
+
+        //act
+        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tx, convertibleTypeSymbol);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding("$x", tx, asList("int", "float"), asList("{as " + ty + "}"), false),
+                varBinding("$y", ty, asList("string"), asList("string"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
     @Test(expected = IllegalArgumentException.class)

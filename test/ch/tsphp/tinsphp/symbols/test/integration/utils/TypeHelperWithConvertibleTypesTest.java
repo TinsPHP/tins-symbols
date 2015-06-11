@@ -707,6 +707,33 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         assertThat(result.upperConstraints.size(), is(0));
     }
 
+    @Test
+    public void
+    isFirstSameOrSubTypeOfSecond_FloatOrIntToAsTWhereTLowerStringAndIntAsWellAsFloatHaveExplToString_LowerConstraintIsString() {
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions = new HashMap<>();
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions
+                = createConversions(pair(intType, asList(stringType)), pair(floatType, asList(stringType)));
+
+        //pre-act necessary for arrange
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+        ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
+
+        //arrange
+        ITypeSymbol actual = createUnionTypeSymbol(intType, floatType);
+        IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
+        IOverloadBindings bindings = symbolFactory.createOverloadBindings();
+        bindings.addVariable("$a", new TypeVariableReference("Ta"));
+        bindings.addUpperTypeBound("Ta", stringType);
+        bindings.bind(formal, asList("Ta"));
+
+        //act
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+
+        assertThat(result.relation, is(ERelation.HAS_RELATION));
+        assertThat(result.lowerConstraints, isConstraints(pair("Ta", asList("string"))));
+        assertThat(result.upperConstraints.size(), is(0));
+    }
+
     //see TINS-498 convertible types without upper bound
     @Test
     public void
