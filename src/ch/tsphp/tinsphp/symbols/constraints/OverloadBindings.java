@@ -294,8 +294,8 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     private BoundResultDto addLowerTypeBoundAfterContainsCheck(String typeVariable, ITypeSymbol typeSymbol) {
-        boolean usedImplicitConversion = checkUpperTypeBounds(typeVariable, typeSymbol);
-        boolean hasChanged = false;
+        BoundResultDto checkUpperResult = checkUpperTypeBounds(typeVariable, typeSymbol);
+        boolean hasChanged = checkUpperResult.hasChanged;
 
         ITypeSymbol newTypeSymbol
                 = checkForAndRegisterConvertibleType(typeVariable, typeSymbol, typeVariablesWithLowerConvertible);
@@ -309,12 +309,13 @@ public class OverloadBindings implements IOverloadBindings
                 }
             }
         }
-        return new BoundResultDto(hasChanged, usedImplicitConversion);
+        return new BoundResultDto(hasChanged, checkUpperResult.usedImplicitConversion);
     }
 
     //Warning! start code duplication - very similar to checkLowerTypeBounds
-    private boolean checkUpperTypeBounds(String typeVariable, ITypeSymbol newLowerType) {
+    private BoundResultDto checkUpperTypeBounds(String typeVariable, ITypeSymbol newLowerType) {
         boolean usedImplicitConversion = false;
+        boolean hasChangedConvertibleType = false;
         if (hasUpperTypeBounds(typeVariable)) {
             IIntersectionTypeSymbol upperTypeSymbol = upperTypeBounds.get(typeVariable);
             TypeHelperDto dto = typeHelper.isFirstSameOrSubTypeOfSecond(newLowerType, upperTypeSymbol);
@@ -329,24 +330,29 @@ public class OverloadBindings implements IOverloadBindings
                             upperTypeSymbol,
                             newLowerType);
             }
-            applyTypeParameterConstraints(dto);
+            hasChangedConvertibleType = applyTypeParameterConstraints(dto);
         }
-        return usedImplicitConversion;
+        return new BoundResultDto(hasChangedConvertibleType, usedImplicitConversion);
     }
 
-    private void applyTypeParameterConstraints(TypeHelperDto dto) {
+    private boolean applyTypeParameterConstraints(TypeHelperDto dto) {
+        boolean hasChanged = false;
         for (Map.Entry<String, List<ITypeSymbol>> entry : dto.lowerConstraints.entrySet()) {
             String typeParameter = entry.getKey();
             for (ITypeSymbol typeSymbol : entry.getValue()) {
-                addLowerTypeBoundAfterContainsCheck(typeParameter, typeSymbol);
+                BoundResultDto resultDto = addLowerTypeBoundAfterContainsCheck(typeParameter, typeSymbol);
+                hasChanged = hasChanged || resultDto.hasChanged;
+
             }
         }
         for (Map.Entry<String, List<ITypeSymbol>> entry : dto.upperConstraints.entrySet()) {
             String typeParameter = entry.getKey();
             for (ITypeSymbol typeSymbol : entry.getValue()) {
-                addUpperTypeBoundAfterContainsCheck(typeParameter, typeSymbol);
+                BoundResultDto resultDto = addUpperTypeBoundAfterContainsCheck(typeParameter, typeSymbol);
+                hasChanged = hasChanged || resultDto.hasChanged;
             }
         }
+        return hasChanged;
     }
     //Warning! end code duplication - very similar to checkLowerTypeBounds
 
@@ -444,8 +450,8 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     private BoundResultDto addUpperTypeBoundAfterContainsCheck(String typeVariable, ITypeSymbol typeSymbol) {
-        boolean usedImplicitConversion = checkLowerTypeBounds(typeVariable, typeSymbol);
-        boolean hasChanged = false;
+        BoundResultDto lowerCheckResult = checkLowerTypeBounds(typeVariable, typeSymbol);
+        boolean hasChanged = lowerCheckResult.hasChanged;
 
         ITypeSymbol newTypeSymbol
                 = checkForAndRegisterConvertibleType(typeVariable, typeSymbol, typeVariablesWithUpperConvertible);
@@ -455,7 +461,7 @@ public class OverloadBindings implements IOverloadBindings
 
             hasChanged = addToUpperIntersectionTypeSymbol(typeVariable, newTypeSymbol);
 
-            if (!hasChanged && newTypeSymbol instanceof IConvertibleTypeSymbol) {
+            if (!hasChanged && !lowerCheckResult.hasChanged && newTypeSymbol instanceof IConvertibleTypeSymbol) {
                 IConvertibleTypeSymbol convertibleTypeSymbol = (IConvertibleTypeSymbol) newTypeSymbol;
                 if (convertibleTypeSymbol.getOverloadBindings() == this) {
                     addLowerRefBound(convertibleTypeSymbol.getTypeVariable(), typeVariable, true);
@@ -469,7 +475,7 @@ public class OverloadBindings implements IOverloadBindings
             }
         }
 
-        return new BoundResultDto(hasChanged, usedImplicitConversion);
+        return new BoundResultDto(hasChanged, lowerCheckResult.usedImplicitConversion);
     }
 
     private void checkIfCanBeUsedInIntersectionWithOthers(String typeVariable, ITypeSymbol typeSymbol) {
@@ -505,8 +511,9 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     //Warning! start code duplication - very similar to checkUpperTypeBounds
-    private boolean checkLowerTypeBounds(String typeVariable, ITypeSymbol newUpperTypeBound) {
+    private BoundResultDto checkLowerTypeBounds(String typeVariable, ITypeSymbol newUpperTypeBound) {
         boolean usedImplicitConversion = false;
+        boolean hasChangedConvertibleType = false;
         if (hasLowerTypeBounds(typeVariable)) {
             IUnionTypeSymbol lowerTypeSymbol = lowerTypeBounds.get(typeVariable);
             TypeHelperDto dto = typeHelper.isFirstSameOrSubTypeOfSecond(lowerTypeSymbol, newUpperTypeBound);
@@ -521,9 +528,9 @@ public class OverloadBindings implements IOverloadBindings
                                     + lowerTypeSymbol.getAbsoluteName(),
                             lowerTypeSymbol, newUpperTypeBound);
             }
-            applyTypeParameterConstraints(dto);
+            hasChangedConvertibleType = applyTypeParameterConstraints(dto);
         }
-        return usedImplicitConversion;
+        return new BoundResultDto(hasChangedConvertibleType, usedImplicitConversion);
     }
     //Warning! end code duplication - very similar to checkUpperTypeBounds
 
