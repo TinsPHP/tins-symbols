@@ -693,8 +693,7 @@ public class OverloadBindings implements IOverloadBindings
             fixType(TinsPHPConstants.RETURN_VARIABLE_NAME);
         }
 
-        boolean hasConstantReturn = propagateOrFixParameters(dto);
-        hasConstantReturn = propagateOrFixTypeParameters(dto, hasConstantReturn);
+        boolean hasConstantReturn = propagateOrFixTypeParameters(dto);
 
         //in case of recursion
         removeUpperRefBounds(returnTypeVariable);
@@ -914,8 +913,8 @@ public class OverloadBindings implements IOverloadBindings
                 && hasUpperTypeBounds(parameterTypeVariable);
     }
 
-    private boolean propagateOrFixTypeParameters(final PropagationDto dto, boolean hasAlreadyConstantReturn) {
-        boolean hasConstantReturn = hasAlreadyConstantReturn;
+    private boolean propagateOrFixTypeParameters(final PropagationDto dto) {
+        boolean hasConstantReturn = true;
 
         Iterator<String> iterator = dto.typeParameters.iterator();
         while (iterator.hasNext()) {
