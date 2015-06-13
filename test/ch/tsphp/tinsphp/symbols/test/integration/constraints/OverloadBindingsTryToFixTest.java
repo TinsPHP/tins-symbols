@@ -2496,6 +2496,120 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         ));
     }
 
+    //see TINS-530 NullPointer when type parameter does not contribute to return
+    @Test
+    public void tryToFix_ParamIsIndirectLowerOfReturnAndUpperIsSubtypeOfLowerReturn_DoesNotProduceANullPointer() {
+        //corresponds:
+        // function foo($x, $y){ $x = $y; $y + 1; return $x; return 1; return 1.5; }
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String tx = "Tx";
+        String $y = "$y";
+        String ty = "Ty";
+        String tReturn = "Treturn";
+
+        overloadBindings.addVariable($x, new TypeVariableReference(tx));
+        overloadBindings.addVariable($y, new TypeVariableReference(ty));
+        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        overloadBindings.addUpperTypeBound(ty, intType);
+        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ty));
+        overloadBindings.addLowerTypeBound(tReturn, numType);
+        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+        parameterTypeVariables.add(ty);
+
+        //act
+        overloadBindings.tryToFix(parameterTypeVariables);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding($x, tx, asList("int"), null, false),
+                varBinding($y, ty, asList("int"), asList("int"), true),
+                varBinding(RETURN_VARIABLE_NAME, tx, asList("int"), null, false)
+        ));
+    }
+
+    //see TINS-530 NullPointer when type parameter does not contribute to return
+    @Test
+    public void tryToFix_ParamIsIndirectLowerOfReturnAndUpperIsSameAsLowerOfReturn_DoesNotProduceANullPointer() {
+        //corresponds:
+        // function foo($x, $y){ $x = $y; $y + 1; return $x; return 1; }
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String tx = "Tx";
+        String $y = "$y";
+        String ty = "Ty";
+        String tReturn = "Treturn";
+
+        overloadBindings.addVariable($x, new TypeVariableReference(tx));
+        overloadBindings.addVariable($y, new TypeVariableReference(ty));
+        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        overloadBindings.addUpperTypeBound(ty, intType);
+        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ty));
+        overloadBindings.addLowerTypeBound(tReturn, intType);
+        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+        parameterTypeVariables.add(ty);
+
+        //act
+        overloadBindings.tryToFix(parameterTypeVariables);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding($x, tx, asList("int"), null, false),
+                varBinding($y, ty, asList("int"), asList("int"), true),
+                varBinding(RETURN_VARIABLE_NAME, tx, asList("int"), null, false)
+        ));
+    }
+
+    //see TINS-530 NullPointer when type parameter does not contribute to return
+    @Test
+    public void tryToFix_ParamIsIndirectLowerOfReturnAndHasFixedType_DoesNotProduceANullPointer() {
+        //corresponds:
+        // function foo($x, $y){ $x = $y; $y + 1; $y = 1; return $x; }
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings();
+
+        //arrange
+        String $x = "$x";
+        String tx = "Tx";
+        String $y = "$y";
+        String ty = "Ty";
+        String tReturn = "Treturn";
+
+        overloadBindings.addVariable($x, new TypeVariableReference(tx));
+        overloadBindings.addVariable($y, new TypeVariableReference(ty));
+        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        overloadBindings.addLowerTypeBound(ty, intType);
+        overloadBindings.addUpperTypeBound(ty, intType);
+        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ty));
+        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+        parameterTypeVariables.add(ty);
+
+        //act
+        overloadBindings.tryToFix(parameterTypeVariables);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding($x, tx, asList("int"), null, false),
+                varBinding($y, ty, asList("int"), asList("int"), true),
+                varBinding(RETURN_VARIABLE_NAME, tx, asList("int"), null, false)
+        ));
+    }
+
     private IOverloadBindings createOverloadBindings() {
         return createOverloadBindings(symbolFactory, typeHelper);
     }
