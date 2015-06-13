@@ -209,8 +209,8 @@ public class FunctionType implements IFunctionType
         addTypeVariableToTypeParameters(dto);
 
         //need to make a copy since they might be renamed in addNonFixedTypeVariableToTypeParameters
-        Set<String> copyNonFixedTypeParamter = new HashSet<>(nonFixedTypeParameters);
-        for (String nonFixedTypeParameter : copyNonFixedTypeParamter) {
+        Set<String> copyNonFixedTypeParameter = new HashSet<>(nonFixedTypeParameters);
+        for (String nonFixedTypeParameter : copyNonFixedTypeParameter) {
             //Warning ! start code duplication, very similar to addTypeVariableToTypeParameters
             if (!typeVariablesAdded.contains(nonFixedTypeParameter)) {
                 addNonFixedTypeVariableToTypeParameters(dto, nonFixedTypeParameter);
@@ -222,13 +222,14 @@ public class FunctionType implements IFunctionType
     private void addTypeVariableToTypeParameters(AddToTypeParameterDto dto) {
         String typeVariable = dto.typeVariableReference.getTypeVariable();
         if (!dto.typeVariablesAdded.contains(typeVariable)) {
-            addNonFixedTypeVariableToTypeParameters(dto, typeVariable);
+            int index = addNonFixedTypeVariableToTypeParameters(dto, typeVariable);
+            parameterAndReturn2TypeParameterIndex.add(index);
         } else {
             parameterAndReturn2TypeParameterIndex.add(typeParameter2Index.get(typeVariable));
         }
     }
 
-    private void addNonFixedTypeVariableToTypeParameters(AddToTypeParameterDto dto, String typeVariable) {
+    private int addNonFixedTypeVariableToTypeParameters(AddToTypeParameterDto dto, String typeVariable) {
         String typeParameter = typeVariable;
         if (dto.shallRenameTypeVariables && nonFixedTypeParameters.contains(typeParameter)) {
             if (dto.useSuffix) {
@@ -242,9 +243,9 @@ public class FunctionType implements IFunctionType
         }
         typeParameters.add(typeParameter);
         dto.typeVariablesAdded.add(typeParameter);
-        typeParameter2Index.put(typeParameter, dto.count);
-        parameterAndReturn2TypeParameterIndex.add(dto.count);
-        ++dto.count;
+        int count = dto.count++;
+        typeParameter2Index.put(typeParameter, count);
+        return count;
     }
 
     @Override

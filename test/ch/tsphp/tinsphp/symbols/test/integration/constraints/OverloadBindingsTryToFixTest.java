@@ -2528,9 +2528,9 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding($x, tx, asList("int"), null, false),
+                varBinding($x, tx, asList("int"), asList("@" + tReturn), false),
                 varBinding($y, ty, asList("int"), asList("int"), true),
-                varBinding(RETURN_VARIABLE_NAME, tx, asList("int"), null, false)
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("num", "@" + tx), null, false)
         ));
     }
 

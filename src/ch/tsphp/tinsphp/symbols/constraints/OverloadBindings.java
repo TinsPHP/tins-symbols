@@ -669,6 +669,62 @@ public class OverloadBindings implements IOverloadBindings
         }
     }
 
+
+    @Override
+    public void fixTypeParameter(String typeParameter) {
+        // if only upper type bounds (no lower type bounds) were defined for the parameter,
+        // then we need to propagate those to the upper refs (if there are any) before we fix all variables
+        // belonging to the type variable of the parameter, otherwise they might turn out to be mixed (which
+        // is less intuitive). see TINS-449 unused ad-hoc polymorphic parameters
+        if (hasUpperRefBoundAndOnlyUpperTypeBound(typeParameter)) {
+            IIntersectionTypeSymbol upperTypeBound = upperTypeBounds.get(typeParameter);
+            for (String refTypeVariable : upperRefBounds.get(typeParameter)) {
+                addToLowerUnionTypeSymbol(refTypeVariable, upperTypeBound);
+            }
+        }
+
+        final boolean isNotParameter = false;
+        boolean typeVariableFixed = false;
+        for (String variableId : typeVariable2Variables.get(typeParameter)) {
+            //Warning! start code duplication, more or less same as in fixTypeAfterContainsCheck
+            ITypeVariableReference reference = variable2TypeVariable.get(variableId);
+            if (!reference.hasFixedType()) {
+                fixTypeVariable(variableId, reference);
+                //no need to fix it multiple times, once is enough
+                if (!typeVariableFixed) {
+                    String typeVariable = reference.getTypeVariable();
+                    fixTypeVariableType(isNotParameter, typeVariable);
+                    typeVariableFixed = true;
+                }
+            }
+            //Warning! end code duplication, more or less same as in fixTypeAfterContainsCheck
+        }
+
+        informBoundTypes(typeParameter);
+    }
+
+    private boolean hasUpperRefBoundAndOnlyUpperTypeBound(String parameterTypeVariable) {
+        return hasUpperRefBounds(parameterTypeVariable)
+                && !hasLowerTypeBounds(parameterTypeVariable)
+                && hasUpperTypeBounds(parameterTypeVariable);
+    }
+
+    private void informBoundTypes(String typeParameter) {
+        //inform bound parametric types that type variable was fixed
+        if (typeVariable2BoundTypes.containsKey(typeParameter)) {
+            for (IParametricType parametricTypeSymbol : typeVariable2BoundTypes.get(typeParameter)) {
+                parametricTypeSymbol.fix(typeParameter);
+            }
+        }
+    }
+
+    @Override
+    public void fixTypeParameters() {
+        for (String typeParameter : typeVariable2BoundTypes.keySet()) {
+            fixTypeParameter(typeParameter);
+        }
+    }
+
     @Override
     public Set<String> tryToFix(Set<String> parameterTypeVariables) {
 
@@ -803,116 +859,6 @@ public class OverloadBindings implements IOverloadBindings
         }
     }
 
-    private boolean propagateOrFixParameters(final PropagationDto dto) {
-
-        boolean hasConstantReturn = true;
-
-        for (String parameterTypeVariable : dto.parameterTypeVariables) {
-            Set<String> parameterUpperRefBounds = upperRefBounds.get(parameterTypeVariable);
-            if (doesContributeToTheReturnType(parameterTypeVariable, dto.returnTypeVariable)) {
-                hasConstantReturn = false;
-
-                Set<String> addToUpperRef = new HashSet<>();
-                for (String refTypeVariable : parameterUpperRefBounds) {
-                    if (!dto.typeParameters.contains(refTypeVariable)) {
-                        propagateTypeParameterUpwards(refTypeVariable, parameterTypeVariable, addToUpperRef, dto);
-                    }
-                }
-
-                for (String refTypeVariable : addToUpperRef) {
-                    parameterUpperRefBounds.add(refTypeVariable);
-                }
-
-            } else {
-                fixTypeParameter(parameterTypeVariable);
-                dto.typeParameters.remove(parameterTypeVariable);
-            }
-            dto.typeVariablesToVisit.remove(parameterTypeVariable);
-        }
-
-        return hasConstantReturn;
-    }
-
-    private boolean doesContributeToTheReturnType(String parameterTypeVariable, String returnTypeVariable) {
-        boolean doesContribute = false;
-        if (hasUpperRefBounds(parameterTypeVariable)) {
-            doesContribute = upperRefBounds.get(parameterTypeVariable).contains(returnTypeVariable);
-            if (doesContribute) {
-                IIntersectionTypeSymbol upperTypeBound = upperTypeBounds.get(parameterTypeVariable);
-                IUnionTypeSymbol lowerTypeBound = lowerTypeBounds.get(parameterTypeVariable);
-                if (lowerTypeBound != null && upperTypeBound != null) {
-                    doesContribute = !typeHelper.areSame(lowerTypeBound, upperTypeBound);
-                }
-
-                //When a function has multiple returns then the parameter does not contribute to the return type if
-                // the return type variable lower type bound is a parent type of the upper type bound of the
-                // parameter's type variable
-                if (doesContribute && upperTypeBound != null && lowerTypeBounds.containsKey(returnTypeVariable)) {
-                    IUnionTypeSymbol returnLowerTypeBound = lowerTypeBounds.get(returnTypeVariable);
-                    TypeHelperDto dto = typeHelper.isFirstSameOrSubTypeOfSecond(
-                            upperTypeBound, returnLowerTypeBound, false);
-                    doesContribute = dto.relation == ERelation.HAS_NO_RELATION;
-                }
-            }
-        }
-        return doesContribute;
-    }
-
-    @Override
-    public void fixTypeParameter(String typeParameter) {
-        // if only upper type bounds (no lower type bounds) were defined for the parameter,
-        // then we need to propagate those to the upper refs (if there are any) before we fix all variables
-        // belonging to the type variable of the parameter, otherwise they might turn out to be mixed (which
-        // is less intuitive). see TINS-449 unused ad-hoc polymorphic parameters
-        if (hasUpperRefBoundAndOnlyUpperTypeBound(typeParameter)) {
-            IIntersectionTypeSymbol upperTypeBound = upperTypeBounds.get(typeParameter);
-            for (String refTypeVariable : upperRefBounds.get(typeParameter)) {
-                addToLowerUnionTypeSymbol(refTypeVariable, upperTypeBound);
-            }
-        }
-
-        final boolean isNotParameter = false;
-        boolean typeVariableFixed = false;
-        for (String variableId : typeVariable2Variables.get(typeParameter)) {
-            //Warning! start code duplication, more or less same as in fixTypeAfterContainsCheck
-            ITypeVariableReference reference = variable2TypeVariable.get(variableId);
-            if (!reference.hasFixedType()) {
-                fixTypeVariable(variableId, reference);
-                //no need to fix it multiple times, once is enough
-                if (!typeVariableFixed) {
-                    String typeVariable = reference.getTypeVariable();
-                    fixTypeVariableType(isNotParameter, typeVariable);
-                    typeVariableFixed = true;
-                }
-            }
-            //Warning! end code duplication, more or less same as in fixTypeAfterContainsCheck
-        }
-
-        informBoundTypes(typeParameter);
-    }
-
-    @Override
-    public void fixTypeParameters() {
-        for (String typeParameter : typeVariable2BoundTypes.keySet()) {
-            fixTypeParameter(typeParameter);
-        }
-    }
-
-    private void informBoundTypes(String typeParameter) {
-        //inform bound parametric types that type variable was fixed
-        if (typeVariable2BoundTypes.containsKey(typeParameter)) {
-            for (IParametricType parametricTypeSymbol : typeVariable2BoundTypes.get(typeParameter)) {
-                parametricTypeSymbol.fix(typeParameter);
-            }
-        }
-    }
-
-    private boolean hasUpperRefBoundAndOnlyUpperTypeBound(String parameterTypeVariable) {
-        return hasUpperRefBounds(parameterTypeVariable)
-                && !hasLowerTypeBounds(parameterTypeVariable)
-                && hasUpperTypeBounds(parameterTypeVariable);
-    }
-
     private boolean propagateOrFixTypeParameters(final PropagationDto dto) {
         boolean hasConstantReturn = true;
 
@@ -935,6 +881,7 @@ public class OverloadBindings implements IOverloadBindings
                 }
 
             } else {
+                dto.removeReturnTypeVariable.remove(typeParameter);
                 fixTypeParameter(typeParameter);
                 iterator.remove();
             }
@@ -943,6 +890,30 @@ public class OverloadBindings implements IOverloadBindings
         return hasConstantReturn;
     }
 
+    private boolean doesContributeToTheReturnType(String parameterTypeVariable, String returnTypeVariable) {
+        boolean doesContribute = false;
+        if (hasUpperRefBounds(parameterTypeVariable)) {
+            doesContribute = upperRefBounds.get(parameterTypeVariable).contains(returnTypeVariable);
+            if (doesContribute) {
+                IIntersectionTypeSymbol upperTypeBound = upperTypeBounds.get(parameterTypeVariable);
+                IUnionTypeSymbol lowerTypeBound = lowerTypeBounds.get(parameterTypeVariable);
+                if (lowerTypeBound != null && upperTypeBound != null) {
+                    doesContribute = !typeHelper.areSame(lowerTypeBound, upperTypeBound);
+                }
+
+                //When a function has multiple returns then the type parameter does not contribute to the return type
+                // if the return type variable's lower type bound is a parent type of the type parameters' upper type
+                // bound of the
+                if (doesContribute && upperTypeBound != null && lowerTypeBounds.containsKey(returnTypeVariable)) {
+                    IUnionTypeSymbol returnLowerTypeBound = lowerTypeBounds.get(returnTypeVariable);
+                    TypeHelperDto dto = typeHelper.isFirstSameOrSubTypeOfSecond(
+                            upperTypeBound, returnLowerTypeBound, false);
+                    doesContribute = dto.relation == ERelation.HAS_NO_RELATION;
+                }
+            }
+        }
+        return doesContribute;
+    }
 
     private void propagateTypeParameterUpwards(
             String refTypeVariable, String typeParameter, Set<String> addToUpperRef, PropagationDto dto) {
