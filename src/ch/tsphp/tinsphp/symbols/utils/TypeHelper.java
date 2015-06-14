@@ -63,6 +63,15 @@ public class TypeHelper implements ITypeHelper
     }
 
     @Override
+    public TypeHelperDto isFirstSameOrSubTypeOfSecond(
+            ITypeSymbol potentialSubType, ITypeSymbol typeSymbol, String typeVariable) {
+        TypeHelperDto dto = new TypeHelperDto(potentialSubType, typeSymbol, true);
+        dto.typeVariable = typeVariable;
+        isFirstSameOrSubTypeOfSecond(dto);
+        return dto;
+    }
+
+    @Override
     public TypeHelperDto isFirstSameOrParentTypeOfSecond(ITypeSymbol potentialParentType, ITypeSymbol typeSymbol) {
         return isFirstSameOrParentTypeOfSecond(potentialParentType, typeSymbol, true);
     }
@@ -71,6 +80,15 @@ public class TypeHelper implements ITypeHelper
     public TypeHelperDto isFirstSameOrParentTypeOfSecond(
             ITypeSymbol potentialParentType, ITypeSymbol typeSymbol, boolean shallConsiderImplicitConversions) {
         TypeHelperDto dto = new TypeHelperDto(typeSymbol, potentialParentType, shallConsiderImplicitConversions);
+        isFirstSameOrSubTypeOfSecond(dto);
+        return dto;
+    }
+
+    @Override
+    public TypeHelperDto isFirstSameOrParentTypeOfSecond(
+            ITypeSymbol potentialParentType, ITypeSymbol typeSymbol, String typeVariable) {
+        TypeHelperDto dto = new TypeHelperDto(typeSymbol, potentialParentType, true);
+        dto.typeVariable = typeVariable;
         isFirstSameOrSubTypeOfSecond(dto);
         return dto;
     }
@@ -258,6 +276,8 @@ public class TypeHelper implements ITypeHelper
             if (conversions.containsKey(toTargetAbsoluteName)) {
                 if (typeParameter != null) {
                     MapHelper.addToListInMap(dto.lowerConstraints, typeParameter, dto.toType);
+                } else if (dto.typeVariable != null) {
+                    MapHelper.addToListInMap(dto.upperConstraints, dto.typeVariable, dto.fromType);
                 }
                 dto.relation = HAS_RELATION;
             } else {
@@ -325,8 +345,12 @@ public class TypeHelper implements ITypeHelper
         ERelation subtypeRelation = HAS_RELATION;
         forLoop:
         for (ITypeSymbol typeSymbol : typeSymbols) {
-            TypeHelperDto resultDto = isFirstSameOrSubTypeOfSecond(
-                    typeSymbol, dto.toType, dto.shallConsiderImplicitConversions);
+            TypeHelperDto resultDto;
+            if (dto.shallConsiderImplicitConversions) {
+                resultDto = isFirstSameOrSubTypeOfSecond(typeSymbol, dto.toType, dto.typeVariable);
+            } else {
+                resultDto = isFirstSameOrSubTypeOfSecond(typeSymbol, dto.toType, false);
+            }
             switch (resultDto.relation) {
                 case HAS_NO_RELATION:
                     subtypeRelation = HAS_NO_RELATION;
@@ -348,6 +372,7 @@ public class TypeHelper implements ITypeHelper
     }
     //Warning! end code duplication - very similar to allAreSameOrParentTypesOfFromType
 
+
     private void transferConstraintsFromTo(Map<String, List<ITypeSymbol>> from, Map<String, List<ITypeSymbol>> to) {
         for (Map.Entry<String, List<ITypeSymbol>> entry : from.entrySet()) {
             String typeVariable = entry.getKey();
@@ -361,6 +386,7 @@ public class TypeHelper implements ITypeHelper
         }
     }
 
+
     //Warning! start code duplication - very similar to allAreSameOrSubtypesOfToType
     private void allAreSameOrParentTypesOfFromType(Collection<ITypeSymbol> typeSymbols, TypeHelperDto dto) {
         Map<String, List<ITypeSymbol>> lowerConstraints = new HashMap<>();
@@ -369,8 +395,12 @@ public class TypeHelper implements ITypeHelper
         ERelation parentTypeRelation = HAS_RELATION;
         forLoop:
         for (ITypeSymbol typeSymbol : typeSymbols) {
-            TypeHelperDto resultDto = isFirstSameOrParentTypeOfSecond(
-                    typeSymbol, dto.fromType, dto.shallConsiderImplicitConversions);
+            TypeHelperDto resultDto;
+            if (dto.shallConsiderImplicitConversions) {
+                resultDto = isFirstSameOrParentTypeOfSecond(typeSymbol, dto.fromType, dto.typeVariable);
+            } else {
+                resultDto = isFirstSameOrParentTypeOfSecond(typeSymbol, dto.fromType, false);
+            }
             switch (resultDto.relation) {
                 case HAS_NO_RELATION:
                     parentTypeRelation = HAS_NO_RELATION;

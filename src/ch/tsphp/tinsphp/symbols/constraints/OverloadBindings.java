@@ -224,7 +224,9 @@ public class OverloadBindings implements IOverloadBindings
 
     private BoundResultDto addLowerRefBound(String typeVariable, String refTypeVariable, boolean hasNotFixedType) {
         boolean hasChanged = false;
+        boolean hasChangedOtherBounds = false;
         boolean usedImplicitConversions = false;
+        ITypeSymbol implicitConversionProvider = null;
 
         // no need to actually add the dependency if it has a fixed type (then it is enough that we transfer the
         // type bounds)
@@ -259,7 +261,13 @@ public class OverloadBindings implements IOverloadBindings
             if (hasUpperTypeBounds(typeVariable)) {
                 result = addUpperTypeBoundAfterContainsCheck(refTypeVariable, upperTypeBounds.get(typeVariable));
                 hasChanged = hasChanged || result.hasChanged;
+                hasChangedOtherBounds = hasChangedOtherBounds || result.hasChangedOtherBounds;
                 usedImplicitConversions = usedImplicitConversions || result.usedImplicitConversion;
+                if (implicitConversionProvider == null) {
+                    implicitConversionProvider = result.implicitConversionProvider;
+                } else if (result.implicitConversionProvider != null) {
+                    throw new UnsupportedOperationException("more than one conversion provider");
+                }
             }
 
             // ... Furthermore, typeVariable logically needs to be able to hold all types refTypeVariable can hold. Thus
@@ -273,11 +281,21 @@ public class OverloadBindings implements IOverloadBindings
             if (hasLowerTypeBounds(refTypeVariable)) {
                 result = addLowerTypeBoundAfterContainsCheck(typeVariable, lowerTypeBounds.get(refTypeVariable));
                 hasChanged = hasChanged || result.hasChanged;
+                hasChangedOtherBounds = hasChangedOtherBounds || result.hasChangedOtherBounds;
                 usedImplicitConversions = usedImplicitConversions || result.usedImplicitConversion;
+                if (implicitConversionProvider == null) {
+                    implicitConversionProvider = result.implicitConversionProvider;
+                } else if (result.implicitConversionProvider != null) {
+                    throw new UnsupportedOperationException("more than one conversion provider");
+                }
             }
         }
 
-        return new BoundResultDto(hasChanged, usedImplicitConversions);
+        return new BoundResultDto(
+                hasChanged,
+                hasChangedOtherBounds,
+                usedImplicitConversions,
+                implicitConversionProvider);
     }
 
     private boolean isNotSelfReference(String typeVariable, String refTypeVariable) {
@@ -297,11 +315,15 @@ public class OverloadBindings implements IOverloadBindings
         BoundResultDto checkUpperResult = checkUpperTypeBounds(typeVariable, typeSymbol);
         boolean hasChanged = false;
 
-        ITypeSymbol newTypeSymbol
-                = checkForAndRegisterConvertibleType(typeVariable, typeSymbol, typeVariablesWithLowerConvertible);
-        if (newTypeSymbol != null) {
+        ITypeSymbol newTypeSymbol = checkForAndRegisterConvertibleType(
+                typeVariable, typeSymbol, typeVariablesWithLowerConvertible);
 
+        if (newTypeSymbol != null) {
             hasChanged = addToLowerUnionTypeSymbol(typeVariable, typeSymbol);
+
+            if (checkUpperResult.implicitConversionProvider != null) {
+                narrowUpperTypeBound(typeVariable, checkUpperResult);
+            }
 
             if (hasChanged && hasUpperRefBounds(typeVariable)) {
                 for (String refTypeVariable : upperRefBounds.get(typeVariable)) {
@@ -309,19 +331,53 @@ public class OverloadBindings implements IOverloadBindings
                 }
             }
         }
-        return new BoundResultDto(hasChanged || checkUpperResult.hasChanged, checkUpperResult.usedImplicitConversion);
+        return new BoundResultDto(
+                hasChanged,
+                checkUpperResult.hasChangedOtherBounds,
+                checkUpperResult.usedImplicitConversion,
+                checkUpperResult.implicitConversionProvider);
     }
+
+    private void narrowUpperTypeBound(String typeVariable, BoundResultDto checkUpperResult) {
+        IIntersectionTypeSymbol currentUpperTypeBounds = upperTypeBounds.remove(typeVariable);
+        addUpperTypeBoundAfterContainsCheck(typeVariable, checkUpperResult.implicitConversionProvider, false);
+        for (ITypeSymbol upperTypeBound : currentUpperTypeBounds.getTypeSymbols().values()) {
+            try {
+                addUpperTypeBoundAfterContainsCheck(typeVariable, upperTypeBound, false);
+            } catch (IntersectionBoundException ex) {
+                //that is fine, must be the type which required the implicit conversion,
+                // we do not want to add it as upper bound (we narrow now)
+            }
+        }
+
+        if (hasLowerRefBounds(typeVariable)) {
+            for (String refTypeVariable : lowerRefBounds.get(typeVariable)) {
+                narrowUpperTypeBound(refTypeVariable, checkUpperResult);
+            }
+        }
+    }
+
 
     //Warning! start code duplication - very similar to checkLowerTypeBounds
     private BoundResultDto checkUpperTypeBounds(String typeVariable, ITypeSymbol newLowerType) {
         boolean usedImplicitConversion = false;
+        ITypeSymbol implicitConversionProvider = null;
         boolean hasChangedConvertibleType = false;
+
         if (hasUpperTypeBounds(typeVariable)) {
             IIntersectionTypeSymbol upperTypeSymbol = upperTypeBounds.get(typeVariable);
-            TypeHelperDto dto = typeHelper.isFirstSameOrSubTypeOfSecond(newLowerType, upperTypeSymbol);
+            TypeHelperDto dto = typeHelper.isFirstSameOrSubTypeOfSecond(newLowerType, upperTypeSymbol, typeVariable);
             switch (dto.relation) {
                 case HAS_COERCIVE_RELATION:
                     usedImplicitConversion = true;
+                    if (dto.upperConstraints.containsKey(typeVariable)) {
+                        List<ITypeSymbol> remove = dto.upperConstraints.remove(typeVariable);
+                        if (remove.size() == 1) {
+                            implicitConversionProvider = remove.get(0);
+                        } else {
+                            throw new UnsupportedOperationException("more than one conversion provider");
+                        }
+                    }
                     break;
                 case HAS_NO_RELATION:
                     throw new UpperBoundException(
@@ -332,7 +388,7 @@ public class OverloadBindings implements IOverloadBindings
             }
             hasChangedConvertibleType = applyTypeParameterConstraints(dto);
         }
-        return new BoundResultDto(hasChangedConvertibleType, usedImplicitConversion);
+        return new BoundResultDto(false, hasChangedConvertibleType, usedImplicitConversion, implicitConversionProvider);
     }
 
     private boolean applyTypeParameterConstraints(TypeHelperDto dto) {
@@ -449,13 +505,23 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     private BoundResultDto addUpperTypeBoundAfterContainsCheck(String typeVariable, ITypeSymbol typeSymbol) {
+        return addUpperTypeBoundAfterContainsCheck(typeVariable, typeSymbol, true);
+    }
+
+    private BoundResultDto addUpperTypeBoundAfterContainsCheck(
+            String typeVariable, ITypeSymbol typeSymbol, boolean propagateToLower) {
         BoundResultDto lowerCheckResult = checkLowerTypeBounds(typeVariable, typeSymbol);
         boolean hasChanged = false;
 
-        ITypeSymbol newTypeSymbol
-                = checkForAndRegisterConvertibleType(typeVariable, typeSymbol, typeVariablesWithUpperConvertible);
-        if (newTypeSymbol != null) {
+        ITypeSymbol newTypeSymbol;
+        if (lowerCheckResult.implicitConversionProvider == null) {
+            newTypeSymbol = checkForAndRegisterConvertibleType(
+                    typeVariable, typeSymbol, typeVariablesWithUpperConvertible);
+        } else {
+            newTypeSymbol = lowerCheckResult.implicitConversionProvider;
+        }
 
+        if (newTypeSymbol != null) {
             checkIfCanBeUsedInIntersectionWithOthers(typeVariable, newTypeSymbol);
 
             hasChanged = addToUpperIntersectionTypeSymbol(typeVariable, newTypeSymbol);
@@ -467,30 +533,31 @@ public class OverloadBindings implements IOverloadBindings
                 }
             }
 
-            if (hasChanged && hasLowerRefBounds(typeVariable)) {
+            if (propagateToLower && hasChanged && hasLowerRefBounds(typeVariable)) {
                 for (String refTypeVariable : lowerRefBounds.get(typeVariable)) {
                     addUpperTypeBoundAfterContainsCheck(refTypeVariable, newTypeSymbol);
                 }
             }
         }
 
-        return new BoundResultDto(hasChanged || lowerCheckResult.hasChanged, lowerCheckResult.usedImplicitConversion);
+        return new BoundResultDto(
+                hasChanged,
+                lowerCheckResult.hasChangedOtherBounds,
+                lowerCheckResult.usedImplicitConversion,
+                lowerCheckResult.implicitConversionProvider);
     }
 
     private void checkIfCanBeUsedInIntersectionWithOthers(String typeVariable, ITypeSymbol typeSymbol) {
         if (!typeSymbol.canBeUsedInIntersection() && hasUpperTypeBounds(typeVariable)) {
             IIntersectionTypeSymbol upperBound = upperTypeBounds.get(typeVariable);
             //only need to check if we already have a type in the upper bound which cannot be used in an
-            // intersection
+            // intersection along with others which cannot be used
+            if (!upperBound.canBeUsedInIntersection() && areNotInSameTypeHierarchy(typeSymbol, upperBound)) {
+                throw new IntersectionBoundException(
+                        "The upper bound " + upperBound.getAbsoluteName() + " already contained a concrete type "
+                                + "and thus the new type " + typeSymbol.getAbsoluteName() + " cannot be added.",
+                        upperBound, typeSymbol);
 
-            // along with others which cannot be used
-            if (!upperBound.canBeUsedInIntersection()) {
-                if (areNotInSameTypeHierarchy(typeSymbol, upperBound)) {
-                    throw new IntersectionBoundException(
-                            "The upper bound " + upperBound.getAbsoluteName() + " already contained a concrete type "
-                                    + "and thus the new type " + typeSymbol.getAbsoluteName() + " cannot be added.",
-                            upperBound, typeSymbol);
-                }
             }
         }
     }
@@ -512,13 +579,24 @@ public class OverloadBindings implements IOverloadBindings
     //Warning! start code duplication - very similar to checkUpperTypeBounds
     private BoundResultDto checkLowerTypeBounds(String typeVariable, ITypeSymbol newUpperTypeBound) {
         boolean usedImplicitConversion = false;
+        ITypeSymbol implicitConversionProvider = null;
         boolean hasChangedConvertibleType = false;
+
         if (hasLowerTypeBounds(typeVariable)) {
             IUnionTypeSymbol lowerTypeSymbol = lowerTypeBounds.get(typeVariable);
-            TypeHelperDto dto = typeHelper.isFirstSameOrSubTypeOfSecond(lowerTypeSymbol, newUpperTypeBound);
+            TypeHelperDto dto = typeHelper.isFirstSameOrSubTypeOfSecond(
+                    lowerTypeSymbol, newUpperTypeBound, typeVariable);
             switch (dto.relation) {
                 case HAS_COERCIVE_RELATION:
                     usedImplicitConversion = true;
+                    if (dto.upperConstraints.containsKey(typeVariable)) {
+                        List<ITypeSymbol> remove = dto.upperConstraints.remove(typeVariable);
+                        if (remove.size() == 1) {
+                            implicitConversionProvider = remove.get(0);
+                        } else {
+                            throw new UnsupportedOperationException("more than one conversion provider");
+                        }
+                    }
                     break;
                 case HAS_NO_RELATION:
                     throw new LowerBoundException(
@@ -529,7 +607,7 @@ public class OverloadBindings implements IOverloadBindings
             }
             hasChangedConvertibleType = applyTypeParameterConstraints(dto);
         }
-        return new BoundResultDto(hasChangedConvertibleType, usedImplicitConversion);
+        return new BoundResultDto(false, hasChangedConvertibleType, usedImplicitConversion, implicitConversionProvider);
     }
     //Warning! end code duplication - very similar to checkUpperTypeBounds
 
@@ -1093,9 +1171,8 @@ public class OverloadBindings implements IOverloadBindings
         return returnTypeVariable;
     }
 
-
     private boolean hasReturnTypeVariableAsUpper(String typeVariable, String returnTypeVariable) {
-        return hasUpperBounds(typeVariable)
+        return hasUpperRefBounds(typeVariable)
                 && upperRefBounds.get(typeVariable).contains(returnTypeVariable);
     }
 
