@@ -236,7 +236,7 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     }
 
     @Test
-    public void addLowerTypeBound_AddIntAndUpperIsFloatAndIntToFloatIsImplicit_UpperIsFloatAndImplicitWasUsed() {
+    public void addLowerTypeBound_AddIntAndUpperIsFloatAndIntToFloatIsImplicit_UpperIsIntAndProviderIsInt() {
         //pre-arrange
         Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
                 = createConversions(pair(intType, asList(floatType)));
@@ -255,10 +255,188 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         BoundResultDto resultDto = overloadBindings.addLowerTypeBound(tLhs, intType);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding("$lhs", tLhs, asList("int"), asList("float"), false)
+                varBinding("$lhs", tLhs, asList("int"), asList("int"), false)
         ));
         assertThat(resultDto.hasChanged, is(true));
         assertThat(resultDto.usedImplicitConversion, is(true));
+        assertThat(resultDto.implicitConversionProvider, is(intType));
+    }
+
+    @Test(expected = LowerBoundException.class)
+    public void addLowerTypeBound_AddIntAndLowerIsFloatAndUpperIsFloatAndIntToFloatIsImplicit_ThrowsBoundException() {
+        //pre-arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(intType, asList(floatType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+
+        //arrange
+        String tLhs = "Tlhs";
+        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
+        overloadBindings.addLowerTypeBound(tLhs, floatType);
+        overloadBindings.addUpperTypeBound(tLhs, floatType);
+
+        //act
+        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(tLhs, intType);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding("$lhs", tLhs, asList("int"), asList("int"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(true));
+        assertThat(resultDto.implicitConversionProvider, is(intType));
+    }
+
+    @Test
+    public void addLowerTypeBound_AddIntAndUpperIsFloatAndIntToFloatIsImplAndHasLowerRef_UpperOfLowerIsUpdatedAsWell() {
+        //pre-arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(intType, asList(floatType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+
+        //arrange
+        String tx = "Tx";
+        String ty = "Ty";
+        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
+        overloadBindings.addVariable("$y", new TypeVariableReference(ty));
+        overloadBindings.addUpperTypeBound(tx, floatType);
+        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ty));
+
+        //act
+        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(tx, intType);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding("$x", tx, asList("int", "@" + ty), asList("int"), false),
+                varBinding("$y", ty, null, asList("int", "@" + tx), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(true));
+        assertThat(resultDto.implicitConversionProvider, is(intType));
+    }
+
+    @Test
+    public void
+    addLowerTypeBound_AddIntAndUpperIsFloatAndIntToFloatIsImplAndHasLowerRefWithDiffUpper_DiffUpperIsNotLost() {
+        //pre-arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(intType, asList(floatType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+
+        //arrange
+        String tx = "Tx";
+        String ty = "Ty";
+        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
+        overloadBindings.addVariable("$y", new TypeVariableReference(ty));
+        overloadBindings.addUpperTypeBound(tx, floatType);
+        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ty));
+        overloadBindings.addUpperTypeBound(ty, interfaceAType);
+
+        //act
+        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(tx, intType);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding("$x", tx, asList("int", "@" + ty), asList("int"), false),
+                varBinding("$y", ty, null, asList("int", "IA", "@" + tx), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(true));
+        assertThat(resultDto.implicitConversionProvider, is(intType));
+    }
+
+    @Test(expected = LowerBoundException.class)
+    public void
+    addLowerTypeBound_AddBoolAndUpperIsNumAndBoolToNumIsImplAndHasLowerRefWithLowerInt_ThrowsLowerBoundException() {
+        //pre-arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(boolType, asList(numType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+
+        //arrange
+        String tx = "Tx";
+        String ty = "Ty";
+        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
+        overloadBindings.addVariable("$y", new TypeVariableReference(ty));
+        overloadBindings.addUpperTypeBound(tx, numType);
+        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ty));
+        overloadBindings.addLowerTypeBound(ty, intType);
+
+        //act
+        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(tx, boolType);
+
+        //assert in annotation
+    }
+
+    @Test
+    public void addLowerTypeBound_AddIntAndUpperIsIBAndNumToIBIsImpl_UpperIsNumAndProviderIsNum() {
+        //pre-arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(numType, asList(interfaceBType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+
+        //arrange
+        String tLhs = "Tlhs";
+        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
+        overloadBindings.addUpperTypeBound(tLhs, interfaceBType);
+
+        //act
+        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(tLhs, intType);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding("$lhs", tLhs, asList("int"), asList("num"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(true));
+        assertThat(resultDto.implicitConversionProvider, is(numType));
+    }
+
+    @Test
+    public void
+    addLowerTypeBound_AddIntAndUpperIsAsIBAndIAAndIntToIBIsExplAndNumToIAIsImpl_UpperIsNumAndAsIBProviderIsNum() {
+        //pre-arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(numType, asList(interfaceAType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions
+                = createConversions(pair(intType, asList(interfaceBType)));
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+        IConvertibleTypeSymbol asIB = createConvertibleType(interfaceBType, symbolFactory, typeHelper);
+
+        //arrange
+        String tLhs = "Tlhs";
+        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
+        overloadBindings.addUpperTypeBound(tLhs, interfaceAType);
+        overloadBindings.addUpperTypeBound(tLhs, asIB);
+
+        //act
+        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(tLhs, intType);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding("$lhs", tLhs, asList("int"), asList("num", "{as IB}"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(true));
+        assertThat(resultDto.implicitConversionProvider, is(numType));
     }
 
     @Test
@@ -288,6 +466,7 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         ));
         assertThat(resultDto.hasChanged, is(true));
         assertThat(resultDto.usedImplicitConversion, is(true));
+        assertThat(resultDto.implicitConversionProvider, is(nullValue()));
     }
 
     @Test
@@ -317,6 +496,7 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         ));
         assertThat(resultDto.hasChanged, is(true));
         assertThat(resultDto.usedImplicitConversion, is(true));
+        assertThat(resultDto.implicitConversionProvider, is(nullValue()));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -580,8 +760,9 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
+    //see TINS-525 using implicit needs to restrict upper bound as well
     @Test
-    public void addUpperTypeBound_AddFloatAndLowerIsIntAndIntToFloatIsImplicit_UpperIsIntAndImplicitWasUsed() {
+    public void addUpperTypeBound_AddFloatAndLowerIsIntAndIntToFloatIsImplicit_UpperIsIntAndProviderIsInt() {
         //pre-arrange
         Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
                 = createConversions(pair(intType, asList(floatType)));
@@ -599,15 +780,159 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         //act
         BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tLhs, floatType);
 
-        //TODO TINS-525 using implicit needs to restrict upper bound as well
-//        assertThat(overloadBindings, withVariableBindings(
-//                varBinding("$lhs", tLhs, asList("int"), asList("int"), false)
-//        ));
         assertThat(overloadBindings, withVariableBindings(
-                varBinding("$lhs", tLhs, asList("int"), asList("float"), false)
+                varBinding("$lhs", tLhs, asList("int"), asList("int"), false)
         ));
         assertThat(resultDto.hasChanged, is(true));
         assertThat(resultDto.usedImplicitConversion, is(true));
+        assertThat(resultDto.implicitConversionProvider, is(intType));
+    }
+
+    //see TINS-525 using implicit needs to restrict upper bound as well
+    @Test
+    public void
+    addUpperTypeBound_AddFloatAndLowerAsWellAsUpperIsIntAndIntToFloatIsImplicit_UpperIsIntAndProviderIsInt() {
+        //pre-arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(intType, asList(floatType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+
+        //arrange
+        String tLhs = "Tlhs";
+        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
+        overloadBindings.addLowerTypeBound(tLhs, intType);
+        overloadBindings.addUpperTypeBound(tLhs, intType);
+
+        //act
+        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tLhs, floatType);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding("$lhs", tLhs, asList("int"), asList("int"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(false));
+        assertThat(resultDto.usedImplicitConversion, is(true));
+        assertThat(resultDto.implicitConversionProvider, is(intType));
+    }
+
+    //see TINS-525 using implicit needs to restrict upper bound as well
+    @Test
+    public void addUpperTypeBound_AddFloatAndLowerIsIntAndUpperIsNumAndIntToFloatIsImpl_UpperIsIntAndProviderIsInt() {
+        //pre-arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(intType, asList(floatType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+
+        //arrange
+        String tLhs = "Tlhs";
+        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
+        overloadBindings.addLowerTypeBound(tLhs, intType);
+        overloadBindings.addUpperTypeBound(tLhs, numType);
+
+        //act
+        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tLhs, floatType);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding("$lhs", tLhs, asList("int"), asList("int"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(true));
+        assertThat(resultDto.implicitConversionProvider, is(intType));
+    }
+
+    //see TINS-525 using implicit needs to restrict upper bound as well
+    @Test
+    public void addUpperTypeBound_AddIBAndLowerIsIntAndNumToIBIsImpl_UpperIsNumAndNumIsProvider() {
+        //pre-arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(numType, asList(interfaceBType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+
+        //arrange
+        String tLhs = "Tlhs";
+        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
+        overloadBindings.addLowerTypeBound(tLhs, intType);
+
+        //act
+        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tLhs, interfaceBType);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding("$lhs", tLhs, asList("int"), asList("num"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(true));
+        assertThat(resultDto.implicitConversionProvider, is(numType));
+    }
+
+    //see TINS-525 using implicit needs to restrict upper bound as well
+    @Test
+    public void
+    addUpperTypeBound_AddIBAndLowerIsIntAndUpperIsIntAndNumToIBIsImplicit_UpperIsIntAndProviderIsNum() {
+        //pre-arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(numType, asList(interfaceBType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+
+        //arrange
+        String tLhs = "Tlhs";
+        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
+        overloadBindings.addLowerTypeBound(tLhs, intType);
+        overloadBindings.addUpperTypeBound(tLhs, intType);
+
+        //act
+        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tLhs, interfaceBType);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding("$lhs", tLhs, asList("int"), asList("int"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(false));
+        assertThat(resultDto.usedImplicitConversion, is(true));
+        assertThat(resultDto.implicitConversionProvider, is(numType));
+    }
+
+    //see TINS-525 using implicit needs to restrict upper bound as well
+    @Test
+    public void
+    addUpperTypeBound_AddIBAndLowerIsIntAndUpperIsScalarAndNumToIBIsImplicit_UpperIsNumAndProviderIsNum() {
+        //pre-arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(numType, asList(interfaceBType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+
+        //arrange
+        String tLhs = "Tlhs";
+        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
+        overloadBindings.addLowerTypeBound(tLhs, intType);
+        overloadBindings.addUpperTypeBound(tLhs, scalarType);
+
+        //act
+        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tLhs, interfaceBType);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding("$lhs", tLhs, asList("int"), asList("num"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(true));
+        assertThat(resultDto.implicitConversionProvider, is(numType));
     }
 
     @Test
