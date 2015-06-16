@@ -186,7 +186,15 @@ public class TypeHelper implements ITypeHelper
         } else if (dto.toType instanceof IConvertibleTypeSymbol) {
             IConvertibleTypeSymbol fromType = (IConvertibleTypeSymbol) dto.fromType;
             IConvertibleTypeSymbol toType = (IConvertibleTypeSymbol) dto.toType;
-            TypeHelperDto newDto = new TypeHelperDto(fromType.getUpperTypeBounds(), toType.getUpperTypeBounds(), false);
+            ITypeSymbol fromTargetType = fromType.getUpperTypeBounds();
+            if (fromTargetType == null) {
+                fromTargetType = fromType.getLowerTypeBounds();
+            }
+            ITypeSymbol toTargetType = toType.getUpperTypeBounds();
+            if (toTargetType == null) {
+                toTargetType = toType.getLowerTypeBounds();
+            }
+            TypeHelperDto newDto = new TypeHelperDto(fromTargetType, toTargetType, false);
             hasUpRelationFromTo(newDto);
             if (newDto.relation != HAS_NO_RELATION) {
                 dto.relation = newDto.relation;

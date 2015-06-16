@@ -61,6 +61,7 @@ public class OverloadBindings implements IOverloadBindings
     private int count = 1;
     private int helperVariableCount = 0;
     private int numberOfConvertibleApplications = 0;
+    private EMode mode = EMode.Normal;
 
     public OverloadBindings(ISymbolFactory theSymbolFactory, ITypeHelper theTypeHelper) {
         symbolFactory = theSymbolFactory;
@@ -87,6 +88,7 @@ public class OverloadBindings implements IOverloadBindings
         count = bindings.count;
         helperVariableCount = bindings.helperVariableCount;
         numberOfConvertibleApplications = bindings.numberOfConvertibleApplications;
+        mode = bindings.mode;
 
         //type variables need to be copied first since a lower or upper type bound might contain a parametric
         // polymorphic type which is bound to one of the type variables
@@ -203,6 +205,11 @@ public class OverloadBindings implements IOverloadBindings
     @Override
     public ITypeVariableReference getTypeVariableReference(String variableId) {
         return variable2TypeVariable.get(variableId);
+    }
+
+    @Override
+    public String getTypeVariable(String variableId) {
+        return variable2TypeVariable.get(variableId).getTypeVariable();
     }
 
     @Override
@@ -1284,6 +1291,78 @@ public class OverloadBindings implements IOverloadBindings
         return numberOfConvertibleApplications;
     }
 
+    @Override
+    public void changeToSoftTypingMode() {
+        mode = EMode.SoftTyping;
+    }
+
+    @Override
+    public void changeToModificationMode() {
+        mode = EMode.Modification;
+    }
+
+    @Override
+    public void changeToNormalMode() {
+        mode = EMode.Normal;
+    }
+
+    @Override
+    public boolean isNotInSoftTypingMode() {
+        return mode != EMode.SoftTyping;
+    }
+
+    @Override
+    public void setLowerTypeBound(String typeVariable, IUnionTypeSymbol lowerTypeBound) {
+        if (mode != EMode.Modification) {
+            throw new IllegalStateException("Can only set a lower type bound in moficiation mode");
+        }
+
+        if (!typeVariable2Variables.containsKey(typeVariable)) {
+            throw new IllegalArgumentException("no variable has a binding for type variable \"" + typeVariable + "\"");
+        }
+
+        lowerTypeBounds.put(typeVariable, lowerTypeBound);
+    }
+
+    @Override
+    public void setUpperTypeBound(String typeVariable, IIntersectionTypeSymbol upperTypeBound) {
+        if (mode != EMode.Modification) {
+            throw new IllegalStateException("Can only set an upper type bound in moficiation mode");
+        }
+
+        if (!typeVariable2Variables.containsKey(typeVariable)) {
+            throw new IllegalArgumentException("no variable has a binding for type variable \"" + typeVariable + "\"");
+        }
+
+        upperTypeBounds.put(typeVariable, upperTypeBound);
+    }
+
+    @Override
+    public void removeLowerTypeBound(String typeVariable) {
+        if (mode != EMode.Modification) {
+            throw new IllegalStateException("Can only remove a lower type bound in moficiation mode");
+        }
+
+        if (!typeVariable2Variables.containsKey(typeVariable)) {
+            throw new IllegalArgumentException("no variable has a binding for type variable \"" + typeVariable + "\"");
+        }
+
+        lowerTypeBounds.remove(typeVariable);
+    }
+
+    @Override
+    public void removeUpperTypeBound(String typeVariable) {
+        if (mode != EMode.Modification) {
+            throw new IllegalStateException("Can only remove an upper type bound in moficiation mode");
+        }
+
+        if (!typeVariable2Variables.containsKey(typeVariable)) {
+            throw new IllegalArgumentException("no variable has a binding for type variable \"" + typeVariable + "\"");
+        }
+
+        upperTypeBounds.remove(typeVariable);
+    }
+
     private void mergeFirstIntoSecondAfterContainsCheck(String typeVariable, String newTypeVariable,
             boolean avoidSelfRef) {
         if (hasLowerTypeBounds(typeVariable)) {
@@ -1382,5 +1461,13 @@ public class OverloadBindings implements IOverloadBindings
         }
         sb.append("]");
         return sb.toString();
+    }
+
+
+    private enum EMode
+    {
+        Normal,
+        SoftTyping,
+        Modification
     }
 }

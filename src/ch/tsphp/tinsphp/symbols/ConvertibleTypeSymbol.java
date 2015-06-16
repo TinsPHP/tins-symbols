@@ -136,7 +136,11 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
             newOverloadBindings.addLowerTypeBound(newTypeVariable, getLowerTypeBounds());
         }
         if (hasUpperTypeBounds()) {
-            newOverloadBindings.addUpperTypeBound(newTypeVariable, getUpperTypeBounds());
+            if (newOverloadBindings.isNotInSoftTypingMode()) {
+                newOverloadBindings.addUpperTypeBound(newTypeVariable, getUpperTypeBounds());
+            } else {
+                newOverloadBindings.addLowerTypeBound(newTypeVariable, getUpperTypeBounds());
+            }
         }
 
         //a convertible type has only one type parameter and therefore cannot have lower ref bounds
