@@ -9,6 +9,7 @@ package ch.tsphp.tinsphp.symbols.test.integration.constraints;
 import ch.tsphp.tinsphp.common.inference.constraints.FixedTypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
+import ch.tsphp.tinsphp.common.inference.constraints.OverloadApplicationDto;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
 import ch.tsphp.tinsphp.common.symbols.IConvertibleTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
@@ -130,17 +131,18 @@ public class OverloadBindingsCopyTest extends ATypeHelperTest
     }
 
     @Test
-    public void copyConstructor_HasAppliedBinding_IsCopied() {
+    public void copyConstructor_HasAppliedOverload_IsCopied() {
         OverloadBindings bindings1 = new OverloadBindings(symbolFactory, typeHelper);
         bindings1.addVariable("$a", new TypeVariableReference("T1"));
-        IFunctionType overload = mock(IFunctionType.class);
-        bindings1.setAppliedOverload("$a", overload);
+        OverloadApplicationDto dto = new OverloadApplicationDto(mock(IFunctionType.class), null, null);
+        bindings1.setAppliedOverload("$a", dto);
 
         IOverloadBindings overloadBindings = createOverloadBindings(bindings1);
         bindings1.addVariable("$b", new TypeVariableReference("T1"));
-        bindings1.setAppliedOverload("$b", mock(IFunctionType.class));
+        OverloadApplicationDto dto2 = new OverloadApplicationDto(mock(IFunctionType.class), null, null);
+        bindings1.setAppliedOverload("$b", dto2);
 
-        assertThat(overloadBindings.getAppliedOverload("$a"), is(overload));
+        assertThat(overloadBindings.getAppliedOverload("$a"), is(dto));
         assertThat(overloadBindings.getAppliedOverload("$b"), is(nullValue()));
     }
 

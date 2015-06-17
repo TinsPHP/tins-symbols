@@ -7,14 +7,27 @@
 package ch.tsphp.tinsphp.symbols;
 
 import ch.tsphp.common.ITSPHPAst;
-import ch.tsphp.tinsphp.common.symbols.IMinimalVariableSymbol;
+import ch.tsphp.tinsphp.common.symbols.IExpressionVariableSymbol;
+import ch.tsphp.tinsphp.common.symbols.IMinimalMethodSymbol;
 
-public class ExpressionVariableSymbol extends ASymbol implements IMinimalVariableSymbol
+public class ExpressionVariableSymbol extends ASymbol implements IExpressionVariableSymbol
 {
+    private IMinimalMethodSymbol methodSymbol;
+
     public ExpressionVariableSymbol(ITSPHPAst theDefinitionAst) {
         super(theDefinitionAst,
                 theDefinitionAst.getText() + "@"
                         + theDefinitionAst.getLine() + "|" + theDefinitionAst.getCharPositionInLine()
         );
+    }
+
+    @Override
+    public void setMethodSymbol(IMinimalMethodSymbol theMethodSymbol) {
+        methodSymbol = theMethodSymbol;
+    }
+
+    @Override
+    public IMinimalMethodSymbol getMethodSymbol() {
+        return methodSymbol;
     }
 }

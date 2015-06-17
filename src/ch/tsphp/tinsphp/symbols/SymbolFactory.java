@@ -28,6 +28,7 @@ import ch.tsphp.tinsphp.common.symbols.IAliasTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IArrayTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IClassTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IConvertibleTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IExpressionVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMinimalMethodSymbol;
@@ -198,7 +199,7 @@ public class SymbolFactory implements ISymbolFactory
     }
 
     @Override
-    public IMinimalVariableSymbol createExpressionVariableSymbol(ITSPHPAst exprAst) {
+    public IExpressionVariableSymbol createExpressionVariableSymbol(ITSPHPAst exprAst) {
         return new ExpressionVariableSymbol(exprAst);
     }
 

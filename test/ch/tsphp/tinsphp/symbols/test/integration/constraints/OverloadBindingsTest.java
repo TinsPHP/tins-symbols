@@ -10,6 +10,7 @@ import ch.tsphp.tinsphp.common.inference.constraints.FixedTypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableReference;
+import ch.tsphp.tinsphp.common.inference.constraints.OverloadApplicationDto;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
@@ -175,11 +176,10 @@ public class OverloadBindingsTest extends ATypeHelperTest
 
     @Test(expected = IllegalArgumentException.class)
     public void setAppliedOverload_NonExistingVariable_ThrowsIllegalArgumentException() {
-        //no arrange necessary
-
+        OverloadApplicationDto dto = new OverloadApplicationDto(mock(IFunctionType.class), null, null);
 
         IOverloadBindings overloadBindings = createOverloadBindings();
-        overloadBindings.setAppliedOverload("$nonExistingVariable", mock(IFunctionType.class));
+        overloadBindings.setAppliedOverload("$nonExistingVariable", dto);
 
         //assert in annotation
     }
@@ -191,13 +191,13 @@ public class OverloadBindingsTest extends ATypeHelperTest
 
         //arrange
         overloadBindings.addVariable("$a", new TypeVariableReference("T"));
-        IFunctionType overload = mock(IFunctionType.class);
+        OverloadApplicationDto dto = new OverloadApplicationDto(mock(IFunctionType.class), null, null);
 
         //act
-        overloadBindings.setAppliedOverload("$a", overload);
-        IFunctionType result = overloadBindings.getAppliedOverload("$a");
+        overloadBindings.setAppliedOverload("$a", dto);
+        OverloadApplicationDto result = overloadBindings.getAppliedOverload("$a");
 
-        assertThat(result, is(overload));
+        assertThat(result, is(dto));
     }
 
     private IOverloadBindings createOverloadBindings() {

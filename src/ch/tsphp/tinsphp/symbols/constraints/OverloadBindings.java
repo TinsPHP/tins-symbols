@@ -11,12 +11,12 @@ import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.TinsPHPConstants;
 import ch.tsphp.tinsphp.common.inference.constraints.BoundResultDto;
 import ch.tsphp.tinsphp.common.inference.constraints.FixedTypeVariableReference;
-import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.IParametricType;
 import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.IntersectionBoundException;
 import ch.tsphp.tinsphp.common.inference.constraints.LowerBoundException;
+import ch.tsphp.tinsphp.common.inference.constraints.OverloadApplicationDto;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.UpperBoundException;
 import ch.tsphp.tinsphp.common.symbols.IContainerTypeSymbol;
@@ -53,7 +53,7 @@ public class OverloadBindings implements IOverloadBindings
     private final Map<String, Set<String>> lowerRefBounds;
     private final Map<String, ITypeVariableReference> variable2TypeVariable;
     private final Map<String, Set<String>> typeVariable2Variables;
-    private final Map<String, IFunctionType> appliedOverloads;
+    private final Map<String, OverloadApplicationDto> appliedOverloads;
     private final Map<String, Set<IParametricType>> typeVariable2BoundTypes;
     private final Map<String, Set<String>> typeVariablesWithLowerConvertible;
     private final Map<String, Set<String>> typeVariablesWithUpperConvertible;
@@ -63,6 +63,7 @@ public class OverloadBindings implements IOverloadBindings
     private int numberOfConvertibleApplications = 0;
     private EMode mode = EMode.Normal;
 
+    @SuppressWarnings("checkstyle:parameternumber")
     public OverloadBindings(ISymbolFactory theSymbolFactory, ITypeHelper theTypeHelper) {
         symbolFactory = theSymbolFactory;
         typeHelper = theTypeHelper;
@@ -689,21 +690,27 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     @Override
-    public IFunctionType getAppliedOverload(String variableId) {
+    public OverloadApplicationDto getAppliedOverload(String variableId) {
         return appliedOverloads.get(variableId);
     }
 
     @Override
-    public void setAppliedOverload(String variableId, IFunctionType overload) {
+    public void setAppliedOverload(String variableId, OverloadApplicationDto overloadApplicationDto) {
         if (!variable2TypeVariable.containsKey(variableId)) {
             throw new IllegalArgumentException("variable with id " + variableId + " does not exist in this binding.");
         }
-        if (appliedOverloads.containsKey(variableId)
-                && appliedOverloads.get(variableId).hasConvertibleParameterTypes()) {
-            --numberOfConvertibleApplications;
+
+        if (appliedOverloads.containsKey(variableId)) {
+            OverloadApplicationDto dto = appliedOverloads.get(variableId);
+            if (dto.overload != null && dto.overload.hasConvertibleParameterTypes()) {
+                --numberOfConvertibleApplications;
+            }
         }
-        appliedOverloads.put(variableId, overload);
-        if (overload.hasConvertibleParameterTypes()) {
+
+        appliedOverloads.put(variableId, overloadApplicationDto);
+
+        if (overloadApplicationDto.overload != null
+                && overloadApplicationDto.overload.hasConvertibleParameterTypes()) {
             ++numberOfConvertibleApplications;
         }
     }
@@ -1462,7 +1469,6 @@ public class OverloadBindings implements IOverloadBindings
         sb.append("]");
         return sb.toString();
     }
-
 
     private enum EMode
     {
