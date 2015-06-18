@@ -14,12 +14,35 @@ import ch.tsphp.tinsphp.symbols.test.unit.symbols.ATypeSymbolTest;
 
 import java.util.Set;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.mockito.Mockito.mock;
+
 public class ArrayTypeSymbol_ATypeSymbol_LSPTest extends ATypeSymbolTest
 {
 
     @Override
     public void getParentTypeSymbols_StandardWithSet_ReturnsOnePassedToConstructor() {
         // different behaviour - ArrayTypeSymbol does not support multiple parent types
+    }
+
+    @Override
+    public void isFinal_Standard_ReturnsFalse() {
+        // different behaviour - array types are final
+
+        // start same as in ASymbolTest
+        //no arrange necessary
+
+        ATypeSymbol typeSymbol = createTypeSymbol();
+        boolean result = typeSymbol.isFinal();
+        // end same as in ASymbolTest
+
+        //assertThat(result, is(true));
+        assertThat(result, is(true));
+    }
+
+    private ATypeSymbol createTypeSymbol() {
+        return createTypeSymbol(mock(ITSPHPAst.class), "foo", mock(ITypeSymbol.class));
     }
 
     @Override
