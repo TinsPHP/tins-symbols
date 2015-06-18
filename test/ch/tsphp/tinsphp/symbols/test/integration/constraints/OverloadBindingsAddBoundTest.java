@@ -29,7 +29,9 @@ import org.junit.Test;
 import org.mockito.exceptions.base.MockitoAssertionError;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static ch.tsphp.tinsphp.common.utils.Pair.pair;
 import static ch.tsphp.tinsphp.symbols.test.integration.testutils.OverloadBindingsMatcher.varBinding;
@@ -41,13 +43,14 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class OverloadBindingsAddBoundTest extends ATypeHelperTest
 {
-
 
     @Test(expected = IllegalArgumentException.class)
     public void addLowerTypeBound_ForNonExistingBinding_ThrowsIllegalArgumentException() {
@@ -1057,6 +1060,102 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$x", tx, asList("int", "float"), asList("{as " + ty + "}"), false),
                 varBinding("$y", ty, asList("string"), asList("string"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(false));
+        assertThat(resultDto.usedImplicitConversion, is(false));
+    }
+
+    @Test(expected = IntersectionBoundException.class)
+    public void addUpperTypeBound_ContainsFinalIsNotInSameTypeHierarchy_ThrowsIntersectionBoundException() {
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings();
+
+        //arrange
+        ITypeSymbol typeSymbol = mock(ITypeSymbol.class);
+        when(typeSymbol.isFinal()).thenReturn(true);
+        when(typeSymbol.getAbsoluteName()).thenReturn("A");
+        String tLhs = "Tlhs";
+        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
+        overloadBindings.addUpperTypeBound(tLhs, typeSymbol);
+
+
+        //act
+        overloadBindings.addUpperTypeBound(tLhs, intType);
+
+        //assert in annotation
+    }
+
+    @Test(expected = IntersectionBoundException.class)
+    public void addUpperTypeBound_ContainsIBAndFinalAddedNotInSameTypeHierarchy_ThrowsIntersectionBoundException() {
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings();
+
+        //arrange
+        String tLhs = "Tlhs";
+        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
+        overloadBindings.addUpperTypeBound(tLhs, interfaceBType);
+        ITypeSymbol typeSymbol = mock(ITypeSymbol.class);
+        when(typeSymbol.isFinal()).thenReturn(true);
+        when(typeSymbol.getAbsoluteName()).thenReturn("A");
+
+
+        //act
+        overloadBindings.addUpperTypeBound(tLhs, typeSymbol);
+
+        //assert in annotation
+    }
+
+    @Test
+    public void addUpperTypeBound_ContainsIBAndFinalAddedWhichIsSubtype_UpperBoundContainsFinal() {
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings();
+
+        //arrange
+        String tLhs = "Tlhs";
+        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
+        overloadBindings.addUpperTypeBound(tLhs, interfaceBType);
+        Set<ITypeSymbol> parentTypes = new HashSet<>();
+        parentTypes.add(interfaceBType);
+        ITypeSymbol typeSymbol = mock(ITypeSymbol.class);
+        when(typeSymbol.isFinal()).thenReturn(true);
+        when(typeSymbol.getAbsoluteName()).thenReturn("A");
+        when(typeSymbol.getParentTypeSymbols()).thenReturn(parentTypes);
+
+        //act
+        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tLhs, typeSymbol);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding("$lhs", tLhs, null, asList("A"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
+    }
+
+    @Test
+    public void addUpperTypeBound_ContainsFinalAndParentTypeAdded_UpperBoundContainsFinal() {
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings();
+
+        //arrange
+        ITypeSymbol typeSymbol = mock(ITypeSymbol.class);
+        when(typeSymbol.isFinal()).thenReturn(true);
+        when(typeSymbol.getAbsoluteName()).thenReturn("A");
+        String tLhs = "Tlhs";
+        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
+        ITypeSymbol typeSymbol2 = mock(ITypeSymbol.class);
+        when(typeSymbol2.isFinal()).thenReturn(true);
+        when(typeSymbol2.getAbsoluteName()).thenReturn("B");
+
+        Set<ITypeSymbol> parentTypes = new HashSet<>();
+        parentTypes.add(typeSymbol2);
+        when(typeSymbol.getParentTypeSymbols()).thenReturn(parentTypes);
+        overloadBindings.addUpperTypeBound(tLhs, typeSymbol);
+
+        //act
+        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tLhs, typeSymbol2);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding("$lhs", tLhs, null, asList("A"), false)
         ));
         assertThat(resultDto.hasChanged, is(false));
         assertThat(resultDto.usedImplicitConversion, is(false));

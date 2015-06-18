@@ -106,16 +106,6 @@ public class AContainerTypeSymbolTest
     }
 
     @Test
-    public void evalSelf_Standard_ReturnsThis() {
-        //no arrange necessary
-
-        AContainerTypeSymbol containerTypeSymbol = createContainerTypeSymbol();
-        ITypeSymbol result = containerTypeSymbol.evalSelf();
-
-        assertThat(result, is((ITypeSymbol) containerTypeSymbol));
-    }
-
-    @Test
     public void getDefinitionScope_Standard_ReturnsNull() {
         //no arrange necessary
 

@@ -10,12 +10,11 @@ import ch.tsphp.common.AstHelperRegistry;
 import ch.tsphp.common.IAstHelper;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
-import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.gen.TokenTypes;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousLazySymbol;
+import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.ILazySymbolResolver;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousLazySymbol;
-import org.hamcrest.core.Is;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -119,13 +118,13 @@ public class ErroneousLazySymbolTest
     }
 
     @Test
-    public void evalSelf_Standard_ReturnsThis() {
+    public void isFinal_Standard_ReturnsFalse() {
         //no arrange necessary
 
-        IErroneousLazySymbol lazySymbol = createLazySymbol();
-        ITypeSymbol result = lazySymbol.evalSelf();
+        IErroneousTypeSymbol typeSymbol = createLazySymbol();
+        boolean result = typeSymbol.isFinal();
 
-        assertThat(result, Is.is((ITypeSymbol) lazySymbol));
+        assertThat(result, is(false));
     }
 
     private IErroneousLazySymbol createLazySymbol() {

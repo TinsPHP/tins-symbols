@@ -178,11 +178,8 @@ public abstract class ARecordTypeSymbol extends AScopedSymbol implements IRecord
         return modifiers.isNullable();
     }
 
-    /**
-     * Returns itself, override in sub-classes for another behaviour (lazy types for instance).
-     */
     @Override
-    public ITypeSymbol evalSelf() {
-        return this;
+    public boolean isFinal() {
+        return modifiers.isFinal();
     }
 }

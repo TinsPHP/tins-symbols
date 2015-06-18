@@ -556,16 +556,23 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     private void checkIfCanBeUsedInIntersectionWithOthers(String typeVariable, ITypeSymbol typeSymbol) {
-        if (!typeSymbol.canBeUsedInIntersection() && hasUpperTypeBounds(typeVariable)) {
+        if (hasUpperTypeBounds(typeVariable)) {
             IIntersectionTypeSymbol upperBound = upperTypeBounds.get(typeVariable);
-            //only need to check if we already have a type in the upper bound which cannot be used in an
-            // intersection along with others which cannot be used
-            if (!upperBound.canBeUsedInIntersection() && areNotInSameTypeHierarchy(typeSymbol, upperBound)) {
+            //if the current upper type is final or the current and the new both cannot be used in an intersection with
+            // others which cannot be used in an intersection, then the current and the new need to be in the same
+            // type hierarchy
+            if ((typeSymbol.isFinal() || upperBound.isFinal()) && areNotInSameTypeHierarchy(typeSymbol, upperBound)) {
+                throw new IntersectionBoundException(
+                        "The upper bound " + upperBound.getAbsoluteName() + " is final and the new type "
+                                + typeSymbol.getAbsoluteName() + " is not in the same type hierarchy.",
+                        upperBound, typeSymbol);
+            } else if (!typeSymbol.canBeUsedInIntersection()
+                    && !upperBound.canBeUsedInIntersection()
+                    && areNotInSameTypeHierarchy(typeSymbol, upperBound)) {
                 throw new IntersectionBoundException(
                         "The upper bound " + upperBound.getAbsoluteName() + " already contained a concrete type "
                                 + "and thus the new type " + typeSymbol.getAbsoluteName() + " cannot be added.",
                         upperBound, typeSymbol);
-
             }
         }
     }

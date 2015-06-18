@@ -10,6 +10,7 @@ import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.symbols.ATypeSymbol;
 import ch.tsphp.tinsphp.symbols.utils.ModifierHelper;
+import org.hamcrest.CoreMatchers;
 import org.hamcrest.collection.IsIterableContainingInAnyOrder;
 import org.junit.Test;
 
@@ -114,13 +115,13 @@ public class ATypeSymbolTest
     }
 
     @Test
-    public void evalSelf_Standard_ReturnsThis() {
+    public void isFinal_Standard_ReturnsFalse() {
         //no arrange necessary
 
         ATypeSymbol typeSymbol = createTypeSymbol();
-        ITypeSymbol result = typeSymbol.evalSelf();
+        boolean result = typeSymbol.isFinal();
 
-        assertThat(result, is((ITypeSymbol) typeSymbol));
+        assertThat(result, CoreMatchers.is(false));
     }
 
     private ATypeSymbol createTypeSymbol() {

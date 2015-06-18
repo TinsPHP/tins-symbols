@@ -250,13 +250,13 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
     }
 
     @Override
-    public ITypeSymbol evalSelf() {
-        return this;
+    public boolean canBeUsedInIntersection() {
+        return true;
     }
 
     @Override
-    public boolean canBeUsedInIntersection() {
-        return true;
+    public boolean isFinal() {
+        return false;
     }
 
 }

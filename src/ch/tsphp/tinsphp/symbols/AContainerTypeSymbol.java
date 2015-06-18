@@ -143,6 +143,21 @@ public abstract class AContainerTypeSymbol extends APolymorphicTypeSymbol implem
         return canBeUsed;
     }
 
+    /**
+     * Returns true if all types in the container are final.
+     */
+    @Override
+    public boolean isFinal() {
+        boolean areFinal = true;
+        for (ITypeSymbol typeSymbol : typeSymbols.values()) {
+            if (!typeSymbol.isFinal()) {
+                areFinal = false;
+                break;
+            }
+        }
+        return areFinal;
+    }
+
     @Override
     public boolean addTypeSymbol(ITypeSymbol typeSymbol) {
         boolean hasChanged = false;

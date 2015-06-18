@@ -10,7 +10,6 @@ import ch.tsphp.common.AstHelperRegistry;
 import ch.tsphp.common.IAstHelper;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
-import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.gen.TokenTypes;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousTypeSymbol;
@@ -69,21 +68,21 @@ public class ErroneousTypeSymbolTest
     }
 
     @Test
-    public void evalSelf_Standard_ReturnsThis() {
-        //no arrange necessary
-
-        IErroneousTypeSymbol typeSymbol = createTypeSymbol();
-        ITypeSymbol result = typeSymbol.evalSelf();
-
-        assertThat(result, is((ITypeSymbol) typeSymbol));
-    }
-
-    @Test
     public void canBeUsedInIntersection_Standard_ReturnsFalse() {
         //no arrange necessary
 
         IErroneousTypeSymbol typeSymbol = createTypeSymbol();
         boolean result = typeSymbol.canBeUsedInIntersection();
+
+        assertThat(result, is(false));
+    }
+
+    @Test
+    public void isFinal_Standard_ReturnsFalse() {
+        //no arrange necessary
+
+        IErroneousTypeSymbol typeSymbol = createTypeSymbol();
+        boolean result = typeSymbol.isFinal();
 
         assertThat(result, is(false));
     }

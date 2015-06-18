@@ -83,12 +83,12 @@ public class ErroneousLazySymbol extends AErroneousScopedSymbol implements IErro
     }
 
     @Override
-    public ITypeSymbol evalSelf() {
-        return this;
+    public boolean canBeUsedInIntersection() {
+        return false;
     }
 
     @Override
-    public boolean canBeUsedInIntersection() {
+    public boolean isFinal() {
         return false;
     }
 

@@ -46,11 +46,6 @@ public abstract class APolymorphicTypeSymbol implements ITypeSymbol, IObservable
     }
 
     @Override
-    public ITypeSymbol evalSelf() {
-        return this;
-    }
-
-    @Override
     public String toString() {
         return getAbsoluteName();
     }

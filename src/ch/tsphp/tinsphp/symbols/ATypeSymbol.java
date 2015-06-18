@@ -57,14 +57,6 @@ public abstract class ATypeSymbol extends ASymbolWithModifier implements ITypeSy
     }
 
     /**
-     * Returns itself, override in sub-classes for another behaviour (lazy types for instance).
-     */
-    @Override
-    public ITypeSymbol evalSelf() {
-        return this;
-    }
-
-    /**
      * Returns false, override in sub-classes for another behaviour.
      */
     @Override
@@ -72,4 +64,11 @@ public abstract class ATypeSymbol extends ASymbolWithModifier implements ITypeSy
         return false;
     }
 
+    /**
+     * Returns false, override in sub-classes for another behaviour.
+     */
+    @Override
+    public boolean isFinal() {
+        return false;
+    }
 }

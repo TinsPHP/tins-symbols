@@ -13,9 +13,9 @@ import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IRecordTypeSymbol;
 import ch.tsphp.tinsphp.symbols.ClassTypeSymbol;
-import ch.tsphp.tinsphp.symbols.test.unit.symbols.APolymorphicTypeSymbolTest;
+import ch.tsphp.tinsphp.symbols.test.unit.symbols.ARecordTypeSymbolTest;
 
-public class ClassTypeSymbol_APolymorphicTypeSymbol_LSPTest extends APolymorphicTypeSymbolTest
+public class ClassTypeSymbol_ARecordTypeSymbol_LSPTest extends ARecordTypeSymbolTest
 {
     protected IRecordTypeSymbol createPolymorphicTypeSymbol(
             IScopeHelper scopeHelper,

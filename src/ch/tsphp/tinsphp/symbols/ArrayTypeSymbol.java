@@ -49,4 +49,9 @@ public class ArrayTypeSymbol extends ATypeSymbol implements IArrayTypeSymbol
     public ITSPHPAst getDefaultValue() {
         return AstHelperRegistry.get().createAst(TokenTypes.Null, "null");
     }
+
+    @Override
+    public boolean isFinal() {
+        return true;
+    }
 }

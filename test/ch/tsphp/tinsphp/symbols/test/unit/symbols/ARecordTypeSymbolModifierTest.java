@@ -29,7 +29,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(Parameterized.class)
-public class APolymorphicTypeSymbolModifierTest
+public class ARecordTypeSymbolModifierTest
 {
     class DummyRecordTypeSymbol extends ARecordTypeSymbol
     {
@@ -48,7 +48,7 @@ public class APolymorphicTypeSymbolModifierTest
     private String methodName;
     private int modifierType;
 
-    public APolymorphicTypeSymbolModifierTest(String theMethodName, int theModifierType) {
+    public ARecordTypeSymbolModifierTest(String theMethodName, int theModifierType) {
         methodName = theMethodName;
         modifierType = theModifierType;
     }

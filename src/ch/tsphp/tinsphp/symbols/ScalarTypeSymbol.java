@@ -47,4 +47,9 @@ public class ScalarTypeSymbol extends ATypeSymbol implements IScalarTypeSymbol
     public String getAbsoluteName() {
         return name;
     }
+
+    @Override
+    public boolean isFinal() {
+        return true;
+    }
 }
