@@ -1333,7 +1333,7 @@ public class OverloadBindings implements IOverloadBindings
     @Override
     public void setLowerTypeBounds(String typeVariable, IUnionTypeSymbol lowerTypeBound) {
         if (mode != EMode.Modification) {
-            throw new IllegalStateException("Can only set a lower type bound in moficiation mode");
+            throw new IllegalStateException("Can only set a lower type bound in modification mode");
         }
 
         if (!typeVariable2Variables.containsKey(typeVariable)) {
@@ -1346,7 +1346,7 @@ public class OverloadBindings implements IOverloadBindings
     @Override
     public void setUpperTypeBounds(String typeVariable, IIntersectionTypeSymbol upperTypeBound) {
         if (mode != EMode.Modification) {
-            throw new IllegalStateException("Can only set an upper type bound in moficiation mode");
+            throw new IllegalStateException("Can only set an upper type bound in modification mode");
         }
 
         if (!typeVariable2Variables.containsKey(typeVariable)) {
@@ -1359,7 +1359,7 @@ public class OverloadBindings implements IOverloadBindings
     @Override
     public IUnionTypeSymbol removeLowerTypeBounds(String typeVariable) {
         if (mode != EMode.Modification) {
-            throw new IllegalStateException("Can only remove a lower type bound in moficiation mode");
+            throw new IllegalStateException("Can only remove a lower type bound in modification mode");
         }
 
         if (!typeVariable2Variables.containsKey(typeVariable)) {
@@ -1372,7 +1372,7 @@ public class OverloadBindings implements IOverloadBindings
     @Override
     public IIntersectionTypeSymbol removeUpperTypeBounds(String typeVariable) {
         if (mode != EMode.Modification) {
-            throw new IllegalStateException("Can only remove an upper type bound in moficiation mode");
+            throw new IllegalStateException("Can only remove an upper type bound in modification mode");
         }
 
         if (!typeVariable2Variables.containsKey(typeVariable)) {
