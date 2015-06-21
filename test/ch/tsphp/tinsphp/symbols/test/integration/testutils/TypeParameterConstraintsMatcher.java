@@ -16,28 +16,29 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-public class TypeParameterConstraintsMatcher extends BaseMatcher<Map<String, List<ITypeSymbol>>>
+public class TypeParameterConstraintsMatcher extends BaseMatcher<Map<String, Set<ITypeSymbol>>>
 {
-    final Pair<String, List<String>>[] expConstraints;
+    final Pair<String, Set<String>>[] expConstraints;
 
     @SafeVarargs
-    public static Matcher<? super Map<String, List<ITypeSymbol>>> isConstraints(Pair<String, List<String>>... dtos) {
+    public static Matcher<? super Map<String, Set<ITypeSymbol>>> isConstraints(Pair<String, Set<String>>... dtos) {
         return new TypeParameterConstraintsMatcher(dtos);
     }
 
 
-    public TypeParameterConstraintsMatcher(Pair<String, List<String>>[] theConstraints) {
+    public TypeParameterConstraintsMatcher(Pair<String, Set<String>>[] theConstraints) {
         expConstraints = theConstraints;
     }
 
     @Override
     public boolean matches(Object item) {
-        Map<String, List<ITypeSymbol>> constraints = (Map<String, List<ITypeSymbol>>) item;
+        Map<String, Set<ITypeSymbol>> constraints = (Map<String, Set<ITypeSymbol>>) item;
         boolean ok = constraints.size() == expConstraints.length;
         if (ok) {
             for (int i = 0; i < expConstraints.length; ++i) {
-                List<ITypeSymbol> typeSymbols = constraints.get(expConstraints[i].first);
+                Set<ITypeSymbol> typeSymbols = constraints.get(expConstraints[i].first);
                 if (typeSymbols == null) {
                     ok = false;
                     break;
@@ -57,9 +58,9 @@ public class TypeParameterConstraintsMatcher extends BaseMatcher<Map<String, Lis
 
     @Override
     public void describeMismatch(Object item, Description description) {
-        Map<String, List<ITypeSymbol>> constraints = (Map<String, List<ITypeSymbol>>) item;
+        Map<String, Set<ITypeSymbol>> constraints = (Map<String, Set<ITypeSymbol>>) item;
         description.appendText("[");
-        for (Map.Entry<String, List<ITypeSymbol>> entry : constraints.entrySet()) {
+        for (Map.Entry<String, Set<ITypeSymbol>> entry : constraints.entrySet()) {
             description.appendText(entry.getKey()).appendText(":[");
             Iterator<ITypeSymbol> iterator = entry.getValue().iterator();
             if (iterator.hasNext()) {

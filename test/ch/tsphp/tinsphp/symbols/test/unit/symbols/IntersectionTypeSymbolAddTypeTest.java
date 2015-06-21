@@ -426,9 +426,7 @@ public class IntersectionTypeSymbolAddTypeTest extends ATypeHelperTest
         IOverloadBindings overloadBindings = new OverloadBindings(symbolFactory, typeHelper);
         overloadBindings.addVariable("$a", new TypeVariableReference("T1"));
         overloadBindings.addVariable("$b", new TypeVariableReference("T2"));
-        overloadBindings.addLowerTypeBound("T1", numType);
         overloadBindings.addUpperTypeBound("T1", numType);
-        overloadBindings.addLowerTypeBound("T2", stringType);
         overloadBindings.addUpperTypeBound("T2", stringType);
         IConvertibleTypeSymbol convertibleTypeSymbol1 = createConvertibleType();
         overloadBindings.bind(convertibleTypeSymbol1, asList("T1"));
@@ -443,7 +441,7 @@ public class IntersectionTypeSymbolAddTypeTest extends ATypeHelperTest
         Map<String, ITypeSymbol> symbols = intersectionTypeSymbol.getTypeSymbols();
 
         assertThat(result, is(true));
-        assertThat(symbols.keySet(), containsInAnyOrder("{as int}", "{as string}"));
+        assertThat(symbols.keySet(), containsInAnyOrder("{as int}", "{as T2}"));
         assertThat(intersectionTypeSymbol.isFixed(), is(false));
     }
 

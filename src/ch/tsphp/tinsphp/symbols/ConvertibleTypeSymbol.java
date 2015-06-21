@@ -8,6 +8,7 @@ package ch.tsphp.tinsphp.symbols;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.BoundResultDto;
+import ch.tsphp.tinsphp.common.inference.constraints.EOverloadBindingsMode;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
 import ch.tsphp.tinsphp.common.symbols.IConvertibleTypeSymbol;
@@ -136,7 +137,7 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
             newOverloadBindings.addLowerTypeBound(newTypeVariable, getLowerTypeBounds());
         }
         if (hasUpperTypeBounds()) {
-            if (newOverloadBindings.isNotInSoftTypingMode()) {
+            if (newOverloadBindings.getMode() != EOverloadBindingsMode.SoftTyping) {
                 newOverloadBindings.addUpperTypeBound(newTypeVariable, getUpperTypeBounds());
             } else {
                 newOverloadBindings.addLowerTypeBound(newTypeVariable, getUpperTypeBounds());
@@ -227,23 +228,15 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
             absoluteName = "{as " + typeVariable + "}";
         } else {
             String lowerAbsoluteName = lowerTypeBounds != null ? lowerTypeBounds.getAbsoluteName() : "";
-            String upperAbsoluteName = upperTypeBounds != null ? getUpperTypeBounds().getAbsoluteName() : "";
-            if (lowerAbsoluteName.equals(upperAbsoluteName)) {
-                absoluteName = "{as " + lowerAbsoluteName + "}";
-            } else if (wasBound) {
-                absoluteName = "{as " + typeVariable + "}";
-            } else {
-                StringBuilder stringBuilder = new StringBuilder("{as ");
-                stringBuilder.append(typeVariable).append(" \\ ");
+            String upperAbsoluteName = upperTypeBounds != null ? upperTypeBounds.getAbsoluteName() : "";
+            if (isFixed()) {
                 if (!lowerAbsoluteName.isEmpty()) {
-                    stringBuilder.append(lowerAbsoluteName).append(" < ");
+                    absoluteName = "{as " + lowerAbsoluteName + "}";
+                } else {
+                    absoluteName = "{as " + upperAbsoluteName + "}";
                 }
-                stringBuilder.append(typeVariable);
-                if (!upperAbsoluteName.isEmpty()) {
-                    stringBuilder.append(" < ").append(upperAbsoluteName);
-                }
-                stringBuilder.append("}");
-                absoluteName = stringBuilder.toString();
+            } else {
+                absoluteName = "{as " + typeVariable + "}";
             }
         }
         return absoluteName;

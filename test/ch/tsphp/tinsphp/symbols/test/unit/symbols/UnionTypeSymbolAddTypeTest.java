@@ -453,7 +453,6 @@ public class UnionTypeSymbolAddTypeTest extends ATypeHelperTest
         overloadBindings.addVariable("$a", new TypeVariableReference("T1"));
         overloadBindings.addVariable("$b", new TypeVariableReference("T2"));
         overloadBindings.addUpperTypeBound("T1", intType);
-        overloadBindings.addLowerTypeBound("T2", stringType);
         overloadBindings.addUpperTypeBound("T2", stringType);
         IConvertibleTypeSymbol convertibleTypeSymbol1 = createConvertibleType();
         overloadBindings.bind(convertibleTypeSymbol1, asList("T1"));
@@ -468,7 +467,7 @@ public class UnionTypeSymbolAddTypeTest extends ATypeHelperTest
         Map<String, ITypeSymbol> symbols = unionTypeSymbol.getTypeSymbols();
 
         assertThat(result, is(true));
-        assertThat(symbols.keySet(), containsInAnyOrder("{as num}", "{as string}"));
+        assertThat(symbols.keySet(), containsInAnyOrder("{as num}", "{as T2}"));
         assertThat(unionTypeSymbol.isFixed(), is(false));
     }
 

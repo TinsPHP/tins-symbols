@@ -36,6 +36,7 @@ import java.util.Set;
 import static ch.tsphp.tinsphp.common.utils.Pair.pair;
 import static ch.tsphp.tinsphp.symbols.test.integration.testutils.OverloadBindingsMatcher.varBinding;
 import static ch.tsphp.tinsphp.symbols.test.integration.testutils.OverloadBindingsMatcher.withVariableBindings;
+import static ch.tsphp.tinsphp.symbols.test.integration.testutils.TypeParameterConstraintsMatcher.isConstraints;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -1024,8 +1025,149 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$x", tx, asList("int", "float"), asList("{as " + ty + "}"), false),
-                varBinding("$y", ty, asList("string"), asList("string"), false)
+                varBinding("$y", ty, null, asList("string"), false)
         ));
+        assertThat(resultDto.lowerConstraints, isConstraints(pair(ty, set("string"))));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
+    }
+
+    @Test
+    public void
+    addUpperTypeBound_AddAsTWhereTLowerIsIntAndTUpperIsNumAndLowerIsFloat_LowerConstraintIsFloat() {
+        //pre-arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions = new HashMap<>();
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+
+        //arrange
+        String tx = "Tx";
+        String ty = "Ty";
+        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
+        overloadBindings.addVariable("$y", new TypeVariableReference(ty));
+        overloadBindings.addLowerTypeBound(tx, floatType);
+        overloadBindings.addLowerTypeBound(ty, intType);
+        overloadBindings.addUpperTypeBound(ty, numType);
+        IConvertibleTypeSymbol asTy = createConvertibleType(symbolFactory, typeHelper);
+        overloadBindings.bind(asTy, asList(ty));
+
+        //act
+        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tx, asTy);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding("$x", tx, asList("float"), asList("{as " + ty + "}"), false),
+                varBinding("$y", ty, asList("int"), asList("num"), false)
+        ));
+        assertThat(resultDto.lowerConstraints, isConstraints(pair(ty, set("float"))));
+        assertThat(resultDto.hasChanged, is(true));
+    }
+
+    @Test
+    public void addUpperTypeBound_AddAsTWhereTLowerIsFloatAndTUpperIsNumAndLowerIsInt_LowerConstraintIsInt() {
+        //pre-arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions = new HashMap<>();
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+
+        //arrange
+        String tx = "Tx";
+        String ty = "Ty";
+        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
+        overloadBindings.addVariable("$y", new TypeVariableReference(ty));
+        overloadBindings.addLowerTypeBound(tx, intType);
+        overloadBindings.addLowerTypeBound(ty, floatType);
+        overloadBindings.addUpperTypeBound(ty, numType);
+        IConvertibleTypeSymbol asTy = createConvertibleType(symbolFactory, typeHelper);
+        overloadBindings.bind(asTy, asList(ty));
+
+        //act
+        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tx, asTy);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding("$x", tx, asList("int"), asList("{as " + ty + "}"), false),
+                varBinding("$y", ty, asList("float"), asList("num"), false)
+        ));
+        assertThat(resultDto.lowerConstraints, isConstraints(pair(ty, set("int"))));
+        assertThat(resultDto.hasChanged, is(true));
+    }
+
+    @Test
+    public void
+    addUpperTypeBound_AddAsTWhereTLowerIsFloatAndTUpperIsNumAndLowerIsString_LowerConstraintsContainIntAndFloat() {
+        //pre-arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(intType, asList(floatType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions
+                = createConversions(pair(stringType, asList(intType, floatType)));
+
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+
+        //arrange
+        String tx = "Tx";
+        String ty = "Ty";
+        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
+        overloadBindings.addVariable("$y", new TypeVariableReference(ty));
+        overloadBindings.addLowerTypeBound(tx, stringType);
+        overloadBindings.addLowerTypeBound(ty, floatType);
+        overloadBindings.addUpperTypeBound(ty, numType);
+        IConvertibleTypeSymbol asTy = createConvertibleType(symbolFactory, typeHelper);
+        overloadBindings.bind(asTy, asList(ty));
+
+        //act
+        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tx, asTy);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding("$x", tx, asList("string"), asList("{as " + ty + "}"), false),
+                varBinding("$y", ty, asList("float"), asList("num"), false)
+        ));
+        assertThat(resultDto.lowerConstraints, isConstraints(pair(ty, set("float", "int"))));
+        assertThat(resultDto.hasChanged, is(true));
+    }
+
+    @Test
+    public void
+    addUpperTypeBound_AddAsTWhereTLowerIsIntAndTUpperIsNumAndLowerIsString_LowerConstraintsContainIntAndFloat() {
+        //pre-arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(intType, asList(floatType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions
+                = createConversions(pair(stringType, asList(intType, floatType)));
+
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //pre-act necessary for arrange
+        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+
+        //arrange
+        String tx = "Tx";
+        String ty = "Ty";
+        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
+        overloadBindings.addVariable("$y", new TypeVariableReference(ty));
+        overloadBindings.addLowerTypeBound(tx, stringType);
+        overloadBindings.addLowerTypeBound(ty, intType);
+        overloadBindings.addUpperTypeBound(ty, numType);
+        IConvertibleTypeSymbol asTy = createConvertibleType(symbolFactory, typeHelper);
+        overloadBindings.bind(asTy, asList(ty));
+
+        //act
+        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tx, asTy);
+
+        assertThat(overloadBindings, withVariableBindings(
+                varBinding("$x", tx, asList("string"), asList("{as " + ty + "}"), false),
+                varBinding("$y", ty, asList("int"), asList("num"), false)
+        ));
+        assertThat(resultDto.lowerConstraints, isConstraints(pair(ty, set("int", "float"))));
         assertThat(resultDto.hasChanged, is(true));
         assertThat(resultDto.usedImplicitConversion, is(false));
     }
@@ -1033,7 +1175,7 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     //TINS-526 bool and arithmetic operators
     @Test
     public void
-    addUpperTypeBound_AddTwiceAsTWhereTLowerStringAndLowerIsIntOrFloatAndIntAsWellAsFloatHaveExplToString_LowerConstraintContainsString() {
+    addUpperTypeBound_AddTwiceAsTWhereTLowerStringAndLowerIsIntOrFloatAndIntAsWellAsFloatHaveExplToString_LowerConstraintsContainString() {
         //pre-arrange
         Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions = new HashMap<>();
         Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions
@@ -1059,8 +1201,9 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding("$x", tx, asList("int", "float"), asList("{as " + ty + "}"), false),
-                varBinding("$y", ty, asList("string"), asList("string"), false)
+                varBinding("$y", ty, null, asList("string"), false)
         ));
+        assertThat(resultDto.lowerConstraints, isConstraints(pair(ty, set("string"))));
         assertThat(resultDto.hasChanged, is(false));
         assertThat(resultDto.usedImplicitConversion, is(false));
     }

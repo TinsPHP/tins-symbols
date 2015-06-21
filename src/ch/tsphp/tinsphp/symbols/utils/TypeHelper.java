@@ -18,11 +18,11 @@ import ch.tsphp.tinsphp.common.utils.MapHelper;
 import ch.tsphp.tinsphp.common.utils.Pair;
 import ch.tsphp.tinsphp.common.utils.TypeHelperDto;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static ch.tsphp.tinsphp.common.utils.ERelation.HAS_COERCIVE_RELATION;
 import static ch.tsphp.tinsphp.common.utils.ERelation.HAS_NO_RELATION;
@@ -237,7 +237,7 @@ public class TypeHelper implements ITypeHelper
             copy.toType = upperTypeBounds;
             hasUpRelationFromNominalToIntersection(copy);
             if (typeParameter != null && copy.relation != HAS_NO_RELATION) {
-                MapHelper.addToListInMap(dto.lowerConstraints, typeParameter, dto.fromType);
+                MapHelper.addToSetInMap(dto.lowerConstraints, typeParameter, dto.fromType);
             }
             hasExplicitOrImplicitConversion(dto, typeParameter, copy);
         } else if (lowerTypeBounds != null && convertibleTypeSymbol.wasBound()) {
@@ -255,7 +255,7 @@ public class TypeHelper implements ITypeHelper
                     transferConstraintsFromTo(copy.lowerConstraints, dto.lowerConstraints);
                     transferConstraintsFromTo(copy.upperConstraints, dto.upperConstraints);
                 } else {
-                    MapHelper.addToListInMap(dto.upperConstraints, typeParameter, lowerTypeBounds);
+                    MapHelper.addToSetInMap(dto.upperConstraints, typeParameter, lowerTypeBounds);
                 }
             }
         }
@@ -283,9 +283,9 @@ public class TypeHelper implements ITypeHelper
         if (conversions != null) {
             if (conversions.containsKey(toTargetAbsoluteName)) {
                 if (typeParameter != null) {
-                    MapHelper.addToListInMap(dto.lowerConstraints, typeParameter, dto.toType);
+                    MapHelper.addToSetInMap(dto.lowerConstraints, typeParameter, dto.toType);
                 } else if (dto.typeVariable != null) {
-                    MapHelper.addToListInMap(dto.upperConstraints, dto.typeVariable, dto.fromType);
+                    MapHelper.addToSetInMap(dto.upperConstraints, dto.typeVariable, dto.fromType);
                 }
                 dto.relation = HAS_RELATION;
             } else {
@@ -303,27 +303,31 @@ public class TypeHelper implements ITypeHelper
     private void isAtLeastOneConversionTargetSubtype(
             TypeHelperDto dto, String typeParameter, Map<String, Pair<ITypeSymbol, IConversionMethod>> conversions) {
 
+        ERelation relation = ERelation.HAS_NO_RELATION;
         ITypeSymbol tmpFromType = dto.fromType;
-        forLoop:
         for (Map.Entry<String, Pair<ITypeSymbol, IConversionMethod>> entry : conversions.entrySet()) {
             dto.fromType = entry.getValue().first;
+            dto.relation = HAS_NO_RELATION;
             isFirstSameOrSubTypeOfSecond(dto);
             switch (dto.relation) {
                 case HAS_RELATION:
                     if (typeParameter != null) {
-                        MapHelper.addToListInMap(dto.lowerConstraints, typeParameter, dto.fromType);
+                        MapHelper.addToSetInMap(dto.lowerConstraints, typeParameter, dto.fromType);
                     }
-                    dto.relation = HAS_RELATION;
-                    break forLoop;
+                    if (relation == HAS_NO_RELATION) {
+                        relation = HAS_RELATION;
+                    }
+                    break;
                 case HAS_COERCIVE_RELATION:
                     if (typeParameter != null) {
-                        MapHelper.addToListInMap(dto.lowerConstraints, typeParameter, dto.fromType);
+                        MapHelper.addToSetInMap(dto.lowerConstraints, typeParameter, dto.fromType);
                     }
-                    dto.relation = HAS_COERCIVE_RELATION;
+                    relation = HAS_COERCIVE_RELATION;
                     break;
             }
         }
         dto.fromType = tmpFromType;
+        dto.relation = relation;
     }
     //Warning! end code duplication - very similar to isAtLeastOneSameOrParentTypeOfFromType and
     // isAtLeastOneSameOrSubtypeOfToType
@@ -347,8 +351,8 @@ public class TypeHelper implements ITypeHelper
 
     //Warning! start code duplication - very similar to allAreSameOrParentTypesOfFromType
     private void allAreSameOrSubtypesOfToType(Collection<ITypeSymbol> typeSymbols, TypeHelperDto dto) {
-        Map<String, List<ITypeSymbol>> lowerConstraints = new HashMap<>();
-        Map<String, List<ITypeSymbol>> upperConstraints = new HashMap<>();
+        Map<String, Set<ITypeSymbol>> lowerConstraints = new HashMap<>();
+        Map<String, Set<ITypeSymbol>> upperConstraints = new HashMap<>();
 
         ERelation subtypeRelation = HAS_RELATION;
         forLoop:
@@ -381,14 +385,14 @@ public class TypeHelper implements ITypeHelper
     //Warning! end code duplication - very similar to allAreSameOrParentTypesOfFromType
 
 
-    private void transferConstraintsFromTo(Map<String, List<ITypeSymbol>> from, Map<String, List<ITypeSymbol>> to) {
-        for (Map.Entry<String, List<ITypeSymbol>> entry : from.entrySet()) {
+    private void transferConstraintsFromTo(Map<String, Set<ITypeSymbol>> from, Map<String, Set<ITypeSymbol>> to) {
+        for (Map.Entry<String, Set<ITypeSymbol>> entry : from.entrySet()) {
             String typeVariable = entry.getKey();
-            List<ITypeSymbol> fromList = entry.getValue();
+            Set<ITypeSymbol> fromList = entry.getValue();
             if (to.containsKey(typeVariable)) {
                 to.get(typeVariable).addAll(fromList);
             } else {
-                List<ITypeSymbol> toList = new ArrayList<>(fromList);
+                Set<ITypeSymbol> toList = new HashSet<>(fromList);
                 to.put(typeVariable, toList);
             }
         }
@@ -397,8 +401,8 @@ public class TypeHelper implements ITypeHelper
 
     //Warning! start code duplication - very similar to allAreSameOrSubtypesOfToType
     private void allAreSameOrParentTypesOfFromType(Collection<ITypeSymbol> typeSymbols, TypeHelperDto dto) {
-        Map<String, List<ITypeSymbol>> lowerConstraints = new HashMap<>();
-        Map<String, List<ITypeSymbol>> upperConstraints = new HashMap<>();
+        Map<String, Set<ITypeSymbol>> lowerConstraints = new HashMap<>();
+        Map<String, Set<ITypeSymbol>> upperConstraints = new HashMap<>();
 
         ERelation parentTypeRelation = HAS_RELATION;
         forLoop:
@@ -452,10 +456,10 @@ public class TypeHelper implements ITypeHelper
 
         dto.relation = newDto.relation;
         for (String typeVariable : newDto.lowerConstraints.keySet()) {
-            MapHelper.addToListInMap(dto.lowerConstraints, typeVariable, dto.fromType);
+            MapHelper.addToSetInMap(dto.lowerConstraints, typeVariable, dto.fromType);
         }
         for (String typeVariable : newDto.upperConstraints.keySet()) {
-            MapHelper.addToListInMap(dto.upperConstraints, typeVariable, dto.fromType);
+            MapHelper.addToSetInMap(dto.upperConstraints, typeVariable, dto.fromType);
         }
     }
     //Warning! end code duplication - very similar to isAtLeastOneSameOrParentTypeOfFromType

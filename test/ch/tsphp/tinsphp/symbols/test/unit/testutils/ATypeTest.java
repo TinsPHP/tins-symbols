@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -145,7 +146,7 @@ public abstract class ATypeTest
     }
 
     @SafeVarargs
-    protected static <T> HashSet<T> set(T... symbols) {
+    protected static <T> Set<T> set(T... symbols) {
         return new HashSet<>(Arrays.asList(symbols));
     }
 }
