@@ -303,6 +303,37 @@ public class FunctionTypeTest extends ATypeTest
         assertThat(result, is("{as T} x {as T} -> T \\ int <: T <: num"));
     }
 
+    //see TINS-548 hasConvertibleParameters false even though function has
+    @Test
+    public void simplify_PlusWithConvertibleWithLowerBound_HasConvertibleParameterTypes() {
+        //corresponds: function foo($x, $y){return $x + $y + 1;}
+        //where {as T} x {as T} -> T \ T <: num is used for the first + operator
+        IOverloadBindings overloadBindings = createOverloadBindings();
+        String tx = "V3";
+        String ty = "V4";
+        String tReturn = "V1";
+        String te1 = "V2";
+        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
+        overloadBindings.addVariable("$y", new TypeVariableReference(ty));
+        overloadBindings.addVariable("+@1|2", new TypeVariableReference(te1));
+        overloadBindings.addVariable(TinsPHPConstants.RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        IConvertibleTypeSymbol asTe1 = symbolFactory.createConvertibleTypeSymbol();
+        overloadBindings.bind(asTe1, Arrays.asList(te1));
+        overloadBindings.addUpperTypeBound(tx, asTe1);
+        overloadBindings.addUpperTypeBound(ty, asTe1);
+        overloadBindings.addLowerTypeBound(te1, intType);
+        overloadBindings.addUpperTypeBound(te1, numType);
+        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(te1));
+        IVariable $x = new Variable("$x");
+        IVariable $y = new Variable("$y");
+
+        IFunctionType function = createFunction("foo", overloadBindings, asList($x, $y));
+        function.simplify();
+        boolean result = function.hasConvertibleParameterTypes();
+
+        assertThat(result, is(true));
+    }
+
     //see TINS-403 rename TypeVariables to reflect order of parameters
     //see also TINS-517 param lower of other and both lower of return
     //see also TINS-516 improve function signature with unions
@@ -404,6 +435,33 @@ public class FunctionTypeTest extends ATypeTest
         String result = function.getSignature();
 
         assertThat(result, is("{as T} -> (array | T) \\ T <: int"));
+    }
+
+    //see TINS-548 hasConvertibleParameters false even though function has
+    @Test
+    public void simplify_AsTe1UpperTxAndTe1LowerReturn_HasConvertibleParameters() {
+        //corresponds: function foo($x){ if($x + 1 > 0){ return $x; } return []; }
+        //where {as T} x {as T} -> T was taken for $x + 1;
+        IOverloadBindings overloadBindings = createOverloadBindings();
+        String tx = "V3";
+        String te1 = "V2";
+        String tReturn = "V1";
+        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
+        overloadBindings.addVariable("+@1|2", new TypeVariableReference(te1));
+        overloadBindings.addVariable(TinsPHPConstants.RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        IConvertibleTypeSymbol asTe1 = symbolFactory.createConvertibleTypeSymbol();
+        overloadBindings.bind(asTe1, asList(te1));
+        overloadBindings.addUpperTypeBound(te1, intType);
+        overloadBindings.addUpperTypeBound(tx, asTe1);
+        overloadBindings.addLowerTypeBound(tReturn, arrayType);
+        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(te1));
+        IVariable $x = new Variable("$x");
+
+        IFunctionType function = createFunction("foo", overloadBindings, asList($x));
+        function.simplify();
+        boolean result = function.hasConvertibleParameterTypes();
+
+        assertThat(result, is(true));
     }
 
     @Test(expected = IllegalStateException.class)
