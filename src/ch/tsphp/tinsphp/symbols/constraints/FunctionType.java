@@ -143,9 +143,6 @@ public class FunctionType implements IFunctionType
                 break;
             }
         }
-        String typeVariable
-                = overloadBindings.getTypeVariableReference(TinsPHPConstants.RETURN_VARIABLE_NAME).getTypeVariable();
-        searchForConvertibleTypeInTypeBounds(typeVariable);
     }
 
     private boolean searchForConvertibleTypeInTypeBounds(String typeParameter) {
