@@ -6,7 +6,6 @@
 
 package ch.tsphp.tinsphp.symbols.test.integration.constraints;
 
-import ch.tsphp.tinsphp.common.inference.constraints.FixedTypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
 import ch.tsphp.tinsphp.common.symbols.IConvertibleTypeSymbol;
@@ -41,8 +40,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
 
         overloadBindings.addVariable("$a", new TypeVariableReference(ta));
         overloadBindings.addVariable("$b", new TypeVariableReference(tb));
-        overloadBindings.addVariable(
-                RETURN_VARIABLE_NAME, new FixedTypeVariableReference(new TypeVariableReference(tReturn)));
+        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
         overloadBindings.addLowerTypeBound(ta, intType);
         overloadBindings.addLowerTypeBound(tb, floatType);
         overloadBindings.addLowerTypeBound(tReturn, boolType);
@@ -52,9 +50,9 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(new HashSet<String>());
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding("$a", ta, asList("int"), asList("int"), true),
-                varBinding("$b", tb, asList("float"), asList("float"), true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("bool"), asList("bool"), true)
+                varBinding("$a", ta, asList("int"), null, true),
+                varBinding("$b", tb, asList("float"), null, true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("bool"), null, true)
         ));
     }
 
@@ -83,9 +81,9 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding("$a", ta, asList("int"), asList("int"), true),
-                varBinding("$b", tb, asList("float"), asList("float"), true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("float"), asList("float"), true)
+                varBinding("$a", ta, asList("int"), null, true),
+                varBinding("$b", tb, asList("float"), null, true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("float"), null, true)
         ));
     }
 
@@ -114,9 +112,9 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding("$a", ta, asList("int"), asList("int"), true),
-                varBinding("$b", tb, asList("int"), asList("int"), true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), asList("int"), true)
+                varBinding("$a", ta, asList("int"), null, true),
+                varBinding("$b", tb, asList("int"), null, true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
         ));
     }
 
@@ -148,9 +146,9 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding("$a", ta, asList("int"), asList("int"), true),
-                varBinding("$b", tb, asList("int"), asList("int"), true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), asList("int"), true)
+                varBinding("$a", ta, asList("int"), null, true),
+                varBinding("$b", tb, asList("int"), null, true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
         ));
     }
 
@@ -186,11 +184,11 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding("$a", ta, asList("int"), asList("int"), true),
-                varBinding("$b", tb, asList("int"), asList("int"), true),
-                varBinding("$c", tc, asList("int"), asList("int"), true),
-                varBinding("$d", td, asList("int"), asList("int"), true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), asList("int"), true)
+                varBinding("$a", ta, asList("int"), null, true),
+                varBinding("$b", tb, asList("int"), null, true),
+                varBinding("$c", tc, asList("int"), null, true),
+                varBinding("$d", td, asList("int"), null, true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
         ));
     }
 
@@ -224,10 +222,10 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding($x, t1, asList("num"), asList("num"), true),
-                varBinding($y, t1, asList("num"), asList("num"), true),
-                varBinding($a, ta, asList("num"), asList("num"), true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), asList("int"), true)
+                varBinding($x, t1, null, asList("num"), true),
+                varBinding($y, t1, null, asList("num"), true),
+                varBinding($a, ta, asList("num"), null, true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
         ));
     }
 
@@ -262,9 +260,9 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding($x, tx, asList("num"), asList("num"), true),
-                varBinding($y, ty, asList("num"), asList("num"), true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), asList("int"), true)
+                varBinding($x, tx, null, asList("num"), true),
+                varBinding($y, ty, null, asList("num"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
         ));
     }
 
@@ -597,9 +595,9 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding($x, tx, asList("mixed"), asList("mixed"), true),
-                varBinding($y, ty, asList("mixed"), asList("mixed"), true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), asList("int"), true)
+                varBinding($x, tx, null, asList("mixed"), true),
+                varBinding($y, ty, null, asList("mixed"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
         ));
     }
 
@@ -628,9 +626,9 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding($x, tx, asList("mixed"), asList("mixed"), true),
-                varBinding($a, ta, asList("mixed"), asList("mixed"), true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), asList("int"), true)
+                varBinding($x, tx, null, asList("mixed"), true),
+                varBinding($a, ta, asList("mixed"), null, true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
         ));
     }
 
@@ -792,7 +790,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding($x, tx, asList("bool"), asList("bool"), true),
+                varBinding($x, tx, null, asList("bool"), true),
                 varBinding($y, ty, null, asList("@" + tReturn), false),
                 varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int", "@" + ty), null, false)
         ));
@@ -822,8 +820,8 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding($x, tx, asList("string"), asList("string"), true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("string"), asList("string"), true)
+                varBinding($x, tx, null, asList("string"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("string"), null, true)
         ));
     }
 
@@ -862,10 +860,10 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding($x, tx, asList("string"), asList("string"), true),
+                varBinding($x, tx, null, asList("string"), true),
                 //see TINS-500 multiple return and same lower as param upper - why Ty is fixed
-                varBinding($y, ty, asList("string"), asList("string"), true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("string"), asList("string"), true)
+                varBinding($y, ty, null, asList("string"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("string"), null, true)
         ));
     }
 
@@ -903,9 +901,9 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding($x, tx, asList("string"), asList("string"), true),
-                varBinding($y, ty, asList("string"), asList("string"), true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("string"), asList("string"), true)
+                varBinding($x, tx, null, asList("string"), true),
+                varBinding($y, ty, null, asList("string"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("string"), null, true)
         ));
     }
 
@@ -943,9 +941,9 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding($x, tx, asList("string"), asList("string"), true),
-                varBinding($y, ty, asList("string"), asList("string"), true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("string"), asList("string"), true)
+                varBinding($x, tx, null, asList("string"), true),
+                varBinding($y, ty, null, asList("string"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("string"), null, true)
         ));
     }
 
@@ -987,10 +985,10 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding($x, tx, asList("string"), asList("string"), true),
-                varBinding($y, ty, asList("string"), asList("string"), true),
-                varBinding($a, ta, asList("string"), asList("string"), true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("string"), asList("string"), true)
+                varBinding($x, tx, null, asList("string"), true),
+                varBinding($y, ty, null, asList("string"), true),
+                varBinding($a, ta, asList("string"), null, true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("string"), null, true)
         ));
     }
 
@@ -1024,7 +1022,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding($x, tx, asList("string"), asList("string"), true),
+                varBinding($x, tx, null, asList("string"), true),
                 varBinding($y, ty, asList("string"), null, false),
                 varBinding(RETURN_VARIABLE_NAME, ty, asList("string"), null, false)
         ));
@@ -1542,7 +1540,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
                 varBinding($x, tx, null, asList("int", "@" + ty), false),
                 varBinding($y, ty, asList("@" + tx), asList("num"), false),
                 varBinding($z, ty, asList("@" + tx), asList("num"), false),
-                varBinding($a, ta, asList("mixed"), asList("mixed"), true),
+                varBinding($a, ta, null, asList("mixed"), true),
                 varBinding(RETURN_VARIABLE_NAME, ty, asList("@" + tx), asList("num"), false)
         ));
     }
@@ -1633,7 +1631,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding($x, tx, asList("bool"), asList("bool"), true),
+                varBinding($x, tx, null, asList("bool"), true),
                 varBinding($y, ty, null, asList("bool", "@" + tBar1, "@" + tBar2, "@" + tReturn), false),
                 varBinding($z, tz, null, asList("@" + tBar1, "@" + tBar2, "@" + tReturn), false),
                 varBinding(fCallBar1, tBar1, asList("@Ty", "@Tz"), null, false),
@@ -1698,7 +1696,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding($x, tx, asList("bool"), asList("bool"), true),
+                varBinding($x, tx, null, asList("bool"), true),
                 varBinding($y, ty, null, asList("bool", "@" + tBar1, "@" + tBar2, "@" + tBar3, "@" + tReturn), false),
                 varBinding($z, tz, null, asList("@" + tBar1, "@" + tBar2, "@" + tBar3, "@" + tReturn), false),
                 varBinding(fCallBar1, tBar1, asList("@" + ty, "@" + tz), null, false),
@@ -1803,8 +1801,8 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding($x, tx, asList("{as " + tPlus + "}"), asList("{as " + tPlus + "}"), true),
-                varBinding($y, ty, asList("{as " + tPlus + "}"), asList("{as " + tPlus + "}"), true),
+                varBinding($x, tx, null, asList("{as " + tPlus + "}"), true),
+                varBinding($y, ty, null, asList("{as " + tPlus + "}"), true),
                 varBinding(plus, tPlus, null, asList("num"), false),
                 varBinding(RETURN_VARIABLE_NAME, tPlus, null, asList("num"), false)
         ));
@@ -1852,8 +1850,8 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding($x, tx, asList("{as " + tPlus + "}"), asList("{as " + tPlus + "}"), true),
-                varBinding($y, ty, asList("{as " + tPlus + "}"), asList("{as " + tPlus + "}"), true),
+                varBinding($x, tx, null, asList("{as " + tPlus + "}"), true),
+                varBinding($y, ty, null, asList("{as " + tPlus + "}"), true),
                 varBinding(plus, tPlus, null, asList("num"), false),
                 varBinding($a, tPlus, null, asList("num"), false),
                 varBinding(RETURN_VARIABLE_NAME, tPlus, null, asList("num"), false)
@@ -1905,8 +1903,8 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding($x, tx, null, asList("{as " + tPlus + "}", "@" + tReturn), false),
-                varBinding($y, ty, asList("{as " + tPlus + "}"), asList("{as " + tPlus + "}"), true),
-                varBinding($z, tz, asList("bool"), asList("bool"), true),
+                varBinding($y, ty, null, asList("{as " + tPlus + "}"), true),
+                varBinding($z, tz, null, asList("bool"), true),
                 varBinding(plus, tPlus, null, asList("num", "@" + tReturn), false),
                 varBinding(RETURN_VARIABLE_NAME, tReturn, asList("@" + tPlus, "@" + tx), null, false)
         ));
@@ -1917,7 +1915,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
     @Test
     public void tryToFix_PlusWithConvertibleAndReturnTxAndTy_ReturnIsNotFixedIsTPlusAndTxAndTy() {
         //corresponds:
-        //  function foo($x, $y, $z){ if($z > 10){ return $x + $y;} else if ($z <10){return $x;} return $y; }
+        //  function foo($x, $y, $a){ if($a > 10){ return $x + $y;} else if ($a <10){return $x;} return $y; }
         // with + overload {as T} x {as T} -> T
 
         //pre-act necessary for arrange
@@ -1928,20 +1926,20 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String tx = "Tx";
         String $y = "$y";
         String ty = "Ty";
-        String $z = "$z";
-        String tz = "Tz";
+        String $a = "$a";
+        String ta = "Ta";
         String plus = "+@1|2";
         String tPlus = "Tplus";
         String tReturn = "Treturn";
 
         overloadBindings.addVariable($x, new TypeVariableReference(tx));
         overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable($z, new TypeVariableReference(tz));
+        overloadBindings.addVariable($a, new TypeVariableReference(ta));
         overloadBindings.addVariable(plus, new TypeVariableReference(tPlus));
         overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
         IConvertibleTypeSymbol asTPlus = createConvertibleType();
         overloadBindings.bind(asTPlus, asList(tPlus));
-        overloadBindings.addUpperTypeBound(tz, mixedType);
+        overloadBindings.addUpperTypeBound(ta, mixedType);
         overloadBindings.addUpperTypeBound(tx, asTPlus);
         overloadBindings.addUpperTypeBound(ty, asTPlus);
         overloadBindings.addUpperTypeBound(tPlus, numType);
@@ -1959,7 +1957,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         assertThat(overloadBindings, withVariableBindings(
                 varBinding($x, tx, null, asList("{as " + tPlus + "}", "@" + tReturn), false),
                 varBinding($y, ty, null, asList("{as " + tPlus + "}", "@" + tReturn), false),
-                varBinding($z, tz, asList("mixed"), asList("mixed"), true),
+                varBinding($a, ta, asList("mixed"), null, true),
                 varBinding(plus, tPlus, null, asList("num", "@" + tReturn), false),
                 varBinding(RETURN_VARIABLE_NAME, tReturn, asList("@" + tPlus, "@" + tx, "@" + ty), null, false)
         ));
@@ -2008,11 +2006,11 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding($x, tx, asList("{as num}"), asList("{as num}"), true),
-                varBinding($y, ty, asList("{as num}"), asList("{as num}"), true),
-                varBinding(plus, tPlus, asList("num"), asList("num"), true),
-                varBinding($a, ta, asList("num"), asList("num"), true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("bool"), asList("bool"), true)
+                varBinding($x, tx, null, asList("{as num}"), true),
+                varBinding($y, ty, null, asList("{as num}"), true),
+                varBinding(plus, tPlus, null, asList("num"), true),
+                varBinding($a, ta, asList("num"), null, true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("bool"), null, true)
         ));
     }
 
@@ -2052,9 +2050,9 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding($x, tx, asList("{as num}"), asList("{as num}"), true),
-                varBinding(e1, te1, asList("num"), asList("num"), true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), asList("int"), true)
+                varBinding($x, tx, null, asList("{as num}"), true),
+                varBinding(e1, te1, null, asList("num"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
         ));
     }
 
@@ -2105,11 +2103,11 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding($x, tx, asList("{as num}"), asList("{as num}"), true),
-                varBinding($y, ty, asList("{as num}"), asList("{as num}"), true),
-                varBinding(e1, te1, asList("num"), asList("num"), true),
-                varBinding(e2, te2, asList("num"), asList("num"), true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), asList("int"), true)
+                varBinding($x, tx, null, asList("{as num}"), true),
+                varBinding($y, ty, null, asList("{as num}"), true),
+                varBinding(e1, te1, null, asList("num"), true),
+                varBinding(e2, te2, null, asList("num"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
         ));
     }
 
@@ -2157,10 +2155,10 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding($x, tx, asList("int"), asList("int"), true),
-                varBinding(e1, te1, asList("int"), asList("int"), true),
-                varBinding(localReturn, tLocalReturn, asList("int"), asList("int"), true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int", "bool"), asList("(bool | int)"), true)
+                varBinding($x, tx, null, asList("int"), true),
+                varBinding(e1, te1, asList("int"), null, true),
+                varBinding(localReturn, tLocalReturn, asList("int"), null, true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int", "bool"), null, true)
         ));
     }
 
@@ -2208,10 +2206,10 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding($x, tx, asList("int"), asList("int"), true),
-                varBinding(e1, te1, asList("int"), asList("int"), true),
-                varBinding(localReturn, tLocalReturn, asList("int"), asList("int"), true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int", "bool"), asList("(bool | int)"), true)
+                varBinding($x, tx, null, asList("int"), true),
+                varBinding(e1, te1, asList("int"), null, true),
+                varBinding(localReturn, tLocalReturn, asList("int"), null, true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int", "bool"), null, true)
         ));
     }
 
@@ -2243,8 +2241,8 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding($x, tx, asList("int"), asList("int"), true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), asList("int"), true)
+                varBinding($x, tx, null, asList("int"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
         ));
     }
 
@@ -2275,8 +2273,8 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding($x, tx, asList("int"), asList("int"), true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), asList("int"), true)
+                varBinding($x, tx, null, asList("int"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
         ));
     }
 
@@ -2312,7 +2310,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding($x, tx, asList("int"), asList("int"), true),
+                varBinding($x, tx, null, asList("int"), true),
                 varBinding($y, ty, null, asList("float", "@" + tReturn), false),
                 varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int", "@" + ty), null, false)
         ));
@@ -2351,9 +2349,9 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         overloadBindings.tryToFix(parameterTypeVariables);
 
         assertThat(overloadBindings, withVariableBindings(
-                varBinding($x, tx, asList("int"), asList("int"), true),
-                varBinding($a, ta, asList("float"), asList("float"), true),
-                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int", "float"), asList("(float | int)"), true)
+                varBinding($x, tx, null, asList("int"), true),
+                varBinding($a, ta, asList("float"), null, true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int", "float"), null, true)
         ));
     }
 
@@ -2391,7 +2389,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding($x, tx, asList("int"), null, false),
-                varBinding($y, ty, asList("int"), asList("int"), true),
+                varBinding($y, ty, null, asList("int"), true),
                 varBinding(RETURN_VARIABLE_NAME, tx, asList("int"), null, false)
         ));
     }
@@ -2430,7 +2428,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding($x, tx, asList("int"), null, false),
-                varBinding($y, ty, asList("int"), asList("int"), true),
+                varBinding($y, ty, null, asList("int"), true),
                 varBinding(RETURN_VARIABLE_NAME, tx, asList("int"), null, false)
         ));
     }
@@ -2488,8 +2486,8 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding($x, tx, null, asList("num", "@" + te2), false),
-                varBinding($y, ty, asList("{as " + tx + "}"), asList("{as " + tx + "}"), true),
-                varBinding($z, tz, asList("{as " + te2 + "}"), asList("{as " + te2 + "}"), true),
+                varBinding($y, ty, null, asList("{as " + tx + "}"), true),
+                varBinding($z, tz, null, asList("{as " + te2 + "}"), true),
                 varBinding(e1, tx, null, asList("num", "@" + te2), false),
                 varBinding(e2, te2, asList("@" + tx), asList("num"), false),
                 varBinding(RETURN_VARIABLE_NAME, te2, asList("@" + tx), asList("num"), false)
@@ -2529,7 +2527,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding($x, tx, asList("int"), asList("@" + tReturn), false),
-                varBinding($y, ty, asList("int"), asList("int"), true),
+                varBinding($y, ty, null, asList("int"), true),
                 varBinding(RETURN_VARIABLE_NAME, tReturn, asList("num", "@" + tx), null, false)
         ));
     }
@@ -2567,7 +2565,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding($x, tx, asList("int"), null, false),
-                varBinding($y, ty, asList("int"), asList("int"), true),
+                varBinding($y, ty, null, asList("int"), true),
                 varBinding(RETURN_VARIABLE_NAME, tx, asList("int"), null, false)
         ));
     }
@@ -2605,7 +2603,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
 
         assertThat(overloadBindings, withVariableBindings(
                 varBinding($x, tx, asList("int"), null, false),
-                varBinding($y, ty, asList("int"), asList("int"), true),
+                varBinding($y, ty, null, asList("int"), true),
                 varBinding(RETURN_VARIABLE_NAME, tx, asList("int"), null, false)
         ));
     }

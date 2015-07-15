@@ -183,8 +183,6 @@ public abstract class AContainerTypeSymbol extends APolymorphicTypeSymbol implem
     }
 
     protected boolean addAndSimplify(String absoluteName, ITypeSymbol newTypeSymbol) {
-        boolean hasChanged = false;
-
         EAdditionStatus status = CAN_BE_ADDED;
         Iterator<Map.Entry<String, ITypeSymbol>> iterator = typeSymbols.entrySet().iterator();
         while (iterator.hasNext()) {
@@ -202,13 +200,10 @@ public abstract class AContainerTypeSymbol extends APolymorphicTypeSymbol implem
         }
 
         if (status != DOES_NOT_ADD_NEW_INFORMATION) {
-            hasChanged = true;
             typeSymbols.put(absoluteName, newTypeSymbol);
+            return true;
         }
-
-        //Warning! end code duplication - almost the same as in UnionTypeSymbol
-
-        return hasChanged;
+        return false;
     }
 
     protected boolean merge(IContainerTypeSymbol containerTypeSymbol) {

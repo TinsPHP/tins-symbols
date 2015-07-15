@@ -728,8 +728,8 @@ public class OverloadBindings implements IOverloadBindings
     private void fixTypeAfterContainsCheck(String variableId, boolean isNotParameter) {
         //Warning! start code duplication, more or less same as in fixTypeParameter
         ITypeVariableReference reference = variable2TypeVariable.get(variableId);
+        String typeVariable = reference.getTypeVariable();
         if (!reference.hasFixedType()) {
-            String typeVariable = reference.getTypeVariable();
             fixTypeVariable(variableId, reference);
             fixTypeVariableType(isNotParameter, typeVariable);
             informBoundTypes(typeVariable);
@@ -744,8 +744,6 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     private void fixTypeVariableType(boolean isNotParameter, String typeVariable) {
-        //TODO TINS-407 - store fixed type only in lower bound
-
         //parameters should be hold as general as possible where local variables should be as specific as possible.
         //therefore we add the lower type bound to the upper type bound if it is not a parameter and vice versa
         if (isNotParameter && hasLowerTypeBounds(typeVariable)) {
@@ -783,12 +781,13 @@ public class OverloadBindings implements IOverloadBindings
             ITypeVariableReference reference = variable2TypeVariable.get(variableId);
             if (!reference.hasFixedType()) {
                 fixTypeVariable(variableId, reference);
-                //no need to fix it multiple times, once is enough
-                if (!typeVariableFixed) {
-                    String typeVariable = reference.getTypeVariable();
-                    fixTypeVariableType(isNotParameter, typeVariable);
-                    typeVariableFixed = true;
-                }
+            }
+            //no need to fix it multiple times, once is enough
+            if (!typeVariableFixed) {
+                String typeVariable = reference.getTypeVariable();
+                fixTypeVariableType(isNotParameter, typeVariable);
+                lowerTypeBounds.remove(typeVariable);
+                typeVariableFixed = true;
             }
             //Warning! end code duplication, more or less same as in fixTypeAfterContainsCheck
         }
@@ -995,8 +994,8 @@ public class OverloadBindings implements IOverloadBindings
                 }
 
                 //When a function has multiple returns then the type parameter does not contribute to the return type
-                // if the return type variable's lower type bound is a parent type of the type parameters' upper type
-                // bound of the
+                // if the lower type bound of the type variable of the return variable is a parent type of the
+                // type parameters' upper type bound
                 if (doesContribute && upperTypeBound != null && lowerTypeBounds.containsKey(returnTypeVariable)) {
                     IUnionTypeSymbol returnLowerTypeBound = lowerTypeBounds.get(returnTypeVariable);
                     TypeHelperDto dto = typeHelper.isFirstSameOrSubTypeOfSecond(
@@ -1064,6 +1063,7 @@ public class OverloadBindings implements IOverloadBindings
                 for (String variableId : entry.getValue()) {
                     fixTypeAfterContainsCheck(variableId, isNotParameter);
                 }
+                upperTypeBounds.remove(typeVariable);
             }
         }
         return variablesToRename;
