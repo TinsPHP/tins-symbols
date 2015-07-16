@@ -6,9 +6,9 @@
 
 package ch.tsphp.tinsphp.symbols.constraints;
 
+import ch.tsphp.tinsphp.common.inference.constraints.IBindingCollection;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraintCollection;
-import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +16,7 @@ import java.util.List;
 public class ConstraintCollection implements IConstraintCollection
 {
     private final List<IConstraint> constraints = new ArrayList<>();
-    private List<IOverloadBindings> bindings;
+    private List<IBindingCollection> bindings;
     private String absoluteName;
 
     public ConstraintCollection(String theAbsoluteName) {
@@ -39,12 +39,12 @@ public class ConstraintCollection implements IConstraintCollection
     }
 
     @Override
-    public List<IOverloadBindings> getBindings() {
+    public List<IBindingCollection> getBindings() {
         return bindings;
     }
 
     @Override
-    public void setBindings(List<IOverloadBindings> theBindings) {
+    public void setBindings(List<IBindingCollection> theBindings) {
         bindings = theBindings;
     }
 }

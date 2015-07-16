@@ -16,10 +16,10 @@ import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ISymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
+import ch.tsphp.tinsphp.common.inference.constraints.IBindingCollection;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraintCollection;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
-import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMinimalVariableSymbol;
@@ -148,12 +148,12 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
     }
 
     @Override
-    public List<IOverloadBindings> getBindings() {
+    public List<IBindingCollection> getBindings() {
         return constraintCollection.getBindings();
     }
 
     @Override
-    public void setBindings(List<IOverloadBindings> theBindings) {
+    public void setBindings(List<IBindingCollection> theBindings) {
         constraintCollection.setBindings(theBindings);
     }
     //Warning! end code duplication - same as in GlobalNamespaceScope

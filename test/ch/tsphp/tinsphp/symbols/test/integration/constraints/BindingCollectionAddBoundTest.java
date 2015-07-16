@@ -11,7 +11,7 @@ import ch.tsphp.tinsphp.common.IConversionMethod;
 import ch.tsphp.tinsphp.common.inference.constraints.BoundException;
 import ch.tsphp.tinsphp.common.inference.constraints.BoundResultDto;
 import ch.tsphp.tinsphp.common.inference.constraints.FixedTypeVariableReference;
-import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
+import ch.tsphp.tinsphp.common.inference.constraints.IBindingCollection;
 import ch.tsphp.tinsphp.common.inference.constraints.IntersectionBoundException;
 import ch.tsphp.tinsphp.common.inference.constraints.LowerBoundException;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
@@ -22,7 +22,7 @@ import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.common.utils.Pair;
-import ch.tsphp.tinsphp.symbols.constraints.OverloadBindings;
+import ch.tsphp.tinsphp.symbols.constraints.BindingCollection;
 import ch.tsphp.tinsphp.symbols.test.integration.testutils.ATypeHelperTest;
 import org.junit.Assert;
 import org.junit.Test;
@@ -34,8 +34,8 @@ import java.util.Map;
 import java.util.Set;
 
 import static ch.tsphp.tinsphp.common.utils.Pair.pair;
-import static ch.tsphp.tinsphp.symbols.test.integration.testutils.OverloadBindingsMatcher.varBinding;
-import static ch.tsphp.tinsphp.symbols.test.integration.testutils.OverloadBindingsMatcher.withVariableBindings;
+import static ch.tsphp.tinsphp.symbols.test.integration.testutils.BindingCollectionMatcher.varBinding;
+import static ch.tsphp.tinsphp.symbols.test.integration.testutils.BindingCollectionMatcher.withVariableBindings;
 import static ch.tsphp.tinsphp.symbols.test.integration.testutils.TypeParameterConstraintsMatcher.isConstraints;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
@@ -50,7 +50,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class OverloadBindingsAddBoundTest extends ATypeHelperTest
+public class BindingCollectionAddBoundTest extends ATypeHelperTest
 {
 
     @Test(expected = IllegalArgumentException.class)
@@ -58,8 +58,8 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         //no arrange necessary
 
         //act
-        IOverloadBindings overloadBindings = createOverloadBindings();
-        overloadBindings.addLowerTypeBound("T", intType);
+        IBindingCollection bindingCollection = createBindingCollection();
+        bindingCollection.addLowerTypeBound("T", intType);
 
         //assert in annotation
     }
@@ -67,16 +67,16 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerTypeBound_IsSubtypeOfExistingUpper_AddsLowerBound() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String typeVariable = "T";
-        overloadBindings.addVariable("$a", new TypeVariableReference("T"));
-        overloadBindings.addUpperTypeBound(typeVariable, numType);
+        bindingCollection.addVariable("$a", new TypeVariableReference("T"));
+        bindingCollection.addUpperTypeBound(typeVariable, numType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(typeVariable, intType);
-        IUnionTypeSymbol result = overloadBindings.getLowerTypeBounds(typeVariable);
+        BoundResultDto resultDto = bindingCollection.addLowerTypeBound(typeVariable, intType);
+        IUnionTypeSymbol result = bindingCollection.getLowerTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("int"));
         assertThat(resultDto.hasChanged, is(true));
@@ -86,16 +86,16 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerTypeBound_IsSameTypeAsExistingUpper_AddsLowerBound() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String typeVariable = "T";
-        overloadBindings.addVariable("$a", new TypeVariableReference("T"));
-        overloadBindings.addUpperTypeBound(typeVariable, intType);
+        bindingCollection.addVariable("$a", new TypeVariableReference("T"));
+        bindingCollection.addUpperTypeBound(typeVariable, intType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(typeVariable, intType);
-        IUnionTypeSymbol result = overloadBindings.getLowerTypeBounds(typeVariable);
+        BoundResultDto resultDto = bindingCollection.addLowerTypeBound(typeVariable, intType);
+        IUnionTypeSymbol result = bindingCollection.getLowerTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("int"));
         assertThat(resultDto.hasChanged, is(true));
@@ -105,16 +105,16 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test(expected = UpperBoundException.class)
     public void addLowerTypeBound_IsNotSameOrSubtypeOfExistingUpper_ThrowsLowerBoundException() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String typeVariable = "T";
-        overloadBindings.addVariable("$a", new TypeVariableReference("T"));
-        overloadBindings.addUpperTypeBound(typeVariable, intType);
+        bindingCollection.addVariable("$a", new TypeVariableReference("T"));
+        bindingCollection.addUpperTypeBound(typeVariable, intType);
 
         //act
-        overloadBindings.addLowerTypeBound(typeVariable, numType);
-        overloadBindings.getLowerTypeBounds(typeVariable);
+        bindingCollection.addLowerTypeBound(typeVariable, numType);
+        bindingCollection.getLowerTypeBounds(typeVariable);
 
         //assert in annotation
     }
@@ -122,16 +122,16 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerTypeBound_IsSameAsExistingLower_ContainsTypeOnlyOnce() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String typeVariable = "T";
-        overloadBindings.addVariable("$a", new TypeVariableReference("T"));
-        overloadBindings.addLowerTypeBound(typeVariable, intType);
+        bindingCollection.addVariable("$a", new TypeVariableReference("T"));
+        bindingCollection.addLowerTypeBound(typeVariable, intType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(typeVariable, intType);
-        IUnionTypeSymbol result = overloadBindings.getLowerTypeBounds(typeVariable);
+        BoundResultDto resultDto = bindingCollection.addLowerTypeBound(typeVariable, intType);
+        IUnionTypeSymbol result = bindingCollection.getLowerTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("int"));
         assertThat(resultDto.hasChanged, is(false));
@@ -141,16 +141,16 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerTypeBound_IsSubtypeOfExistingLower_RemainsExisting() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String typeVariable = "T";
-        overloadBindings.addVariable("$a", new TypeVariableReference("T"));
-        overloadBindings.addLowerTypeBound(typeVariable, numType);
+        bindingCollection.addVariable("$a", new TypeVariableReference("T"));
+        bindingCollection.addLowerTypeBound(typeVariable, numType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(typeVariable, intType);
-        IUnionTypeSymbol result = overloadBindings.getLowerTypeBounds(typeVariable);
+        BoundResultDto resultDto = bindingCollection.addLowerTypeBound(typeVariable, intType);
+        IUnionTypeSymbol result = bindingCollection.getLowerTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("num"));
         assertThat(resultDto.hasChanged, is(false));
@@ -160,16 +160,16 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerTypeBound_IsParentTypeOfExistingLower_IsNewLowerBound() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String typeVariable = "T";
-        overloadBindings.addVariable("$a", new TypeVariableReference("T"));
-        overloadBindings.addLowerTypeBound(typeVariable, intType);
+        bindingCollection.addVariable("$a", new TypeVariableReference("T"));
+        bindingCollection.addLowerTypeBound(typeVariable, intType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(typeVariable, numType);
-        IUnionTypeSymbol result = overloadBindings.getLowerTypeBounds(typeVariable);
+        BoundResultDto resultDto = bindingCollection.addLowerTypeBound(typeVariable, numType);
+        IUnionTypeSymbol result = bindingCollection.getLowerTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("num"));
         assertThat(resultDto.hasChanged, is(true));
@@ -179,16 +179,16 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerTypeBound_IsOutOfTypeHierarchyOfExistingLower_ContainsBoth() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String typeVariable = "T";
-        overloadBindings.addVariable("$a", new TypeVariableReference("T"));
-        overloadBindings.addLowerTypeBound(typeVariable, intType);
+        bindingCollection.addVariable("$a", new TypeVariableReference("T"));
+        bindingCollection.addLowerTypeBound(typeVariable, intType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(typeVariable, boolType);
-        IUnionTypeSymbol result = overloadBindings.getLowerTypeBounds(typeVariable);
+        BoundResultDto resultDto = bindingCollection.addLowerTypeBound(typeVariable, boolType);
+        IUnionTypeSymbol result = bindingCollection.getLowerTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("int", "bool"));
         assertThat(resultDto.hasChanged, is(true));
@@ -199,18 +199,18 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerTypeBound_ConvertibleTypeWhichPointsToItself_DoesNotAddTheConvertibleType() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String tLhs = "Tlhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
         IConvertibleTypeSymbol asTlhs = symbolFactory.createConvertibleTypeSymbol();
-        asTlhs.bindTo(overloadBindings, asList(tLhs));
+        asTlhs.bindTo(bindingCollection, asList(tLhs));
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(tLhs, asTlhs);
+        BoundResultDto resultDto = bindingCollection.addLowerTypeBound(tLhs, asTlhs);
 
-        assertThat(overloadBindings.getLowerTypeBounds(tLhs), is(nullValue()));
+        assertThat(bindingCollection.getLowerTypeBounds(tLhs), is(nullValue()));
         assertThat(resultDto.hasChanged, is(false));
         assertThat(resultDto.usedImplicitConversion, is(false));
     }
@@ -218,22 +218,22 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerTypeBound_ConvertibleTypeWithRefWhichIsAlreadyUpper_DoesNotPropagateTheTypeUpwards() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String tLhs = "Tlhs";
         String tRhs = "Trhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
-        overloadBindings.addVariable("$rhs", new TypeVariableReference(tRhs));
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
+        bindingCollection.addVariable("$rhs", new TypeVariableReference(tRhs));
         IConvertibleTypeSymbol asTlhs = symbolFactory.createConvertibleTypeSymbol();
-        asTlhs.bindTo(overloadBindings, asList(tLhs));
-        overloadBindings.addLowerRefBound(tLhs, new TypeVariableReference(tRhs));
+        asTlhs.bindTo(bindingCollection, asList(tLhs));
+        bindingCollection.addLowerRefBound(tLhs, new TypeVariableReference(tRhs));
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(tRhs, asTlhs);
+        BoundResultDto resultDto = bindingCollection.addLowerTypeBound(tRhs, asTlhs);
 
-        assertThat(overloadBindings.getLowerTypeBounds(tLhs), is(nullValue()));
-        assertThat(overloadBindings.getLowerTypeBounds(tRhs).getTypeSymbols().keySet(),
+        assertThat(bindingCollection.getLowerTypeBounds(tLhs), is(nullValue()));
+        assertThat(bindingCollection.getLowerTypeBounds(tRhs).getTypeSymbols().keySet(),
                 containsInAnyOrder("{as Tlhs}"));
         assertThat(resultDto.hasChanged, is(true));
         assertThat(resultDto.usedImplicitConversion, is(false));
@@ -248,17 +248,17 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
 
         //arrange
         String tLhs = "Tlhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
-        overloadBindings.addUpperTypeBound(tLhs, floatType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
+        bindingCollection.addUpperTypeBound(tLhs, floatType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(tLhs, intType);
+        BoundResultDto resultDto = bindingCollection.addLowerTypeBound(tLhs, intType);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", tLhs, asList("int"), asList("int"), false)
         ));
         assertThat(resultDto.hasChanged, is(true));
@@ -275,18 +275,18 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
 
         //arrange
         String tLhs = "Tlhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
-        overloadBindings.addLowerTypeBound(tLhs, floatType);
-        overloadBindings.addUpperTypeBound(tLhs, floatType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
+        bindingCollection.addLowerTypeBound(tLhs, floatType);
+        bindingCollection.addUpperTypeBound(tLhs, floatType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(tLhs, intType);
+        BoundResultDto resultDto = bindingCollection.addLowerTypeBound(tLhs, intType);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", tLhs, asList("int"), asList("int"), false)
         ));
         assertThat(resultDto.hasChanged, is(true));
@@ -303,20 +303,20 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
 
         //arrange
         String tx = "Tx";
         String ty = "Ty";
-        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
-        overloadBindings.addVariable("$y", new TypeVariableReference(ty));
-        overloadBindings.addUpperTypeBound(tx, floatType);
-        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ty));
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addVariable("$y", new TypeVariableReference(ty));
+        bindingCollection.addUpperTypeBound(tx, floatType);
+        bindingCollection.addLowerRefBound(tx, new TypeVariableReference(ty));
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(tx, intType);
+        BoundResultDto resultDto = bindingCollection.addLowerTypeBound(tx, intType);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$x", tx, asList("int", "@" + ty), asList("int"), false),
                 varBinding("$y", ty, null, asList("int", "@" + tx), false)
         ));
@@ -335,21 +335,21 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
 
         //arrange
         String tx = "Tx";
         String ty = "Ty";
-        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
-        overloadBindings.addVariable("$y", new TypeVariableReference(ty));
-        overloadBindings.addUpperTypeBound(tx, floatType);
-        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ty));
-        overloadBindings.addUpperTypeBound(ty, interfaceAType);
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addVariable("$y", new TypeVariableReference(ty));
+        bindingCollection.addUpperTypeBound(tx, floatType);
+        bindingCollection.addLowerRefBound(tx, new TypeVariableReference(ty));
+        bindingCollection.addUpperTypeBound(ty, interfaceAType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(tx, intType);
+        BoundResultDto resultDto = bindingCollection.addLowerTypeBound(tx, intType);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$x", tx, asList("int", "@" + ty), asList("int"), false),
                 varBinding("$y", ty, null, asList("int", "IA", "@" + tx), false)
         ));
@@ -368,19 +368,19 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
 
         //arrange
         String tx = "Tx";
         String ty = "Ty";
-        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
-        overloadBindings.addVariable("$y", new TypeVariableReference(ty));
-        overloadBindings.addUpperTypeBound(tx, numType);
-        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ty));
-        overloadBindings.addLowerTypeBound(ty, intType);
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addVariable("$y", new TypeVariableReference(ty));
+        bindingCollection.addUpperTypeBound(tx, numType);
+        bindingCollection.addLowerRefBound(tx, new TypeVariableReference(ty));
+        bindingCollection.addLowerTypeBound(ty, intType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(tx, boolType);
+        BoundResultDto resultDto = bindingCollection.addLowerTypeBound(tx, boolType);
 
         //assert in annotation
     }
@@ -394,17 +394,17 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
 
         //arrange
         String tLhs = "Tlhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
-        overloadBindings.addUpperTypeBound(tLhs, interfaceBType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
+        bindingCollection.addUpperTypeBound(tLhs, interfaceBType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(tLhs, intType);
+        BoundResultDto resultDto = bindingCollection.addLowerTypeBound(tLhs, intType);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", tLhs, asList("int"), asList("num"), false)
         ));
         assertThat(resultDto.hasChanged, is(true));
@@ -423,19 +423,19 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
         IConvertibleTypeSymbol asIB = createConvertibleType(interfaceBType, symbolFactory, typeHelper);
 
         //arrange
         String tLhs = "Tlhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
-        overloadBindings.addUpperTypeBound(tLhs, interfaceAType);
-        overloadBindings.addUpperTypeBound(tLhs, asIB);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
+        bindingCollection.addUpperTypeBound(tLhs, interfaceAType);
+        bindingCollection.addUpperTypeBound(tLhs, asIB);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(tLhs, intType);
+        BoundResultDto resultDto = bindingCollection.addLowerTypeBound(tLhs, intType);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", tLhs, asList("int"), asList("num", "{as IB}"), false)
         ));
         assertThat(resultDto.hasChanged, is(true));
@@ -454,18 +454,18 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
 
         //arrange
         String tLhs = "Tlhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType(floatType, symbolFactory, typeHelper);
-        overloadBindings.addUpperTypeBound(tLhs, convertibleTypeSymbol);
+        bindingCollection.addUpperTypeBound(tLhs, convertibleTypeSymbol);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(tLhs, boolType);
+        BoundResultDto resultDto = bindingCollection.addLowerTypeBound(tLhs, boolType);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", tLhs, asList("bool"), asList("{as float}"), false)
         ));
         assertThat(resultDto.hasChanged, is(true));
@@ -484,18 +484,18 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
 
         //arrange
         String tLhs = "Tlhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType(interfaceBType, symbolFactory, typeHelper);
-        overloadBindings.addUpperTypeBound(tLhs, convertibleTypeSymbol);
+        bindingCollection.addUpperTypeBound(tLhs, convertibleTypeSymbol);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerTypeBound(tLhs, boolType);
+        BoundResultDto resultDto = bindingCollection.addLowerTypeBound(tLhs, boolType);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", tLhs, asList("bool"), asList("{as IB}"), false)
         ));
         assertThat(resultDto.hasChanged, is(true));
@@ -508,8 +508,8 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         //no arrange necessary
 
         //act
-        IOverloadBindings overloadBindings = createOverloadBindings();
-        overloadBindings.addUpperTypeBound("T", intType);
+        IBindingCollection bindingCollection = createBindingCollection();
+        bindingCollection.addUpperTypeBound("T", intType);
 
         //assert in annotation
     }
@@ -517,16 +517,16 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addUpperTypeBound_IsParentTypeOfExistingLower_AddsUpperBound() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String typeVariable = "T";
-        overloadBindings.addVariable("$a", new TypeVariableReference("T"));
-        overloadBindings.addLowerTypeBound(typeVariable, intType);
+        bindingCollection.addVariable("$a", new TypeVariableReference("T"));
+        bindingCollection.addLowerTypeBound(typeVariable, intType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(typeVariable, numType);
-        IIntersectionTypeSymbol result = overloadBindings.getUpperTypeBounds(typeVariable);
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(typeVariable, numType);
+        IIntersectionTypeSymbol result = bindingCollection.getUpperTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("num"));
         assertThat(resultDto.hasChanged, is(true));
@@ -536,16 +536,16 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addUpperTypeBound_IsSameTypeAsExistingLower_AddsUpperBound() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String typeVariable = "T";
-        overloadBindings.addVariable("$a", new TypeVariableReference("T"));
-        overloadBindings.addLowerTypeBound(typeVariable, intType);
+        bindingCollection.addVariable("$a", new TypeVariableReference("T"));
+        bindingCollection.addLowerTypeBound(typeVariable, intType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(typeVariable, intType);
-        IIntersectionTypeSymbol result = overloadBindings.getUpperTypeBounds(typeVariable);
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(typeVariable, intType);
+        IIntersectionTypeSymbol result = bindingCollection.getUpperTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("int"));
         assertThat(resultDto.hasChanged, is(true));
@@ -555,15 +555,15 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test(expected = LowerBoundException.class)
     public void addUpperTypeBound_IsNotSameOrParentTypeOfExistingLower_ThrowsLowerBoundException() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String typeVariable = "T";
-        overloadBindings.addVariable("$a", new TypeVariableReference("T"));
-        overloadBindings.addLowerTypeBound(typeVariable, numType);
+        bindingCollection.addVariable("$a", new TypeVariableReference("T"));
+        bindingCollection.addLowerTypeBound(typeVariable, numType);
 
         //act
-        overloadBindings.addUpperTypeBound(typeVariable, intType);
+        bindingCollection.addUpperTypeBound(typeVariable, intType);
 
         //assert in annotation
     }
@@ -571,16 +571,16 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addUpperTypeBound_IsSameTypeAsExistingUpper_ContainsTypeOnlyOnce() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String typeVariable = "T";
-        overloadBindings.addVariable("$a", new TypeVariableReference("T"));
-        overloadBindings.addUpperTypeBound(typeVariable, intType);
+        bindingCollection.addVariable("$a", new TypeVariableReference("T"));
+        bindingCollection.addUpperTypeBound(typeVariable, intType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(typeVariable, intType);
-        IIntersectionTypeSymbol result = overloadBindings.getUpperTypeBounds(typeVariable);
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(typeVariable, intType);
+        IIntersectionTypeSymbol result = bindingCollection.getUpperTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("int"));
         assertThat(resultDto.hasChanged, is(false));
@@ -590,16 +590,16 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addUpperTypeBound_IsSubtypeOfExistingUpper_IsNewUpperBound() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String typeVariable = "T";
-        overloadBindings.addVariable("$a", new TypeVariableReference("T"));
-        overloadBindings.addUpperTypeBound(typeVariable, numType);
+        bindingCollection.addVariable("$a", new TypeVariableReference("T"));
+        bindingCollection.addUpperTypeBound(typeVariable, numType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(typeVariable, intType);
-        IIntersectionTypeSymbol result = overloadBindings.getUpperTypeBounds(typeVariable);
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(typeVariable, intType);
+        IIntersectionTypeSymbol result = bindingCollection.getUpperTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("int"));
         assertThat(resultDto.hasChanged, is(true));
@@ -609,16 +609,16 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addUpperTypeBound_IsParentTypeOfExistingUpper_RemainsExistingBound() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String typeVariable = "T";
-        overloadBindings.addVariable("$a", new TypeVariableReference("T"));
-        overloadBindings.addUpperTypeBound(typeVariable, intType);
+        bindingCollection.addVariable("$a", new TypeVariableReference("T"));
+        bindingCollection.addUpperTypeBound(typeVariable, intType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(typeVariable, numType);
-        IIntersectionTypeSymbol result = overloadBindings.getUpperTypeBounds(typeVariable);
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(typeVariable, numType);
+        IIntersectionTypeSymbol result = bindingCollection.getUpperTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("int"));
         assertThat(resultDto.hasChanged, is(false));
@@ -628,16 +628,16 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addUpperTypeBound_IsOutOfTypeHierarchyAndBothCanBeUsed_ContainsBoth() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String typeVariable = "T";
-        overloadBindings.addVariable("$a", new TypeVariableReference("T"));
-        overloadBindings.addUpperTypeBound(typeVariable, interfaceAType);
+        bindingCollection.addVariable("$a", new TypeVariableReference("T"));
+        bindingCollection.addUpperTypeBound(typeVariable, interfaceAType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(typeVariable, interfaceBType);
-        IIntersectionTypeSymbol result = overloadBindings.getUpperTypeBounds(typeVariable);
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(typeVariable, interfaceBType);
+        IIntersectionTypeSymbol result = bindingCollection.getUpperTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("IA", "IB"));
         assertThat(resultDto.hasChanged, is(true));
@@ -647,16 +647,16 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addUpperTypeBound_IsOutOfHierarchyAndCannotBeUsedAndExistingCanBeUsed_ContainsBoth() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String typeVariable = "T";
-        overloadBindings.addVariable("$a", new TypeVariableReference("T"));
-        overloadBindings.addUpperTypeBound(typeVariable, interfaceAType);
+        bindingCollection.addVariable("$a", new TypeVariableReference("T"));
+        bindingCollection.addUpperTypeBound(typeVariable, interfaceAType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(typeVariable, boolType);
-        IIntersectionTypeSymbol result = overloadBindings.getUpperTypeBounds(typeVariable);
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(typeVariable, boolType);
+        IIntersectionTypeSymbol result = bindingCollection.getUpperTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("bool", "IA"));
         assertThat(resultDto.hasChanged, is(true));
@@ -666,16 +666,16 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addUpperTypeBound_IsOutOfTypeHierarchyAndCanBeUsedAndExistingCannotBeUsed_ContainsBoth() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String typeVariable = "T";
-        overloadBindings.addVariable("$a", new TypeVariableReference("T"));
-        overloadBindings.addUpperTypeBound(typeVariable, intType);
+        bindingCollection.addVariable("$a", new TypeVariableReference("T"));
+        bindingCollection.addUpperTypeBound(typeVariable, intType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(typeVariable, interfaceAType);
-        IIntersectionTypeSymbol result = overloadBindings.getUpperTypeBounds(typeVariable);
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(typeVariable, interfaceAType);
+        IIntersectionTypeSymbol result = bindingCollection.getUpperTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("int", "IA"));
         assertThat(resultDto.hasChanged, is(true));
@@ -685,16 +685,16 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test(expected = IntersectionBoundException.class)
     public void addUpperTypeBound_IsOutOfTypeHierarchyAndBothCannotBeUsed_ThrowsIntersectionBoundException() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String typeVariable = "T";
-        overloadBindings.addVariable("$a", new TypeVariableReference("T"));
-        overloadBindings.addUpperTypeBound(typeVariable, intType);
+        bindingCollection.addVariable("$a", new TypeVariableReference("T"));
+        bindingCollection.addUpperTypeBound(typeVariable, intType);
 
         //act
-        overloadBindings.addUpperTypeBound(typeVariable, floatType);
-        overloadBindings.getUpperTypeBounds(typeVariable);
+        bindingCollection.addUpperTypeBound(typeVariable, floatType);
+        bindingCollection.getUpperTypeBounds(typeVariable);
 
         //assert in annotation
     }
@@ -702,17 +702,17 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addUpperTypeBound_IsSubtypeOfOneOfTheTypesInTheUpperBound_NarrowsUpperBound() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String typeVariable = "T";
-        overloadBindings.addVariable("$a", new TypeVariableReference("T"));
-        overloadBindings.addUpperTypeBound(typeVariable, interfaceAType);
-        overloadBindings.addUpperTypeBound(typeVariable, interfaceBType);
+        bindingCollection.addVariable("$a", new TypeVariableReference("T"));
+        bindingCollection.addUpperTypeBound(typeVariable, interfaceAType);
+        bindingCollection.addUpperTypeBound(typeVariable, interfaceBType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(typeVariable, interfaceSubAType);
-        IIntersectionTypeSymbol result = overloadBindings.getUpperTypeBounds(typeVariable);
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(typeVariable, interfaceSubAType);
+        IIntersectionTypeSymbol result = bindingCollection.getUpperTypeBounds(typeVariable);
 
         assertThat(result.getTypeSymbols().keySet(), containsInAnyOrder("ISubA", "IB"));
         assertThat(resultDto.hasChanged, is(true));
@@ -723,22 +723,22 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addUpperTypeBound_ConvertibleTypeWithRefWhichIsAlreadyLower_DoesNotPropagateTheTypeDownwards() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String tLhs = "Tlhs";
         String tRhs = "Trhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
-        overloadBindings.addVariable("$rhs", new TypeVariableReference(tRhs));
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
+        bindingCollection.addVariable("$rhs", new TypeVariableReference(tRhs));
         IConvertibleTypeSymbol asTrhs = symbolFactory.createConvertibleTypeSymbol();
-        asTrhs.bindTo(overloadBindings, asList(tRhs));
-        overloadBindings.addLowerRefBound(tLhs, new TypeVariableReference(tRhs));
+        asTrhs.bindTo(bindingCollection, asList(tRhs));
+        bindingCollection.addLowerRefBound(tLhs, new TypeVariableReference(tRhs));
 
         //act
-        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tLhs, asTrhs);
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tLhs, asTrhs);
 
-        assertThat(overloadBindings.getUpperTypeBounds(tRhs), is(nullValue()));
-        assertThat(overloadBindings.getUpperTypeBounds(tLhs).getTypeSymbols().keySet(),
+        assertThat(bindingCollection.getUpperTypeBounds(tRhs), is(nullValue()));
+        assertThat(bindingCollection.getUpperTypeBounds(tLhs).getTypeSymbols().keySet(),
                 containsInAnyOrder("{as Trhs}"));
         assertThat(resultDto.hasChanged, is(true));
         assertThat(resultDto.usedImplicitConversion, is(false));
@@ -748,18 +748,18 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addUpperTypeBound_ConvertibleTypeWhichPointsToItself_DoesNotAddTheConvertibleType() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String tLhs = "Tlhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
         IConvertibleTypeSymbol asTlhs = symbolFactory.createConvertibleTypeSymbol();
-        asTlhs.bindTo(overloadBindings, asList(tLhs));
+        asTlhs.bindTo(bindingCollection, asList(tLhs));
 
         //act
-        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tLhs, asTlhs);
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tLhs, asTlhs);
 
-        assertThat(overloadBindings.getUpperTypeBounds(tLhs), is(nullValue()));
+        assertThat(bindingCollection.getUpperTypeBounds(tLhs), is(nullValue()));
         assertThat(resultDto.hasChanged, is(false));
         assertThat(resultDto.usedImplicitConversion, is(false));
     }
@@ -774,17 +774,17 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
 
         //arrange
         String tLhs = "Tlhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
-        overloadBindings.addLowerTypeBound(tLhs, intType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
+        bindingCollection.addLowerTypeBound(tLhs, intType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tLhs, floatType);
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tLhs, floatType);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", tLhs, asList("int"), asList("int"), false)
         ));
         assertThat(resultDto.hasChanged, is(true));
@@ -803,18 +803,18 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
 
         //arrange
         String tLhs = "Tlhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
-        overloadBindings.addLowerTypeBound(tLhs, intType);
-        overloadBindings.addUpperTypeBound(tLhs, intType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
+        bindingCollection.addLowerTypeBound(tLhs, intType);
+        bindingCollection.addUpperTypeBound(tLhs, intType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tLhs, floatType);
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tLhs, floatType);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", tLhs, asList("int"), asList("int"), false)
         ));
         assertThat(resultDto.hasChanged, is(false));
@@ -832,18 +832,18 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
 
         //arrange
         String tLhs = "Tlhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
-        overloadBindings.addLowerTypeBound(tLhs, intType);
-        overloadBindings.addUpperTypeBound(tLhs, numType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
+        bindingCollection.addLowerTypeBound(tLhs, intType);
+        bindingCollection.addUpperTypeBound(tLhs, numType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tLhs, floatType);
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tLhs, floatType);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", tLhs, asList("int"), asList("int"), false)
         ));
         assertThat(resultDto.hasChanged, is(true));
@@ -861,17 +861,17 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
 
         //arrange
         String tLhs = "Tlhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
-        overloadBindings.addLowerTypeBound(tLhs, intType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
+        bindingCollection.addLowerTypeBound(tLhs, intType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tLhs, interfaceBType);
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tLhs, interfaceBType);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", tLhs, asList("int"), asList("num"), false)
         ));
         assertThat(resultDto.hasChanged, is(true));
@@ -890,18 +890,18 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
 
         //arrange
         String tLhs = "Tlhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
-        overloadBindings.addLowerTypeBound(tLhs, intType);
-        overloadBindings.addUpperTypeBound(tLhs, intType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
+        bindingCollection.addLowerTypeBound(tLhs, intType);
+        bindingCollection.addUpperTypeBound(tLhs, intType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tLhs, interfaceBType);
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tLhs, interfaceBType);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", tLhs, asList("int"), asList("int"), false)
         ));
         assertThat(resultDto.hasChanged, is(false));
@@ -920,18 +920,18 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
 
         //arrange
         String tLhs = "Tlhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
-        overloadBindings.addLowerTypeBound(tLhs, intType);
-        overloadBindings.addUpperTypeBound(tLhs, scalarType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
+        bindingCollection.addLowerTypeBound(tLhs, intType);
+        bindingCollection.addUpperTypeBound(tLhs, scalarType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tLhs, interfaceBType);
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tLhs, interfaceBType);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", tLhs, asList("int"), asList("num"), false)
         ));
         assertThat(resultDto.hasChanged, is(true));
@@ -950,18 +950,18 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
 
         //arrange
         String tLhs = "Tlhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
-        overloadBindings.addLowerTypeBound(tLhs, boolType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
+        bindingCollection.addLowerTypeBound(tLhs, boolType);
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType(floatType, symbolFactory, typeHelper);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tLhs, convertibleTypeSymbol);
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tLhs, convertibleTypeSymbol);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", tLhs, asList("bool"), asList("{as float}"), false)
         ));
         assertThat(resultDto.hasChanged, is(true));
@@ -979,18 +979,18 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
 
         //arrange
         String tLhs = "Tlhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
-        overloadBindings.addLowerTypeBound(tLhs, boolType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
+        bindingCollection.addLowerTypeBound(tLhs, boolType);
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType(interfaceBType, symbolFactory, typeHelper);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tLhs, convertibleTypeSymbol);
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tLhs, convertibleTypeSymbol);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", tLhs, asList("bool"), asList("{as IB}"), false)
         ));
         assertThat(resultDto.hasChanged, is(true));
@@ -1008,22 +1008,22 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
 
         //arrange
         String tx = "Tx";
         String ty = "Ty";
-        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
-        overloadBindings.addVariable("$y", new TypeVariableReference(ty));
-        overloadBindings.addLowerTypeBound(tx, createUnionTypeSymbol(intType, floatType));
-        overloadBindings.addUpperTypeBound(ty, stringType);
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addVariable("$y", new TypeVariableReference(ty));
+        bindingCollection.addLowerTypeBound(tx, createUnionTypeSymbol(intType, floatType));
+        bindingCollection.addUpperTypeBound(ty, stringType);
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType(symbolFactory, typeHelper);
-        overloadBindings.bind(convertibleTypeSymbol, asList(ty));
+        bindingCollection.bind(convertibleTypeSymbol, asList(ty));
 
         //act
-        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tx, convertibleTypeSymbol);
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, convertibleTypeSymbol);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$x", tx, asList("int", "float"), asList("{as " + ty + "}"), false),
                 varBinding("$y", ty, null, asList("string"), false)
         ));
@@ -1042,23 +1042,23 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
 
         //arrange
         String tx = "Tx";
         String ty = "Ty";
-        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
-        overloadBindings.addVariable("$y", new TypeVariableReference(ty));
-        overloadBindings.addLowerTypeBound(tx, floatType);
-        overloadBindings.addLowerTypeBound(ty, intType);
-        overloadBindings.addUpperTypeBound(ty, numType);
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addVariable("$y", new TypeVariableReference(ty));
+        bindingCollection.addLowerTypeBound(tx, floatType);
+        bindingCollection.addLowerTypeBound(ty, intType);
+        bindingCollection.addUpperTypeBound(ty, numType);
         IConvertibleTypeSymbol asTy = createConvertibleType(symbolFactory, typeHelper);
-        overloadBindings.bind(asTy, asList(ty));
+        bindingCollection.bind(asTy, asList(ty));
 
         //act
-        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tx, asTy);
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, asTy);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$x", tx, asList("float"), asList("{as " + ty + "}"), false),
                 varBinding("$y", ty, asList("int"), asList("num"), false)
         ));
@@ -1075,23 +1075,23 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
 
         //arrange
         String tx = "Tx";
         String ty = "Ty";
-        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
-        overloadBindings.addVariable("$y", new TypeVariableReference(ty));
-        overloadBindings.addLowerTypeBound(tx, intType);
-        overloadBindings.addLowerTypeBound(ty, floatType);
-        overloadBindings.addUpperTypeBound(ty, numType);
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addVariable("$y", new TypeVariableReference(ty));
+        bindingCollection.addLowerTypeBound(tx, intType);
+        bindingCollection.addLowerTypeBound(ty, floatType);
+        bindingCollection.addUpperTypeBound(ty, numType);
         IConvertibleTypeSymbol asTy = createConvertibleType(symbolFactory, typeHelper);
-        overloadBindings.bind(asTy, asList(ty));
+        bindingCollection.bind(asTy, asList(ty));
 
         //act
-        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tx, asTy);
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, asTy);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$x", tx, asList("int"), asList("{as " + ty + "}"), false),
                 varBinding("$y", ty, asList("float"), asList("num"), false)
         ));
@@ -1111,23 +1111,23 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
 
         //arrange
         String tx = "Tx";
         String ty = "Ty";
-        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
-        overloadBindings.addVariable("$y", new TypeVariableReference(ty));
-        overloadBindings.addLowerTypeBound(tx, stringType);
-        overloadBindings.addLowerTypeBound(ty, floatType);
-        overloadBindings.addUpperTypeBound(ty, numType);
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addVariable("$y", new TypeVariableReference(ty));
+        bindingCollection.addLowerTypeBound(tx, stringType);
+        bindingCollection.addLowerTypeBound(ty, floatType);
+        bindingCollection.addUpperTypeBound(ty, numType);
         IConvertibleTypeSymbol asTy = createConvertibleType(symbolFactory, typeHelper);
-        overloadBindings.bind(asTy, asList(ty));
+        bindingCollection.bind(asTy, asList(ty));
 
         //act
-        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tx, asTy);
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, asTy);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$x", tx, asList("string"), asList("{as " + ty + "}"), false),
                 varBinding("$y", ty, asList("float"), asList("num"), false)
         ));
@@ -1147,23 +1147,23 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
 
         //arrange
         String tx = "Tx";
         String ty = "Ty";
-        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
-        overloadBindings.addVariable("$y", new TypeVariableReference(ty));
-        overloadBindings.addLowerTypeBound(tx, stringType);
-        overloadBindings.addLowerTypeBound(ty, intType);
-        overloadBindings.addUpperTypeBound(ty, numType);
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addVariable("$y", new TypeVariableReference(ty));
+        bindingCollection.addLowerTypeBound(tx, stringType);
+        bindingCollection.addLowerTypeBound(ty, intType);
+        bindingCollection.addUpperTypeBound(ty, numType);
         IConvertibleTypeSymbol asTy = createConvertibleType(symbolFactory, typeHelper);
-        overloadBindings.bind(asTy, asList(ty));
+        bindingCollection.bind(asTy, asList(ty));
 
         //act
-        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tx, asTy);
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, asTy);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$x", tx, asList("string"), asList("{as " + ty + "}"), false),
                 varBinding("$y", ty, asList("int"), asList("num"), false)
         ));
@@ -1183,23 +1183,23 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
 
         //arrange
         String tx = "Tx";
         String ty = "Ty";
-        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
-        overloadBindings.addVariable("$y", new TypeVariableReference(ty));
-        overloadBindings.addLowerTypeBound(tx, createUnionTypeSymbol(intType, floatType));
-        overloadBindings.addUpperTypeBound(ty, stringType);
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addVariable("$y", new TypeVariableReference(ty));
+        bindingCollection.addLowerTypeBound(tx, createUnionTypeSymbol(intType, floatType));
+        bindingCollection.addUpperTypeBound(ty, stringType);
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType(symbolFactory, typeHelper);
-        overloadBindings.bind(convertibleTypeSymbol, asList(ty));
+        bindingCollection.bind(convertibleTypeSymbol, asList(ty));
 
         //act
-        overloadBindings.addUpperTypeBound(tx, convertibleTypeSymbol);
-        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tx, convertibleTypeSymbol);
+        bindingCollection.addUpperTypeBound(tx, convertibleTypeSymbol);
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, convertibleTypeSymbol);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$x", tx, asList("int", "float"), asList("{as " + ty + "}"), false),
                 varBinding("$y", ty, null, asList("string"), false)
         ));
@@ -1211,19 +1211,19 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test(expected = IntersectionBoundException.class)
     public void addUpperTypeBound_ContainsFinalIsNotInSameTypeHierarchy_ThrowsIntersectionBoundException() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         ITypeSymbol typeSymbol = mock(ITypeSymbol.class);
         when(typeSymbol.isFinal()).thenReturn(true);
         when(typeSymbol.getAbsoluteName()).thenReturn("A");
         String tLhs = "Tlhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
-        overloadBindings.addUpperTypeBound(tLhs, typeSymbol);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
+        bindingCollection.addUpperTypeBound(tLhs, typeSymbol);
 
 
         //act
-        overloadBindings.addUpperTypeBound(tLhs, intType);
+        bindingCollection.addUpperTypeBound(tLhs, intType);
 
         //assert in annotation
     }
@@ -1231,19 +1231,19 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test(expected = IntersectionBoundException.class)
     public void addUpperTypeBound_ContainsIBAndFinalAddedNotInSameTypeHierarchy_ThrowsIntersectionBoundException() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String tLhs = "Tlhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
-        overloadBindings.addUpperTypeBound(tLhs, interfaceBType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
+        bindingCollection.addUpperTypeBound(tLhs, interfaceBType);
         ITypeSymbol typeSymbol = mock(ITypeSymbol.class);
         when(typeSymbol.isFinal()).thenReturn(true);
         when(typeSymbol.getAbsoluteName()).thenReturn("A");
 
 
         //act
-        overloadBindings.addUpperTypeBound(tLhs, typeSymbol);
+        bindingCollection.addUpperTypeBound(tLhs, typeSymbol);
 
         //assert in annotation
     }
@@ -1251,12 +1251,12 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addUpperTypeBound_ContainsIBAndFinalAddedWhichIsSubtype_UpperBoundContainsFinal() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String tLhs = "Tlhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
-        overloadBindings.addUpperTypeBound(tLhs, interfaceBType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
+        bindingCollection.addUpperTypeBound(tLhs, interfaceBType);
         Set<ITypeSymbol> parentTypes = new HashSet<>();
         parentTypes.add(interfaceBType);
         ITypeSymbol typeSymbol = mock(ITypeSymbol.class);
@@ -1265,9 +1265,9 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         when(typeSymbol.getParentTypeSymbols()).thenReturn(parentTypes);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tLhs, typeSymbol);
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tLhs, typeSymbol);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", tLhs, null, asList("A"), false)
         ));
         assertThat(resultDto.hasChanged, is(true));
@@ -1277,14 +1277,14 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addUpperTypeBound_ContainsFinalAndParentTypeAdded_UpperBoundContainsFinal() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         ITypeSymbol typeSymbol = mock(ITypeSymbol.class);
         when(typeSymbol.isFinal()).thenReturn(true);
         when(typeSymbol.getAbsoluteName()).thenReturn("A");
         String tLhs = "Tlhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
         ITypeSymbol typeSymbol2 = mock(ITypeSymbol.class);
         when(typeSymbol2.isFinal()).thenReturn(true);
         when(typeSymbol2.getAbsoluteName()).thenReturn("B");
@@ -1292,12 +1292,12 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         Set<ITypeSymbol> parentTypes = new HashSet<>();
         parentTypes.add(typeSymbol2);
         when(typeSymbol.getParentTypeSymbols()).thenReturn(parentTypes);
-        overloadBindings.addUpperTypeBound(tLhs, typeSymbol);
+        bindingCollection.addUpperTypeBound(tLhs, typeSymbol);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addUpperTypeBound(tLhs, typeSymbol2);
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tLhs, typeSymbol2);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", tLhs, null, asList("A"), false)
         ));
         assertThat(resultDto.hasChanged, is(false));
@@ -1309,8 +1309,8 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         //no arrange necessary
 
         //act
-        IOverloadBindings overloadBindings = createOverloadBindings();
-        overloadBindings.addLowerRefBound("T", new TypeVariableReference("T2"));
+        IBindingCollection bindingCollection = createBindingCollection();
+        bindingCollection.addLowerRefBound("T", new TypeVariableReference("T2"));
 
         //assert in annotation
     }
@@ -1320,9 +1320,9 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         //no arrange necessary
 
         //act
-        IOverloadBindings overloadBindings = createOverloadBindings();
-        overloadBindings.addVariable("$a", new TypeVariableReference("T"));
-        overloadBindings.addLowerRefBound("T", new TypeVariableReference("T2"));
+        IBindingCollection bindingCollection = createBindingCollection();
+        bindingCollection.addVariable("$a", new TypeVariableReference("T"));
+        bindingCollection.addLowerRefBound("T", new TypeVariableReference("T2"));
 
         //assert in annotation
     }
@@ -1330,18 +1330,18 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerRefBound_HasNoBounds_AddsLowerBound() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(lhs));
-        overloadBindings.addVariable("$rhs", new TypeVariableReference(rhs));
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(lhs));
+        bindingCollection.addVariable("$rhs", new TypeVariableReference(rhs));
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
+        BoundResultDto resultDto = bindingCollection.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("@Trhs"), null, false),
                 varBinding("$rhs", rhs, null, asList("@Tlhs"), false)
         ));
@@ -1352,19 +1352,19 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerRefBound_LhsHasUpperAndRefHasNoBounds_NarrowsRefAndAddsLowerBound() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(lhs));
-        overloadBindings.addVariable("$rhs", new TypeVariableReference(rhs));
-        overloadBindings.addUpperTypeBound(lhs, intType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(lhs));
+        bindingCollection.addVariable("$rhs", new TypeVariableReference(rhs));
+        bindingCollection.addUpperTypeBound(lhs, intType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
+        BoundResultDto resultDto = bindingCollection.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("@Trhs"), asList("int"), false),
                 varBinding("$rhs", rhs, null, asList("@Tlhs", "int"), false)
         ));
@@ -1375,20 +1375,20 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerRefBound_LhsHasUpperAndRefsUpperIsSame_AddsLowerBound() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(lhs));
-        overloadBindings.addVariable("$rhs", new TypeVariableReference(rhs));
-        overloadBindings.addUpperTypeBound(lhs, intType);
-        overloadBindings.addUpperTypeBound(rhs, intType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(lhs));
+        bindingCollection.addVariable("$rhs", new TypeVariableReference(rhs));
+        bindingCollection.addUpperTypeBound(lhs, intType);
+        bindingCollection.addUpperTypeBound(rhs, intType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
+        BoundResultDto resultDto = bindingCollection.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("@Trhs"), asList("int"), false),
                 varBinding("$rhs", rhs, null, asList("@Tlhs", "int"), false)
         ));
@@ -1399,20 +1399,20 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerRefBound_LhsHasUpperAndRefsUpperIsSubtype_RefsUpperStaysTheSameAndAddsLowerBound() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(lhs));
-        overloadBindings.addVariable("$rhs", new TypeVariableReference(rhs));
-        overloadBindings.addUpperTypeBound(lhs, numType);
-        overloadBindings.addUpperTypeBound(rhs, intType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(lhs));
+        bindingCollection.addVariable("$rhs", new TypeVariableReference(rhs));
+        bindingCollection.addUpperTypeBound(lhs, numType);
+        bindingCollection.addUpperTypeBound(rhs, intType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
+        BoundResultDto resultDto = bindingCollection.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("@Trhs"), asList("num"), false),
                 varBinding("$rhs", rhs, null, asList("@Tlhs", "int"), false)
         ));
@@ -1423,20 +1423,20 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerRefBound_LhsHasUpperAndRefsUpperIsParentType_NarrowRefAndAddsLowerBound() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(lhs));
-        overloadBindings.addVariable("$rhs", new TypeVariableReference(rhs));
-        overloadBindings.addUpperTypeBound(lhs, intType);
-        overloadBindings.addUpperTypeBound(rhs, numType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(lhs));
+        bindingCollection.addVariable("$rhs", new TypeVariableReference(rhs));
+        bindingCollection.addUpperTypeBound(lhs, intType);
+        bindingCollection.addUpperTypeBound(rhs, numType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
+        BoundResultDto resultDto = bindingCollection.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("@Trhs"), asList("int"), false),
                 varBinding("$rhs", rhs, null, asList("@Tlhs", "int"), false)
         ));
@@ -1447,20 +1447,20 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerRefBound_LhsHasUpperAndRefsLowerIsSame_NarrowRefAndLhsAndAddsLowerBound() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(lhs));
-        overloadBindings.addVariable("$rhs", new TypeVariableReference(rhs));
-        overloadBindings.addUpperTypeBound(lhs, intType);
-        overloadBindings.addLowerTypeBound(rhs, intType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(lhs));
+        bindingCollection.addVariable("$rhs", new TypeVariableReference(rhs));
+        bindingCollection.addUpperTypeBound(lhs, intType);
+        bindingCollection.addLowerTypeBound(rhs, intType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
+        BoundResultDto resultDto = bindingCollection.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("int", "@Trhs"), asList("int"), false),
                 varBinding("$rhs", rhs, asList("int"), asList("@Tlhs", "int"), false)
         ));
@@ -1471,20 +1471,20 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerRefBound_LhsHasUpperAndRefsLowerIsSubtype_NarrowRefAndLhsAndAddsLowerBound() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(lhs));
-        overloadBindings.addVariable("$rhs", new TypeVariableReference(rhs));
-        overloadBindings.addUpperTypeBound(lhs, numType);
-        overloadBindings.addLowerTypeBound(rhs, intType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(lhs));
+        bindingCollection.addVariable("$rhs", new TypeVariableReference(rhs));
+        bindingCollection.addUpperTypeBound(lhs, numType);
+        bindingCollection.addLowerTypeBound(rhs, intType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
+        BoundResultDto resultDto = bindingCollection.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("int", "@Trhs"), asList("num"), false),
                 varBinding("$rhs", rhs, asList("int"), asList("@Tlhs", "num"), false)
         ));
@@ -1495,18 +1495,18 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test(expected = BoundException.class)
     public void addLowerRefBound_LhsHasUpperAndRefsLowerIsParentType_ThrowsBoundException() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(lhs));
-        overloadBindings.addVariable("$rhs", new TypeVariableReference(rhs));
-        overloadBindings.addUpperTypeBound(lhs, intType);
-        overloadBindings.addLowerTypeBound(rhs, numType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(lhs));
+        bindingCollection.addVariable("$rhs", new TypeVariableReference(rhs));
+        bindingCollection.addUpperTypeBound(lhs, intType);
+        bindingCollection.addLowerTypeBound(rhs, numType);
 
         //act
-        overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
+        bindingCollection.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
         //assert in annotation
     }
@@ -1514,19 +1514,19 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerRefBound_LhsHasNoBoundAndRefHasLower_NarrowsLhsAndAddsLowerBound() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(lhs));
-        overloadBindings.addVariable("$rhs", new TypeVariableReference(rhs));
-        overloadBindings.addLowerTypeBound(rhs, intType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(lhs));
+        bindingCollection.addVariable("$rhs", new TypeVariableReference(rhs));
+        bindingCollection.addLowerTypeBound(rhs, intType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
+        BoundResultDto resultDto = bindingCollection.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("int", "@Trhs"), null, false),
                 varBinding("$rhs", rhs, asList("int"), asList("@Tlhs"), false)
         ));
@@ -1537,21 +1537,21 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerRefBound_LhsHasLowerBoundAndRefsLowerIsSameType_AddsLowerBound() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(lhs));
-        overloadBindings.addVariable("$rhs", new TypeVariableReference(rhs));
-        overloadBindings.addLowerTypeBound(lhs, intType);
-        overloadBindings.addLowerTypeBound(rhs, intType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(lhs));
+        bindingCollection.addVariable("$rhs", new TypeVariableReference(rhs));
+        bindingCollection.addLowerTypeBound(lhs, intType);
+        bindingCollection.addLowerTypeBound(rhs, intType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
+        BoundResultDto resultDto = bindingCollection.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("int", "@Trhs"), null, false),
                 varBinding("$rhs", rhs, asList("int"), asList("@Tlhs"), false)
         ));
@@ -1562,20 +1562,20 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerRefBound_LhsHasLowerBoundAndRefsLowerIsSubtype_DoesNotChangeLhsAndAddsLowerBound() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(lhs));
-        overloadBindings.addVariable("$rhs", new TypeVariableReference(rhs));
-        overloadBindings.addLowerTypeBound(lhs, numType);
-        overloadBindings.addLowerTypeBound(rhs, intType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(lhs));
+        bindingCollection.addVariable("$rhs", new TypeVariableReference(rhs));
+        bindingCollection.addLowerTypeBound(lhs, numType);
+        bindingCollection.addLowerTypeBound(rhs, intType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
+        BoundResultDto resultDto = bindingCollection.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("num", "@Trhs"), null, false),
                 varBinding("$rhs", rhs, asList("int"), asList("@Tlhs"), false)
         ));
@@ -1586,20 +1586,20 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerRefBound_LhsHasLowerBoundAndRefsLowerIsParentType_NarrowsLhsAndAddsLowerBound() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(lhs));
-        overloadBindings.addVariable("$rhs", new TypeVariableReference(rhs));
-        overloadBindings.addLowerTypeBound(lhs, intType);
-        overloadBindings.addLowerTypeBound(rhs, numType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(lhs));
+        bindingCollection.addVariable("$rhs", new TypeVariableReference(rhs));
+        bindingCollection.addLowerTypeBound(lhs, intType);
+        bindingCollection.addLowerTypeBound(rhs, numType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(rhs));
+        BoundResultDto resultDto = bindingCollection.addLowerRefBound(lhs, new TypeVariableReference(rhs));
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("num", "@Trhs"), null, false),
                 varBinding("$rhs", rhs, asList("num"), asList("@Tlhs"), false)
         ));
@@ -1610,21 +1610,21 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerRefBound_HasFixedTypeAndLowerBound_TransfersLowerTypeBoundButDoesNotAddLowerBound() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(lhs));
-        overloadBindings.addVariable("$rhs", new TypeVariableReference(rhs));
-        overloadBindings.addLowerTypeBound(rhs, numType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(lhs));
+        bindingCollection.addVariable("$rhs", new TypeVariableReference(rhs));
+        bindingCollection.addLowerTypeBound(rhs, numType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new FixedTypeVariableReference(new
+        BoundResultDto resultDto = bindingCollection.addLowerRefBound(lhs, new FixedTypeVariableReference(new
                 TypeVariableReference
                 (rhs)));
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("num"), null, false),
                 varBinding("$rhs", rhs, asList("num"), null, false)
         ));
@@ -1636,16 +1636,16 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerRefBound_SelfRefWithoutBounds_AddsLowerBound() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String lhs = "Tlhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(lhs));
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(lhs));
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(lhs));
+        BoundResultDto resultDto = bindingCollection.addLowerRefBound(lhs, new TypeVariableReference(lhs));
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("@Tlhs"), asList("@Tlhs"), false)
         ));
         assertThat(resultDto.hasChanged, is(true));
@@ -1655,23 +1655,23 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerRefBound_SelfRefWithUpperBound_AddsLowerBoundAndAddUpperBoundWasNotCalled() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = spy(createOverloadBindings());
+        IBindingCollection bindingCollection = spy(createBindingCollection());
 
         //arrange
         String lhs = "Tlhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(lhs));
-        overloadBindings.addUpperTypeBound(lhs, intType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(lhs));
+        bindingCollection.addUpperTypeBound(lhs, intType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(lhs));
+        BoundResultDto resultDto = bindingCollection.addLowerRefBound(lhs, new TypeVariableReference(lhs));
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("@Tlhs"), asList("@Tlhs", "int"), false)
         ));
         assertThat(resultDto.hasChanged, is(true));
         assertThat(resultDto.usedImplicitConversion, is(false));
         try {
-            verify(overloadBindings, times(2)).addUpperTypeBound(anyString(), any(ITypeSymbol.class));
+            verify(bindingCollection, times(2)).addUpperTypeBound(anyString(), any(ITypeSymbol.class));
             Assert.fail("addUpperTypeBound was called but should not have been.");
         } catch (MockitoAssertionError ex) {
             //that's fine
@@ -1681,23 +1681,23 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerRefBound_SelfRefWithLowerBound_AddsLowerBoundAndAddLowerBoundWasNotCalled() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = spy(createOverloadBindings());
+        IBindingCollection bindingCollection = spy(createBindingCollection());
 
         //arrange
         String lhs = "Tlhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(lhs));
-        overloadBindings.addLowerTypeBound(lhs, intType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(lhs));
+        bindingCollection.addLowerTypeBound(lhs, intType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(lhs));
+        BoundResultDto resultDto = bindingCollection.addLowerRefBound(lhs, new TypeVariableReference(lhs));
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("@Tlhs", "int"), asList("@Tlhs"), false)
         ));
         assertThat(resultDto.hasChanged, is(true));
         assertThat(resultDto.usedImplicitConversion, is(false));
         try {
-            verify(overloadBindings, times(2)).addLowerTypeBound(anyString(), any(ITypeSymbol.class));
+            verify(bindingCollection, times(2)).addLowerTypeBound(anyString(), any(ITypeSymbol.class));
             Assert.fail("addUpperTypeBound was called but should not have been.");
         } catch (MockitoAssertionError ex) {
             //that's fine
@@ -1707,18 +1707,18 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerRefBound_SelfRefWithUpperBoundAndAlreadySelfRef_NoEndlessLoopDependencyOnlyOnes() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = spy(createOverloadBindings());
+        IBindingCollection bindingCollection = spy(createBindingCollection());
 
         //arrange
         String lhs = "Tlhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(lhs));
-        overloadBindings.addUpperTypeBound(lhs, intType);
-        overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(lhs));
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(lhs));
+        bindingCollection.addUpperTypeBound(lhs, intType);
+        bindingCollection.addLowerRefBound(lhs, new TypeVariableReference(lhs));
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(lhs));
+        BoundResultDto resultDto = bindingCollection.addLowerRefBound(lhs, new TypeVariableReference(lhs));
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", lhs, asList("@Tlhs"), asList("@Tlhs", "int"), false)
         ));
         assertThat(resultDto.hasChanged, is(false));
@@ -1728,25 +1728,25 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerRefBound_BidirectionalRefWithBoundsButAlsoOtherRefs_PropagatesBoundsAccordingly() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String t1 = "T1";
         String t2 = "T2";
         String t3 = "T3";
-        overloadBindings.addVariable("$a", new TypeVariableReference(t1));
-        overloadBindings.addVariable("$b", new TypeVariableReference(t2));
-        overloadBindings.addVariable("$c", new TypeVariableReference(t3));
-        overloadBindings.addLowerRefBound(t2, new TypeVariableReference(t1));
-        overloadBindings.addLowerTypeBound(t2, intType);
-        overloadBindings.addUpperTypeBound(t3, numType);
-        overloadBindings.addLowerRefBound(t2, new TypeVariableReference(t3));
+        bindingCollection.addVariable("$a", new TypeVariableReference(t1));
+        bindingCollection.addVariable("$b", new TypeVariableReference(t2));
+        bindingCollection.addVariable("$c", new TypeVariableReference(t3));
+        bindingCollection.addLowerRefBound(t2, new TypeVariableReference(t1));
+        bindingCollection.addLowerTypeBound(t2, intType);
+        bindingCollection.addUpperTypeBound(t3, numType);
+        bindingCollection.addLowerRefBound(t2, new TypeVariableReference(t3));
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerRefBound(t1, new TypeVariableReference(t2));
+        BoundResultDto resultDto = bindingCollection.addLowerRefBound(t1, new TypeVariableReference(t2));
 
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$a", "T1", asList("int", "@T2"), asList("@T2"), false),
                 varBinding("$b", "T2", asList("int", "@T3", "@T1"), asList("@T1"), false),
                 varBinding("$c", "T3", null, asList("num", "@T2"), false)
@@ -1758,22 +1758,22 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerRefBound_CircularRefWithoutBounds_AddRefsAccordingly() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String t1 = "T1";
         String t2 = "T2";
         String t3 = "T3";
-        overloadBindings.addVariable("$a", new TypeVariableReference(t1));
-        overloadBindings.addVariable("$b", new TypeVariableReference(t2));
-        overloadBindings.addVariable("$c", new TypeVariableReference(t3));
-        overloadBindings.addLowerRefBound(t2, new TypeVariableReference(t3));
-        overloadBindings.addLowerRefBound(t3, new TypeVariableReference(t1));
+        bindingCollection.addVariable("$a", new TypeVariableReference(t1));
+        bindingCollection.addVariable("$b", new TypeVariableReference(t2));
+        bindingCollection.addVariable("$c", new TypeVariableReference(t3));
+        bindingCollection.addLowerRefBound(t2, new TypeVariableReference(t3));
+        bindingCollection.addLowerRefBound(t3, new TypeVariableReference(t1));
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerRefBound(t1, new TypeVariableReference(t2));
+        BoundResultDto resultDto = bindingCollection.addLowerRefBound(t1, new TypeVariableReference(t2));
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$a", "T1", asList("@T2"), asList("@T3"), false),
                 varBinding("$b", "T2", asList("@T3"), asList("@T1"), false),
                 varBinding("$c", "T3", asList("@T1"), asList("@T2"), false)
@@ -1786,24 +1786,24 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerRefBound_CircularRefWithBounds_PropagatesTypesAccordingly() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String t1 = "T1";
         String t2 = "T2";
         String t3 = "T3";
-        overloadBindings.addVariable("$a", new TypeVariableReference(t1));
-        overloadBindings.addVariable("$b", new TypeVariableReference(t2));
-        overloadBindings.addVariable("$c", new TypeVariableReference(t3));
-        overloadBindings.addLowerRefBound(t2, new TypeVariableReference(t3));
-        overloadBindings.addLowerTypeBound(t2, intType);
-        overloadBindings.addLowerRefBound(t3, new TypeVariableReference(t1));
-        overloadBindings.addUpperTypeBound(t2, numType);
+        bindingCollection.addVariable("$a", new TypeVariableReference(t1));
+        bindingCollection.addVariable("$b", new TypeVariableReference(t2));
+        bindingCollection.addVariable("$c", new TypeVariableReference(t3));
+        bindingCollection.addLowerRefBound(t2, new TypeVariableReference(t3));
+        bindingCollection.addLowerTypeBound(t2, intType);
+        bindingCollection.addLowerRefBound(t3, new TypeVariableReference(t1));
+        bindingCollection.addUpperTypeBound(t2, numType);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerRefBound(t1, new TypeVariableReference(t2));
+        BoundResultDto resultDto = bindingCollection.addLowerRefBound(t1, new TypeVariableReference(t2));
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$a", "T1", asList("int", "@T2"), asList("num", "@T3"), false),
                 varBinding("$b", "T2", asList("int", "@T3"), asList("num", "@T1"), false),
                 varBinding("$c", "T3", asList("int", "@T1"), asList("num", "@T2"), false)
@@ -1815,7 +1815,7 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerRefBound_CircularRefWithBoundsButAlsoOtherRefs_PropagatesBoundsAccordingly() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String t1 = "T1";
@@ -1823,22 +1823,22 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
         String t3 = "T3";
         String t4 = "T4";
         String t5 = "T5";
-        overloadBindings.addVariable("$a", new TypeVariableReference(t1));
-        overloadBindings.addVariable("$b", new TypeVariableReference(t2));
-        overloadBindings.addVariable("$c", new TypeVariableReference(t3));
-        overloadBindings.addVariable("$d", new TypeVariableReference(t4));
-        overloadBindings.addVariable("$e", new TypeVariableReference(t5));
-        overloadBindings.addLowerRefBound(t2, new TypeVariableReference(t3));
-        overloadBindings.addLowerTypeBound(t2, intType);
-        overloadBindings.addLowerRefBound(t3, new TypeVariableReference(t1));
-        overloadBindings.addUpperTypeBound(t3, numType);
-        overloadBindings.addLowerRefBound(t1, new TypeVariableReference(t4));
-        overloadBindings.addLowerRefBound(t3, new TypeVariableReference(t5));
+        bindingCollection.addVariable("$a", new TypeVariableReference(t1));
+        bindingCollection.addVariable("$b", new TypeVariableReference(t2));
+        bindingCollection.addVariable("$c", new TypeVariableReference(t3));
+        bindingCollection.addVariable("$d", new TypeVariableReference(t4));
+        bindingCollection.addVariable("$e", new TypeVariableReference(t5));
+        bindingCollection.addLowerRefBound(t2, new TypeVariableReference(t3));
+        bindingCollection.addLowerTypeBound(t2, intType);
+        bindingCollection.addLowerRefBound(t3, new TypeVariableReference(t1));
+        bindingCollection.addUpperTypeBound(t3, numType);
+        bindingCollection.addLowerRefBound(t1, new TypeVariableReference(t4));
+        bindingCollection.addLowerRefBound(t3, new TypeVariableReference(t5));
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerRefBound(t1, new TypeVariableReference(t2));
+        BoundResultDto resultDto = bindingCollection.addLowerRefBound(t1, new TypeVariableReference(t2));
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$a", "T1", asList("int", "@T2", "@T4"), asList("num", "@T3"), false),
                 varBinding("$b", "T2", asList("int", "@T3"), asList("num", "@T1"), false),
                 varBinding("$c", "T3", asList("int", "@T1", "@T5"), asList("num", "@T2"), false),
@@ -1853,34 +1853,34 @@ public class OverloadBindingsAddBoundTest extends ATypeHelperTest
     @Test
     public void addLowerRefBound_HasAlreadyConvertibleWithSameRefAsUpper_DoesNotPropagateConvertible() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String tLhs = "Tlhs";
         String tRhs = "Trhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(tLhs));
-        overloadBindings.addVariable("$rhs", new TypeVariableReference(tRhs));
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
+        bindingCollection.addVariable("$rhs", new TypeVariableReference(tRhs));
         IConvertibleTypeSymbol asTrhs = symbolFactory.createConvertibleTypeSymbol();
-        asTrhs.bindTo(overloadBindings, asList(tRhs));
-        overloadBindings.addUpperTypeBound(tLhs, asTrhs);
+        asTrhs.bindTo(bindingCollection, asList(tRhs));
+        bindingCollection.addUpperTypeBound(tLhs, asTrhs);
 
         //act
-        BoundResultDto resultDto = overloadBindings.addLowerRefBound(tLhs, new TypeVariableReference(tRhs));
-        IIntersectionTypeSymbol result = overloadBindings.getUpperTypeBounds(tRhs);
+        BoundResultDto resultDto = bindingCollection.addLowerRefBound(tLhs, new TypeVariableReference(tRhs));
+        IIntersectionTypeSymbol result = bindingCollection.getUpperTypeBounds(tRhs);
 
         assertThat(result, is(nullValue()));
-        assertThat(overloadBindings.getLowerRefBounds(tLhs), containsInAnyOrder(tRhs));
+        assertThat(bindingCollection.getLowerRefBounds(tLhs), containsInAnyOrder(tRhs));
         assertThat(resultDto.hasChanged, is(true));
         assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
-    private IOverloadBindings createOverloadBindings() {
-        return createOverloadBindings(symbolFactory, typeHelper);
+    private IBindingCollection createBindingCollection() {
+        return createBindingCollection(symbolFactory, typeHelper);
     }
 
-    protected IOverloadBindings createOverloadBindings(
+    protected IBindingCollection createBindingCollection(
             ISymbolFactory symbolFactory, ITypeHelper typeHelper) {
-        return new OverloadBindings(symbolFactory, typeHelper);
+        return new BindingCollection(symbolFactory, typeHelper);
     }
 
 }

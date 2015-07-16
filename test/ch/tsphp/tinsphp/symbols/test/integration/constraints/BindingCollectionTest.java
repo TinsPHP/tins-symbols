@@ -7,14 +7,14 @@
 package ch.tsphp.tinsphp.symbols.test.integration.constraints;
 
 import ch.tsphp.tinsphp.common.inference.constraints.FixedTypeVariableReference;
+import ch.tsphp.tinsphp.common.inference.constraints.IBindingCollection;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
-import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.OverloadApplicationDto;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
-import ch.tsphp.tinsphp.symbols.constraints.OverloadBindings;
+import ch.tsphp.tinsphp.symbols.constraints.BindingCollection;
 import ch.tsphp.tinsphp.symbols.test.integration.testutils.ATypeHelperTest;
 import org.junit.Test;
 
@@ -26,26 +26,26 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.mockito.Mockito.mock;
 
-public class OverloadBindingsTest extends ATypeHelperTest
+public class BindingCollectionTest extends ATypeHelperTest
 {
 
     @Test
     public void getNextTypeVariable_FirstCall_ReturnsV1() {
         //no arrange necessary
 
-        IOverloadBindings overloadBindings = createOverloadBindings();
-        ITypeVariableReference result = overloadBindings.getNextTypeVariable();
+        IBindingCollection bindingCollection = createBindingCollection();
+        ITypeVariableReference result = bindingCollection.getNextTypeVariable();
 
         assertThat(result.getTypeVariable(), is("V1"));
     }
 
     @Test
     public void getNextTypeVariable_SecondCallAfterCopy_ReturnsV2() {
-        OverloadBindings bindings1 = new OverloadBindings(symbolFactory, typeHelper);
+        BindingCollection bindings1 = new BindingCollection(symbolFactory, typeHelper);
         bindings1.getNextTypeVariable();
 
-        IOverloadBindings overloadBindings = createOverloadBindings(bindings1);
-        ITypeVariableReference result = overloadBindings.getNextTypeVariable();
+        IBindingCollection bindingCollection = createBindingCollection(bindings1);
+        ITypeVariableReference result = bindingCollection.getNextTypeVariable();
 
         assertThat(result.getTypeVariable(), is("V2"));
     }
@@ -54,22 +54,22 @@ public class OverloadBindingsTest extends ATypeHelperTest
     public void addVariable_NotYetAdded_IsAdded() {
         //no arrange necessary
 
-        IOverloadBindings overloadBindings = createOverloadBindings();
-        overloadBindings.addVariable("$a", new TypeVariableReference("T"));
+        IBindingCollection bindingCollection = createBindingCollection();
+        bindingCollection.addVariable("$a", new TypeVariableReference("T"));
 
-        assertThat(overloadBindings.containsVariable("$a"), is(true));
+        assertThat(bindingCollection.containsVariable("$a"), is(true));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void addVariable_AlreadyAdded_ThrowsIllegalArgumentException() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
-        overloadBindings.addVariable("$a", new TypeVariableReference("T1"));
+        bindingCollection.addVariable("$a", new TypeVariableReference("T1"));
 
         //act
-        overloadBindings.addVariable("$a", new TypeVariableReference("T2"));
+        bindingCollection.addVariable("$a", new TypeVariableReference("T2"));
 
         //assert in annotation
     }
@@ -78,8 +78,8 @@ public class OverloadBindingsTest extends ATypeHelperTest
     public void getLowerRefBounds_NothingDefined_ReturnsNull() {
         //no arrange necessary
 
-        IOverloadBindings overloadBindings = createOverloadBindings();
-        Set<String> result = overloadBindings.getLowerRefBounds("T");
+        IBindingCollection bindingCollection = createBindingCollection();
+        Set<String> result = bindingCollection.getLowerRefBounds("T");
 
         assertThat(result, is(nullValue()));
     }
@@ -87,17 +87,17 @@ public class OverloadBindingsTest extends ATypeHelperTest
     @Test
     public void getLowerRefBounds_OneDefined_ReturnsTheOne() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String t1 = "T1";
         String t2 = "T2";
-        overloadBindings.addVariable("$a", new TypeVariableReference(t1));
-        overloadBindings.addVariable("$b", new TypeVariableReference(t2));
-        overloadBindings.addLowerRefBound(t1, new TypeVariableReference(t2));
+        bindingCollection.addVariable("$a", new TypeVariableReference(t1));
+        bindingCollection.addVariable("$b", new TypeVariableReference(t2));
+        bindingCollection.addLowerRefBound(t1, new TypeVariableReference(t2));
 
         //act
-        Set<String> result = overloadBindings.getLowerRefBounds(t1);
+        Set<String> result = bindingCollection.getLowerRefBounds(t1);
 
         assertThat(result, contains(t2));
     }
@@ -106,8 +106,8 @@ public class OverloadBindingsTest extends ATypeHelperTest
     public void getUpperRefBounds_NothingDefined_ReturnsNull() {
         //no arrange necessary
 
-        IOverloadBindings overloadBindings = createOverloadBindings();
-        Set<String> result = overloadBindings.getUpperRefBounds("T");
+        IBindingCollection bindingCollection = createBindingCollection();
+        Set<String> result = bindingCollection.getUpperRefBounds("T");
 
         assertThat(result, is(nullValue()));
     }
@@ -115,17 +115,17 @@ public class OverloadBindingsTest extends ATypeHelperTest
     @Test
     public void getUpperRefBounds_OneDefined_ReturnsTheOne() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String t1 = "T1";
         String t2 = "T2";
-        overloadBindings.addVariable("$a", new TypeVariableReference(t1));
-        overloadBindings.addVariable("$b", new TypeVariableReference(t2));
-        overloadBindings.addLowerRefBound(t1, new TypeVariableReference(t2));
+        bindingCollection.addVariable("$a", new TypeVariableReference(t1));
+        bindingCollection.addVariable("$b", new TypeVariableReference(t2));
+        bindingCollection.addLowerRefBound(t1, new TypeVariableReference(t2));
 
         //act
-        Set<String> result = overloadBindings.getUpperRefBounds(t2);
+        Set<String> result = bindingCollection.getUpperRefBounds(t2);
 
         assertThat(result, contains(t1));
     }
@@ -135,8 +135,8 @@ public class OverloadBindingsTest extends ATypeHelperTest
     public void fixType_VariableNotDefined_ThrowsIllegalArgumentException() {
         //no arrange necessary
 
-        IOverloadBindings overloadBindings = createOverloadBindings();
-        overloadBindings.fixType("$a");
+        IBindingCollection bindingCollection = createBindingCollection();
+        bindingCollection.fixType("$a");
 
         //assert in annotation
     }
@@ -144,15 +144,15 @@ public class OverloadBindingsTest extends ATypeHelperTest
     @Test
     public void fixType_NotFixed_IsFixedAfterwards() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String t1 = "T1";
-        overloadBindings.addVariable("$a", new TypeVariableReference(t1));
+        bindingCollection.addVariable("$a", new TypeVariableReference(t1));
 
         //act
-        overloadBindings.fixType("$a");
-        boolean result = overloadBindings.getTypeVariableReference("$a").hasFixedType();
+        bindingCollection.fixType("$a");
+        boolean result = bindingCollection.getTypeVariableReference("$a").hasFixedType();
 
         assertThat(result, is(true));
     }
@@ -160,16 +160,16 @@ public class OverloadBindingsTest extends ATypeHelperTest
     @Test
     public void fixType_AlreadyFixed_DoesNotWrapItAgain() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String t1 = "T1";
         ITypeVariableReference constraint = new FixedTypeVariableReference(new TypeVariableReference(t1));
-        overloadBindings.addVariable("$a", constraint);
+        bindingCollection.addVariable("$a", constraint);
 
         //act
-        overloadBindings.fixType("$a");
-        ITypeVariableReference result = overloadBindings.getTypeVariableReference("$a");
+        bindingCollection.fixType("$a");
+        ITypeVariableReference result = bindingCollection.getTypeVariableReference("$a");
 
         assertThat(result, is(constraint));
     }
@@ -178,8 +178,8 @@ public class OverloadBindingsTest extends ATypeHelperTest
     public void setAppliedOverload_NonExistingVariable_ThrowsIllegalArgumentException() {
         OverloadApplicationDto dto = new OverloadApplicationDto(mock(IFunctionType.class), null, null);
 
-        IOverloadBindings overloadBindings = createOverloadBindings();
-        overloadBindings.setAppliedOverload("$nonExistingVariable", dto);
+        IBindingCollection bindingCollection = createBindingCollection();
+        bindingCollection.setAppliedOverload("$nonExistingVariable", dto);
 
         //assert in annotation
     }
@@ -187,29 +187,29 @@ public class OverloadBindingsTest extends ATypeHelperTest
     @Test
     public void setAndGetAppliedOverload_OneDefined_ReturnsTheOne() {
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
-        overloadBindings.addVariable("$a", new TypeVariableReference("T"));
+        bindingCollection.addVariable("$a", new TypeVariableReference("T"));
         OverloadApplicationDto dto = new OverloadApplicationDto(mock(IFunctionType.class), null, null);
 
         //act
-        overloadBindings.setAppliedOverload("$a", dto);
-        OverloadApplicationDto result = overloadBindings.getAppliedOverload("$a");
+        bindingCollection.setAppliedOverload("$a", dto);
+        OverloadApplicationDto result = bindingCollection.getAppliedOverload("$a");
 
         assertThat(result, is(dto));
     }
 
-    private IOverloadBindings createOverloadBindings() {
-        return createOverloadBindings(symbolFactory, typeHelper);
+    private IBindingCollection createBindingCollection() {
+        return createBindingCollection(symbolFactory, typeHelper);
     }
 
-    protected IOverloadBindings createOverloadBindings(
+    protected IBindingCollection createBindingCollection(
             ISymbolFactory symbolFactory, ITypeHelper typeHelper) {
-        return new OverloadBindings(symbolFactory, typeHelper);
+        return new BindingCollection(symbolFactory, typeHelper);
     }
 
-    protected IOverloadBindings createOverloadBindings(OverloadBindings bindings) {
-        return new OverloadBindings(bindings);
+    protected IBindingCollection createBindingCollection(BindingCollection bindings) {
+        return new BindingCollection(bindings);
     }
 }

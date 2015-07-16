@@ -6,40 +6,40 @@
 
 package ch.tsphp.tinsphp.symbols.test.integration.constraints;
 
-import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
+import ch.tsphp.tinsphp.common.inference.constraints.IBindingCollection;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
 import ch.tsphp.tinsphp.common.symbols.IConvertibleTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
-import ch.tsphp.tinsphp.symbols.constraints.OverloadBindings;
+import ch.tsphp.tinsphp.symbols.constraints.BindingCollection;
 import ch.tsphp.tinsphp.symbols.test.integration.testutils.ATypeHelperTest;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.exceptions.base.MockitoAssertionError;
 
-import static ch.tsphp.tinsphp.symbols.test.integration.testutils.OverloadBindingsMatcher.varBinding;
-import static ch.tsphp.tinsphp.symbols.test.integration.testutils.OverloadBindingsMatcher.withVariableBindings;
+import static ch.tsphp.tinsphp.symbols.test.integration.testutils.BindingCollectionMatcher.varBinding;
+import static ch.tsphp.tinsphp.symbols.test.integration.testutils.BindingCollectionMatcher.withVariableBindings;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
+public class BindingCollectionMergeTypeVariablesTest extends ATypeHelperTest
 {
     @Test(expected = IllegalArgumentException.class)
     public void renameTypeVariable_UnknownTypeVariable_ThrowsIllegalArgumentException() {
         //pre act - necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String lhs = "Tlhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(lhs));
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(lhs));
 
         //act
-        overloadBindings.mergeFirstIntoSecond("T", lhs);
+        bindingCollection.mergeFirstIntoSecond("T", lhs);
 
         //assert in annotation
     }
@@ -47,14 +47,14 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
     @Test(expected = IllegalArgumentException.class)
     public void renameTypeVariable_UnknownNewName_ThrowsIllegalArgumentException() {
         //pre act - necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String lhs = "Tlhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(lhs));
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(lhs));
 
         //act
-        overloadBindings.mergeFirstIntoSecond(lhs, "T");
+        bindingCollection.mergeFirstIntoSecond(lhs, "T");
 
         //assert in annotation
     }
@@ -62,15 +62,15 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
     @Test
     public void renameTypeVariable_IsSelfReference_DoesNotCallSetTypeVariableOnConstraint() {
         //pre act - necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String lhs = "Tlhs";
         TypeVariableReference constraint = spy(new TypeVariableReference(lhs));
-        overloadBindings.addVariable("$lhs", constraint);
+        bindingCollection.addVariable("$lhs", constraint);
 
         //act
-        overloadBindings.mergeFirstIntoSecond(lhs, lhs);
+        bindingCollection.mergeFirstIntoSecond(lhs, lhs);
 
         try {
             verify(constraint).setTypeVariable(anyString());
@@ -83,20 +83,20 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
     @Test
     public void renameTypeVariable_HasTypeBounds_TransferTypeBounds() {
         //pre act - necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(lhs));
-        overloadBindings.addVariable("$rhs", new TypeVariableReference(rhs));
-        overloadBindings.addLowerTypeBound(lhs, intType);
-        overloadBindings.addUpperTypeBound(lhs, numType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(lhs));
+        bindingCollection.addVariable("$rhs", new TypeVariableReference(rhs));
+        bindingCollection.addLowerTypeBound(lhs, intType);
+        bindingCollection.addUpperTypeBound(lhs, numType);
 
         //act
-        overloadBindings.mergeFirstIntoSecond(lhs, rhs);
+        bindingCollection.mergeFirstIntoSecond(lhs, rhs);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", rhs, asList("int"), asList("num"), false),
                 varBinding("$rhs", rhs, asList("int"), asList("num"), false)
         ));
@@ -106,23 +106,23 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
     @Test
     public void renameTypeVariable_HasTypeBoundsAndOtherHasUpperRef_TransferTypeBoundsAndPropagate() {
         //pre act - necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
         String upperRhs = "Tupper";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(lhs));
-        overloadBindings.addVariable("$rhs", new TypeVariableReference(rhs));
-        overloadBindings.addVariable("$upper", new TypeVariableReference(upperRhs));
-        overloadBindings.addLowerRefBound(upperRhs, new TypeVariableReference(rhs));
-        overloadBindings.addLowerTypeBound(lhs, intType);
-        overloadBindings.addUpperTypeBound(lhs, numType);
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(lhs));
+        bindingCollection.addVariable("$rhs", new TypeVariableReference(rhs));
+        bindingCollection.addVariable("$upper", new TypeVariableReference(upperRhs));
+        bindingCollection.addLowerRefBound(upperRhs, new TypeVariableReference(rhs));
+        bindingCollection.addLowerTypeBound(lhs, intType);
+        bindingCollection.addUpperTypeBound(lhs, numType);
 
         //act
-        overloadBindings.mergeFirstIntoSecond(lhs, rhs);
+        bindingCollection.mergeFirstIntoSecond(lhs, rhs);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", rhs, asList("int"), asList("num", "@" + upperRhs), false),
                 varBinding("$rhs", rhs, asList("int"), asList("num", "@" + upperRhs), false),
                 varBinding("$upper", upperRhs, asList("int", "@" + rhs), null, false)
@@ -132,24 +132,24 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
     @Test
     public void renameTypeVariable_HasRefBounds_TransfersBounds() {
         //pre act - necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String lhs = "Tlhs";
         String rhs = "Trhs";
-        overloadBindings.addVariable("$lhs", new TypeVariableReference(lhs));
-        overloadBindings.addVariable("$rhs", new TypeVariableReference(rhs));
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(lhs));
+        bindingCollection.addVariable("$rhs", new TypeVariableReference(rhs));
         String t1 = "T1";
-        overloadBindings.addVariable("$t1", new TypeVariableReference(t1));
+        bindingCollection.addVariable("$t1", new TypeVariableReference(t1));
         String t2 = "T2";
-        overloadBindings.addVariable("$t2", new TypeVariableReference(t2));
-        overloadBindings.addLowerRefBound(lhs, new TypeVariableReference(t1));
-        overloadBindings.addLowerRefBound(t2, new TypeVariableReference(lhs));
+        bindingCollection.addVariable("$t2", new TypeVariableReference(t2));
+        bindingCollection.addLowerRefBound(lhs, new TypeVariableReference(t1));
+        bindingCollection.addLowerRefBound(t2, new TypeVariableReference(lhs));
 
         //act
-        overloadBindings.mergeFirstIntoSecond(lhs, rhs);
+        bindingCollection.mergeFirstIntoSecond(lhs, rhs);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$lhs", rhs, asList("@T1"), asList("@T2"), false),
                 varBinding("$rhs", rhs, asList("@T1"), asList("@T2"), false),
                 varBinding("$t1", t1, null, asList("@Trhs"), false),
@@ -161,23 +161,23 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
     @Test
     public void renameTypeVariable_HasUpperBoundToConvertibleType_ConvertibleTypeIsRenamedAsWell() {
         //pre act - necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String t1 = "T1";
         String t2 = "T2";
         String t3 = "T3";
-        overloadBindings.addVariable("$t1", new TypeVariableReference(t1));
-        overloadBindings.addVariable("$t2", new TypeVariableReference(t2));
-        overloadBindings.addVariable("$t3", new TypeVariableReference(t3));
+        bindingCollection.addVariable("$t1", new TypeVariableReference(t1));
+        bindingCollection.addVariable("$t2", new TypeVariableReference(t2));
+        bindingCollection.addVariable("$t3", new TypeVariableReference(t3));
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
-        overloadBindings.bind(convertibleTypeSymbol, asList(t1));
-        overloadBindings.addUpperTypeBound(t3, convertibleTypeSymbol);
+        bindingCollection.bind(convertibleTypeSymbol, asList(t1));
+        bindingCollection.addUpperTypeBound(t3, convertibleTypeSymbol);
 
         //act
-        overloadBindings.mergeFirstIntoSecond(t1, t2);
+        bindingCollection.mergeFirstIntoSecond(t1, t2);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$t1", t2, null, null, false),
                 varBinding("$t2", t2, null, null, false),
                 varBinding("$t3", t3, null, asList("{as T2}"), false)
@@ -188,23 +188,23 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
     @Test
     public void renameTypeVariable_HasLowerBoundToConvertibleType_ConvertibleTypeIsRenamedAsWell() {
         //pre act - necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String t1 = "T1";
         String t2 = "T2";
         String t3 = "T3";
-        overloadBindings.addVariable("$t1", new TypeVariableReference(t1));
-        overloadBindings.addVariable("$t2", new TypeVariableReference(t2));
-        overloadBindings.addVariable("$t3", new TypeVariableReference(t3));
+        bindingCollection.addVariable("$t1", new TypeVariableReference(t1));
+        bindingCollection.addVariable("$t2", new TypeVariableReference(t2));
+        bindingCollection.addVariable("$t3", new TypeVariableReference(t3));
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
-        overloadBindings.bind(convertibleTypeSymbol, asList(t1));
-        overloadBindings.addLowerTypeBound(t3, convertibleTypeSymbol);
+        bindingCollection.bind(convertibleTypeSymbol, asList(t1));
+        bindingCollection.addLowerTypeBound(t3, convertibleTypeSymbol);
 
         //act
-        overloadBindings.mergeFirstIntoSecond(t1, t2);
+        bindingCollection.mergeFirstIntoSecond(t1, t2);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$t1", t2, null, null, false),
                 varBinding("$t2", t2, null, null, false),
                 varBinding("$t3", t3, asList("{as T2}"), null, false)
@@ -215,25 +215,25 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
     @Test
     public void renameTypeVariable_HasUpperBoundToConvertibleTypeInUnion_ConvertibleTypeIsRenamedAsWell() {
         //pre act - necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String t1 = "T1";
         String t2 = "T2";
         String t3 = "T3";
-        overloadBindings.addVariable("$t1", new TypeVariableReference(t1));
-        overloadBindings.addVariable("$t2", new TypeVariableReference(t2));
-        overloadBindings.addVariable("$t3", new TypeVariableReference(t3));
+        bindingCollection.addVariable("$t1", new TypeVariableReference(t1));
+        bindingCollection.addVariable("$t2", new TypeVariableReference(t2));
+        bindingCollection.addVariable("$t3", new TypeVariableReference(t3));
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
-        overloadBindings.addUpperTypeBound(t1, stringType);
-        overloadBindings.bind(convertibleTypeSymbol, asList(t1));
+        bindingCollection.addUpperTypeBound(t1, stringType);
+        bindingCollection.bind(convertibleTypeSymbol, asList(t1));
         IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(convertibleTypeSymbol);
-        overloadBindings.addUpperTypeBound(t3, unionTypeSymbol);
+        bindingCollection.addUpperTypeBound(t3, unionTypeSymbol);
 
         //act
-        overloadBindings.mergeFirstIntoSecond(t1, t2);
+        bindingCollection.mergeFirstIntoSecond(t1, t2);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$t1", t2, null, asList("string"), false),
                 varBinding("$t2", t2, null, asList("string"), false),
                 varBinding("$t3", t3, null, asList("{as T2}"), false)
@@ -244,25 +244,25 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
     @Test
     public void renameTypeVariable_HasLowerBoundToConvertibleTypeInUnion_ConvertibleTypeIsRenamedAsWell() {
         //pre act - necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String t1 = "T1";
         String t2 = "T2";
         String t3 = "T3";
-        overloadBindings.addVariable("$t1", new TypeVariableReference(t1));
-        overloadBindings.addVariable("$t2", new TypeVariableReference(t2));
-        overloadBindings.addVariable("$t3", new TypeVariableReference(t3));
+        bindingCollection.addVariable("$t1", new TypeVariableReference(t1));
+        bindingCollection.addVariable("$t2", new TypeVariableReference(t2));
+        bindingCollection.addVariable("$t3", new TypeVariableReference(t3));
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
-        overloadBindings.addUpperTypeBound(t1, stringType);
-        overloadBindings.bind(convertibleTypeSymbol, asList(t1));
+        bindingCollection.addUpperTypeBound(t1, stringType);
+        bindingCollection.bind(convertibleTypeSymbol, asList(t1));
         IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(convertibleTypeSymbol);
-        overloadBindings.addLowerTypeBound(t3, unionTypeSymbol);
+        bindingCollection.addLowerTypeBound(t3, unionTypeSymbol);
 
         //act
-        overloadBindings.mergeFirstIntoSecond(t1, t2);
+        bindingCollection.mergeFirstIntoSecond(t1, t2);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$t1", t2, null, asList("string"), false),
                 varBinding("$t2", t2, null, asList("string"), false),
                 varBinding("$t3", t3, asList("{as T2}"), null, false)
@@ -273,25 +273,25 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
     @Test
     public void renameTypeVariable_HasUpperBoundToConvertibleTypeInUnionWithInt_ConvertibleTypeIsRenamedAsWell() {
         //pre act - necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String t1 = "T1";
         String t2 = "T2";
         String t3 = "T3";
-        overloadBindings.addVariable("$t1", new TypeVariableReference(t1));
-        overloadBindings.addVariable("$t2", new TypeVariableReference(t2));
-        overloadBindings.addVariable("$t3", new TypeVariableReference(t3));
-        overloadBindings.addUpperTypeBound(t1, fooType);
+        bindingCollection.addVariable("$t1", new TypeVariableReference(t1));
+        bindingCollection.addVariable("$t2", new TypeVariableReference(t2));
+        bindingCollection.addVariable("$t3", new TypeVariableReference(t3));
+        bindingCollection.addUpperTypeBound(t1, fooType);
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
-        overloadBindings.bind(convertibleTypeSymbol, asList(t1));
+        bindingCollection.bind(convertibleTypeSymbol, asList(t1));
         IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(intType, convertibleTypeSymbol);
-        overloadBindings.addUpperTypeBound(t3, unionTypeSymbol);
+        bindingCollection.addUpperTypeBound(t3, unionTypeSymbol);
 
         //act
-        overloadBindings.mergeFirstIntoSecond(t1, t2);
+        bindingCollection.mergeFirstIntoSecond(t1, t2);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$t1", t2, null, asList("Foo"), false),
                 varBinding("$t2", t2, null, asList("Foo"), false),
                 varBinding("$t3", t3, null, asList("(int | {as T2})"), false)
@@ -302,25 +302,25 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
     @Test
     public void renameTypeVariable_HasLowerBoundToConvertibleTypeInUnionWithInt_ConvertibleTypeIsRenamedAsWell() {
         //pre act - necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String t1 = "T1";
         String t2 = "T2";
         String t3 = "T3";
-        overloadBindings.addVariable("$t1", new TypeVariableReference(t1));
-        overloadBindings.addVariable("$t2", new TypeVariableReference(t2));
-        overloadBindings.addVariable("$t3", new TypeVariableReference(t3));
-        overloadBindings.addUpperTypeBound(t1, fooType);
+        bindingCollection.addVariable("$t1", new TypeVariableReference(t1));
+        bindingCollection.addVariable("$t2", new TypeVariableReference(t2));
+        bindingCollection.addVariable("$t3", new TypeVariableReference(t3));
+        bindingCollection.addUpperTypeBound(t1, fooType);
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
-        overloadBindings.bind(convertibleTypeSymbol, asList(t1));
+        bindingCollection.bind(convertibleTypeSymbol, asList(t1));
         IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(intType, convertibleTypeSymbol);
-        overloadBindings.addLowerTypeBound(t3, unionTypeSymbol);
+        bindingCollection.addLowerTypeBound(t3, unionTypeSymbol);
 
         //act
-        overloadBindings.mergeFirstIntoSecond(t1, t2);
+        bindingCollection.mergeFirstIntoSecond(t1, t2);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$t1", t2, null, asList("Foo"), false),
                 varBinding("$t2", t2, null, asList("Foo"), false),
                 varBinding("$t3", t3, asList("int", "{as T2}"), null, false)
@@ -331,7 +331,7 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
     @Test
     public void renameTypeVariable_AfterCopyAndHasBoundToConvertibleType_ConvertibleTypeIsRenamedAsWell() {
         //pre act - necessary for arrange
-        IOverloadBindings bindings = createOverloadBindings();
+        IBindingCollection bindings = createBindingCollection();
 
         //arrange
         String t1 = "T1";
@@ -345,10 +345,10 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
         bindings.addUpperTypeBound(t3, convertibleTypeSymbol);
 
         //act
-        IOverloadBindings overloadBindings = createOverloadBindings((OverloadBindings) bindings);
-        overloadBindings.mergeFirstIntoSecond(t1, t2);
+        IBindingCollection bindingCollection = createBindingCollection((BindingCollection) bindings);
+        bindingCollection.mergeFirstIntoSecond(t1, t2);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$t1", t2, null, null, false),
                 varBinding("$t2", t2, null, null, false),
                 varBinding("$t3", t3, null, asList("{as T2}"), false)
@@ -359,7 +359,7 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
     @Test
     public void renameTypeVariable_AfterCopyAndHasBoundToConvertibleTypeInUnion_ConvertibleTypeIsRenamedAsWell() {
         //pre act - necessary for arrange
-        IOverloadBindings bindings = createOverloadBindings();
+        IBindingCollection bindings = createBindingCollection();
 
         //arrange
         String t1 = "T1";
@@ -374,10 +374,10 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
         bindings.addUpperTypeBound(t3, unionTypeSymbol);
 
         //act
-        IOverloadBindings overloadBindings = createOverloadBindings((OverloadBindings) bindings);
-        overloadBindings.mergeFirstIntoSecond(t1, t2);
+        IBindingCollection bindingCollection = createBindingCollection((BindingCollection) bindings);
+        bindingCollection.mergeFirstIntoSecond(t1, t2);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$t1", t2, null, null, false),
                 varBinding("$t2", t2, null, null, false),
                 varBinding("$t3", t3, null, asList("{as T2}"), false)
@@ -389,7 +389,7 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
     public void
     renameTypeVariable_AfterCopyAndHasUpperBoundToConvertibleTypeInUnionWithFloat_ConvertibleTypeIsRenamedAsWell() {
         //pre act - necessary for arrange
-        IOverloadBindings bindings = createOverloadBindings();
+        IBindingCollection bindings = createBindingCollection();
 
         //arrange
         String t1 = "T1";
@@ -405,10 +405,10 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
         bindings.addUpperTypeBound(t3, unionTypeSymbol);
 
         //act
-        IOverloadBindings overloadBindings = createOverloadBindings((OverloadBindings) bindings);
-        overloadBindings.mergeFirstIntoSecond(t1, t2);
+        IBindingCollection bindingCollection = createBindingCollection((BindingCollection) bindings);
+        bindingCollection.mergeFirstIntoSecond(t1, t2);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$t1", t2, null, asList("Foo"), false),
                 varBinding("$t2", t2, null, asList("Foo"), false),
                 varBinding("$t3", t3, null, asList("(float | {as T2})"), false)
@@ -420,7 +420,7 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
     public void
     renameTypeVariable_AfterCopyAndHasLowerBoundToConvertibleTypeInIntersectionWithFloat_ConvertibleTypeIsRenamedAsWell() {
         //pre act - necessary for arrange
-        IOverloadBindings bindings = createOverloadBindings();
+        IBindingCollection bindings = createBindingCollection();
 
         //arrange
         String t1 = "T1";
@@ -436,10 +436,10 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
         bindings.addLowerTypeBound(t3, intersectionTypeSymbol);
 
         //act
-        IOverloadBindings overloadBindings = createOverloadBindings((OverloadBindings) bindings);
-        overloadBindings.mergeFirstIntoSecond(t1, t2);
+        IBindingCollection bindingCollection = createBindingCollection((BindingCollection) bindings);
+        bindingCollection.mergeFirstIntoSecond(t1, t2);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$t1", t2, null, asList("Foo"), false),
                 varBinding("$t2", t2, null, asList("Foo"), false),
                 varBinding("$t3", t3, asList("(float & {as T2})"), null, false)
@@ -452,7 +452,7 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
     renameTypeVariable_AfterCopyTwiceAndHasConvertibleInBothBoundsInMultipleContainers_ConvertibleTypeIsRenamedAsWell
     () {
         //pre act - necessary for arrange
-        IOverloadBindings bindings = createOverloadBindings();
+        IBindingCollection bindings = createBindingCollection();
 
         //arrange
         String t1 = "T1";
@@ -477,11 +477,11 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
         bindings.addLowerTypeBound(t4, intersectionTypeSymbol2);
 
         //act
-        IOverloadBindings overloadBindings1 = createOverloadBindings((OverloadBindings) bindings);
-        IOverloadBindings overloadBindings = createOverloadBindings((OverloadBindings) overloadBindings1);
-        overloadBindings.mergeFirstIntoSecond(t1, t2);
+        IBindingCollection bindingCollection1 = createBindingCollection((BindingCollection) bindings);
+        IBindingCollection bindingCollection = createBindingCollection((BindingCollection) bindingCollection1);
+        bindingCollection.mergeFirstIntoSecond(t1, t2);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$t1", t2, null, asList("Foo"), false),
                 varBinding("$t2", t2, null, asList("Foo"), false),
                 varBinding("$t3", t3, null, asList("((float & {as T2}) | int)"), false),
@@ -493,24 +493,24 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
     @Test
     public void renameTypeVariable_HasUpperBoundToConvertibleWhichPointsToNewTypeVariable_ConvertibleTypeIsRemoved() {
         //pre act - necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String t1 = "T1";
         String t2 = "T2";
-        overloadBindings.addVariable("$t1", new TypeVariableReference(t1));
-        overloadBindings.addVariable("$t2", new TypeVariableReference(t2));
-        overloadBindings.addUpperTypeBound(t1, intType);
-        overloadBindings.addUpperTypeBound(t2, interfaceBType);
+        bindingCollection.addVariable("$t1", new TypeVariableReference(t1));
+        bindingCollection.addVariable("$t2", new TypeVariableReference(t2));
+        bindingCollection.addUpperTypeBound(t1, intType);
+        bindingCollection.addUpperTypeBound(t2, interfaceBType);
 
         IConvertibleTypeSymbol asT2 = createConvertibleType();
-        overloadBindings.bind(asT2, asList(t2));
-        overloadBindings.addUpperTypeBound(t1, asT2);
+        bindingCollection.bind(asT2, asList(t2));
+        bindingCollection.addUpperTypeBound(t1, asT2);
 
         //act
-        overloadBindings.mergeFirstIntoSecond(t1, t2);
+        bindingCollection.mergeFirstIntoSecond(t1, t2);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$t1", t2, null, asList("int", "IB"), false),
                 varBinding("$t2", t2, null, asList("int", "IB"), false)
         ));
@@ -521,23 +521,23 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
     public void
     renameTypeVariable_NewTypeVariableWithConvertibleInUpperWhichPointsToOldTypeVariable_ConvertibleTypeIsRemoved() {
         //pre act - necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String t1 = "T1";
         String t2 = "T2";
-        overloadBindings.addVariable("$t1", new TypeVariableReference(t1));
-        overloadBindings.addVariable("$t2", new TypeVariableReference(t2));
-        overloadBindings.addUpperTypeBound(t1, intType);
-        overloadBindings.addUpperTypeBound(t2, interfaceBType);
+        bindingCollection.addVariable("$t1", new TypeVariableReference(t1));
+        bindingCollection.addVariable("$t2", new TypeVariableReference(t2));
+        bindingCollection.addUpperTypeBound(t1, intType);
+        bindingCollection.addUpperTypeBound(t2, interfaceBType);
         IConvertibleTypeSymbol asT1 = createConvertibleType();
-        overloadBindings.bind(asT1, asList(t1));
-        overloadBindings.addUpperTypeBound(t2, asT1);
+        bindingCollection.bind(asT1, asList(t1));
+        bindingCollection.addUpperTypeBound(t2, asT1);
 
         //act
-        overloadBindings.mergeFirstIntoSecond(t1, t2);
+        bindingCollection.mergeFirstIntoSecond(t1, t2);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$t1", t2, null, asList("int", "IB"), false),
                 varBinding("$t2", t2, null, asList("int", "IB"), false)
         ));
@@ -548,36 +548,36 @@ public class OverloadBindingsMergeTypeVariablesTest extends ATypeHelperTest
     public void
     renameTypeVariable_NewTypeVariableWithOnlyConvertibleInUpperWhichPointsToOldTypeVariable_UpperIsNullAfterwards() {
         //pre act - necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String t1 = "T1";
         String t2 = "T2";
-        overloadBindings.addVariable("$t1", new TypeVariableReference(t1));
-        overloadBindings.addVariable("$t2", new TypeVariableReference(t2));
+        bindingCollection.addVariable("$t1", new TypeVariableReference(t1));
+        bindingCollection.addVariable("$t2", new TypeVariableReference(t2));
         IConvertibleTypeSymbol asT1 = createConvertibleType();
-        overloadBindings.bind(asT1, asList(t1));
-        overloadBindings.addUpperTypeBound(t2, asT1);
+        bindingCollection.bind(asT1, asList(t1));
+        bindingCollection.addUpperTypeBound(t2, asT1);
 
         //act
-        overloadBindings.mergeFirstIntoSecond(t1, t2);
+        bindingCollection.mergeFirstIntoSecond(t1, t2);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$t1", t2, null, null, false),
                 varBinding("$t2", t2, null, null, false)
         ));
     }
 
-    private IOverloadBindings createOverloadBindings() {
-        return createOverloadBindings(symbolFactory, typeHelper);
+    private IBindingCollection createBindingCollection() {
+        return createBindingCollection(symbolFactory, typeHelper);
     }
 
-    protected IOverloadBindings createOverloadBindings(
+    protected IBindingCollection createBindingCollection(
             ISymbolFactory symbolFactory, ITypeHelper typeHelper) {
-        return new OverloadBindings(symbolFactory, typeHelper);
+        return new BindingCollection(symbolFactory, typeHelper);
     }
 
-    protected IOverloadBindings createOverloadBindings(OverloadBindings bindings) {
-        return new OverloadBindings(bindings);
+    protected IBindingCollection createBindingCollection(BindingCollection bindings) {
+        return new BindingCollection(bindings);
     }
 }

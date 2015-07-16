@@ -6,7 +6,7 @@
 
 package ch.tsphp.tinsphp.symbols.test.integration.symbols;
 
-import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
+import ch.tsphp.tinsphp.common.inference.constraints.IBindingCollection;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
 import ch.tsphp.tinsphp.common.symbols.IConvertibleTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
@@ -33,10 +33,10 @@ public class IntersectionTypeSymbolTest extends ATypeHelperTest
         String tx = "Tx";
         ISymbolFactory symbolFactory = createSymbolFactory();
         IConvertibleTypeSymbol asTx = createConvertibleType(symbolFactory, typeHelper);
-        IOverloadBindings overloadBindings = symbolFactory.createOverloadBindings();
-        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
-        overloadBindings.addUpperTypeBound(tx, numType);
-        overloadBindings.bind(asTx, asList(tx));
+        IBindingCollection bindingCollection = symbolFactory.createBindingCollection();
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addUpperTypeBound(tx, numType);
+        bindingCollection.bind(asTx, asList(tx));
         containerTypeSymbol.addTypeSymbol(asTx);
         IConvertibleTypeSymbol asTy = createConvertibleType(symbolFactory, typeHelper);
         asTy.addLowerTypeBound(intType);
@@ -57,10 +57,10 @@ public class IntersectionTypeSymbolTest extends ATypeHelperTest
         String tx = "Tx";
         ISymbolFactory symbolFactory = createSymbolFactory();
         IConvertibleTypeSymbol asTx = createConvertibleType(symbolFactory, typeHelper);
-        IOverloadBindings overloadBindings = symbolFactory.createOverloadBindings();
-        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
-        overloadBindings.addUpperTypeBound(tx, intType);
-        overloadBindings.bind(asTx, asList(tx));
+        IBindingCollection bindingCollection = symbolFactory.createBindingCollection();
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addUpperTypeBound(tx, intType);
+        bindingCollection.bind(asTx, asList(tx));
         containerTypeSymbol.addTypeSymbol(mixedType);
 
         containerTypeSymbol.addTypeSymbol(asTx);
@@ -79,13 +79,13 @@ public class IntersectionTypeSymbolTest extends ATypeHelperTest
         String tx = "Tx";
         ISymbolFactory symbolFactory = createSymbolFactory();
         IConvertibleTypeSymbol asTx = createConvertibleType(symbolFactory, typeHelper);
-        IOverloadBindings overloadBindings = symbolFactory.createOverloadBindings();
-        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
-        overloadBindings.addUpperTypeBound(tx, intType);
-        overloadBindings.bind(asTx, asList(tx));
+        IBindingCollection bindingCollection = symbolFactory.createBindingCollection();
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addUpperTypeBound(tx, intType);
+        bindingCollection.bind(asTx, asList(tx));
         containerTypeSymbol.addTypeSymbol(asTx);
 
-        overloadBindings.fixTypeParameter(tx);
+        bindingCollection.fixTypeParameter(tx);
         boolean result = containerTypeSymbol.isFixed();
 
         assertThat(result, Is.is(true));
@@ -102,17 +102,17 @@ public class IntersectionTypeSymbolTest extends ATypeHelperTest
         ISymbolFactory symbolFactory = createSymbolFactory();
         IConvertibleTypeSymbol asTx = createConvertibleType(symbolFactory, typeHelper);
         IConvertibleTypeSymbol asTy = createConvertibleType(symbolFactory, typeHelper);
-        IOverloadBindings overloadBindings = symbolFactory.createOverloadBindings();
-        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
-        overloadBindings.addVariable("$y", new TypeVariableReference(ty));
-        overloadBindings.addUpperTypeBound(tx, intType);
-        overloadBindings.addUpperTypeBound(ty, stringType);
-        overloadBindings.bind(asTx, asList(tx));
-        overloadBindings.bind(asTy, asList(ty));
+        IBindingCollection bindingCollection = symbolFactory.createBindingCollection();
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addVariable("$y", new TypeVariableReference(ty));
+        bindingCollection.addUpperTypeBound(tx, intType);
+        bindingCollection.addUpperTypeBound(ty, stringType);
+        bindingCollection.bind(asTx, asList(tx));
+        bindingCollection.bind(asTy, asList(ty));
         containerTypeSymbol.addTypeSymbol(asTx);
         containerTypeSymbol.addTypeSymbol(asTy);
 
-        overloadBindings.fixTypeParameter(tx);
+        bindingCollection.fixTypeParameter(tx);
         boolean result = containerTypeSymbol.isFixed();
 
         assertThat(result, Is.is(false));
@@ -129,13 +129,13 @@ public class IntersectionTypeSymbolTest extends ATypeHelperTest
         ISymbolFactory symbolFactory = createSymbolFactory();
         IConvertibleTypeSymbol asTx = createConvertibleType(symbolFactory, typeHelper);
         IConvertibleTypeSymbol asTy = createConvertibleType(symbolFactory, typeHelper);
-        IOverloadBindings overloadBindings = symbolFactory.createOverloadBindings();
-        overloadBindings.addVariable("$x", new TypeVariableReference(tx));
-        overloadBindings.addVariable("$y", new TypeVariableReference(ty));
-        overloadBindings.addUpperTypeBound(tx, intType);
-        overloadBindings.addUpperTypeBound(ty, stringType);
-        overloadBindings.bind(asTx, asList(tx));
-        overloadBindings.bind(asTy, asList(ty));
+        IBindingCollection bindingCollection = symbolFactory.createBindingCollection();
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addVariable("$y", new TypeVariableReference(ty));
+        bindingCollection.addUpperTypeBound(tx, intType);
+        bindingCollection.addUpperTypeBound(ty, stringType);
+        bindingCollection.bind(asTx, asList(tx));
+        bindingCollection.bind(asTy, asList(ty));
         IUnionTypeSymbol intersectionTypeSymbol = createUnionTypeSymbol(asTx, asTy);
         containerTypeSymbol.addTypeSymbol(intersectionTypeSymbol);
 

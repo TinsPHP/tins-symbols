@@ -12,9 +12,9 @@ import ch.tsphp.common.exceptions.TSPHPException;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.gen.TokenTypes;
+import ch.tsphp.tinsphp.common.inference.constraints.IBindingCollection;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
-import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IAliasSymbol;
@@ -326,19 +326,19 @@ public class SymbolFactoryTest
 
         ISymbolFactory symbolFactory = createSymbolFactory();
         IFunctionType result = symbolFactory.createFunctionType(
-                name, mock(IOverloadBindings.class), new ArrayList<IVariable>());
+                name, mock(IBindingCollection.class), new ArrayList<IVariable>());
 
         assertThat(result.getName(), is(name));
     }
 
     @Test
-    public void createFunctionType_Standard_OverloadBindingsArePassedOverloadBindings() {
-        IOverloadBindings overloadBindings = mock(IOverloadBindings.class);
+    public void createFunctionType_Standard_BindingCollectionIsPassedBindingCollection() {
+        IBindingCollection bindingCollection = mock(IBindingCollection.class);
 
         ISymbolFactory symbolFactory = createSymbolFactory();
-        IFunctionType result = symbolFactory.createFunctionType("+", overloadBindings, new ArrayList<IVariable>());
+        IFunctionType result = symbolFactory.createFunctionType("+", bindingCollection, new ArrayList<IVariable>());
 
-        assertThat(result.getOverloadBindings(), is(overloadBindings));
+        assertThat(result.getBindingCollection(), is(bindingCollection));
     }
 
     @Test
@@ -346,7 +346,7 @@ public class SymbolFactoryTest
         List<IVariable> parameters = new ArrayList<>();
 
         ISymbolFactory symbolFactory = createSymbolFactory();
-        IFunctionType result = symbolFactory.createFunctionType("+", mock(IOverloadBindings.class), parameters);
+        IFunctionType result = symbolFactory.createFunctionType("+", mock(IBindingCollection.class), parameters);
 
         assertThat(result.getParameters(), is(parameters));
     }
@@ -617,11 +617,11 @@ public class SymbolFactoryTest
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void createOverloadBindings_NotTheOneOfThisComponent_ThrowsIllegalArgumentException() {
+    public void createBindingCollection_NotTheOneOfThisComponent_ThrowsIllegalArgumentException() {
         //no arrange necessary
 
         ISymbolFactory symbolFactory = createSymbolFactory();
-        symbolFactory.createOverloadBindings(mock(IOverloadBindings.class));
+        symbolFactory.createBindingCollection(mock(IBindingCollection.class));
 
         //assert in annotation
     }

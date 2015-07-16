@@ -8,9 +8,9 @@ package ch.tsphp.tinsphp.symbols.test.unit.symbols.erroneous;
 
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
+import ch.tsphp.tinsphp.common.inference.constraints.IBindingCollection;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
-import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousMethodSymbol;
@@ -161,7 +161,7 @@ public class ErroneousMethodSymbolTest
         //no arrange necessary
 
         IErroneousMethodSymbol methodSymbol = createMethodSymbol();
-        methodSymbol.setBindings(new ArrayList<IOverloadBindings>());
+        methodSymbol.setBindings(new ArrayList<IBindingCollection>());
 
         //assert in annotation
     }

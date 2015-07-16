@@ -14,9 +14,9 @@ package ch.tsphp.tinsphp.symbols.erroneous;
 
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
+import ch.tsphp.tinsphp.common.inference.constraints.IBindingCollection;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
-import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.symbols.IMinimalVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
@@ -99,7 +99,7 @@ public class ErroneousMethodSymbol extends AErroneousScopedSymbol implements IEr
     }
 
     @Override
-    public List<IOverloadBindings> getBindings() {
+    public List<IBindingCollection> getBindings() {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
@@ -109,7 +109,7 @@ public class ErroneousMethodSymbol extends AErroneousScopedSymbol implements IEr
     }
 
     @Override
-    public void setBindings(List<IOverloadBindings> bindings) {
+    public void setBindings(List<IBindingCollection> bindings) {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 

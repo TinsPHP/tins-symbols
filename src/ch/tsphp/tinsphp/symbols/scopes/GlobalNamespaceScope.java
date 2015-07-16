@@ -16,9 +16,9 @@ import ch.tsphp.common.ILowerCaseStringMap;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.LowerCaseStringMap;
 import ch.tsphp.common.symbols.ISymbol;
+import ch.tsphp.tinsphp.common.inference.constraints.IBindingCollection;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraintCollection;
-import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.scopes.IGlobalNamespaceScope;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.utils.MapHelper;
@@ -110,12 +110,12 @@ public class GlobalNamespaceScope extends AScope implements IGlobalNamespaceScop
     }
 
     @Override
-    public List<IOverloadBindings> getBindings() {
+    public List<IBindingCollection> getBindings() {
         return constraintCollection.getBindings();
     }
 
     @Override
-    public void setBindings(List<IOverloadBindings> theBindings) {
+    public void setBindings(List<IBindingCollection> theBindings) {
         constraintCollection.setBindings(theBindings);
     }
     //Warning! end code duplication - same as in MethodSymbol

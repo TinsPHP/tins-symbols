@@ -18,9 +18,9 @@ import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.exceptions.TSPHPException;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.TinsPHPConstants;
+import ch.tsphp.tinsphp.common.inference.constraints.IBindingCollection;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
-import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IAliasSymbol;
@@ -45,9 +45,9 @@ import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.ILazySymbolResolver;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
+import ch.tsphp.tinsphp.symbols.constraints.BindingCollection;
 import ch.tsphp.tinsphp.symbols.constraints.Constraint;
 import ch.tsphp.tinsphp.symbols.constraints.FunctionType;
-import ch.tsphp.tinsphp.symbols.constraints.OverloadBindings;
 import ch.tsphp.tinsphp.symbols.constraints.Variable;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousLazySymbol;
 import ch.tsphp.tinsphp.symbols.erroneous.ErroneousMethodSymbol;
@@ -161,7 +161,7 @@ public class SymbolFactory implements ISymbolFactory
 
     @Override
     public IConvertibleTypeSymbol createConvertibleTypeSymbol() {
-        return new ConvertibleTypeSymbol(createOverloadBindings());
+        return new ConvertibleTypeSymbol(createBindingCollection());
     }
 
     @Override
@@ -171,8 +171,8 @@ public class SymbolFactory implements ISymbolFactory
 
     @Override
     public IFunctionType createFunctionType(
-            String name, IOverloadBindings overloadBindings, List<IVariable> parameterTypeVariables) {
-        return new FunctionType(name, overloadBindings, parameterTypeVariables);
+            String name, IBindingCollection bindingCollection, List<IVariable> parameterTypeVariables) {
+        return new FunctionType(name, bindingCollection, parameterTypeVariables);
     }
 
     @Override
@@ -244,15 +244,15 @@ public class SymbolFactory implements ISymbolFactory
     }
 
     @Override
-    public IOverloadBindings createOverloadBindings() {
-        return new OverloadBindings(this, typeHelper);
+    public IBindingCollection createBindingCollection() {
+        return new BindingCollection(this, typeHelper);
     }
 
     @Override
-    public IOverloadBindings createOverloadBindings(IOverloadBindings overloadBindingsToCopy) {
-        if (!(overloadBindingsToCopy instanceof OverloadBindings)) {
-            throw new IllegalArgumentException("only supports " + OverloadBindings.class.getName() + " or a subclass");
+    public IBindingCollection createBindingCollection(IBindingCollection bindingCollectionToCopy) {
+        if (!(bindingCollectionToCopy instanceof BindingCollection)) {
+            throw new IllegalArgumentException("only supports " + BindingCollection.class.getName() + " or a subclass");
         }
-        return new OverloadBindings((OverloadBindings) overloadBindingsToCopy);
+        return new BindingCollection((BindingCollection) bindingCollectionToCopy);
     }
 }

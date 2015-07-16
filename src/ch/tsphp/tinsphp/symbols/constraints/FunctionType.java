@@ -9,8 +9,8 @@ package ch.tsphp.tinsphp.symbols.constraints;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.TinsPHPConstants;
+import ch.tsphp.tinsphp.common.inference.constraints.IBindingCollection;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
-import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
@@ -36,7 +36,7 @@ public class FunctionType implements IFunctionType
     private final Map<String, String> suffices = new HashMap<>(2);
     private final String name;
     private String signature;
-    private IOverloadBindings overloadBindings;
+    private IBindingCollection bindingCollection;
     private List<IVariable> parameters;
 
     //used as soon as function is simplified
@@ -51,16 +51,17 @@ public class FunctionType implements IFunctionType
     private boolean wasBound;
     private boolean hasSignatureChanged = true;
 
-    public FunctionType(String theName, IOverloadBindings theOverloadBindings, List<IVariable> theParameterVariables) {
+    public FunctionType(String theName, IBindingCollection theBindingCollection,
+            List<IVariable> theParameterVariables) {
         name = theName;
-        overloadBindings = theOverloadBindings;
+        bindingCollection = theBindingCollection;
         parameters = theParameterVariables;
     }
 
     private FunctionType(FunctionType functionType) {
         name = functionType.name;
         signature = functionType.signature;
-        overloadBindings = functionType.overloadBindings;
+        bindingCollection = functionType.bindingCollection;
         parameters = functionType.parameters;
         wasBound = functionType.wasBound;
         wasSimplified = functionType.wasSimplified;
@@ -127,10 +128,10 @@ public class FunctionType implements IFunctionType
         Set<String> parameterTypeVariables = new HashSet<>();
         for (IVariable parameter : parameters) {
             String parameterId = parameter.getAbsoluteName();
-            parameterTypeVariables.add(overloadBindings.getTypeVariableReference(parameterId).getTypeVariable());
+            parameterTypeVariables.add(bindingCollection.getTypeVariableReference(parameterId).getTypeVariable());
         }
-        nonFixedTypeParameters = overloadBindings.tryToFix(parameterTypeVariables);
-        numberOfConvertibleApplications = overloadBindings.getNumberOfConvertibleApplications();
+        nonFixedTypeParameters = bindingCollection.tryToFix(parameterTypeVariables);
+        numberOfConvertibleApplications = bindingCollection.getNumberOfConvertibleApplications();
 
         calculateTypeParameters(true);
 
@@ -146,16 +147,16 @@ public class FunctionType implements IFunctionType
     }
 
     private boolean searchForConvertibleTypeInTypeBounds(String typeParameter) {
-        if (overloadBindings.hasUpperTypeBounds(typeParameter)) {
-            IIntersectionTypeSymbol upperTypeBounds = overloadBindings.getUpperTypeBounds(typeParameter);
+        if (bindingCollection.hasUpperTypeBounds(typeParameter)) {
+            IIntersectionTypeSymbol upperTypeBounds = bindingCollection.getUpperTypeBounds(typeParameter);
             hasConvertibleParameterTypes = containsConvertibleType(upperTypeBounds);
             if (hasConvertibleParameterTypes) {
                 return true;
             }
         }
 
-        if (overloadBindings.hasLowerTypeBounds(typeParameter)) {
-            IUnionTypeSymbol lowerTypeBounds = overloadBindings.getLowerTypeBounds(typeParameter);
+        if (bindingCollection.hasLowerTypeBounds(typeParameter)) {
+            IUnionTypeSymbol lowerTypeBounds = bindingCollection.getLowerTypeBounds(typeParameter);
             hasConvertibleParameterTypes = containsConvertibleType(lowerTypeBounds);
             if (hasConvertibleParameterTypes) {
                 return true;
@@ -197,12 +198,12 @@ public class FunctionType implements IFunctionType
         for (int i = 0; i < numberOfParameters; ++i) {
             IVariable parameter = parameters.get(i);
             String parameterId = parameter.getAbsoluteName();
-            dto.typeVariableReference = overloadBindings.getTypeVariableReference(parameterId);
+            dto.typeVariableReference = bindingCollection.getTypeVariableReference(parameterId);
             addTypeVariableToTypeParameters(dto);
         }
 
         dto.typeVariableReference
-                = overloadBindings.getTypeVariableReference(TinsPHPConstants.RETURN_VARIABLE_NAME);
+                = bindingCollection.getTypeVariableReference(TinsPHPConstants.RETURN_VARIABLE_NAME);
         addTypeVariableToTypeParameters(dto);
 
         //need to make a copy since they might be renamed in addNonFixedTypeVariableToTypeParameters
@@ -234,7 +235,7 @@ public class FunctionType implements IFunctionType
             } else {
                 typeParameter = "T";
             }
-            overloadBindings.renameTypeVariable(typeVariable, typeParameter);
+            bindingCollection.renameTypeVariable(typeVariable, typeParameter);
             nonFixedTypeParameters.remove(typeVariable);
             nonFixedTypeParameters.add(typeParameter);
         }
@@ -340,7 +341,7 @@ public class FunctionType implements IFunctionType
 
     //Warning! start code duplication - very similar to the one in ConvertibleTypeSymbol
     @Override
-    public void bindTo(IOverloadBindings newOverloadBindings, List<String> bindingTypeParameters) {
+    public void bindTo(IBindingCollection newBindingCollection, List<String> bindingTypeParameters) {
         if (!wasSimplified) {
             throw new IllegalStateException("function " + name + " was not yet simplified, cannot bind it yet.");
         }
@@ -351,9 +352,9 @@ public class FunctionType implements IFunctionType
                     + " type parameter(s) but only " + bindingTypeParameters.size() + " provided");
         }
 
-        transferBounds(newOverloadBindings, bindingTypeParameters);
+        transferBounds(newBindingCollection, bindingTypeParameters);
 
-        overloadBindings = newOverloadBindings;
+        bindingCollection = newBindingCollection;
         for (int i = 0; i < size; ++i) {
             renameTypeVariableAfterContainsCheck(typeParameters.get(i), bindingTypeParameters.get(i));
         }
@@ -361,7 +362,7 @@ public class FunctionType implements IFunctionType
     }
     //Warning! end code duplication - very similar to the one in ConvertibleTypeSymbol
 
-    private void transferBounds(IOverloadBindings newOverloadBindings, List<String> bindingTypeParameters) {
+    private void transferBounds(IBindingCollection newBindingCollection, List<String> bindingTypeParameters) {
         int size = typeParameters.size();
         Map<String, String> typeParameter2BindingTypeParameter = new HashMap<>(size);
         for (int i = 0; i < size; ++i) {
@@ -377,21 +378,21 @@ public class FunctionType implements IFunctionType
             //TODO rstoll TINS-512 - function binding
             // parametric types need to be bound to the newOverload bindings as well
 
-            if (overloadBindings.hasLowerTypeBounds(typeParameter)) {
-                IUnionTypeSymbol lowerTypeBounds = overloadBindings.getLowerTypeBounds(typeParameter);
-                newOverloadBindings.addLowerTypeBound(bindingTypeParameter, lowerTypeBounds);
+            if (bindingCollection.hasLowerTypeBounds(typeParameter)) {
+                IUnionTypeSymbol lowerTypeBounds = bindingCollection.getLowerTypeBounds(typeParameter);
+                newBindingCollection.addLowerTypeBound(bindingTypeParameter, lowerTypeBounds);
             }
 
-            if (overloadBindings.hasUpperTypeBounds(typeParameter)) {
-                IIntersectionTypeSymbol upperTypeBounds = overloadBindings.getUpperTypeBounds(typeParameter);
-                newOverloadBindings.addUpperTypeBound(bindingTypeParameter, upperTypeBounds);
+            if (bindingCollection.hasUpperTypeBounds(typeParameter)) {
+                IIntersectionTypeSymbol upperTypeBounds = bindingCollection.getUpperTypeBounds(typeParameter);
+                newBindingCollection.addUpperTypeBound(bindingTypeParameter, upperTypeBounds);
             }
 
-            if (overloadBindings.hasLowerRefBounds(typeParameter)) {
-                for (String refTypeParameter : overloadBindings.getLowerRefBounds(typeParameter)) {
+            if (bindingCollection.hasLowerRefBounds(typeParameter)) {
+                for (String refTypeParameter : bindingCollection.getLowerRefBounds(typeParameter)) {
                     String refBindingTypeParameter = typeParameter2BindingTypeParameter.get(refTypeParameter);
                     TypeVariableReference reference = new TypeVariableReference(refBindingTypeParameter);
-                    newOverloadBindings.addLowerRefBound(bindingTypeParameter, reference);
+                    newBindingCollection.addLowerRefBound(bindingTypeParameter, reference);
                 }
             }
         }
@@ -399,12 +400,12 @@ public class FunctionType implements IFunctionType
 
     //Warning! start code duplication - same as in ConvertibleTypeSymbol
     @Override
-    public void rebind(IOverloadBindings newOverloadBindings) {
+    public void rebind(IBindingCollection newBindingCollection) {
         if (!wasBound) {
             throw new IllegalStateException("can only rebind a convertible type if it was already bound before.");
         }
 
-        overloadBindings = newOverloadBindings;
+        bindingCollection = newBindingCollection;
     }
     //Warning! end code duplication - same as in ConvertibleTypeSymbol
 
@@ -419,8 +420,8 @@ public class FunctionType implements IFunctionType
     }
 
     @Override
-    public IOverloadBindings getOverloadBindings() {
-        return overloadBindings;
+    public IBindingCollection getBindingCollection() {
+        return bindingCollection;
     }
 
     @Override
@@ -483,17 +484,17 @@ public class FunctionType implements IFunctionType
         String typeVariable = typeParameters.get(typeParameterIndex);
         if (!nonFixedTypeParameters.contains(typeVariable)) {
             List<String> bounds = new ArrayList<>();
-            if (overloadBindings.hasUpperTypeBounds(typeVariable)) {
+            if (bindingCollection.hasUpperTypeBounds(typeVariable)) {
                 SortedSet<String> sortedSet = new TreeSet<>(
-                        overloadBindings.getUpperTypeBounds(typeVariable).getTypeSymbols().keySet());
+                        bindingCollection.getUpperTypeBounds(typeVariable).getTypeSymbols().keySet());
                 bounds.addAll(sortedSet);
-            } else if (overloadBindings.hasLowerTypeBounds(typeVariable)) {
+            } else if (bindingCollection.hasLowerTypeBounds(typeVariable)) {
                 SortedSet<String> sortedSet = new TreeSet<>(
-                        overloadBindings.getLowerTypeBounds(typeVariable).getTypeSymbols().keySet());
+                        bindingCollection.getLowerTypeBounds(typeVariable).getTypeSymbols().keySet());
                 bounds.addAll(sortedSet);
             }
-            if (overloadBindings.hasLowerRefBounds(typeVariable)) {
-                SortedSet<String> sortedSet = new TreeSet<>(overloadBindings.getLowerRefBounds(typeVariable));
+            if (bindingCollection.hasLowerRefBounds(typeVariable)) {
+                SortedSet<String> sortedSet = new TreeSet<>(bindingCollection.getLowerRefBounds(typeVariable));
                 bounds.addAll(sortedSet);
             }
             appendBound(stringBuilder, bounds);
@@ -507,8 +508,8 @@ public class FunctionType implements IFunctionType
     }
 
     private void appendTypeParameter(StringBuilder sbTypeParameters, String typeVariable) {
-        boolean hasLowerBounds = overloadBindings.hasLowerBounds(typeVariable);
-        boolean hasUpperTypeBounds = overloadBindings.hasUpperTypeBounds(typeVariable);
+        boolean hasLowerBounds = bindingCollection.hasLowerBounds(typeVariable);
+        boolean hasUpperTypeBounds = bindingCollection.hasUpperTypeBounds(typeVariable);
         boolean hasLowerOrUpperBounds = hasLowerBounds || hasUpperTypeBounds;
 
         if (hasLowerOrUpperBounds) {
@@ -521,13 +522,13 @@ public class FunctionType implements IFunctionType
 
         if (hasLowerBounds) {
             List<String> lowerBounds = new ArrayList<>();
-            if (overloadBindings.hasLowerTypeBounds(typeVariable)) {
+            if (bindingCollection.hasLowerTypeBounds(typeVariable)) {
                 SortedSet<String> sortedSet = new TreeSet<>(
-                        overloadBindings.getLowerTypeBounds(typeVariable).getTypeSymbols().keySet());
+                        bindingCollection.getLowerTypeBounds(typeVariable).getTypeSymbols().keySet());
                 lowerBounds.addAll(sortedSet);
             }
-            if (overloadBindings.hasLowerRefBounds(typeVariable)) {
-                SortedSet<String> sortedSet = new TreeSet<>(overloadBindings.getLowerRefBounds(typeVariable));
+            if (bindingCollection.hasLowerRefBounds(typeVariable)) {
+                SortedSet<String> sortedSet = new TreeSet<>(bindingCollection.getLowerRefBounds(typeVariable));
                 lowerBounds.addAll(sortedSet);
             }
             appendBound(sbTypeParameters, lowerBounds);
@@ -540,7 +541,7 @@ public class FunctionType implements IFunctionType
 
         if (hasUpperTypeBounds) {
             sbTypeParameters.append(" <: ");
-            sbTypeParameters.append(overloadBindings.getUpperTypeBounds(typeVariable).getAbsoluteName());
+            sbTypeParameters.append(bindingCollection.getUpperTypeBounds(typeVariable).getAbsoluteName());
         }
     }
 
@@ -588,7 +589,7 @@ public class FunctionType implements IFunctionType
 
     private StringBuilder appendVariable(StringBuilder sb, String variableName) {
         sb.append(variableName).append(":");
-        ITypeVariableReference reference = overloadBindings.getTypeVariableReference(variableName);
+        ITypeVariableReference reference = bindingCollection.getTypeVariableReference(variableName);
         boolean isFixed = reference.hasFixedType();
         String typeVariable = reference.getTypeVariable();
         return appendVariable(sb, typeVariable, isFixed);
@@ -597,9 +598,9 @@ public class FunctionType implements IFunctionType
     private StringBuilder appendVariable(StringBuilder sb, String typeVariable, boolean isFixed) {
         sb.append(typeVariable)
                 .append("<")
-                .append(overloadBindings.getLowerBoundConstraintIds(typeVariable))
+                .append(bindingCollection.getLowerBoundConstraintIds(typeVariable))
                 .append(",")
-                .append(overloadBindings.getUpperBoundConstraintIds(typeVariable))
+                .append(bindingCollection.getUpperBoundConstraintIds(typeVariable))
                 .append(">");
         if (isFixed) {
             sb.append("#");

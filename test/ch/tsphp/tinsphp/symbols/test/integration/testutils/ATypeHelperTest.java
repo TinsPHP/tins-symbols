@@ -21,7 +21,7 @@ import ch.tsphp.tinsphp.symbols.ConvertibleTypeSymbol;
 import ch.tsphp.tinsphp.symbols.IntersectionTypeSymbol;
 import ch.tsphp.tinsphp.symbols.SymbolFactory;
 import ch.tsphp.tinsphp.symbols.UnionTypeSymbol;
-import ch.tsphp.tinsphp.symbols.constraints.OverloadBindings;
+import ch.tsphp.tinsphp.symbols.constraints.BindingCollection;
 import ch.tsphp.tinsphp.symbols.test.unit.testutils.ATypeTest;
 import ch.tsphp.tinsphp.symbols.utils.TypeHelper;
 import org.junit.Ignore;
@@ -92,7 +92,7 @@ public abstract class ATypeHelperTest extends ATypeTest
     }
 
     protected ConvertibleTypeSymbol createConvertibleType(ISymbolFactory theSymbolFactory, ITypeHelper theTypeHelper) {
-        return new ConvertibleTypeSymbol(new OverloadBindings(theSymbolFactory, theTypeHelper));
+        return new ConvertibleTypeSymbol(new BindingCollection(theSymbolFactory, theTypeHelper));
     }
 
     @SafeVarargs

@@ -15,7 +15,7 @@ import ch.tsphp.tinsphp.common.utils.Pair;
 import ch.tsphp.tinsphp.symbols.ConvertibleTypeSymbol;
 import ch.tsphp.tinsphp.symbols.IntersectionTypeSymbol;
 import ch.tsphp.tinsphp.symbols.UnionTypeSymbol;
-import ch.tsphp.tinsphp.symbols.constraints.OverloadBindings;
+import ch.tsphp.tinsphp.symbols.constraints.BindingCollection;
 import ch.tsphp.tinsphp.symbols.utils.TypeHelper;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -131,7 +131,7 @@ public abstract class ATypeTest
         {
             @Override
             public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                return new ConvertibleTypeSymbol(new OverloadBindings(symbolFactory, typeHelper));
+                return new ConvertibleTypeSymbol(new BindingCollection(symbolFactory, typeHelper));
             }
         });
     }

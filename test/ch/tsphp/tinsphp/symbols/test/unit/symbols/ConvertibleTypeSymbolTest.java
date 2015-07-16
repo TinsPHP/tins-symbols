@@ -6,12 +6,12 @@
 
 package ch.tsphp.tinsphp.symbols.test.unit.symbols;
 
-import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
+import ch.tsphp.tinsphp.common.inference.constraints.IBindingCollection;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
 import ch.tsphp.tinsphp.common.symbols.IConvertibleTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IObservableTypeListener;
 import ch.tsphp.tinsphp.common.symbols.IParametricTypeSymbol;
-import ch.tsphp.tinsphp.symbols.constraints.OverloadBindings;
+import ch.tsphp.tinsphp.symbols.constraints.BindingCollection;
 import ch.tsphp.tinsphp.symbols.test.integration.testutils.ATypeHelperTest;
 import org.junit.Test;
 
@@ -30,7 +30,7 @@ public class ConvertibleTypeSymbolTest extends ATypeHelperTest
     @Test
     public void copy_WasBoundBefore_IsBoundAfterwards() {
         IConvertibleTypeSymbol typeSymbol = createConvertibleType();
-        IOverloadBindings bindings = new OverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindings = new BindingCollection(symbolFactory, typeHelper);
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.bind(typeSymbol, asList("Ta"));
 
@@ -40,21 +40,21 @@ public class ConvertibleTypeSymbolTest extends ATypeHelperTest
     }
 
     @Test
-    public void copy_WasBoundBefore_PointsToSameOverloadBindingsAsBefore() {
+    public void copy_WasBoundBefore_PointsToSameBindingCollectionAsBefore() {
         IConvertibleTypeSymbol typeSymbol = createConvertibleType();
-        IOverloadBindings bindings = new OverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindings = new BindingCollection(symbolFactory, typeHelper);
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.bind(typeSymbol, asList("Ta"));
 
         IConvertibleTypeSymbol convertibleTypeSymbol = typeSymbol.copy(new HashSet<IParametricTypeSymbol>());
 
-        assertThat(convertibleTypeSymbol.getOverloadBindings(), is(typeSymbol.getOverloadBindings()));
+        assertThat(convertibleTypeSymbol.getBindingCollection(), is(typeSymbol.getBindingCollection()));
     }
 
     @Test
     public void copy_WasFixedBefore_IsFixedAfterwards() {
         IConvertibleTypeSymbol typeSymbol = createConvertibleType();
-        IOverloadBindings bindings = new OverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindings = new BindingCollection(symbolFactory, typeHelper);
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.addLowerTypeBound("Ta", intType);
         bindings.addUpperTypeBound("Ta", intType);
@@ -69,7 +69,7 @@ public class ConvertibleTypeSymbolTest extends ATypeHelperTest
     @Test
     public void copy_Standard_SameTypeVariableAsBefore() {
         IConvertibleTypeSymbol typeSymbol = createConvertibleType();
-        IOverloadBindings bindings = new OverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindings = new BindingCollection(symbolFactory, typeHelper);
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.bind(typeSymbol, asList("Ta"));
 
@@ -84,9 +84,9 @@ public class ConvertibleTypeSymbolTest extends ATypeHelperTest
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
 
         //arrange
-        IOverloadBindings overloadBindings = new OverloadBindings(symbolFactory, typeHelper);
-        overloadBindings.addVariable("$a", new TypeVariableReference("Ta"));
-        convertibleTypeSymbol.bindTo(overloadBindings, asList("Ta"));
+        IBindingCollection bindingCollection = new BindingCollection(symbolFactory, typeHelper);
+        bindingCollection.addVariable("$a", new TypeVariableReference("Ta"));
+        convertibleTypeSymbol.bindTo(bindingCollection, asList("Ta"));
 
         //act
         convertibleTypeSymbol.renameTypeParameter("NonExistingTypeVariable", "T");
@@ -110,9 +110,9 @@ public class ConvertibleTypeSymbolTest extends ATypeHelperTest
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
 
         //arrange
-        IOverloadBindings overloadBindings = new OverloadBindings(symbolFactory, typeHelper);
-        overloadBindings.addVariable("$a", new TypeVariableReference("Ta"));
-        convertibleTypeSymbol.bindTo(overloadBindings, asList("Ta"));
+        IBindingCollection bindingCollection = new BindingCollection(symbolFactory, typeHelper);
+        bindingCollection.addVariable("$a", new TypeVariableReference("Ta"));
+        convertibleTypeSymbol.bindTo(bindingCollection, asList("Ta"));
 
         //act
         convertibleTypeSymbol.renameTypeParameter(convertibleTypeSymbol.getTypeVariable(), "T2");
@@ -129,9 +129,9 @@ public class ConvertibleTypeSymbolTest extends ATypeHelperTest
         convertibleTypeSymbol.registerObservableListener(listener);
 
         //arrange
-        IOverloadBindings overloadBindings = new OverloadBindings(symbolFactory, typeHelper);
-        overloadBindings.addVariable("$a", new TypeVariableReference("Ta"));
-        convertibleTypeSymbol.bindTo(overloadBindings, asList("Ta"));
+        IBindingCollection bindingCollection = new BindingCollection(symbolFactory, typeHelper);
+        bindingCollection.addVariable("$a", new TypeVariableReference("Ta"));
+        convertibleTypeSymbol.bindTo(bindingCollection, asList("Ta"));
 
         //act
         convertibleTypeSymbol.renameTypeParameter(convertibleTypeSymbol.getTypeVariable(), "T2");
@@ -141,20 +141,20 @@ public class ConvertibleTypeSymbolTest extends ATypeHelperTest
 
     @Test(expected = IllegalArgumentException.class)
     public void bindTo_NoTypeVariable_ThrowsIllegalArgumentException() {
-        IOverloadBindings overloadBindings = new OverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindingCollection = new BindingCollection(symbolFactory, typeHelper);
 
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
-        convertibleTypeSymbol.bindTo(overloadBindings, new ArrayList<String>());
+        convertibleTypeSymbol.bindTo(bindingCollection, new ArrayList<String>());
 
         //assert in annotation
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void bindTo_MoreThanOneTypeVariable_ThrowsIllegalArgumentException() {
-        IOverloadBindings overloadBindings = new OverloadBindings(symbolFactory, typeHelper);
+        IBindingCollection bindingCollection = new BindingCollection(symbolFactory, typeHelper);
 
         IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
-        convertibleTypeSymbol.bindTo(overloadBindings, asList("T1", "T2"));
+        convertibleTypeSymbol.bindTo(bindingCollection, asList("T1", "T2"));
 
         //assert in annotation
     }

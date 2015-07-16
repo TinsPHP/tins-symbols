@@ -8,7 +8,7 @@ package ch.tsphp.tinsphp.symbols.test.integration.utils;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.IConversionMethod;
-import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
+import ch.tsphp.tinsphp.common.inference.constraints.IBindingCollection;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
 import ch.tsphp.tinsphp.common.symbols.IConvertibleTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
@@ -641,7 +641,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         //arrange
         ITypeSymbol actual = intType;
         IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
-        IOverloadBindings bindings = symbolFactory.createOverloadBindings();
+        IBindingCollection bindings = symbolFactory.createBindingCollection();
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.addUpperTypeBound("Ta", numType);
         bindings.bind(formal, asList("Ta"));
@@ -667,7 +667,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         //arrange
         ITypeSymbol actual = boolType;
         IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
-        IOverloadBindings bindings = symbolFactory.createOverloadBindings();
+        IBindingCollection bindings = symbolFactory.createBindingCollection();
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.addUpperTypeBound("Ta", numType);
         bindings.bind(formal, asList("Ta"));
@@ -694,7 +694,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         //arrange
         ITypeSymbol actual = boolType;
         IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
-        IOverloadBindings bindings = symbolFactory.createOverloadBindings();
+        IBindingCollection bindings = symbolFactory.createBindingCollection();
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.addUpperTypeBound("Ta", floatType);
         bindings.bind(formal, asList("Ta"));
@@ -721,7 +721,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         //arrange
         ITypeSymbol actual = createUnionTypeSymbol(intType, floatType);
         IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
-        IOverloadBindings bindings = symbolFactory.createOverloadBindings();
+        IBindingCollection bindings = symbolFactory.createBindingCollection();
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.addUpperTypeBound("Ta", stringType);
         bindings.bind(formal, asList("Ta"));
@@ -748,7 +748,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         //arrange
         ITypeSymbol actual = boolType;
         IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
-        IOverloadBindings bindings = symbolFactory.createOverloadBindings();
+        IBindingCollection bindings = symbolFactory.createBindingCollection();
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.bind(formal, asList("Ta"));
         bindings.addLowerTypeBound("Ta", boolType);
@@ -776,7 +776,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         //arrange
         ITypeSymbol actual = intType;
         IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
-        IOverloadBindings bindings = symbolFactory.createOverloadBindings();
+        IBindingCollection bindings = symbolFactory.createBindingCollection();
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.bind(formal, asList("Ta"));
         bindings.addLowerTypeBound("Ta", boolType);
@@ -805,7 +805,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         //arrange
         ITypeSymbol actual = boolType;
         IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
-        IOverloadBindings bindings = symbolFactory.createOverloadBindings();
+        IBindingCollection bindings = symbolFactory.createBindingCollection();
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.bind(formal, asList("Ta"));
         bindings.addLowerTypeBound("Ta", floatType);
@@ -834,7 +834,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         //arrange
         ITypeSymbol actual = intType;
         IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
-        IOverloadBindings bindings = symbolFactory.createOverloadBindings();
+        IBindingCollection bindings = symbolFactory.createBindingCollection();
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.bind(formal, asList("Ta"));
         bindings.addLowerTypeBound("Ta", interfaceAType);
@@ -862,7 +862,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         //arrange
         ITypeSymbol actual = intType;
         IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
-        IOverloadBindings bindings = symbolFactory.createOverloadBindings();
+        IBindingCollection bindings = symbolFactory.createBindingCollection();
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.bind(formal, asList("Ta"));
         bindings.addLowerTypeBound("Ta", interfaceAType);
@@ -890,7 +890,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         IUnionTypeSymbol numOrString = createUnionTypeSymbol(typeHelper, numType, stringType);
         ITypeSymbol actual = numOrString;
         IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
-        IOverloadBindings bindings = symbolFactory.createOverloadBindings();
+        IBindingCollection bindings = symbolFactory.createBindingCollection();
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.bind(formal, asList("Ta"));
         bindings.addUpperTypeBound("Ta", numOrString);
@@ -919,7 +919,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
                 interfaceSubAType);
         ITypeSymbol actual = IBAndISubA;
         IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
-        IOverloadBindings bindings = symbolFactory.createOverloadBindings();
+        IBindingCollection bindings = symbolFactory.createBindingCollection();
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.bind(formal, asList("Ta"));
         bindings.addUpperTypeBound("Ta", interfaceAType);
@@ -948,7 +948,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
                 interfaceSubAType);
         ITypeSymbol actual = IBAndISubA;
         IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
-        IOverloadBindings bindings = symbolFactory.createOverloadBindings();
+        IBindingCollection bindings = symbolFactory.createBindingCollection();
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.bind(formal, asList("Ta"));
         IUnionTypeSymbol isIAOrIB = createUnionTypeSymbol(typeHelper, interfaceBType, interfaceAType);
@@ -979,7 +979,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         IUnionTypeSymbol IBAndAsISubAOrIA = createUnionTypeSymbol(typeHelper, IBAndAsISubA, interfaceAType);
         ITypeSymbol actual = IBAndAsISubAOrIA;
         IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
-        IOverloadBindings bindings = symbolFactory.createOverloadBindings();
+        IBindingCollection bindings = symbolFactory.createBindingCollection();
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.bind(formal, asList("Ta"));
         IUnionTypeSymbol isIAOrIB = createUnionTypeSymbol(typeHelper, interfaceBType, interfaceAType);

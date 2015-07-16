@@ -8,8 +8,8 @@ package ch.tsphp.tinsphp.symbols;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.inference.constraints.BoundResultDto;
-import ch.tsphp.tinsphp.common.inference.constraints.EOverloadBindingsMode;
-import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
+import ch.tsphp.tinsphp.common.inference.constraints.EBindingCollectionMode;
+import ch.tsphp.tinsphp.common.inference.constraints.IBindingCollection;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
 import ch.tsphp.tinsphp.common.symbols.IConvertibleTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
@@ -27,21 +27,21 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
 
     private List<String> typeParameters;
     private Set<String> nonFixedTypeParameters;
-    private IOverloadBindings overloadBindings;
+    private IBindingCollection bindingCollection;
     private boolean wasBound = false;
 
-    public ConvertibleTypeSymbol(IOverloadBindings theOverloadBindings) {
-        overloadBindings = theOverloadBindings;
+    public ConvertibleTypeSymbol(IBindingCollection theBindingCollection) {
+        bindingCollection = theBindingCollection;
         String typeVariable = "T";
         typeParameters = new ArrayList<>(1);
         typeParameters.add(typeVariable);
         nonFixedTypeParameters = new HashSet<>(1);
         nonFixedTypeParameters.add(typeVariable);
-        overloadBindings.addVariable(typeVariable, new TypeVariableReference(typeVariable));
+        bindingCollection.addVariable(typeVariable, new TypeVariableReference(typeVariable));
     }
 
     private ConvertibleTypeSymbol(ConvertibleTypeSymbol convertibleTypeSymbol) {
-        overloadBindings = convertibleTypeSymbol.overloadBindings;
+        bindingCollection = convertibleTypeSymbol.bindingCollection;
         typeParameters = new ArrayList<>(convertibleTypeSymbol.typeParameters);
         nonFixedTypeParameters = new HashSet<>(convertibleTypeSymbol.nonFixedTypeParameters);
         wasBound = convertibleTypeSymbol.wasBound;
@@ -114,15 +114,15 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
 
     //Warning! start code duplication - very similar to the one in FunctionType
     @Override
-    public void bindTo(IOverloadBindings newOverloadBindings, List<String> bindingTypeParameters) {
+    public void bindTo(IBindingCollection newBindingCollection, List<String> bindingTypeParameters) {
         if (typeParameters.size() != bindingTypeParameters.size()) {
             throw new IllegalArgumentException("This parametric type requires " + typeParameters.size()
                     + " type parameter(s) but only " + bindingTypeParameters.size() + " provided");
         }
 
-        transferBounds(newOverloadBindings, bindingTypeParameters);
+        transferBounds(newBindingCollection, bindingTypeParameters);
 
-        overloadBindings = newOverloadBindings;
+        bindingCollection = newBindingCollection;
         renameTypeVariableAfterContainsCheck(typeParameters.get(0), bindingTypeParameters.get(0));
         wasBound = true;
 
@@ -131,16 +131,16 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
     //Warning! end code duplication - very similar to the one in FunctionType
 
 
-    private void transferBounds(IOverloadBindings newOverloadBindings, List<String> bindingTypeParameters) {
+    private void transferBounds(IBindingCollection newBindingCollection, List<String> bindingTypeParameters) {
         String newTypeVariable = bindingTypeParameters.get(0);
         if (hasLowerTypeBounds()) {
-            newOverloadBindings.addLowerTypeBound(newTypeVariable, getLowerTypeBounds());
+            newBindingCollection.addLowerTypeBound(newTypeVariable, getLowerTypeBounds());
         }
         if (hasUpperTypeBounds()) {
-            if (newOverloadBindings.getMode() != EOverloadBindingsMode.SoftTyping) {
-                newOverloadBindings.addUpperTypeBound(newTypeVariable, getUpperTypeBounds());
+            if (newBindingCollection.getMode() != EBindingCollectionMode.SoftTyping) {
+                newBindingCollection.addUpperTypeBound(newTypeVariable, getUpperTypeBounds());
             } else {
-                newOverloadBindings.addLowerTypeBound(newTypeVariable, getUpperTypeBounds());
+                newBindingCollection.addLowerTypeBound(newTypeVariable, getUpperTypeBounds());
             }
         }
 
@@ -150,12 +150,12 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
 
     //Warning! end code duplication - same as in FunctionType
     @Override
-    public void rebind(IOverloadBindings newOverloadBindings) {
+    public void rebind(IBindingCollection newBindingCollection) {
         if (!wasBound) {
             throw new IllegalStateException("can only rebind a convertible type if it was already bound before.");
         }
 
-        overloadBindings = newOverloadBindings;
+        bindingCollection = newBindingCollection;
     }
     //Warning! end code duplication - same as in FunctionType
 
@@ -170,8 +170,8 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
     }
 
     @Override
-    public IOverloadBindings getOverloadBindings() {
-        return overloadBindings;
+    public IBindingCollection getBindingCollection() {
+        return bindingCollection;
     }
 
     @Override
@@ -181,7 +181,7 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
 
     @Override
     public BoundResultDto addLowerTypeBound(ITypeSymbol typeSymbol) {
-        BoundResultDto result = overloadBindings.addLowerTypeBound(typeParameters.get(0), typeSymbol);
+        BoundResultDto result = bindingCollection.addLowerTypeBound(typeParameters.get(0), typeSymbol);
         if (result.hasChanged) {
             notifyNameHasChanged();
         }
@@ -190,7 +190,7 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
 
     @Override
     public BoundResultDto addUpperTypeBound(ITypeSymbol typeSymbol) {
-        BoundResultDto result = overloadBindings.addUpperTypeBound(typeParameters.get(0), typeSymbol);
+        BoundResultDto result = bindingCollection.addUpperTypeBound(typeParameters.get(0), typeSymbol);
         if (result.hasChanged) {
             notifyNameHasChanged();
         }
@@ -199,22 +199,22 @@ public class ConvertibleTypeSymbol extends APolymorphicTypeSymbol implements ICo
 
     @Override
     public boolean hasLowerTypeBounds() {
-        return overloadBindings.hasLowerTypeBounds(typeParameters.get(0));
+        return bindingCollection.hasLowerTypeBounds(typeParameters.get(0));
     }
 
     @Override
     public boolean hasUpperTypeBounds() {
-        return overloadBindings.hasUpperTypeBounds(typeParameters.get(0));
+        return bindingCollection.hasUpperTypeBounds(typeParameters.get(0));
     }
 
     @Override
     public IUnionTypeSymbol getLowerTypeBounds() {
-        return overloadBindings.getLowerTypeBounds(typeParameters.get(0));
+        return bindingCollection.getLowerTypeBounds(typeParameters.get(0));
     }
 
     @Override
     public IIntersectionTypeSymbol getUpperTypeBounds() {
-        return overloadBindings.getUpperTypeBounds(typeParameters.get(0));
+        return bindingCollection.getUpperTypeBounds(typeParameters.get(0));
     }
 
     @Override

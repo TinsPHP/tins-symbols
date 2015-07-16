@@ -10,9 +10,9 @@ package ch.tsphp.tinsphp.symbols.constraints;
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.TinsPHPConstants;
 import ch.tsphp.tinsphp.common.inference.constraints.BoundResultDto;
-import ch.tsphp.tinsphp.common.inference.constraints.EOverloadBindingsMode;
+import ch.tsphp.tinsphp.common.inference.constraints.EBindingCollectionMode;
 import ch.tsphp.tinsphp.common.inference.constraints.FixedTypeVariableReference;
-import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
+import ch.tsphp.tinsphp.common.inference.constraints.IBindingCollection;
 import ch.tsphp.tinsphp.common.inference.constraints.IParametricType;
 import ch.tsphp.tinsphp.common.inference.constraints.ITypeVariableReference;
 import ch.tsphp.tinsphp.common.inference.constraints.IntersectionBoundException;
@@ -40,7 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class OverloadBindings implements IOverloadBindings
+public class BindingCollection implements IBindingCollection
 {
     private static final String HELPER_VARIABLE_PREFIX = "!help";
 
@@ -62,10 +62,10 @@ public class OverloadBindings implements IOverloadBindings
     private int count = 1;
     private int helperVariableCount = 0;
     private int numberOfConvertibleApplications = 0;
-    private EOverloadBindingsMode mode = EOverloadBindingsMode.Normal;
+    private EBindingCollectionMode mode = EBindingCollectionMode.Normal;
 
     @SuppressWarnings("checkstyle:parameternumber")
-    public OverloadBindings(ISymbolFactory theSymbolFactory, ITypeHelper theTypeHelper) {
+    public BindingCollection(ISymbolFactory theSymbolFactory, ITypeHelper theTypeHelper) {
         symbolFactory = theSymbolFactory;
         typeHelper = theTypeHelper;
         mixedTypeSymbol = symbolFactory.getMixedTypeSymbol();
@@ -82,7 +82,7 @@ public class OverloadBindings implements IOverloadBindings
         typeVariablesWithUpperConvertible = new HashMap<>();
     }
 
-    public OverloadBindings(OverloadBindings bindings) {
+    public BindingCollection(BindingCollection bindings) {
         symbolFactory = bindings.symbolFactory;
         typeHelper = bindings.typeHelper;
         mixedTypeSymbol = bindings.mixedTypeSymbol;
@@ -117,7 +117,7 @@ public class OverloadBindings implements IOverloadBindings
 
     }
 
-    private void copyVariablesAndTypeVariables(OverloadBindings bindings) {
+    private void copyVariablesAndTypeVariables(BindingCollection bindings) {
         for (Map.Entry<String, ITypeVariableReference> entry : bindings.variable2TypeVariable.entrySet()) {
             ITypeVariableReference reference = entry.getValue();
             TypeVariableReference typeVariableReference = new TypeVariableReference(reference.getTypeVariable());
@@ -134,7 +134,7 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     private void copyBounds(
-            OverloadBindings bindings, Set<IParametricTypeSymbol> rebindParametricTypeSymbols) {
+            BindingCollection bindings, Set<IParametricTypeSymbol> rebindParametricTypeSymbols) {
         for (Map.Entry<String, IUnionTypeSymbol> entry : bindings.lowerTypeBounds.entrySet()) {
             Collection<IParametricTypeSymbol> parametricTypeSymbols = new ArrayDeque<>();
             IUnionTypeSymbol copy = entry.getValue().copy(parametricTypeSymbols);
@@ -241,7 +241,7 @@ public class OverloadBindings implements IOverloadBindings
 
         // no need to actually add the dependency if it has a fixed type (then it is enough that we transfer the
         // type bounds)
-        if (hasNotFixedType || mode == EOverloadBindingsMode.SoftTyping) {
+        if (hasNotFixedType || mode == EBindingCollectionMode.SoftTyping) {
             dto.hasChanged = !lowerRefBounds.containsKey(typeVariable);
             if (!dto.hasChanged) {
                 Set<String> set = lowerRefBounds.get(typeVariable);
@@ -455,7 +455,7 @@ public class OverloadBindings implements IOverloadBindings
             }
         } else if (typeSymbol instanceof IConvertibleTypeSymbol) {
             IConvertibleTypeSymbol convertibleTypeSymbol = (IConvertibleTypeSymbol) typeSymbol;
-            if (convertibleTypeSymbol.getOverloadBindings() == this) {
+            if (convertibleTypeSymbol.getBindingCollection() == this) {
                 String convertibleTypeVariable = convertibleTypeSymbol.getTypeVariable();
                 if (!convertibleTypeVariable.equals(typeVariable)) {
                     nonConvertibleType = typeSymbol;
@@ -535,7 +535,7 @@ public class OverloadBindings implements IOverloadBindings
 
             if (!hasChanged && !hasLowerTypeBounds(typeVariable) && newTypeSymbol instanceof IConvertibleTypeSymbol) {
                 IConvertibleTypeSymbol convertibleTypeSymbol = (IConvertibleTypeSymbol) newTypeSymbol;
-                if (convertibleTypeSymbol.getOverloadBindings() == this) {
+                if (convertibleTypeSymbol.getBindingCollection() == this) {
                     addLowerRefBound(convertibleTypeSymbol.getTypeVariable(), typeVariable, true);
                 }
             }
@@ -891,7 +891,7 @@ public class OverloadBindings implements IOverloadBindings
                     searchForParametricTypes(dto, (IContainerTypeSymbol) typeSymbol);
                 } else if (typeSymbol instanceof IParametricTypeSymbol) {
                     IParametricTypeSymbol parametricTypeSymbol = (IParametricTypeSymbol) typeSymbol;
-                    if (!parametricTypeSymbol.isFixed() && parametricTypeSymbol.getOverloadBindings() == this) {
+                    if (!parametricTypeSymbol.isFixed() && parametricTypeSymbol.getBindingCollection() == this) {
                         dto.typeParameters.addAll(parametricTypeSymbol.getTypeParameters());
                     }
                 }
@@ -1300,18 +1300,18 @@ public class OverloadBindings implements IOverloadBindings
     }
 
     @Override
-    public void setMode(EOverloadBindingsMode newMode) {
+    public void setMode(EBindingCollectionMode newMode) {
         mode = newMode;
     }
 
     @Override
-    public EOverloadBindingsMode getMode() {
+    public EBindingCollectionMode getMode() {
         return mode;
     }
 
     @Override
     public void setLowerTypeBounds(String typeVariable, IUnionTypeSymbol lowerTypeBound) {
-        if (mode != EOverloadBindingsMode.Modification) {
+        if (mode != EBindingCollectionMode.Modification) {
             throw new IllegalStateException("Can only set a lower type bound in modification mode");
         }
 
@@ -1324,7 +1324,7 @@ public class OverloadBindings implements IOverloadBindings
 
     @Override
     public void setUpperTypeBounds(String typeVariable, IIntersectionTypeSymbol upperTypeBound) {
-        if (mode != EOverloadBindingsMode.Modification) {
+        if (mode != EBindingCollectionMode.Modification) {
             throw new IllegalStateException("Can only set an upper type bound in modification mode");
         }
 
@@ -1337,7 +1337,7 @@ public class OverloadBindings implements IOverloadBindings
 
     @Override
     public IUnionTypeSymbol removeLowerTypeBounds(String typeVariable) {
-        if (mode != EOverloadBindingsMode.Modification) {
+        if (mode != EBindingCollectionMode.Modification) {
             throw new IllegalStateException("Can only remove a lower type bound in modification mode");
         }
 
@@ -1350,7 +1350,7 @@ public class OverloadBindings implements IOverloadBindings
 
     @Override
     public IIntersectionTypeSymbol removeUpperTypeBounds(String typeVariable) {
-        if (mode != EOverloadBindingsMode.Modification) {
+        if (mode != EBindingCollectionMode.Modification) {
             throw new IllegalStateException("Can only remove an upper type bound in modification mode");
         }
 

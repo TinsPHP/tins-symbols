@@ -6,8 +6,8 @@
 
 package ch.tsphp.tinsphp.symbols.test.unit.constraints;
 
+import ch.tsphp.tinsphp.common.inference.constraints.IBindingCollection;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
-import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.inference.constraints.IVariable;
 import ch.tsphp.tinsphp.symbols.constraints.FunctionType;
 import org.junit.Test;
@@ -27,7 +27,7 @@ public class FunctionTypeTest
     @Test
     public void getName_Standard_ReturnsTheOnePassedByConstructor() {
         String name = "foo";
-        IOverloadBindings bindings = mock(IOverloadBindings.class);
+        IBindingCollection bindings = mock(IBindingCollection.class);
         ArrayList<IVariable> parameters = new ArrayList<>();
 
         IFunctionType function = createFunction(name, bindings, parameters);
@@ -37,13 +37,13 @@ public class FunctionTypeTest
     }
 
     @Test
-    public void getOverloadBindings_Standard_ReturnsTheOnePassedByConstructor() {
+    public void getBindingCollection_Standard_ReturnsTheOnePassedByConstructor() {
         String name = "foo";
-        IOverloadBindings bindings = mock(IOverloadBindings.class);
+        IBindingCollection bindings = mock(IBindingCollection.class);
         ArrayList<IVariable> parameters = new ArrayList<>();
 
         IFunctionType function = createFunction(name, bindings, parameters);
-        IOverloadBindings result = function.getOverloadBindings();
+        IBindingCollection result = function.getBindingCollection();
 
         assertThat(result, is(bindings));
     }
@@ -51,7 +51,7 @@ public class FunctionTypeTest
     @Test
     public void getParameters_Standard_ReturnsTheOnePassedByConstructor() {
         String name = "foo";
-        IOverloadBindings bindings = mock(IOverloadBindings.class);
+        IBindingCollection bindings = mock(IBindingCollection.class);
         List<IVariable> parameters = new ArrayList<>();
 
         IFunctionType function = createFunction(name, bindings, parameters);
@@ -63,7 +63,7 @@ public class FunctionTypeTest
     @Test
     public void getNumbersOfNonOptionalParameters_NoParams_Returns0() {
         String name = "foo";
-        IOverloadBindings bindings = mock(IOverloadBindings.class);
+        IBindingCollection bindings = mock(IBindingCollection.class);
         List<IVariable> parameters = new ArrayList<>();
 
         IFunctionType function = createFunction(name, bindings, parameters);
@@ -75,7 +75,7 @@ public class FunctionTypeTest
     @Test
     public void getNumbersOfNonOptionalParameters_TwoParams_Returns2() {
         String name = "foo";
-        IOverloadBindings bindings = mock(IOverloadBindings.class);
+        IBindingCollection bindings = mock(IBindingCollection.class);
         List<IVariable> parameters = asList(mock(IVariable.class), mock(IVariable.class));
 
         IFunctionType function = createFunction(name, bindings, parameters);
@@ -133,11 +133,11 @@ public class FunctionTypeTest
     }
 
     private IFunctionType createFunction() {
-        return createFunction("foo", mock(IOverloadBindings.class), new ArrayList<IVariable>());
+        return createFunction("foo", mock(IBindingCollection.class), new ArrayList<IVariable>());
     }
 
     protected IFunctionType createFunction(
-            String theName, IOverloadBindings theOverloadBindings, List<IVariable> theParameterVariables) {
-        return new FunctionType(theName, theOverloadBindings, theParameterVariables);
+            String theName, IBindingCollection theBindingCollection, List<IVariable> theParameterVariables) {
+        return new FunctionType(theName, theBindingCollection, theParameterVariables);
     }
 }

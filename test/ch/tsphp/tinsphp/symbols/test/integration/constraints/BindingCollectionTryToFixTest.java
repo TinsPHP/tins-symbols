@@ -6,12 +6,12 @@
 
 package ch.tsphp.tinsphp.symbols.test.integration.constraints;
 
-import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
+import ch.tsphp.tinsphp.common.inference.constraints.IBindingCollection;
 import ch.tsphp.tinsphp.common.inference.constraints.TypeVariableReference;
 import ch.tsphp.tinsphp.common.symbols.IConvertibleTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
-import ch.tsphp.tinsphp.symbols.constraints.OverloadBindings;
+import ch.tsphp.tinsphp.symbols.constraints.BindingCollection;
 import ch.tsphp.tinsphp.symbols.test.integration.testutils.ATypeHelperTest;
 import org.junit.Test;
 
@@ -19,37 +19,37 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static ch.tsphp.tinsphp.common.TinsPHPConstants.RETURN_VARIABLE_NAME;
-import static ch.tsphp.tinsphp.symbols.test.integration.testutils.OverloadBindingsMatcher.varBinding;
-import static ch.tsphp.tinsphp.symbols.test.integration.testutils.OverloadBindingsMatcher.withVariableBindings;
+import static ch.tsphp.tinsphp.symbols.test.integration.testutils.BindingCollectionMatcher.varBinding;
+import static ch.tsphp.tinsphp.symbols.test.integration.testutils.BindingCollectionMatcher.withVariableBindings;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class OverloadBindingsTryToFixTest extends ATypeHelperTest
+public class BindingCollectionTryToFixTest extends ATypeHelperTest
 {
     @Test
     public void tryToFix_NoParams_AllVariablesAreConstant() {
         //corresponds: function foo(){ $a = 1; $b = 2.2; return true;}
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String ta = "Ta";
         String tb = "Tb";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable("$a", new TypeVariableReference(ta));
-        overloadBindings.addVariable("$b", new TypeVariableReference(tb));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerTypeBound(ta, intType);
-        overloadBindings.addLowerTypeBound(tb, floatType);
-        overloadBindings.addLowerTypeBound(tReturn, boolType);
-        overloadBindings.addUpperTypeBound(tReturn, boolType);
+        bindingCollection.addVariable("$a", new TypeVariableReference(ta));
+        bindingCollection.addVariable("$b", new TypeVariableReference(tb));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerTypeBound(ta, intType);
+        bindingCollection.addLowerTypeBound(tb, floatType);
+        bindingCollection.addLowerTypeBound(tReturn, boolType);
+        bindingCollection.addUpperTypeBound(tReturn, boolType);
 
         //act
-        overloadBindings.tryToFix(new HashSet<String>());
+        bindingCollection.tryToFix(new HashSet<String>());
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$a", ta, asList("int"), null, true),
                 varBinding("$b", tb, asList("float"), null, true),
                 varBinding(RETURN_VARIABLE_NAME, tReturn, asList("bool"), null, true)
@@ -62,25 +62,25 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         //corresponds: function foo(){ $a = 1; $b = 2.2; return $b;}
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String ta = "Ta";
         String tb = "Tb";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable("$a", new TypeVariableReference(ta));
-        overloadBindings.addVariable("$b", new TypeVariableReference(tb));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerTypeBound(ta, intType);
-        overloadBindings.addLowerTypeBound(tb, floatType);
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tb));
+        bindingCollection.addVariable("$a", new TypeVariableReference(ta));
+        bindingCollection.addVariable("$b", new TypeVariableReference(tb));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerTypeBound(ta, intType);
+        bindingCollection.addLowerTypeBound(tb, floatType);
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tb));
         Set<String> parameterTypeVariables = new HashSet<>();
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$a", ta, asList("int"), null, true),
                 varBinding("$b", tb, asList("float"), null, true),
                 varBinding(RETURN_VARIABLE_NAME, tReturn, asList("float"), null, true)
@@ -93,25 +93,25 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         //corresponds: function foo(){ $a = 1; $b = $a; return $b;}
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String ta = "Ta";
         String tb = "Tb";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable("$a", new TypeVariableReference(ta));
-        overloadBindings.addVariable("$b", new TypeVariableReference(tb));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerTypeBound(ta, intType);
-        overloadBindings.addLowerRefBound(tb, new TypeVariableReference(ta));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tb));
+        bindingCollection.addVariable("$a", new TypeVariableReference(ta));
+        bindingCollection.addVariable("$b", new TypeVariableReference(tb));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerTypeBound(ta, intType);
+        bindingCollection.addLowerRefBound(tb, new TypeVariableReference(ta));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tb));
         Set<String> parameterTypeVariables = new HashSet<>();
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$a", ta, asList("int"), null, true),
                 varBinding("$b", tb, asList("int"), null, true),
                 varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
@@ -127,25 +127,25 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
 
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String ta = "Ta";
         String tb = "Tb";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable("$a", new TypeVariableReference(ta));
-        overloadBindings.addVariable("$b", new TypeVariableReference(tb));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerTypeBound(tb, intType);
-        overloadBindings.addLowerRefBound(ta, new TypeVariableReference(tb));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(ta));
+        bindingCollection.addVariable("$a", new TypeVariableReference(ta));
+        bindingCollection.addVariable("$b", new TypeVariableReference(tb));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerTypeBound(tb, intType);
+        bindingCollection.addLowerRefBound(ta, new TypeVariableReference(tb));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(ta));
         Set<String> parameterTypeVariables = new HashSet<>();
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$a", ta, asList("int"), null, true),
                 varBinding("$b", tb, asList("int"), null, true),
                 varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
@@ -159,7 +159,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         //corresponds: function foo(){ $a = 1; $b = $a; $c = $b; $d = $c; return $d;}
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String ta = "Ta";
@@ -168,22 +168,22 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String td = "Td";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable("$a", new TypeVariableReference(ta));
-        overloadBindings.addVariable("$b", new TypeVariableReference(tb));
-        overloadBindings.addVariable("$c", new TypeVariableReference(tc));
-        overloadBindings.addVariable("$d", new TypeVariableReference(td));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerTypeBound(ta, intType);
-        overloadBindings.addLowerRefBound(tb, new TypeVariableReference(ta));
-        overloadBindings.addLowerRefBound(tc, new TypeVariableReference(tb));
-        overloadBindings.addLowerRefBound(td, new TypeVariableReference(tc));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(td));
+        bindingCollection.addVariable("$a", new TypeVariableReference(ta));
+        bindingCollection.addVariable("$b", new TypeVariableReference(tb));
+        bindingCollection.addVariable("$c", new TypeVariableReference(tc));
+        bindingCollection.addVariable("$d", new TypeVariableReference(td));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerTypeBound(ta, intType);
+        bindingCollection.addLowerRefBound(tb, new TypeVariableReference(ta));
+        bindingCollection.addLowerRefBound(tc, new TypeVariableReference(tb));
+        bindingCollection.addLowerRefBound(td, new TypeVariableReference(tc));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(td));
         Set<String> parameterTypeVariables = new HashSet<>();
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding("$a", ta, asList("int"), null, true),
                 varBinding("$b", tb, asList("int"), null, true),
                 varBinding("$c", tc, asList("int"), null, true),
@@ -198,7 +198,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         //corresponds: function foo($x, $y){ $a = $x + $y; return $1;}
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -208,20 +208,20 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String ta = "Ta";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($a, new TypeVariableReference(ta));
-        overloadBindings.addVariable($x, new TypeVariableReference(t1));
-        overloadBindings.addVariable($y, new TypeVariableReference(t1));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(ta, new TypeVariableReference(t1));
-        overloadBindings.addUpperTypeBound(t1, numType);
-        overloadBindings.addLowerTypeBound(tReturn, intType);
+        bindingCollection.addVariable($a, new TypeVariableReference(ta));
+        bindingCollection.addVariable($x, new TypeVariableReference(t1));
+        bindingCollection.addVariable($y, new TypeVariableReference(t1));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(ta, new TypeVariableReference(t1));
+        bindingCollection.addUpperTypeBound(t1, numType);
+        bindingCollection.addLowerTypeBound(tReturn, intType);
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(t1);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, t1, null, asList("num"), true),
                 varBinding($y, t1, null, asList("num"), true),
                 varBinding($a, ta, asList("num"), null, true),
@@ -235,7 +235,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         //corresponds: function foo($x, $y){ $x + 1; $x = $y; return 1;}
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
 
@@ -245,21 +245,21 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String ty = "Ty";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerTypeBound(tx, intType);
-        overloadBindings.addUpperTypeBound(tx, numType);
-        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ty));
-        overloadBindings.addLowerTypeBound(tReturn, intType);
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerTypeBound(tx, intType);
+        bindingCollection.addUpperTypeBound(tx, numType);
+        bindingCollection.addLowerRefBound(tx, new TypeVariableReference(ty));
+        bindingCollection.addLowerTypeBound(tReturn, intType);
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("num"), true),
                 varBinding($y, ty, null, asList("num"), true),
                 varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
@@ -271,7 +271,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         //corresponds: function foo($x, $y){ $x + 1; $x = $y; return $x;}
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -280,21 +280,21 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String ty = "Ty";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerTypeBound(tx, intType);
-        overloadBindings.addUpperTypeBound(tx, numType);
-        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ty));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerTypeBound(tx, intType);
+        bindingCollection.addUpperTypeBound(tx, numType);
+        bindingCollection.addLowerRefBound(tx, new TypeVariableReference(ty));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, asList("int", "@" + ty), asList("num"), false),
                 varBinding($y, ty, null, asList("num", "@" + tx), false),
                 varBinding(RETURN_VARIABLE_NAME, tx, asList("int", "@" + ty), asList("num"), false)
@@ -306,7 +306,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         //corresponds: function foo($x, $y){ $x + 1; $b = $y; $x = $b; return $x;}
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -317,23 +317,23 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String tb = "Tb";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable($b, new TypeVariableReference(tb));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerTypeBound(tx, intType);
-        overloadBindings.addUpperTypeBound(tx, numType);
-        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(tb));
-        overloadBindings.addLowerRefBound(tb, new TypeVariableReference(ty));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable($b, new TypeVariableReference(tb));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerTypeBound(tx, intType);
+        bindingCollection.addUpperTypeBound(tx, numType);
+        bindingCollection.addLowerRefBound(tx, new TypeVariableReference(tb));
+        bindingCollection.addLowerRefBound(tb, new TypeVariableReference(ty));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, asList("int", "@" + ty), asList("num"), false),
                 varBinding($y, ty, null, asList("num", "@" + tx), false),
                 varBinding($b, ty, null, asList("num", "@" + tx), false),
@@ -346,7 +346,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         //corresponds: function foo($x, $y){ $a = $y; $x = $a; $b = $x; return $x;}
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -359,23 +359,23 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String tb = "Tb";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable($a, new TypeVariableReference(ta));
-        overloadBindings.addVariable($b, new TypeVariableReference(tb));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(ta, new TypeVariableReference(ty));
-        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ta));
-        overloadBindings.addLowerRefBound(tb, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tb));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable($a, new TypeVariableReference(ta));
+        bindingCollection.addVariable($b, new TypeVariableReference(tb));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(ta, new TypeVariableReference(ty));
+        bindingCollection.addLowerRefBound(tx, new TypeVariableReference(ta));
+        bindingCollection.addLowerRefBound(tb, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tb));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, asList("@" + ty), null, false),
                 varBinding($y, ty, null, asList("@" + tx), false),
                 varBinding($a, ty, null, asList("@" + tx), false),
@@ -389,7 +389,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         //corresponds: function foo($x, $y){$a = 1; $a = $y; $x = $a; $b = $x; return $x;}
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -402,24 +402,24 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String tb = "Tb";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable($a, new TypeVariableReference(ta));
-        overloadBindings.addVariable($b, new TypeVariableReference(tb));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerTypeBound(ta, intType);
-        overloadBindings.addLowerRefBound(ta, new TypeVariableReference(ty));
-        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ta));
-        overloadBindings.addLowerRefBound(tb, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tb));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable($a, new TypeVariableReference(ta));
+        bindingCollection.addVariable($b, new TypeVariableReference(tb));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerTypeBound(ta, intType);
+        bindingCollection.addLowerRefBound(ta, new TypeVariableReference(ty));
+        bindingCollection.addLowerRefBound(tx, new TypeVariableReference(ta));
+        bindingCollection.addLowerRefBound(tb, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tb));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, asList("int", "@" + ty), null, false),
                 varBinding($y, ty, null, asList("@" + tx, "@" + ta), false),
                 varBinding($a, ta, asList("int", "@" + ty), null, false),
@@ -432,7 +432,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
     public void tryToFix_YIsLowALowCLowXLowBLowRtnAndAHasDiffLowBoundThanY_TyLowTxTcTaAndRtnIsTxAndBIsTx() {
         //corresponds: function foo($x, $y){$a = 1; $a = $y; $c = $a; $x = $c $b = $x; return $x;}
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -447,26 +447,26 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String tc = "Tc";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable($a, new TypeVariableReference(ta));
-        overloadBindings.addVariable($b, new TypeVariableReference(tb));
-        overloadBindings.addVariable($c, new TypeVariableReference(tc));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerTypeBound(ta, intType);
-        overloadBindings.addLowerRefBound(ta, new TypeVariableReference(ty));
-        overloadBindings.addLowerRefBound(tc, new TypeVariableReference(ta));
-        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(tc));
-        overloadBindings.addLowerRefBound(tb, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tb));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable($a, new TypeVariableReference(ta));
+        bindingCollection.addVariable($b, new TypeVariableReference(tb));
+        bindingCollection.addVariable($c, new TypeVariableReference(tc));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerTypeBound(ta, intType);
+        bindingCollection.addLowerRefBound(ta, new TypeVariableReference(ty));
+        bindingCollection.addLowerRefBound(tc, new TypeVariableReference(ta));
+        bindingCollection.addLowerRefBound(tx, new TypeVariableReference(tc));
+        bindingCollection.addLowerRefBound(tb, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tb));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, asList("int", "@" + ty), null, false),
                 varBinding($y, ty, null, asList("@" + tx, "@" + ta, "@" + tc), false),
                 varBinding($a, ta, asList("int", "@" + ty), null, false),
@@ -480,7 +480,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
     public void tryToFix_YIsLowALowCLowXLowBLowRtnAndCHasDiffLowBoundThanY_TyLowTxTcAndRtnIsTxAndBIsTxAndAIsTy() {
         //corresponds: function foo($x, $y){$c = 1; $a = $y; $c = $a; $x = $c; $b = $x; return $x;}
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -495,26 +495,26 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String tc = "Tc";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable($a, new TypeVariableReference(ta));
-        overloadBindings.addVariable($b, new TypeVariableReference(tb));
-        overloadBindings.addVariable($c, new TypeVariableReference(tc));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerTypeBound(tc, intType);
-        overloadBindings.addLowerRefBound(ta, new TypeVariableReference(ty));
-        overloadBindings.addLowerRefBound(tc, new TypeVariableReference(ta));
-        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(tc));
-        overloadBindings.addLowerRefBound(tb, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tb));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable($a, new TypeVariableReference(ta));
+        bindingCollection.addVariable($b, new TypeVariableReference(tb));
+        bindingCollection.addVariable($c, new TypeVariableReference(tc));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerTypeBound(tc, intType);
+        bindingCollection.addLowerRefBound(ta, new TypeVariableReference(ty));
+        bindingCollection.addLowerRefBound(tc, new TypeVariableReference(ta));
+        bindingCollection.addLowerRefBound(tx, new TypeVariableReference(tc));
+        bindingCollection.addLowerRefBound(tb, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tb));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, asList("int", "@" + ty), null, false),
                 varBinding($y, ty, null, asList("@" + tx, "@" + tc), false),
                 varBinding($a, ty, null, asList("@" + tx, "@" + tc), false),
@@ -530,7 +530,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         //corresponds: function foo($x, $y){$a = 1; $a = $y; $a = $x; $x = $a; $b = $x; return $x;}
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -543,24 +543,24 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String tb = "Tb";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable($a, new TypeVariableReference(ta));
-        overloadBindings.addVariable($b, new TypeVariableReference(tb));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerTypeBound(ta, intType);
-        overloadBindings.addLowerRefBound(ta, new TypeVariableReference(ty));
-        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ta));
-        overloadBindings.addLowerRefBound(tb, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tb));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable($a, new TypeVariableReference(ta));
+        bindingCollection.addVariable($b, new TypeVariableReference(tb));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerTypeBound(ta, intType);
+        bindingCollection.addLowerRefBound(ta, new TypeVariableReference(ty));
+        bindingCollection.addLowerRefBound(tx, new TypeVariableReference(ta));
+        bindingCollection.addLowerRefBound(tb, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tb));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, asList("int", "@" + ty), null, false),
                 varBinding($y, ty, null, asList("@" + tx, "@" + ta), false),
                 varBinding($a, ta, asList("int", "@" + ty), null, false),
@@ -574,7 +574,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         //corresponds: function foo($x, $y){ return 1;}
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -583,18 +583,18 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String ty = "Ty";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerTypeBound(tReturn, intType);
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerTypeBound(tReturn, intType);
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("mixed"), true),
                 varBinding($y, ty, null, asList("mixed"), true),
                 varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
@@ -605,7 +605,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
     public void tryToFix_VariableHasParamAsLowerConstantReturn_AllAreConstant() {
         //corresponds: function foo($x){ $a = $x; return 1;}
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -614,18 +614,18 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String ta = "Ta";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($a, new TypeVariableReference(ta));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(ta, new TypeVariableReference(tx));
-        overloadBindings.addLowerTypeBound(tReturn, intType);
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($a, new TypeVariableReference(ta));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(ta, new TypeVariableReference(tx));
+        bindingCollection.addLowerTypeBound(tReturn, intType);
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("mixed"), true),
                 varBinding($a, ta, asList("mixed"), null, true),
                 varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
@@ -636,7 +636,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
     public void tryToFix_VariableHasParamAsLowerAndParamReturned_VariableUnifiesWithParam() {
         //corresponds: function foo($x){ $a = $x; return $x;}
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -645,18 +645,18 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String ta = "Ta";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($a, new TypeVariableReference(ta));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(ta, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($a, new TypeVariableReference(ta));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(ta, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, null, false),
                 varBinding($a, tx, null, null, false),
                 varBinding(RETURN_VARIABLE_NAME, tx, null, null, false)
@@ -667,7 +667,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
     public void tryToFix_VariableHasParamAsLowerAndSameLowerTypeAndParamReturned_UnifiesWithParameter() {
         //corresponds: function foo($x){ $a = 1; $x = 1; $a = $x; return $x;}
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -676,20 +676,20 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String ta = "Ta";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($a, new TypeVariableReference(ta));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(ta, new TypeVariableReference(tx));
-        overloadBindings.addLowerTypeBound(tx, intType);
-        overloadBindings.addLowerTypeBound(ta, intType);
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($a, new TypeVariableReference(ta));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(ta, new TypeVariableReference(tx));
+        bindingCollection.addLowerTypeBound(tx, intType);
+        bindingCollection.addLowerTypeBound(ta, intType);
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, asList("int"), null, false),
                 varBinding($a, tx, asList("int"), null, false),
                 varBinding(RETURN_VARIABLE_NAME, tx, asList("int"), null, false)
@@ -701,7 +701,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
     public void tryToFix_VariableHasParamAsLowerAndDifferentLowerTypeAndParamReturned_DoesNotUnifyWithParameter() {
         //corresponds: function foo($x){ $a = 1.3; $x = 1; $a = $x; return $x;}
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -710,20 +710,20 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String ta = "Ta";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($a, new TypeVariableReference(ta));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(ta, new TypeVariableReference(tx));
-        overloadBindings.addLowerTypeBound(tx, intType);
-        overloadBindings.addLowerTypeBound(ta, floatType);
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($a, new TypeVariableReference(ta));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(ta, new TypeVariableReference(tx));
+        bindingCollection.addLowerTypeBound(tx, intType);
+        bindingCollection.addLowerTypeBound(ta, floatType);
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, asList("int"), asList("@" + ta), false),
                 varBinding($a, ta, asList("float", "int", "@" + tx), null, false),
                 varBinding(RETURN_VARIABLE_NAME, tx, asList("int"), asList("@" + ta), false)
@@ -734,7 +734,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
     public void tryToFix_ParamXAndYAndBothAreReturned_ReturnHasBothAsLowerRef() {
         //corresponds: function foo($x, $y){ if($x){return $x;} return $y;}
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -743,20 +743,20 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String ty = "Ty";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addUpperTypeBound(tx, boolType);
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(ty));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addUpperTypeBound(tx, boolType);
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(ty));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("bool", "@" + tReturn), false),
                 varBinding($y, ty, null, asList("@" + tReturn), false),
                 varBinding(RETURN_VARIABLE_NAME, tReturn, asList("@" + tx, "@" + ty), null, false)
@@ -767,7 +767,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
     public void tryToFix_SemiConstantReturn_ReturnHasTypeAndParamAsLowerBound() {
         //corresponds: function foo($x, $y){ if($x){return 1;} return $y;}
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -776,20 +776,20 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String ty = "Ty";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addUpperTypeBound(tx, boolType);
-        overloadBindings.addLowerTypeBound(tReturn, intType);
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(ty));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addUpperTypeBound(tx, boolType);
+        bindingCollection.addLowerTypeBound(tReturn, intType);
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(ty));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("bool"), true),
                 varBinding($y, ty, null, asList("@" + tReturn), false),
                 varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int", "@" + ty), null, false)
@@ -801,25 +801,25 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
     public void tryToFix_SameLowerAndUpperTypeBound_FixIt() {
         //corresponds: function foo($x){ $x = 'h'; expectsString($x); return $x;}
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
         String tx = "Tx";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerTypeBound(tx, stringType);
-        overloadBindings.addUpperTypeBound(tx, stringType);
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerTypeBound(tx, stringType);
+        bindingCollection.addUpperTypeBound(tx, stringType);
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("string"), true),
                 varBinding(RETURN_VARIABLE_NAME, tReturn, asList("string"), null, true)
         ));
@@ -834,7 +834,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         //   $x = $y; $x = 'h'; expectsString($x); expectsString($y); return $x; return $y;
         // }
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -843,23 +843,23 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String ty = "Ty";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerTypeBound(tx, stringType);
-        overloadBindings.addUpperTypeBound(tx, stringType);
-        overloadBindings.addUpperTypeBound(ty, stringType);
-        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ty));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(ty));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerTypeBound(tx, stringType);
+        bindingCollection.addUpperTypeBound(tx, stringType);
+        bindingCollection.addUpperTypeBound(ty, stringType);
+        bindingCollection.addLowerRefBound(tx, new TypeVariableReference(ty));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(ty));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("string"), true),
                 //see TINS-500 multiple return and same lower as param upper - why Ty is fixed
                 varBinding($y, ty, null, asList("string"), true),
@@ -875,7 +875,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         //   $y = $x; $x = 'h'; expectsString($x); expectsString($y); return $x; return $y;
         // }
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -884,23 +884,23 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String ty = "Ty";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerTypeBound(tx, stringType);
-        overloadBindings.addUpperTypeBound(tx, stringType);
-        overloadBindings.addUpperTypeBound(ty, stringType);
-        overloadBindings.addLowerRefBound(ty, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(ty));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerTypeBound(tx, stringType);
+        bindingCollection.addUpperTypeBound(tx, stringType);
+        bindingCollection.addUpperTypeBound(ty, stringType);
+        bindingCollection.addLowerRefBound(ty, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(ty));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("string"), true),
                 varBinding($y, ty, null, asList("string"), true),
                 varBinding(RETURN_VARIABLE_NAME, tReturn, asList("string"), null, true)
@@ -915,7 +915,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         //   $x = $y; $y = 'h'; expectsString($x); expectsString($y); return $x; return $y;
         // }
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -924,23 +924,23 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String ty = "Ty";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerTypeBound(ty, stringType);
-        overloadBindings.addUpperTypeBound(ty, stringType);
-        overloadBindings.addUpperTypeBound(tx, stringType);
-        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ty));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(ty));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerTypeBound(ty, stringType);
+        bindingCollection.addUpperTypeBound(ty, stringType);
+        bindingCollection.addUpperTypeBound(tx, stringType);
+        bindingCollection.addLowerRefBound(tx, new TypeVariableReference(ty));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(ty));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("string"), true),
                 varBinding($y, ty, null, asList("string"), true),
                 varBinding(RETURN_VARIABLE_NAME, tReturn, asList("string"), null, true)
@@ -955,7 +955,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         //   $y = $a; $a = $x; $x = 'h'; expectsString($x); expectsString($y); return $x; return $y;
         // }
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -966,25 +966,25 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String ta = "Ta";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable($a, new TypeVariableReference(ta));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerTypeBound(tx, stringType);
-        overloadBindings.addUpperTypeBound(tx, stringType);
-        overloadBindings.addUpperTypeBound(ty, stringType);
-        overloadBindings.addLowerRefBound(ty, new TypeVariableReference(ta));
-        overloadBindings.addLowerRefBound(ta, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(ty));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable($a, new TypeVariableReference(ta));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerTypeBound(tx, stringType);
+        bindingCollection.addUpperTypeBound(tx, stringType);
+        bindingCollection.addUpperTypeBound(ty, stringType);
+        bindingCollection.addLowerRefBound(ty, new TypeVariableReference(ta));
+        bindingCollection.addLowerRefBound(ta, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(ty));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("string"), true),
                 varBinding($y, ty, null, asList("string"), true),
                 varBinding($a, ta, asList("string"), null, true),
@@ -997,7 +997,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
     public void tryToFix_SameLowerAndUpperTypeBoundWithLowerRefToOtherParamWhichHasDifferentUpper_FixOnlyOne() {
         //corresponds: function foo($x, $y){ $y = $x; $x = 'h'; expectsString($x); return $x; return $y; }
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -1006,22 +1006,22 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String ty = "Ty";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerTypeBound(tx, stringType);
-        overloadBindings.addUpperTypeBound(tx, stringType);
-        overloadBindings.addLowerRefBound(ty, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(ty));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerTypeBound(tx, stringType);
+        bindingCollection.addUpperTypeBound(tx, stringType);
+        bindingCollection.addLowerRefBound(ty, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(ty));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("string"), true),
                 varBinding($y, ty, asList("string"), null, false),
                 varBinding(RETURN_VARIABLE_NAME, ty, asList("string"), null, false)
@@ -1033,24 +1033,24 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
     public void tryToFix_Recursion_DoesNotHaveSelfReference() {
         //corresponds: function endless($x){ $x = endless($x); return $x;}
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
         String tx = "Tx";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(tReturn));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tx, new TypeVariableReference(tReturn));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, null, false),
                 varBinding(RETURN_VARIABLE_NAME, tx, null, null, false)
         ));
@@ -1061,7 +1061,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
     public void tryToFix_RecursionWithLocalVariableIndirection_DoesNotHaveSelfReference() {
         //corresponds: function endless($x){ $a = endless($x); $x = $a; return $x;}
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -1071,19 +1071,19 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
 
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($a, new TypeVariableReference(ta));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ta));
-        overloadBindings.addLowerRefBound(ta, new TypeVariableReference(tReturn));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($a, new TypeVariableReference(ta));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tx, new TypeVariableReference(ta));
+        bindingCollection.addLowerRefBound(ta, new TypeVariableReference(tReturn));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, null, false),
                 varBinding($a, tx, null, null, false),
                 varBinding(RETURN_VARIABLE_NAME, tx, null, null, false)
@@ -1095,7 +1095,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
     public void tryToFix_RecursionWithLocalVariableIndirectionAndHasParamAsLower_DoesNotHaveSelfReference() {
         //corresponds: function endless($x){ $a = endless($x); $x = $a; $a = $x; return $x;}
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -1105,20 +1105,20 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
 
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($a, new TypeVariableReference(ta));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ta));
-        overloadBindings.addLowerRefBound(ta, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(ta, new TypeVariableReference(tReturn));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($a, new TypeVariableReference(ta));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tx, new TypeVariableReference(ta));
+        bindingCollection.addLowerRefBound(ta, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(ta, new TypeVariableReference(tReturn));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, null, false),
                 varBinding($a, tx, null, null, false),
                 varBinding(RETURN_VARIABLE_NAME, tx, null, null, false)
@@ -1131,7 +1131,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
     public void tryToFix_RecursionWithParamIndirection_DoesNotHaveCyclicRef() {
         //corresponds: function endless($x, $y){ $y = endless($x,$y); $x = $y; return $x;}
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -1141,20 +1141,20 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
 
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(ty, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ty));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(ty, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(tx, new TypeVariableReference(ty));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, ty, null, null, false),
                 varBinding($y, ty, null, null, false),
                 varBinding(RETURN_VARIABLE_NAME, ty, null, null, false)
@@ -1165,7 +1165,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
     public void tryToFix_RecursionWithDoubleParamIndirection_DoesNotHaveCyclicRef() {
         //corresponds: function endless($x, $y, $z){ $y = endless($x,$y,$z); $z = $y; $x = $z; return $x;}
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -1177,23 +1177,23 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
 
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable($z, new TypeVariableReference(tz));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(ty, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(tz, new TypeVariableReference(ty));
-        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(tz));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable($z, new TypeVariableReference(tz));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(ty, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(tz, new TypeVariableReference(ty));
+        bindingCollection.addLowerRefBound(tx, new TypeVariableReference(tz));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
         parameterTypeVariables.add(tz);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, ty, null, null, false),
                 varBinding($y, ty, null, null, false),
                 varBinding($z, ty, null, null, false),
@@ -1205,7 +1205,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
     public void tryToFix_RecursionWithTripleParamIndirection_DoesNotHaveCyclicRef() {
         //corresponds: function endless($x, $y, $z, $a){ $y = endless($x,$y,$z); $z = $y; $a = $z; $x = $a; return $x;}
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -1218,16 +1218,16 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String ta = "Ta";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable($z, new TypeVariableReference(tz));
-        overloadBindings.addVariable($a, new TypeVariableReference(ta));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(ty, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(tz, new TypeVariableReference(ty));
-        overloadBindings.addLowerRefBound(ta, new TypeVariableReference(tz));
-        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ta));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable($z, new TypeVariableReference(tz));
+        bindingCollection.addVariable($a, new TypeVariableReference(ta));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(ty, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(tz, new TypeVariableReference(ty));
+        bindingCollection.addLowerRefBound(ta, new TypeVariableReference(tz));
+        bindingCollection.addLowerRefBound(tx, new TypeVariableReference(ta));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
@@ -1235,9 +1235,9 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         parameterTypeVariables.add(ta);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, ty, null, null, false),
                 varBinding($y, ty, null, null, false),
                 varBinding($z, ty, null, null, false),
@@ -1251,7 +1251,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
     public void tryToFix_RecursionWithDoubleParamIndirectionAndTwoReturn_DoesNotHaveCyclicRef() {
         //corresponds: function foo($x, $y, $z){ if($x > 0){ $y = foo($x -1,$y,$z); $z = $y; return $z;} return $x;}
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -1263,25 +1263,25 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
 
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable($z, new TypeVariableReference(tz));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerTypeBound(tx, intType);
-        overloadBindings.addUpperTypeBound(tx, numType);
-        overloadBindings.addLowerRefBound(ty, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(tz, new TypeVariableReference(ty));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tz));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable($z, new TypeVariableReference(tz));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerTypeBound(tx, intType);
+        bindingCollection.addUpperTypeBound(tx, numType);
+        bindingCollection.addLowerRefBound(ty, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(tz, new TypeVariableReference(ty));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tz));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
         parameterTypeVariables.add(tz);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, asList("int"), asList("num", "@" + ty), false),
                 varBinding($y, ty, asList("int", "@Tx"), null, false),
                 varBinding($z, ty, asList("int", "@Tx"), null, false),
@@ -1294,7 +1294,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
     public void tryToFix_TwoRecursions_DoesNotHaveCyclicRef() {
         //corresponds: function foo($x, $y, $z){ $y = foo(...); $x = foo(...); $z = $y; $z = $x; return $z;}
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -1306,24 +1306,24 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
 
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable($z, new TypeVariableReference(tz));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(ty, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(tz, new TypeVariableReference(ty));
-        overloadBindings.addLowerRefBound(tz, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tz));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable($z, new TypeVariableReference(tz));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(ty, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(tx, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(tz, new TypeVariableReference(ty));
+        bindingCollection.addLowerRefBound(tz, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tz));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
         parameterTypeVariables.add(tz);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, ty, null, null, false),
                 varBinding($y, ty, null, null, false),
                 varBinding($z, ty, null, null, false),
@@ -1340,7 +1340,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         // $z = $a; $a = $b; $z = $y; $z = $x; return $z;
         // }
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -1355,20 +1355,20 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String tb = "Tb";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable($z, new TypeVariableReference(tz));
-        overloadBindings.addVariable($a, new TypeVariableReference(ta));
-        overloadBindings.addVariable($b, new TypeVariableReference(tb));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(ty, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(tb, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(ta, new TypeVariableReference(tb));
-        overloadBindings.addLowerRefBound(tz, new TypeVariableReference(ty));
-        overloadBindings.addLowerRefBound(tz, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tz, new TypeVariableReference(ta));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tz));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable($z, new TypeVariableReference(tz));
+        bindingCollection.addVariable($a, new TypeVariableReference(ta));
+        bindingCollection.addVariable($b, new TypeVariableReference(tb));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(ty, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(tx, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(tb, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(ta, new TypeVariableReference(tb));
+        bindingCollection.addLowerRefBound(tz, new TypeVariableReference(ty));
+        bindingCollection.addLowerRefBound(tz, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tz, new TypeVariableReference(ta));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tz));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
@@ -1377,9 +1377,9 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         parameterTypeVariables.add(tb);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tb, null, null, false),
                 varBinding($y, tb, null, null, false),
                 varBinding($z, tb, null, null, false),
@@ -1397,7 +1397,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         // function foo($x, $y, $z){ if($x > 0){ $y = foo($x - 1, $y, $z); $z = $y; return $z; } return $x; }
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -1408,15 +1408,15 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String tz = "Tz";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable($z, new TypeVariableReference(tz));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addUpperTypeBound(tx, intType);
-        overloadBindings.addLowerRefBound(ty, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tz));
-        overloadBindings.addLowerRefBound(tz, new TypeVariableReference(ty));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable($z, new TypeVariableReference(tz));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addUpperTypeBound(tx, intType);
+        bindingCollection.addLowerRefBound(ty, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tz));
+        bindingCollection.addLowerRefBound(tz, new TypeVariableReference(ty));
 
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
@@ -1424,9 +1424,9 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         parameterTypeVariables.add(tz);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("int", "@" + ty), false),
                 varBinding($y, ty, asList("@" + tx), null, false),
                 varBinding($z, ty, asList("@" + tx), null, false),
@@ -1448,7 +1448,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         // }
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -1459,16 +1459,16 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String tz = "Tz";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable($z, new TypeVariableReference(tz));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addUpperTypeBound(tx, intType);
-        overloadBindings.addUpperTypeBound(ty, numType);
-        overloadBindings.addLowerRefBound(ty, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tz));
-        overloadBindings.addLowerRefBound(tz, new TypeVariableReference(ty));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable($z, new TypeVariableReference(tz));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addUpperTypeBound(tx, intType);
+        bindingCollection.addUpperTypeBound(ty, numType);
+        bindingCollection.addLowerRefBound(ty, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tz));
+        bindingCollection.addLowerRefBound(tz, new TypeVariableReference(ty));
 
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
@@ -1476,9 +1476,9 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         parameterTypeVariables.add(tz);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("int", "@" + ty), false),
                 varBinding($y, ty, asList("@" + tx), asList("num"), false),
                 varBinding($z, ty, asList("@" + tx), asList("num"), false),
@@ -1501,7 +1501,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         // }
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -1514,18 +1514,18 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String ta = "Ta";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable($z, new TypeVariableReference(tz));
-        overloadBindings.addVariable($a, new TypeVariableReference(ta));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addUpperTypeBound(tx, intType);
-        overloadBindings.addUpperTypeBound(ty, numType);
-        overloadBindings.addLowerRefBound(ty, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tz));
-        overloadBindings.addLowerRefBound(tz, new TypeVariableReference(ty));
-        overloadBindings.addLowerRefBound(ta, new TypeVariableReference(ty));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable($z, new TypeVariableReference(tz));
+        bindingCollection.addVariable($a, new TypeVariableReference(ta));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addUpperTypeBound(tx, intType);
+        bindingCollection.addUpperTypeBound(ty, numType);
+        bindingCollection.addLowerRefBound(ty, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tz));
+        bindingCollection.addLowerRefBound(tz, new TypeVariableReference(ty));
+        bindingCollection.addLowerRefBound(ta, new TypeVariableReference(ty));
 
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
@@ -1534,9 +1534,9 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         parameterTypeVariables.add(ta);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("int", "@" + ty), false),
                 varBinding($y, ty, asList("@" + tx), asList("num"), false),
                 varBinding($z, ty, asList("@" + tx), asList("num"), false),
@@ -1550,7 +1550,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
     public void tryToFix_ParametricReturnDueToParametricFunctionCall_NoConcurrentModificationException() {
         //corresponds: function foo($x){ return bar($x); return bar($x);} function bar($x){return $x;}
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -1561,21 +1561,21 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String tBar2 = "Tb";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable(fCallBar1, new TypeVariableReference(tBar1));
-        overloadBindings.addVariable(fCallBar2, new TypeVariableReference(tBar2));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tBar1));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tBar2));
-        overloadBindings.addLowerRefBound(tBar1, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tBar2, new TypeVariableReference(tx));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable(fCallBar1, new TypeVariableReference(tBar1));
+        bindingCollection.addVariable(fCallBar2, new TypeVariableReference(tBar2));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tBar1));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tBar2));
+        bindingCollection.addLowerRefBound(tBar1, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tBar2, new TypeVariableReference(tx));
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, null, false),
                 varBinding(fCallBar1, tx, null, null, false),
                 varBinding(fCallBar2, tx, null, null, false),
@@ -1591,7 +1591,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         //  function bar($x, $y){ if($x){return $x;} return $y;}
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -1607,20 +1607,20 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String tReturn = "Treturn";
 
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable($z, new TypeVariableReference(tz));
-        overloadBindings.addVariable(fCallBar1, new TypeVariableReference(tBar1));
-        overloadBindings.addVariable(fCallBar2, new TypeVariableReference(tBar2));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addUpperTypeBound(tx, boolType);
-        overloadBindings.addUpperTypeBound(ty, boolType);
-        overloadBindings.addLowerRefBound(tBar1, new TypeVariableReference(tz));
-        overloadBindings.addLowerRefBound(tBar1, new TypeVariableReference(ty));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tBar1));
-        overloadBindings.addLowerRefBound(tBar2, new TypeVariableReference(tz));
-        overloadBindings.addLowerRefBound(tBar2, new TypeVariableReference(ty));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tBar2));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable($z, new TypeVariableReference(tz));
+        bindingCollection.addVariable(fCallBar1, new TypeVariableReference(tBar1));
+        bindingCollection.addVariable(fCallBar2, new TypeVariableReference(tBar2));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addUpperTypeBound(tx, boolType);
+        bindingCollection.addUpperTypeBound(ty, boolType);
+        bindingCollection.addLowerRefBound(tBar1, new TypeVariableReference(tz));
+        bindingCollection.addLowerRefBound(tBar1, new TypeVariableReference(ty));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tBar1));
+        bindingCollection.addLowerRefBound(tBar2, new TypeVariableReference(tz));
+        bindingCollection.addLowerRefBound(tBar2, new TypeVariableReference(ty));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tBar2));
 
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
@@ -1628,9 +1628,9 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         parameterTypeVariables.add(tz);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("bool"), true),
                 varBinding($y, ty, null, asList("bool", "@" + tBar1, "@" + tBar2, "@" + tReturn), false),
                 varBinding($z, tz, null, asList("@" + tBar1, "@" + tBar2, "@" + tReturn), false),
@@ -1651,7 +1651,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         //  function bar($x, $y){ if($x){return $x;} return $y;}
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -1668,24 +1668,24 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String tBar3 = "Tb3";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable($z, new TypeVariableReference(tz));
-        overloadBindings.addVariable(fCallBar1, new TypeVariableReference(tBar1));
-        overloadBindings.addVariable(fCallBar2, new TypeVariableReference(tBar2));
-        overloadBindings.addVariable(fCallBar3, new TypeVariableReference(tBar3));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addUpperTypeBound(tx, boolType);
-        overloadBindings.addUpperTypeBound(ty, boolType);
-        overloadBindings.addLowerRefBound(tBar1, new TypeVariableReference(tz));
-        overloadBindings.addLowerRefBound(tBar1, new TypeVariableReference(ty));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tBar1));
-        overloadBindings.addLowerRefBound(tBar2, new TypeVariableReference(tz));
-        overloadBindings.addLowerRefBound(tBar2, new TypeVariableReference(ty));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tBar2));
-        overloadBindings.addLowerRefBound(tBar3, new TypeVariableReference(tz));
-        overloadBindings.addLowerRefBound(tBar3, new TypeVariableReference(ty));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tBar3));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable($z, new TypeVariableReference(tz));
+        bindingCollection.addVariable(fCallBar1, new TypeVariableReference(tBar1));
+        bindingCollection.addVariable(fCallBar2, new TypeVariableReference(tBar2));
+        bindingCollection.addVariable(fCallBar3, new TypeVariableReference(tBar3));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addUpperTypeBound(tx, boolType);
+        bindingCollection.addUpperTypeBound(ty, boolType);
+        bindingCollection.addLowerRefBound(tBar1, new TypeVariableReference(tz));
+        bindingCollection.addLowerRefBound(tBar1, new TypeVariableReference(ty));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tBar1));
+        bindingCollection.addLowerRefBound(tBar2, new TypeVariableReference(tz));
+        bindingCollection.addLowerRefBound(tBar2, new TypeVariableReference(ty));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tBar2));
+        bindingCollection.addLowerRefBound(tBar3, new TypeVariableReference(tz));
+        bindingCollection.addLowerRefBound(tBar3, new TypeVariableReference(ty));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tBar3));
 
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
@@ -1693,9 +1693,9 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         parameterTypeVariables.add(tz);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("bool"), true),
                 varBinding($y, ty, null, asList("bool", "@" + tBar1, "@" + tBar2, "@" + tBar3, "@" + tReturn), false),
                 varBinding($z, tz, null, asList("@" + tBar1, "@" + tBar2, "@" + tBar3, "@" + tReturn), false),
@@ -1717,7 +1717,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         //  }
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -1732,28 +1732,28 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String tc = "Tc";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable($a, new TypeVariableReference(ta));
-        overloadBindings.addVariable($b, new TypeVariableReference(tb));
-        overloadBindings.addVariable($c, new TypeVariableReference(tc));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(ta, new TypeVariableReference(tb));
-        overloadBindings.addLowerRefBound(ta, new TypeVariableReference(tc));
-        overloadBindings.addLowerRefBound(tb, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tb, new TypeVariableReference(ty));
-        overloadBindings.addLowerRefBound(tc, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tc, new TypeVariableReference(ty));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(ta));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable($a, new TypeVariableReference(ta));
+        bindingCollection.addVariable($b, new TypeVariableReference(tb));
+        bindingCollection.addVariable($c, new TypeVariableReference(tc));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(ta, new TypeVariableReference(tb));
+        bindingCollection.addLowerRefBound(ta, new TypeVariableReference(tc));
+        bindingCollection.addLowerRefBound(tb, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tb, new TypeVariableReference(ty));
+        bindingCollection.addLowerRefBound(tc, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tc, new TypeVariableReference(ty));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(ta));
 
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("@" + ta, "@" + tb, "@" + tc, "@" + tReturn), false),
                 varBinding($y, ty, null, asList("@" + ta, "@" + tb, "@" + tc, "@" + tReturn), false),
                 varBinding($a, ta, asList("@" + tx, "@" + ty), null, false),
@@ -1771,7 +1771,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         // with + overload {as T} x {as T} -> T
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -1782,25 +1782,25 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String tPlus = "Tplus";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable(plus, new TypeVariableReference(tPlus));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable(plus, new TypeVariableReference(tPlus));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
         IConvertibleTypeSymbol asTPlus = createConvertibleType();
-        overloadBindings.bind(asTPlus, asList(tPlus));
-        overloadBindings.addUpperTypeBound(tx, asTPlus);
-        overloadBindings.addUpperTypeBound(ty, asTPlus);
-        overloadBindings.addUpperTypeBound(tPlus, numType);
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tPlus));
+        bindingCollection.bind(asTPlus, asList(tPlus));
+        bindingCollection.addUpperTypeBound(tx, asTPlus);
+        bindingCollection.addUpperTypeBound(ty, asTPlus);
+        bindingCollection.addUpperTypeBound(tPlus, numType);
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tPlus));
 
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("{as " + tPlus + "}"), true),
                 varBinding($y, ty, null, asList("{as " + tPlus + "}"), true),
                 varBinding(plus, tPlus, null, asList("num"), false),
@@ -1816,7 +1816,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         // with + overload {as T} x {as T} -> T
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -1829,27 +1829,27 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String ta = "Ta";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable(plus, new TypeVariableReference(tPlus));
-        overloadBindings.addVariable($a, new TypeVariableReference(ta));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable(plus, new TypeVariableReference(tPlus));
+        bindingCollection.addVariable($a, new TypeVariableReference(ta));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
         IConvertibleTypeSymbol asTPlus = createConvertibleType();
-        overloadBindings.bind(asTPlus, asList(tPlus));
-        overloadBindings.addUpperTypeBound(tx, asTPlus);
-        overloadBindings.addUpperTypeBound(ty, asTPlus);
-        overloadBindings.addUpperTypeBound(tPlus, numType);
-        overloadBindings.addLowerRefBound(ta, new TypeVariableReference(tPlus));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(ta));
+        bindingCollection.bind(asTPlus, asList(tPlus));
+        bindingCollection.addUpperTypeBound(tx, asTPlus);
+        bindingCollection.addUpperTypeBound(ty, asTPlus);
+        bindingCollection.addUpperTypeBound(tPlus, numType);
+        bindingCollection.addLowerRefBound(ta, new TypeVariableReference(tPlus));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(ta));
 
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("{as " + tPlus + "}"), true),
                 varBinding($y, ty, null, asList("{as " + tPlus + "}"), true),
                 varBinding(plus, tPlus, null, asList("num"), false),
@@ -1866,7 +1866,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         // with + overload {as T} x {as T} -> T
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -1879,19 +1879,19 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String tPlus = "Tplus";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable($z, new TypeVariableReference(tz));
-        overloadBindings.addVariable(plus, new TypeVariableReference(tPlus));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable($z, new TypeVariableReference(tz));
+        bindingCollection.addVariable(plus, new TypeVariableReference(tPlus));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
         IConvertibleTypeSymbol asTPlus = createConvertibleType();
-        overloadBindings.bind(asTPlus, asList(tPlus));
-        overloadBindings.addUpperTypeBound(tz, boolType);
-        overloadBindings.addUpperTypeBound(tx, asTPlus);
-        overloadBindings.addUpperTypeBound(ty, asTPlus);
-        overloadBindings.addUpperTypeBound(tPlus, numType);
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tPlus));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.bind(asTPlus, asList(tPlus));
+        bindingCollection.addUpperTypeBound(tz, boolType);
+        bindingCollection.addUpperTypeBound(tx, asTPlus);
+        bindingCollection.addUpperTypeBound(ty, asTPlus);
+        bindingCollection.addUpperTypeBound(tPlus, numType);
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tPlus));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
 
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
@@ -1899,9 +1899,9 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         parameterTypeVariables.add(tz);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("{as " + tPlus + "}", "@" + tReturn), false),
                 varBinding($y, ty, null, asList("{as " + tPlus + "}"), true),
                 varBinding($z, tz, null, asList("bool"), true),
@@ -1919,7 +1919,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         // with + overload {as T} x {as T} -> T
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -1932,29 +1932,29 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String tPlus = "Tplus";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable($a, new TypeVariableReference(ta));
-        overloadBindings.addVariable(plus, new TypeVariableReference(tPlus));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable($a, new TypeVariableReference(ta));
+        bindingCollection.addVariable(plus, new TypeVariableReference(tPlus));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
         IConvertibleTypeSymbol asTPlus = createConvertibleType();
-        overloadBindings.bind(asTPlus, asList(tPlus));
-        overloadBindings.addUpperTypeBound(ta, mixedType);
-        overloadBindings.addUpperTypeBound(tx, asTPlus);
-        overloadBindings.addUpperTypeBound(ty, asTPlus);
-        overloadBindings.addUpperTypeBound(tPlus, numType);
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tPlus));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(ty));
+        bindingCollection.bind(asTPlus, asList(tPlus));
+        bindingCollection.addUpperTypeBound(ta, mixedType);
+        bindingCollection.addUpperTypeBound(tx, asTPlus);
+        bindingCollection.addUpperTypeBound(ty, asTPlus);
+        bindingCollection.addUpperTypeBound(tPlus, numType);
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tPlus));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(ty));
 
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("{as " + tPlus + "}", "@" + tReturn), false),
                 varBinding($y, ty, null, asList("{as " + tPlus + "}", "@" + tReturn), false),
                 varBinding($a, ta, asList("mixed"), null, true),
@@ -1972,7 +1972,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         // with overload {as T} x {as T} -> T
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -1985,27 +1985,27 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String ta = "Ta";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable(plus, new TypeVariableReference(tPlus));
-        overloadBindings.addVariable($a, new TypeVariableReference(ta));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable(plus, new TypeVariableReference(tPlus));
+        bindingCollection.addVariable($a, new TypeVariableReference(ta));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
         IConvertibleTypeSymbol asTPlus = createConvertibleType();
-        overloadBindings.bind(asTPlus, asList(tPlus));
-        overloadBindings.addUpperTypeBound(tx, asTPlus);
-        overloadBindings.addUpperTypeBound(ty, asTPlus);
-        overloadBindings.addUpperTypeBound(tPlus, numType);
-        overloadBindings.addLowerRefBound(ta, new TypeVariableReference(tPlus));
-        overloadBindings.addLowerTypeBound(tReturn, boolType);
+        bindingCollection.bind(asTPlus, asList(tPlus));
+        bindingCollection.addUpperTypeBound(tx, asTPlus);
+        bindingCollection.addUpperTypeBound(ty, asTPlus);
+        bindingCollection.addUpperTypeBound(tPlus, numType);
+        bindingCollection.addLowerRefBound(ta, new TypeVariableReference(tPlus));
+        bindingCollection.addLowerTypeBound(tReturn, boolType);
 
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("{as num}"), true),
                 varBinding($y, ty, null, asList("{as num}"), true),
                 varBinding(plus, tPlus, null, asList("num"), true),
@@ -2025,7 +2025,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
 
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -2034,22 +2034,22 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String te1 = "Te1";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable(e1, new TypeVariableReference(te1));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable(e1, new TypeVariableReference(te1));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
         IConvertibleTypeSymbol asTe1 = createConvertibleType();
-        overloadBindings.bind(asTe1, asList(te1));
-        overloadBindings.addUpperTypeBound(tx, asTe1);
-        overloadBindings.addUpperTypeBound(te1, numType);
-        overloadBindings.addLowerTypeBound(tReturn, intType);
+        bindingCollection.bind(asTe1, asList(te1));
+        bindingCollection.addUpperTypeBound(tx, asTe1);
+        bindingCollection.addUpperTypeBound(te1, numType);
+        bindingCollection.addLowerTypeBound(tReturn, intType);
 
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("{as num}"), true),
                 varBinding(e1, te1, null, asList("num"), true),
                 varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
@@ -2067,7 +2067,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
 
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -2080,29 +2080,29 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String te2 = "Te2";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable(e1, new TypeVariableReference(te1));
-        overloadBindings.addVariable(e2, new TypeVariableReference(te2));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable(e1, new TypeVariableReference(te1));
+        bindingCollection.addVariable(e2, new TypeVariableReference(te2));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
         IConvertibleTypeSymbol asTe1 = createConvertibleType();
-        overloadBindings.bind(asTe1, asList(te1));
-        overloadBindings.addUpperTypeBound(tx, asTe1);
+        bindingCollection.bind(asTe1, asList(te1));
+        bindingCollection.addUpperTypeBound(tx, asTe1);
         IConvertibleTypeSymbol asTe2 = createConvertibleType();
-        overloadBindings.bind(asTe2, asList(te2));
-        overloadBindings.addUpperTypeBound(ty, asTe2);
-        overloadBindings.addUpperTypeBound(te1, numType);
-        overloadBindings.addUpperTypeBound(te2, numType);
-        overloadBindings.addLowerTypeBound(tReturn, intType);
+        bindingCollection.bind(asTe2, asList(te2));
+        bindingCollection.addUpperTypeBound(ty, asTe2);
+        bindingCollection.addUpperTypeBound(te1, numType);
+        bindingCollection.addUpperTypeBound(te2, numType);
+        bindingCollection.addLowerTypeBound(tReturn, intType);
 
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("{as num}"), true),
                 varBinding($y, ty, null, asList("{as num}"), true),
                 varBinding(e1, te1, null, asList("num"), true),
@@ -2126,7 +2126,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
 
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -2137,24 +2137,24 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String tLocalReturn = "T2";
         String tReturn = "T3";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable(e1, new TypeVariableReference(te1));
-        overloadBindings.addVariable(localReturn, new TypeVariableReference(tLocalReturn));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addUpperTypeBound(tx, intType);
-        overloadBindings.addLowerTypeBound(te1, intType);
-        overloadBindings.addLowerTypeBound(tReturn, boolType);
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(te1));
-        overloadBindings.addLowerRefBound(tLocalReturn, new TypeVariableReference(te1));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable(e1, new TypeVariableReference(te1));
+        bindingCollection.addVariable(localReturn, new TypeVariableReference(tLocalReturn));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addUpperTypeBound(tx, intType);
+        bindingCollection.addLowerTypeBound(te1, intType);
+        bindingCollection.addLowerTypeBound(tReturn, boolType);
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(te1));
+        bindingCollection.addLowerRefBound(tLocalReturn, new TypeVariableReference(te1));
 
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("int"), true),
                 varBinding(e1, te1, asList("int"), null, true),
                 varBinding(localReturn, tLocalReturn, asList("int"), null, true),
@@ -2177,7 +2177,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         // inspected first for renaming)
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -2188,24 +2188,24 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String tLocalReturn = "T2";
         String tReturn = "T1";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable(e1, new TypeVariableReference(te1));
-        overloadBindings.addVariable(localReturn, new TypeVariableReference(tLocalReturn));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addUpperTypeBound(tx, intType);
-        overloadBindings.addLowerTypeBound(te1, intType);
-        overloadBindings.addLowerTypeBound(tReturn, boolType);
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(te1));
-        overloadBindings.addLowerRefBound(tLocalReturn, new TypeVariableReference(te1));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable(e1, new TypeVariableReference(te1));
+        bindingCollection.addVariable(localReturn, new TypeVariableReference(tLocalReturn));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addUpperTypeBound(tx, intType);
+        bindingCollection.addLowerTypeBound(te1, intType);
+        bindingCollection.addLowerTypeBound(tReturn, boolType);
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(te1));
+        bindingCollection.addLowerRefBound(tLocalReturn, new TypeVariableReference(te1));
 
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("int"), true),
                 varBinding(e1, te1, asList("int"), null, true),
                 varBinding(localReturn, tLocalReturn, asList("int"), null, true),
@@ -2220,27 +2220,27 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         // where int x int -> int was taken for $n - 1
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
         String tx = "Tx";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addUpperTypeBound(tx, intType);
-        overloadBindings.addLowerTypeBound(tReturn, intType);
-        overloadBindings.addUpperTypeBound(tReturn, intType);
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addUpperTypeBound(tx, intType);
+        bindingCollection.addLowerTypeBound(tReturn, intType);
+        bindingCollection.addUpperTypeBound(tReturn, intType);
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
 
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("int"), true),
                 varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
         ));
@@ -2253,26 +2253,26 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         //corresponds: function foo($x){ if($x-1 > 0){return 1;} return $x;}
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
         String tx = "Tx";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addUpperTypeBound(tx, intType);
-        overloadBindings.addLowerTypeBound(tReturn, intType);
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addUpperTypeBound(tx, intType);
+        bindingCollection.addLowerTypeBound(tReturn, intType);
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
 
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("int"), true),
                 varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
         ));
@@ -2284,7 +2284,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         //corresponds: function fac($x, $y){ if($x - 1 > 0){return 1;} else if($y - 1.5 > 0){return $y;} return $x;}
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -2293,23 +2293,23 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String ty = "Ty";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addUpperTypeBound(tx, intType);
-        overloadBindings.addUpperTypeBound(ty, floatType);
-        overloadBindings.addLowerTypeBound(tReturn, intType);
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(ty));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addUpperTypeBound(tx, intType);
+        bindingCollection.addUpperTypeBound(ty, floatType);
+        bindingCollection.addLowerTypeBound(tReturn, intType);
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(ty));
 
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("int"), true),
                 varBinding($y, ty, null, asList("float", "@" + tReturn), false),
                 varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int", "@" + ty), null, false)
@@ -2323,7 +2323,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         // function fac($x){ $a = 1.5; if($x - 1 > 0){return 1;} else if($a - 1.5 > 0){return $a;} return $x;}
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -2332,23 +2332,23 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String ta = "Ta";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($a, new TypeVariableReference(ta));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addUpperTypeBound(tx, intType);
-        overloadBindings.addLowerTypeBound(ta, floatType);
-        overloadBindings.addUpperTypeBound(ta, floatType);
-        overloadBindings.addLowerTypeBound(tReturn, intType);
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(ta));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($a, new TypeVariableReference(ta));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addUpperTypeBound(tx, intType);
+        bindingCollection.addLowerTypeBound(ta, floatType);
+        bindingCollection.addUpperTypeBound(ta, floatType);
+        bindingCollection.addLowerTypeBound(tReturn, intType);
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(ta));
 
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("int"), true),
                 varBinding($a, ta, asList("float"), null, true),
                 varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int", "float"), null, true)
@@ -2362,7 +2362,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         // function foo($x, $y){ $x = $y; $x = 1; $y + 1; return $x; return $y; }
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -2371,23 +2371,23 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String ty = "Ty";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ty));
-        overloadBindings.addLowerTypeBound(tx, intType);
-        overloadBindings.addUpperTypeBound(ty, intType);
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(ty));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(tx, new TypeVariableReference(ty));
+        bindingCollection.addLowerTypeBound(tx, intType);
+        bindingCollection.addUpperTypeBound(ty, intType);
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(ty));
 
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, asList("int"), null, false),
                 varBinding($y, ty, null, asList("int"), true),
                 varBinding(RETURN_VARIABLE_NAME, tx, asList("int"), null, false)
@@ -2401,7 +2401,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         // function foo($x, $y){ $x = $y; $y + 1; return $x; return $y; }
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -2410,23 +2410,23 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String ty = "Ty";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ty));
-        overloadBindings.addLowerTypeBound(tx, intType);
-        overloadBindings.addUpperTypeBound(ty, intType);
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(ty));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerRefBound(tx, new TypeVariableReference(ty));
+        bindingCollection.addLowerTypeBound(tx, intType);
+        bindingCollection.addUpperTypeBound(ty, intType);
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(ty));
 
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, asList("int"), null, false),
                 varBinding($y, ty, null, asList("int"), true),
                 varBinding(RETURN_VARIABLE_NAME, tx, asList("int"), null, false)
@@ -2445,7 +2445,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         //   {as T} x {as T} -> T \ T <: num
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -2459,22 +2459,22 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String te2 = "Te2";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable($z, new TypeVariableReference(tz));
-        overloadBindings.addVariable(e1, new TypeVariableReference(tx));
-        overloadBindings.addVariable(e2, new TypeVariableReference(te2));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable($z, new TypeVariableReference(tz));
+        bindingCollection.addVariable(e1, new TypeVariableReference(tx));
+        bindingCollection.addVariable(e2, new TypeVariableReference(te2));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
         IConvertibleTypeSymbol asTx = symbolFactory.createConvertibleTypeSymbol();
-        overloadBindings.bind(asTx, asList(tx));
+        bindingCollection.bind(asTx, asList(tx));
         IConvertibleTypeSymbol asTe2 = symbolFactory.createConvertibleTypeSymbol();
-        overloadBindings.bind(asTe2, asList(te2));
-        overloadBindings.addUpperTypeBound(tx, numType);
-        overloadBindings.addUpperTypeBound(te2, numType);
-        overloadBindings.addUpperTypeBound(ty, asTx);
-        overloadBindings.addUpperTypeBound(tx, asTe2);
-        overloadBindings.addUpperTypeBound(tz, asTe2);
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(te2));
+        bindingCollection.bind(asTe2, asList(te2));
+        bindingCollection.addUpperTypeBound(tx, numType);
+        bindingCollection.addUpperTypeBound(te2, numType);
+        bindingCollection.addUpperTypeBound(ty, asTx);
+        bindingCollection.addUpperTypeBound(tx, asTe2);
+        bindingCollection.addUpperTypeBound(tz, asTe2);
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(te2));
 
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
@@ -2482,9 +2482,9 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         parameterTypeVariables.add(tz);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, null, asList("num", "@" + te2), false),
                 varBinding($y, ty, null, asList("{as " + tx + "}"), true),
                 varBinding($z, tz, null, asList("{as " + te2 + "}"), true),
@@ -2501,7 +2501,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         // function foo($x, $y){ $x = $y; $y + 1; return $x; return 1; return 1.5; }
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -2510,22 +2510,22 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String ty = "Ty";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addUpperTypeBound(ty, intType);
-        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ty));
-        overloadBindings.addLowerTypeBound(tReturn, numType);
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addUpperTypeBound(ty, intType);
+        bindingCollection.addLowerRefBound(tx, new TypeVariableReference(ty));
+        bindingCollection.addLowerTypeBound(tReturn, numType);
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
 
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, asList("int"), asList("@" + tReturn), false),
                 varBinding($y, ty, null, asList("int"), true),
                 varBinding(RETURN_VARIABLE_NAME, tReturn, asList("num", "@" + tx), null, false)
@@ -2539,7 +2539,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         // function foo($x, $y){ $x = $y; $y + 1; return $x; return 1; }
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -2548,22 +2548,22 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String ty = "Ty";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addUpperTypeBound(ty, intType);
-        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ty));
-        overloadBindings.addLowerTypeBound(tReturn, intType);
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addUpperTypeBound(ty, intType);
+        bindingCollection.addLowerRefBound(tx, new TypeVariableReference(ty));
+        bindingCollection.addLowerTypeBound(tReturn, intType);
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
 
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, asList("int"), null, false),
                 varBinding($y, ty, null, asList("int"), true),
                 varBinding(RETURN_VARIABLE_NAME, tx, asList("int"), null, false)
@@ -2577,7 +2577,7 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         // function foo($x, $y){ $x = $y; $y + 1; $y = 1; return $x; }
 
         //pre-act necessary for arrange
-        IOverloadBindings overloadBindings = createOverloadBindings();
+        IBindingCollection bindingCollection = createBindingCollection();
 
         //arrange
         String $x = "$x";
@@ -2586,35 +2586,94 @@ public class OverloadBindingsTryToFixTest extends ATypeHelperTest
         String ty = "Ty";
         String tReturn = "Treturn";
 
-        overloadBindings.addVariable($x, new TypeVariableReference(tx));
-        overloadBindings.addVariable($y, new TypeVariableReference(ty));
-        overloadBindings.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        overloadBindings.addLowerTypeBound(ty, intType);
-        overloadBindings.addUpperTypeBound(ty, intType);
-        overloadBindings.addLowerRefBound(tx, new TypeVariableReference(ty));
-        overloadBindings.addLowerRefBound(tReturn, new TypeVariableReference(tx));
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerTypeBound(ty, intType);
+        bindingCollection.addUpperTypeBound(ty, intType);
+        bindingCollection.addLowerRefBound(tx, new TypeVariableReference(ty));
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tx));
 
         Set<String> parameterTypeVariables = new HashSet<>();
         parameterTypeVariables.add(tx);
         parameterTypeVariables.add(ty);
 
         //act
-        overloadBindings.tryToFix(parameterTypeVariables);
+        bindingCollection.tryToFix(parameterTypeVariables);
 
-        assertThat(overloadBindings, withVariableBindings(
+        assertThat(bindingCollection, withVariableBindings(
                 varBinding($x, tx, asList("int"), null, false),
                 varBinding($y, ty, null, asList("int"), true),
                 varBinding(RETURN_VARIABLE_NAME, tx, asList("int"), null, false)
         ));
     }
 
-    private IOverloadBindings createOverloadBindings() {
-        return createOverloadBindings(symbolFactory, typeHelper);
+    //see TINS-520 merge type parameters
+//    @Test
+//    public void tryToFix_TxLowerTyAndSameLowerTypeBounds_MergesTypeVariables() {
+//        //corresponds:
+//        // function foo($x, $y){ return $x + $y + $z; }
+//        // where {as T} x {as T} -> T \ T <: num was applied
+//
+//        //pre-act necessary for arrange
+//        IBindingCollection bindingCollection = createBindingCollection();
+//
+//        //arrange
+//        String $x = "$x";
+//        String tx = "Tx";
+//        String $y = "$y";
+//        String ty = "Ty";
+//        String $z = "$z";
+//        String tz = "Tz";
+//        String e1 = "+@1|2";
+//        String te1 = "Te1";
+//        String e2 = "+@1|4";
+//        String te2 = "Te2";
+//        String tReturn = "Treturn";
+//
+//        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+//        bindingCollection.addVariable($y, new TypeVariableReference(ty));
+//        bindingCollection.addVariable($z, new TypeVariableReference(tz));
+//        bindingCollection.addVariable(e1, new TypeVariableReference(te1));
+//        bindingCollection.addVariable(e2, new TypeVariableReference(te2));
+//        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+//        IConvertibleTypeSymbol asTe1 = createConvertibleType();
+//        bindingCollection.bind(asTe1, asList(te1));
+//        bindingCollection.addUpperTypeBound(te1, numType);
+//        bindingCollection.addUpperTypeBound(tx, asTe1);
+//        bindingCollection.addUpperTypeBound(ty, asTe1);
+//        IConvertibleTypeSymbol asTe2 = createConvertibleType();
+//        bindingCollection.bind(asTe2, asList(te2));
+//        bindingCollection.addUpperTypeBound(te2, numType);
+//        bindingCollection.addUpperTypeBound(te1, asTe2);
+//        bindingCollection.addUpperTypeBound(tz, asTe2);
+//        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(te2));
+//
+//        Set<String> parameterTypeVariables = new HashSet<>();
+//        parameterTypeVariables.add(tx);
+//        parameterTypeVariables.add(ty);
+//        parameterTypeVariables.add(tz);
+//
+//        //act
+//        bindingCollection.tryToFix(parameterTypeVariables);
+//
+//        assertThat(bindingCollection, withVariableBindings(
+//                varBinding($x, tx, null, asList("{as " + te2 + "}"), false),
+//                varBinding($y, ty, null, asList("{as " + te2 + "}"), false),
+//                varBinding($z, tz, null, asList("{as " + te2 + "}"), false),
+//                varBinding(e1, te1, null, asList("{as " + te2 + "}"), false),
+//                varBinding(e2, te2, null, asList("num"), false),
+//                varBinding(RETURN_VARIABLE_NAME, te2, null, asList("num"), false)
+//        ));
+//    }
+
+    private IBindingCollection createBindingCollection() {
+        return createBindingCollection(symbolFactory, typeHelper);
     }
 
-    protected IOverloadBindings createOverloadBindings(
+    protected IBindingCollection createBindingCollection(
             ISymbolFactory symbolFactory, ITypeHelper typeHelper) {
-        return new OverloadBindings(symbolFactory, typeHelper);
+        return new BindingCollection(symbolFactory, typeHelper);
     }
 
 }

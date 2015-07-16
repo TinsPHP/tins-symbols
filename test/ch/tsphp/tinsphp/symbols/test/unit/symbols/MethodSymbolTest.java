@@ -10,9 +10,9 @@ import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ISymbol;
 import ch.tsphp.common.symbols.modifiers.IModifierSet;
+import ch.tsphp.tinsphp.common.inference.constraints.IBindingCollection;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
 import ch.tsphp.tinsphp.common.inference.constraints.IFunctionType;
-import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.symbols.IMethodSymbol;
 import ch.tsphp.tinsphp.common.symbols.IMinimalVariableSymbol;
@@ -166,18 +166,18 @@ public class MethodSymbolTest
         //nothing to arrange
 
         IMethodSymbol methodSymbol = createMethodSymbol();
-        List<IOverloadBindings> result = methodSymbol.getBindings();
+        List<IBindingCollection> result = methodSymbol.getBindings();
 
         Assert.assertThat(result, is(nullValue()));
     }
 
     @Test
     public void setAndGetBindings_Standard_ReturnsTheOneSet() {
-        List<IOverloadBindings> bindings = new ArrayList<>();
+        List<IBindingCollection> bindings = new ArrayList<>();
 
         IMethodSymbol methodSymbol = createMethodSymbol();
         methodSymbol.setBindings(bindings);
-        List<IOverloadBindings> result = methodSymbol.getBindings();
+        List<IBindingCollection> result = methodSymbol.getBindings();
 
         Assert.assertThat(result, is(bindings));
     }

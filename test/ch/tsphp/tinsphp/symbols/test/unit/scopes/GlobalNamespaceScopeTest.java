@@ -15,8 +15,8 @@ package ch.tsphp.tinsphp.symbols.test.unit.scopes;
 import ch.tsphp.common.IScope;
 import ch.tsphp.common.ITSPHPAst;
 import ch.tsphp.common.symbols.ISymbol;
+import ch.tsphp.tinsphp.common.inference.constraints.IBindingCollection;
 import ch.tsphp.tinsphp.common.inference.constraints.IConstraint;
-import ch.tsphp.tinsphp.common.inference.constraints.IOverloadBindings;
 import ch.tsphp.tinsphp.common.scopes.IGlobalNamespaceScope;
 import ch.tsphp.tinsphp.common.scopes.IScopeHelper;
 import ch.tsphp.tinsphp.common.utils.MapHelper;
@@ -275,18 +275,18 @@ public class GlobalNamespaceScopeTest
         //nothing to arrange
 
         IGlobalNamespaceScope globalNamespaceScope = createGlobalNamespaceScope();
-        List<IOverloadBindings> result = globalNamespaceScope.getBindings();
+        List<IBindingCollection> result = globalNamespaceScope.getBindings();
 
         assertThat(result, is(nullValue()));
     }
 
     @Test
     public void setAndGetBindings_Standard_ReturnsTheOneSet() {
-        List<IOverloadBindings> bindings = new ArrayList<>();
+        List<IBindingCollection> bindings = new ArrayList<>();
 
         IGlobalNamespaceScope globalNamespaceScope = createGlobalNamespaceScope();
         globalNamespaceScope.setBindings(bindings);
-        List<IOverloadBindings> result = globalNamespaceScope.getBindings();
+        List<IBindingCollection> result = globalNamespaceScope.getBindings();
 
         assertThat(result, is(bindings));
     }
