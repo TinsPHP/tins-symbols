@@ -1331,6 +1331,33 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
+    //See TINS-586 coercive subtyping and upper bound constraints
+    @Test
+    public void addUpperTypeBound_ContainsFloatAndIntAdded_UpperIsIntAndHasChanged() {
+        //pre-arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(intType, asList(floatType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
+
+        //arrange
+        String tLhs = "Tlhs";
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
+        bindingCollection.addUpperTypeBound(tLhs, floatType);
+
+        //act
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tLhs, intType);
+
+        assertThat(bindingCollection, withVariableBindings(
+                varBinding("$lhs", tLhs, null, asList("int"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(true));
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void addLowerRefBound_ForNonExistingBinding_ThrowsIllegalArgumentException() {
         //no arrange necessary
