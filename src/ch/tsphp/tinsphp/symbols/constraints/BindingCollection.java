@@ -530,7 +530,7 @@ public class BindingCollection implements IBindingCollection
         if (newTypeSymbol != null) {
 
             if (hasUpperTypeBounds(typeVariable)) {
-                hasChanged = checkInheritanceAndAddToUpperTypeBounds(typeVariable, newTypeSymbol);
+                hasChanged = checkInheritanceAndAddToUpperTypeBounds(typeVariable, newTypeSymbol, dto);
             } else {
                 hasChanged = addToUpperIntersectionTypeSymbol(typeVariable, newTypeSymbol);
             }
@@ -554,7 +554,7 @@ public class BindingCollection implements IBindingCollection
     }
 
     private boolean checkInheritanceAndAddToUpperTypeBounds(
-            String typeVariable, ITypeSymbol typeSymbol) {
+            String typeVariable, ITypeSymbol typeSymbol, BoundResultDto dto) {
 
         boolean hasChanged = false;
 
@@ -573,6 +573,23 @@ public class BindingCollection implements IBindingCollection
                 case HAS_RELATION:
                     //that's fine, a subtype just replaces the current upper type bound
                     hasChanged = addToUpperIntersectionTypeSymbol(typeVariable, typeSymbol);
+                    break;
+                case HAS_COERCIVE_RELATION:
+                    //fine as well, since the typeSymbol is a parent type of the current lower type (was
+                    // verified before) -- we just need to narrow the current upper type bound accordingly.
+                    Set<ITypeSymbol> remove = result.upperConstraints.remove(typeVariable);
+                    if (remove.size() == 1) {
+                        // can only be used in intersection since it is a coercive subtype,
+                        // hence we need to narrow the upper type bound instead of adding the type (might
+                        // replace the current upper type bound, and hence narrows as well)
+                        dto.usedImplicitConversion = true;
+                        dto.implicitConversionProvider = remove.iterator().next();
+                        transferBoundConstraints(dto, result.lowerConstraints, result.upperConstraints);
+                        narrowUpperTypeBound(typeVariable, dto.implicitConversionProvider);
+                        hasChanged = true;
+                    } else {
+                        throw new UnsupportedOperationException("more than one conversion provider");
+                    }
                     break;
                 case HAS_NO_RELATION:
                 default:
