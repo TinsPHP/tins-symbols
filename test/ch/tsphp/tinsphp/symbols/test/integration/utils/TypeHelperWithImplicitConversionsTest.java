@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static ch.tsphp.tinsphp.common.utils.Pair.pair;
+import static ch.tsphp.tinsphp.symbols.test.integration.testutils.TypeParameterConstraintsMatcher.isConstraints;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -132,26 +133,88 @@ public class TypeHelperWithImplicitConversionsTest extends ATypeHelperTest
         assertThat(result.relation, is(ERelation.HAS_COERCIVE_RELATION));
     }
 
-    //see TINS-513 implicit conversions and num addition 0.4.0
     @Test
     public void
-    isFirstSameOrSubTypeOfSecond_IntOrStringToFloatAndIntToFloatAsWellAsStringToFloatImpl_HasCoerciveRelation() {
-        //pre-act arrange
+    isFirstSameOrSubTypeOfSecond_IntInIntersectionToFloatInIntersectionAndTypeVariableGiven_HasUpperBoundConstraint() {
+        //pre-act necessary for arrange
         Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
                 = createConversions(pair(intType, asList(floatType)), pair(stringType, asList(floatType)));
         Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
-
-        //pre-act necessary for arrange
         ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
 
         //arrange
-        ITypeSymbol actual = createUnionTypeSymbol(typeHelper, intType, stringType);
-        ITypeSymbol formal = floatType;
+        ITypeSymbol actual = createIntersectionTypeSymbol(typeHelper, intType);
+        ITypeSymbol formal = createIntersectionTypeSymbol(typeHelper, floatType);
 
         //act
-        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal, "Ta");
 
         assertThat(result.relation, is(ERelation.HAS_COERCIVE_RELATION));
+        assertThat(result.lowerConstraints.size(), is(0));
+        assertThat(result.upperConstraints, isConstraints(pair("Ta", set("int"))));
+    }
+
+    @Test
+    public void
+    isFirstSameOrSubTypeOfSecond_IntInUnionToFloatInIntersectionAndTypeVariableGiven_HasUpperBoundConstraint() {
+        //pre-act necessary for arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(intType, asList(floatType)), pair(stringType, asList(floatType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //arrange
+        ITypeSymbol actual = createUnionTypeSymbol(typeHelper, intType);
+        ITypeSymbol formal = createIntersectionTypeSymbol(typeHelper, floatType);
+
+        //act
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal, "Ta");
+
+        assertThat(result.relation, is(ERelation.HAS_COERCIVE_RELATION));
+        assertThat(result.lowerConstraints.size(), is(0));
+        assertThat(result.upperConstraints, isConstraints(pair("Ta", set("int"))));
+    }
+
+    @Test
+    public void
+    isFirstSameOrSubTypeOfSecond_IntInIntersectionToFloatInUnionAndTypeVariableGiven_HasUpperBoundConstraint() {
+        //pre-act necessary for arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(intType, asList(floatType)), pair(stringType, asList(floatType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //arrange
+        ITypeSymbol actual = createIntersectionTypeSymbol(typeHelper, intType);
+        ITypeSymbol formal = createUnionTypeSymbol(typeHelper, floatType);
+
+        //act
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal, "Ta");
+
+        assertThat(result.relation, is(ERelation.HAS_COERCIVE_RELATION));
+        assertThat(result.lowerConstraints.size(), is(0));
+        assertThat(result.upperConstraints, isConstraints(pair("Ta", set("int"))));
+    }
+
+    @Test
+    public void
+    isFirstSameOrSubTypeOfSecond_IntInUnionToFloatInUnionAndTypeVariableGiven_HasUpperBoundConstraint() {
+        //pre-act necessary for arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(intType, asList(floatType)), pair(stringType, asList(floatType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //arrange
+        ITypeSymbol actual = createUnionTypeSymbol(typeHelper, intType);
+        ITypeSymbol formal = createUnionTypeSymbol(typeHelper, floatType);
+
+        //act
+        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal, "Ta");
+
+        assertThat(result.relation, is(ERelation.HAS_COERCIVE_RELATION));
+        assertThat(result.lowerConstraints.size(), is(0));
+        assertThat(result.upperConstraints, isConstraints(pair("Ta", set("int"))));
     }
 
     private ISymbolFactory createSymbolFactory(ITypeHelper typeHelper) {
