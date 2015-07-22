@@ -1304,6 +1304,33 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
+    //See TINS-561 filter overloads with implicit only if others exist
+    @Test
+    public void addUpperTypeBound_ContainsIntAndFloatAdded_UpperRemainsInt() {
+        //pre-arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(intType, asList(floatType)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
+
+        //arrange
+        String tLhs = "Tlhs";
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
+        bindingCollection.addUpperTypeBound(tLhs, intType);
+
+        //act
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tLhs, floatType);
+
+        assertThat(bindingCollection, withVariableBindings(
+                varBinding("$lhs", tLhs, null, asList("int"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(false));
+        assertThat(resultDto.usedImplicitConversion, is(false));
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void addLowerRefBound_ForNonExistingBinding_ThrowsIllegalArgumentException() {
         //no arrange necessary
