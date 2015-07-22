@@ -271,7 +271,7 @@ public class BindingCollection implements IBindingCollection
             // refTypeVariable or will lead to a BoundException. ...
             if (hasUpperTypeBounds(typeVariable)) {
                 result = addUpperTypeBoundAfterContainsCheck(refTypeVariable, upperTypeBounds.get(typeVariable));
-                transferBoundResults(result, dto);
+                transferBoundResultsFromTo(result, dto);
             }
 
             // ... Furthermore, typeVariable logically needs to be able to hold all types refTypeVariable can hold. Thus
@@ -284,25 +284,25 @@ public class BindingCollection implements IBindingCollection
             // if variables have the same lower bound as parameters and thus can be unified.
             if (hasLowerTypeBounds(refTypeVariable)) {
                 result = addLowerTypeBoundAfterContainsCheck(typeVariable, lowerTypeBounds.get(refTypeVariable));
-                transferBoundResults(result, dto);
+                transferBoundResultsFromTo(result, dto);
             }
         }
 
         return dto;
     }
 
-    private void transferBoundResults(BoundResultDto result, BoundResultDto dto) {
-        dto.hasChanged = dto.hasChanged || result.hasChanged;
-        dto.hasChangedOtherBounds = dto.hasChangedOtherBounds || result.hasChangedOtherBounds;
-        dto.usedImplicitConversion = dto.usedImplicitConversion || result.usedImplicitConversion;
+    private void transferBoundResultsFromTo(BoundResultDto from, BoundResultDto to) {
+        to.hasChanged = to.hasChanged || from.hasChanged;
+        to.hasChangedOtherBounds = to.hasChangedOtherBounds || from.hasChangedOtherBounds;
+        to.usedImplicitConversion = to.usedImplicitConversion || from.usedImplicitConversion;
 
-        if (dto.implicitConversionProvider == null) {
-            dto.implicitConversionProvider = result.implicitConversionProvider;
-        } else if (result.implicitConversionProvider != null) {
+        if (to.implicitConversionProvider == null) {
+            to.implicitConversionProvider = from.implicitConversionProvider;
+        } else if (from.implicitConversionProvider != null) {
             throw new UnsupportedOperationException("more than one conversion provider");
         }
 
-        transferBoundConstraints(dto, result.lowerConstraints, result.upperConstraints);
+        transferBoundConstraints(to, from.lowerConstraints, from.upperConstraints);
     }
 
     private void transferBoundConstraints(
@@ -351,7 +351,7 @@ public class BindingCollection implements IBindingCollection
             hasChanged = addToLowerUnionTypeSymbol(typeVariable, typeSymbol);
 
             if (dto.implicitConversionProvider != null) {
-                narrowUpperTypeBound(typeVariable, dto);
+                narrowUpperTypeBound(typeVariable, dto.implicitConversionProvider);
             }
 
             if (hasChanged && hasUpperRefBounds(typeVariable)) {
@@ -365,9 +365,9 @@ public class BindingCollection implements IBindingCollection
         return dto;
     }
 
-    private void narrowUpperTypeBound(String typeVariable, BoundResultDto checkUpperResult) {
+    private void narrowUpperTypeBound(String typeVariable, ITypeSymbol implicitConversionProvider) {
         IIntersectionTypeSymbol currentUpperTypeBounds = upperTypeBounds.remove(typeVariable);
-        addUpperTypeBoundAfterContainsCheck(typeVariable, checkUpperResult.implicitConversionProvider, false);
+        addUpperTypeBoundAfterContainsCheck(typeVariable, implicitConversionProvider, false);
         for (ITypeSymbol upperTypeBound : currentUpperTypeBounds.getTypeSymbols().values()) {
             try {
                 addUpperTypeBoundAfterContainsCheck(typeVariable, upperTypeBound, false);
@@ -379,11 +379,10 @@ public class BindingCollection implements IBindingCollection
 
         if (hasLowerRefBounds(typeVariable)) {
             for (String refTypeVariable : lowerRefBounds.get(typeVariable)) {
-                narrowUpperTypeBound(refTypeVariable, checkUpperResult);
+                narrowUpperTypeBound(refTypeVariable, implicitConversionProvider);
             }
         }
     }
-
 
     //Warning! start code duplication - very similar to checkLowerTypeBounds
     private BoundResultDto checkUpperTypeBounds(String typeVariable, ITypeSymbol newLowerType) {
@@ -529,9 +528,12 @@ public class BindingCollection implements IBindingCollection
         }
 
         if (newTypeSymbol != null) {
-            checkIfCanBeUsedInIntersectionWithOthers(typeVariable, newTypeSymbol);
 
-            hasChanged = addToUpperIntersectionTypeSymbol(typeVariable, newTypeSymbol);
+            if (hasUpperTypeBounds(typeVariable)) {
+                hasChanged = checkInheritanceAndAddToUpperTypeBounds(typeVariable, newTypeSymbol);
+            } else {
+                hasChanged = addToUpperIntersectionTypeSymbol(typeVariable, newTypeSymbol);
+            }
 
             if (!hasChanged && !hasLowerTypeBounds(typeVariable) && newTypeSymbol instanceof IConvertibleTypeSymbol) {
                 IConvertibleTypeSymbol convertibleTypeSymbol = (IConvertibleTypeSymbol) newTypeSymbol;
@@ -546,8 +548,73 @@ public class BindingCollection implements IBindingCollection
                 }
             }
         }
+
         dto.hasChanged = hasChanged;
         return dto;
+    }
+
+    private boolean checkInheritanceAndAddToUpperTypeBounds(
+            String typeVariable, ITypeSymbol typeSymbol) {
+
+        boolean hasChanged = false;
+
+        IIntersectionTypeSymbol upperBound = upperTypeBounds.get(typeVariable);
+        // if (a) the current upper type bound or/and the new typeSymbol are final or
+        // (b) the current or the new typeSymbol cannot be used in an intersection type with
+        // others which cannot be used in an intersection
+        // ==> then either the current upper type bound and the new typeSymbol are in the same type hierarchy or
+        // the new typeSymbol is a coercive subtype of the current upper type bound and hence can be narrowed.
+        // Otherwise we have a bound constraint.
+        if ((typeSymbol.isFinal() || upperBound.isFinal())
+                || (!typeSymbol.canBeUsedInIntersection() && !upperBound.canBeUsedInIntersection())) {
+
+            TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(typeSymbol, upperBound, typeVariable);
+            switch (result.relation) {
+                case HAS_RELATION:
+                    //that's fine, a subtype just replaces the current upper type bound
+                    hasChanged = addToUpperIntersectionTypeSymbol(typeVariable, typeSymbol);
+                    break;
+                case HAS_NO_RELATION:
+                default:
+                    //if it is a parent type (without coercive subtyping), then it is fine as well
+                    result = typeHelper.isFirstSameOrSubTypeOfSecond(upperBound, typeSymbol, true);
+                    switch (result.relation) {
+                        case HAS_RELATION:
+                            //that's fine, a parent type can be neglected
+                            break;
+                        case HAS_COERCIVE_RELATION:
+                            //fine as well, a coercive parent type can be neglected as well.
+                            break;
+                        case HAS_NO_RELATION:
+                        default:
+                            throwIntersectionBoundException(typeSymbol, upperBound);
+                            break;
+                    }
+            }
+        } else {
+            hasChanged = addToUpperIntersectionTypeSymbol(typeVariable, typeSymbol);
+        }
+
+        return hasChanged;
+    }
+
+    private void throwIntersectionBoundException(ITypeSymbol typeSymbol, IIntersectionTypeSymbol upperBound) {
+        if (typeSymbol.isFinal()) {
+            throw new IntersectionBoundException(
+                    "The new type " + typeSymbol.getAbsoluteName() + "is final and is not in the same " +
+                            "type hierarchy as the upper type bound " + upperBound.getAbsoluteName() + ".",
+                    upperBound, typeSymbol);
+        } else if (upperBound.isFinal()) {
+            throw new IntersectionBoundException(
+                    "The upper type bound " + upperBound.getAbsoluteName() + " is final and the new type "
+                            + typeSymbol.getAbsoluteName() + " is not in the same type hierarchy.",
+                    upperBound, typeSymbol);
+        } else {
+            throw new IntersectionBoundException(
+                    "The upper bound " + upperBound.getAbsoluteName() + " already contained a concrete type "
+                            + "and thus the new type " + typeSymbol.getAbsoluteName() + " cannot be added.",
+                    upperBound, typeSymbol);
+        }
     }
 
     //Warning! start code duplication - very similar to checkUpperTypeBounds
@@ -582,43 +649,6 @@ public class BindingCollection implements IBindingCollection
         return resultDto;
     }
     //Warning! end code duplication - very similar to checkUpperTypeBounds
-
-
-    private void checkIfCanBeUsedInIntersectionWithOthers(String typeVariable, ITypeSymbol typeSymbol) {
-        if (hasUpperTypeBounds(typeVariable)) {
-            IIntersectionTypeSymbol upperBound = upperTypeBounds.get(typeVariable);
-            //if the current upper type is final or the current and the new both cannot be used in an intersection with
-            // others which cannot be used in an intersection, then the current and the new need to be in the same
-            // type hierarchy
-            if ((typeSymbol.isFinal() || upperBound.isFinal()) && areNotInSameTypeHierarchy(typeSymbol, upperBound)) {
-                throw new IntersectionBoundException(
-                        "The upper bound " + upperBound.getAbsoluteName() + " is final and the new type "
-                                + typeSymbol.getAbsoluteName() + " is not in the same type hierarchy.",
-                        upperBound, typeSymbol);
-            } else if (!typeSymbol.canBeUsedInIntersection()
-                    && !upperBound.canBeUsedInIntersection()
-                    && areNotInSameTypeHierarchy(typeSymbol, upperBound)) {
-                throw new IntersectionBoundException(
-                        "The upper bound " + upperBound.getAbsoluteName() + " already contained a concrete type "
-                                + "and thus the new type " + typeSymbol.getAbsoluteName() + " cannot be added.",
-                        upperBound, typeSymbol);
-            }
-        }
-    }
-
-    private boolean areNotInSameTypeHierarchy(ITypeSymbol typeSymbol, IIntersectionTypeSymbol upperBound) {
-        boolean areNot = true;
-        TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(typeSymbol, upperBound, false);
-        if (result.relation != ERelation.HAS_NO_RELATION) {
-            areNot = false;
-        } else {
-            result = typeHelper.isFirstSameOrSubTypeOfSecond(upperBound, typeSymbol, false);
-            if (result.relation != ERelation.HAS_NO_RELATION) {
-                areNot = false;
-            }
-        }
-        return areNot;
-    }
 
     private boolean addToUpperIntersectionTypeSymbol(String typeVariable, ITypeSymbol typeSymbol) {
         boolean hasChanged;
