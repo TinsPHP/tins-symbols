@@ -618,8 +618,8 @@ public class BindingCollection implements IBindingCollection
     private void throwIntersectionBoundException(ITypeSymbol typeSymbol, IIntersectionTypeSymbol upperBound) {
         if (typeSymbol.isFinal()) {
             throw new IntersectionBoundException(
-                    "The new type " + typeSymbol.getAbsoluteName() + "is final and is not in the same " +
-                            "type hierarchy as the upper type bound " + upperBound.getAbsoluteName() + ".",
+                    "The new type " + typeSymbol.getAbsoluteName() + "is final and is not in the same "
+                            + "type hierarchy as the upper type bound " + upperBound.getAbsoluteName() + ".",
                     upperBound, typeSymbol);
         } else if (upperBound.isFinal()) {
             throw new IntersectionBoundException(
