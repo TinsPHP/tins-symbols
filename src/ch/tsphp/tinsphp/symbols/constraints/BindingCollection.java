@@ -601,6 +601,7 @@ public class BindingCollection implements IBindingCollection
                             break;
                         case HAS_COERCIVE_RELATION:
                             //fine as well, a coercive parent type can be neglected as well.
+                            dto.usedImplicitConversion = true;
                             break;
                         case HAS_NO_RELATION:
                         default:

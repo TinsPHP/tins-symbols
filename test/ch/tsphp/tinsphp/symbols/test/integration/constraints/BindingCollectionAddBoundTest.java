@@ -1328,7 +1328,7 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
                 varBinding("$lhs", tLhs, null, asList("int"), false)
         ));
         assertThat(resultDto.hasChanged, is(false));
-        assertThat(resultDto.usedImplicitConversion, is(false));
+        assertThat(resultDto.usedImplicitConversion, is(true));
     }
 
     //See TINS-586 coercive subtyping and upper bound constraints
