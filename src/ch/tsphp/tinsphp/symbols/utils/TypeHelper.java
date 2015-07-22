@@ -440,6 +440,8 @@ public class TypeHelper implements ITypeHelper
     private void isAtLeastOneSameOrSubtypeOfToType(Collection<ITypeSymbol> typeSymbols, TypeHelperDto dto) {
 
         TypeHelperDto newDto = new TypeHelperDto(null, dto.toType, dto.shallConsiderImplicitConversions);
+        newDto.typeVariable = dto.typeVariable;
+
         forLoop:
         for (ITypeSymbol typeSymbol : typeSymbols) {
             newDto.fromType = typeSymbol;
