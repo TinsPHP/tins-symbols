@@ -21,6 +21,7 @@ import ch.tsphp.tinsphp.common.utils.TypeHelperDto;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -281,9 +282,10 @@ public class TypeHelper implements ITypeHelper
 
         Map<String, Pair<ITypeSymbol, IConversionMethod>> conversions = conversionMap.get(fromAbsoluteName);
         if (conversions != null) {
-            if (conversions.containsKey(toTargetAbsoluteName)) {
+            Pair<ITypeSymbol, IConversionMethod> pair = conversions.get(toTargetAbsoluteName);
+            if (pair != null) {
                 if (typeParameter != null) {
-                    MapHelper.addToSetInMap(dto.lowerConstraints, typeParameter, dto.toType);
+                    MapHelper.addToSetInMap(dto.lowerConstraints, typeParameter, pair.first);
                 } else if (dto.typeVariable != null) {
                     MapHelper.addToSetInMap(dto.upperConstraints, dto.typeVariable, dto.fromType);
                 }
@@ -457,16 +459,40 @@ public class TypeHelper implements ITypeHelper
         }
 
         dto.relation = newDto.relation;
-        for (String typeVariable : newDto.lowerConstraints.keySet()) {
-            MapHelper.addToSetInMap(dto.lowerConstraints, typeVariable, dto.fromType);
+        for (Map.Entry<String, Set<ITypeSymbol>> entry : newDto.lowerConstraints.entrySet()) {
+            transferIntersectionConstraints(dto, entry, dto.lowerConstraints);
         }
-        for (String typeVariable : newDto.upperConstraints.keySet()) {
-            MapHelper.addToSetInMap(dto.upperConstraints, typeVariable, dto.fromType);
+        for (Map.Entry<String, Set<ITypeSymbol>> entry : newDto.upperConstraints.entrySet()) {
+            transferIntersectionConstraints(dto, entry, dto.upperConstraints);
         }
     }
     //Warning! end code duplication - very similar to isAtLeastOneSameOrParentTypeOfFromType
     // and isAtLeastOneConversionTargetSubtype
 
+
+    private void transferIntersectionConstraints(
+            TypeHelperDto dto, Map.Entry<String, Set<ITypeSymbol>> entry, Map<String, Set<ITypeSymbol>> constraintMap) {
+        String typeVariable = entry.getKey();
+        Set<ITypeSymbol> constraints = entry.getValue();
+        Iterator<ITypeSymbol> iterator = constraints.iterator();
+        ITypeSymbol typeSymbol = iterator.next();
+        if (iterator.hasNext()) {
+            //has more than one constraint, hence cannot be a parent type per see
+            MapHelper.addToSetInMap(constraintMap, typeVariable, typeSymbol);
+            while (iterator.hasNext()) {
+                MapHelper.addToSetInMap(constraintMap, typeVariable, iterator.next());
+            }
+        } else {
+            // if intersection type (dto.fromType) is a subtype of the constraint,
+            // then we restrict it to the subtype instead
+            TypeHelperDto resultDto = isFirstSameOrSubTypeOfSecond(dto.fromType, typeSymbol, false);
+            if (resultDto.relation == HAS_RELATION) {
+                MapHelper.addToSetInMap(constraintMap, typeVariable, dto.fromType);
+            } else {
+                MapHelper.addToSetInMap(constraintMap, typeVariable, typeSymbol);
+            }
+        }
+    }
 
     //Warning! start code duplication - very similar to isAtLeastOneSameOrSubtypeOfToType
     // and isAtLeastOneConversionTargetSubtype

@@ -539,12 +539,7 @@ public class BindingCollection implements IBindingCollection
                 hasChanged = addToUpperIntersectionTypeSymbol(typeVariable, newTypeSymbol);
             }
 
-            if (!hasChanged && !hasLowerTypeBounds(typeVariable) && newTypeSymbol instanceof IConvertibleTypeSymbol) {
-                IConvertibleTypeSymbol convertibleTypeSymbol = (IConvertibleTypeSymbol) newTypeSymbol;
-                if (convertibleTypeSymbol.getBindingCollection() == this) {
-                    addLowerRefBound(convertibleTypeSymbol.getTypeVariable(), typeVariable, true);
-                }
-            }
+            constrainConvertibleIfNecessary(typeVariable, dto, hasChanged, newTypeSymbol);
 
             if (propagateToLower && hasChanged && hasLowerRefBounds(typeVariable)) {
                 for (String refTypeVariable : lowerRefBounds.get(typeVariable)) {
@@ -556,6 +551,39 @@ public class BindingCollection implements IBindingCollection
         dto.hasChanged = hasChanged;
         return dto;
     }
+
+    //Warning! start code duplication - very similar to checkUpperTypeBounds
+    private BoundResultDto checkLowerTypeBounds(String typeVariable, ITypeSymbol newUpperTypeBound) {
+        BoundResultDto resultDto = new BoundResultDto();
+
+        if (hasLowerTypeBounds(typeVariable)) {
+            IUnionTypeSymbol lowerTypeSymbol = lowerTypeBounds.get(typeVariable);
+            TypeHelperDto dto = typeHelper.isFirstSameOrSubTypeOfSecond(
+                    lowerTypeSymbol, newUpperTypeBound, typeVariable);
+            switch (dto.relation) {
+                case HAS_COERCIVE_RELATION:
+                    resultDto.usedImplicitConversion = true;
+                    if (dto.upperConstraints.containsKey(typeVariable)) {
+                        Set<ITypeSymbol> remove = dto.upperConstraints.remove(typeVariable);
+                        if (remove.size() == 1) {
+                            resultDto.implicitConversionProvider = remove.iterator().next();
+                        } else {
+                            throw new UnsupportedOperationException("more than one conversion provider");
+                        }
+                    }
+                    break;
+                case HAS_NO_RELATION:
+                    throw new LowerBoundException(
+                            "The new upper bound " + newUpperTypeBound.getAbsoluteName()
+                                    + " is not the same or a parent type of the current lower bound "
+                                    + lowerTypeSymbol.getAbsoluteName(),
+                            lowerTypeSymbol, newUpperTypeBound);
+            }
+            transferBoundConstraints(resultDto, dto.lowerConstraints, dto.upperConstraints);
+        }
+        return resultDto;
+    }
+    //Warning! end code duplication - very similar to checkUpperTypeBounds
 
     private boolean checkInheritanceAndAddToUpperTypeBounds(
             String typeVariable, ITypeSymbol typeSymbol, BoundResultDto dto) {
@@ -639,38 +667,32 @@ public class BindingCollection implements IBindingCollection
         }
     }
 
-    //Warning! start code duplication - very similar to checkUpperTypeBounds
-    private BoundResultDto checkLowerTypeBounds(String typeVariable, ITypeSymbol newUpperTypeBound) {
-        BoundResultDto resultDto = new BoundResultDto();
+    private void constrainConvertibleIfNecessary(String typeVariable, BoundResultDto dto, boolean hasChanged,
+            ITypeSymbol newTypeSymbol) {
+        if (!hasChanged && !hasLowerTypeBounds(typeVariable) && newTypeSymbol instanceof IConvertibleTypeSymbol) {
+            IConvertibleTypeSymbol convertibleTypeSymbol = (IConvertibleTypeSymbol) newTypeSymbol;
+            if (convertibleTypeSymbol.getBindingCollection() == this) {
+                IIntersectionTypeSymbol currentUpperTypeBound = upperTypeBounds.get(typeVariable);
+                String convertibleTypeParameter = convertibleTypeSymbol.getTypeVariable();
+                ITypeSymbol targetTypeSymbol;
+                if (hasUpperTypeBounds(convertibleTypeParameter)) {
+                    targetTypeSymbol = upperTypeBounds.get(convertibleTypeParameter);
+                } else {
+                    targetTypeSymbol = lowerTypeBounds.get(convertibleTypeParameter);
+                }
+                TypeHelperDto resultDto = typeHelper.isFirstSameOrSubTypeOfSecond(
+                        currentUpperTypeBound, targetTypeSymbol);
 
-        if (hasLowerTypeBounds(typeVariable)) {
-            IUnionTypeSymbol lowerTypeSymbol = lowerTypeBounds.get(typeVariable);
-            TypeHelperDto dto = typeHelper.isFirstSameOrSubTypeOfSecond(
-                    lowerTypeSymbol, newUpperTypeBound, typeVariable);
-            switch (dto.relation) {
-                case HAS_COERCIVE_RELATION:
-                    resultDto.usedImplicitConversion = true;
-                    if (dto.upperConstraints.containsKey(typeVariable)) {
-                        Set<ITypeSymbol> remove = dto.upperConstraints.remove(typeVariable);
-                        if (remove.size() == 1) {
-                            resultDto.implicitConversionProvider = remove.iterator().next();
-                        } else {
-                            throw new UnsupportedOperationException("more than one conversion provider");
-                        }
-                    }
-                    break;
-                case HAS_NO_RELATION:
-                    throw new LowerBoundException(
-                            "The new upper bound " + newUpperTypeBound.getAbsoluteName()
-                                    + " is not the same or a parent type of the current lower bound "
-                                    + lowerTypeSymbol.getAbsoluteName(),
-                            lowerTypeSymbol, newUpperTypeBound);
+                if (resultDto.relation == ERelation.HAS_RELATION) {
+                    addLowerRefBound(convertibleTypeParameter, typeVariable, true);
+                } else {
+                    TypeHelperDto typeHelperDto = typeHelper.isFirstSameOrSubTypeOfSecond(
+                            currentUpperTypeBound, convertibleTypeSymbol);
+                    transferBoundConstraints(dto, typeHelperDto.lowerConstraints, typeHelperDto.upperConstraints);
+                }
             }
-            transferBoundConstraints(resultDto, dto.lowerConstraints, dto.upperConstraints);
         }
-        return resultDto;
     }
-    //Warning! end code duplication - very similar to checkUpperTypeBounds
 
     private boolean addToUpperIntersectionTypeSymbol(String typeVariable, ITypeSymbol typeSymbol) {
         boolean hasChanged;

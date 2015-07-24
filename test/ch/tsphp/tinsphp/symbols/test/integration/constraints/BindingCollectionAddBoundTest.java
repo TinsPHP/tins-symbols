@@ -22,7 +22,9 @@ import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.symbols.IUnionTypeSymbol;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.common.utils.Pair;
+import ch.tsphp.tinsphp.symbols.ModifierHelper;
 import ch.tsphp.tinsphp.symbols.constraints.BindingCollection;
+import ch.tsphp.tinsphp.symbols.scopes.ScopeHelper;
 import ch.tsphp.tinsphp.symbols.test.integration.testutils.ATypeHelperTest;
 import org.junit.Assert;
 import org.junit.Test;
@@ -1172,7 +1174,7 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
-    //TINS-526 bool and arithmetic operators
+    //see TINS-526 bool and arithmetic operators
     @Test
     public void
     addUpperTypeBound_AddTwiceAsTWhereTLowerStringAndLowerIsIntOrFloatAndIntAsWellAsFloatHaveExplToString_LowerConstraintsContainString() {
@@ -1206,6 +1208,160 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         assertThat(resultDto.lowerConstraints, isConstraints(pair(ty, set("string"))));
         assertThat(resultDto.hasChanged, is(false));
         assertThat(resultDto.usedImplicitConversion, is(false));
+    }
+
+
+    //see TINS-590 create lower ref for convertible is erroneous
+    @Test
+    public void addUpperTypeBound_AddAsTyAndTyIsLowerNumAndCurrentUpperIsNum_AddsLowerRef() {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+
+        //arrange
+        String tx = "Tx";
+        String ty = "Ty";
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addVariable("$y", new TypeVariableReference(ty));
+        bindingCollection.addUpperTypeBound(tx, numType);
+        bindingCollection.addUpperTypeBound(ty, numType);
+        IConvertibleTypeSymbol asTy = createConvertibleType(symbolFactory, typeHelper);
+        bindingCollection.bind(asTy, asList(ty));
+
+        //act
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, asTy);
+
+        assertThat(bindingCollection, withVariableBindings(
+                varBinding("$x", tx, null, asList("num", "@" + ty), false),
+                varBinding("$y", ty, asList("@" + tx), asList("num"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(false));
+        assertThat(resultDto.usedImplicitConversion, is(false));
+    }
+
+    //see TINS-590 create lower ref for convertible is erroneous
+    @Test
+    public void addUpperTypeBound_AddAsTyAndTyIsLowerNumAndCurrentUpperIsInt_AddsLowerRef() {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+
+        //arrange
+        String tx = "Tx";
+        String ty = "Ty";
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addVariable("$y", new TypeVariableReference(ty));
+        bindingCollection.addUpperTypeBound(tx, intType);
+        bindingCollection.addUpperTypeBound(ty, numType);
+        IConvertibleTypeSymbol asTy = createConvertibleType(symbolFactory, typeHelper);
+        bindingCollection.bind(asTy, asList(ty));
+
+        //act
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, asTy);
+
+        assertThat(bindingCollection, withVariableBindings(
+                varBinding("$x", tx, null, asList("int", "@" + ty), false),
+                varBinding("$y", ty, asList("@" + tx), asList("num"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(false));
+        assertThat(resultDto.usedImplicitConversion, is(false));
+    }
+
+    //see TINS-590 create lower ref for convertible is erroneous
+    @Test
+    public void addUpperTypeBound_AddAsTyAndTyIsLowerNumAndCurrentUpperIsFloat_AddsLowerRef() {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+
+        //arrange
+        String tx = "Tx";
+        String ty = "Ty";
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addVariable("$y", new TypeVariableReference(ty));
+        bindingCollection.addUpperTypeBound(tx, floatType);
+        bindingCollection.addUpperTypeBound(ty, numType);
+        IConvertibleTypeSymbol asTy = createConvertibleType(symbolFactory, typeHelper);
+        bindingCollection.bind(asTy, asList(ty));
+
+        //act
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, asTy);
+
+        assertThat(bindingCollection, withVariableBindings(
+                varBinding("$x", tx, null, asList("float", "@" + ty), false),
+                varBinding("$y", ty, asList("@" + tx), asList("num"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(false));
+        assertThat(resultDto.usedImplicitConversion, is(false));
+    }
+
+    //see TINS-590 create lower ref for convertible is erroneous
+    @Test
+    public void addUpperTypeBound_AddAsTyAndTyIsLowerIntOrFloatAndCurrentUpperIsString_TyHasLowerConstraints() {
+        //pre-arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions = new HashMap<>();
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions
+                = createConversions(pair(stringType, asList(intType, floatType)));
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+        ISymbolFactory symbolFactory = createSymbolFactory(new ScopeHelper(), new ModifierHelper(), typeHelper);
+
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
+
+        //arrange
+        String tx = "Tx";
+        String ty = "Ty";
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addVariable("$y", new TypeVariableReference(ty));
+        bindingCollection.addUpperTypeBound(tx, stringType);
+        bindingCollection.addUpperTypeBound(ty, createUnionTypeSymbol(intType, floatType));
+        IConvertibleTypeSymbol asTy = createConvertibleType(symbolFactory, typeHelper);
+        bindingCollection.bind(asTy, asList(ty));
+
+        //act
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, asTy);
+
+        assertThat(bindingCollection, withVariableBindings(
+                varBinding("$x", tx, null, asList("string"), false),
+                varBinding("$y", ty, null, asList("(float | int)"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(false));
+        assertThat(resultDto.usedImplicitConversion, is(false));
+        assertThat(resultDto.lowerConstraints, is(isConstraints(pair("Ty", set("int", "float")))));
+        assertThat(resultDto.upperConstraints, is(nullValue()));
+    }
+
+    //see TINS-590 create lower ref for convertible is erroneous
+    @Test
+    public void addUpperTypeBound_AddAsTyAndTyIsLowerIntOrFloatAndCurrentLowerIsString_TyHasLowerConstraints() {
+        //pre-arrange
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions = new HashMap<>();
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions
+                = createConversions(pair(stringType, asList(intType, floatType)));
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+        ISymbolFactory symbolFactory = createSymbolFactory(new ScopeHelper(), new ModifierHelper(), typeHelper);
+
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
+
+        //arrange
+        String tx = "Tx";
+        String ty = "Ty";
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addVariable("$y", new TypeVariableReference(ty));
+        bindingCollection.addLowerTypeBound(tx, stringType);
+        bindingCollection.addUpperTypeBound(ty, createUnionTypeSymbol(intType, floatType));
+        IConvertibleTypeSymbol asTy = createConvertibleType(symbolFactory, typeHelper);
+        bindingCollection.bind(asTy, asList(ty));
+
+        //act
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, asTy);
+
+        assertThat(bindingCollection, withVariableBindings(
+                varBinding("$x", tx, asList("string"), asList("{as " + ty + "}"), false),
+                varBinding("$y", ty, null, asList("(float | int)"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.usedImplicitConversion, is(false));
+        assertThat(resultDto.lowerConstraints, is(isConstraints(pair("Ty", set("int", "float")))));
+        assertThat(resultDto.upperConstraints, is(nullValue()));
     }
 
     @Test(expected = IntersectionBoundException.class)
