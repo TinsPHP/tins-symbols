@@ -141,28 +141,24 @@ public class FunctionType implements IFunctionType
     private void searchConvertibleTypeInTypeBounds() {
         for (String typeParameter : typeParameters) {
             if (searchForConvertibleTypeInTypeBounds(typeParameter)) {
+                hasConvertibleParameterTypes = true;
                 break;
             }
         }
     }
 
     private boolean searchForConvertibleTypeInTypeBounds(String typeParameter) {
+        boolean foundConvertibles = false;
         if (bindingCollection.hasUpperTypeBounds(typeParameter)) {
             IIntersectionTypeSymbol upperTypeBounds = bindingCollection.getUpperTypeBounds(typeParameter);
-            hasConvertibleParameterTypes = containsConvertibleType(upperTypeBounds);
-            if (hasConvertibleParameterTypes) {
-                return true;
-            }
+            foundConvertibles = containsConvertibleType(upperTypeBounds);
         }
 
-        if (bindingCollection.hasLowerTypeBounds(typeParameter)) {
+        if (!foundConvertibles && bindingCollection.hasLowerTypeBounds(typeParameter)) {
             IUnionTypeSymbol lowerTypeBounds = bindingCollection.getLowerTypeBounds(typeParameter);
-            hasConvertibleParameterTypes = containsConvertibleType(lowerTypeBounds);
-            if (hasConvertibleParameterTypes) {
-                return true;
-            }
+            foundConvertibles = containsConvertibleType(lowerTypeBounds);
         }
-        return false;
+        return foundConvertibles;
     }
 
     private boolean containsConvertibleType(IContainerTypeSymbol typeSymbol) {
