@@ -205,6 +205,50 @@ public class FunctionTypeTest extends ATypeTest
         assertThat(result, is("Tlhs x Trhs -> (Tlhs | Trhs) \\ Tlhs <: num, Trhs <: string"));
     }
 
+    //see TINS-597 function multiple upper bound not separated with &
+    @Test
+    public void getSignature_FixedParamWithMultipleUpperBounds_UsesAmpersandToSeparateTypes() {
+        IBindingCollection bindingCollection = createBindingCollection();
+        String tLhs = "Tlhs";
+        String tReturn = "Treturn";
+        bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
+        bindingCollection.addVariable(TinsPHPConstants.RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+
+        bindingCollection.addUpperTypeBound(tLhs, numType);
+        bindingCollection.addUpperTypeBound(tLhs, interfaceAType);
+        bindingCollection.addLowerRefBound(tReturn, new TypeVariableReference(tLhs));
+
+        IVariable lhs = new Variable("$lhs");
+
+        IFunctionType function = createFunction("foo", bindingCollection, asList(lhs));
+        function.manuallySimplified(set(tLhs), 0, false);
+        String result = function.getSignature();
+
+        assertThat(result, is("Tlhs -> Tlhs \\ Tlhs <: (IA & num)"));
+    }
+
+    //see TINS-597 function multiple upper bound not separated with &
+    @Test
+    public void getSignature_NonFixedParamWithMultipleUpperBounds_UsesAmpersandToSeparateTypes() {
+        IBindingCollection bindingCollection = createBindingCollection();
+        String tLhs = "Tlhs";
+        String tReturn = "Treturn";
+        bindingCollection.addVariable("$lhs", new FixedTypeVariableReference(new TypeVariableReference(tLhs)));
+        bindingCollection.addVariable(TinsPHPConstants.RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+
+        bindingCollection.addUpperTypeBound(tLhs, numType);
+        bindingCollection.addUpperTypeBound(tLhs, interfaceAType);
+        bindingCollection.addLowerTypeBound(tReturn, intType);
+
+        IVariable lhs = new Variable("$lhs");
+
+        IFunctionType function = createFunction("foo", bindingCollection, asList(lhs));
+        function.manuallySimplified(new HashSet<String>(), 0, false);
+        String result = function.getSignature();
+
+        assertThat(result, is("(IA & num) -> int"));
+    }
+
     //see TINS-403 rename TypeVariables to reflect order of parameters
     @Test
     public void simplify_Identity_ReturnsIdentitySignature() {
