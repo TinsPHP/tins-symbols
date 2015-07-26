@@ -167,16 +167,14 @@ public class FunctionType implements IFunctionType
 
     private boolean containsConvertibleType(IContainerTypeSymbol typeSymbol) {
         boolean convertibleTypeFound = false;
-        if (!typeSymbol.isFixed()) {
-            for (ITypeSymbol innerTypeSymbol : typeSymbol.getTypeSymbols().values()) {
-                if (innerTypeSymbol instanceof IConvertibleTypeSymbol) {
-                    convertibleTypeFound = true;
+        for (ITypeSymbol innerTypeSymbol : typeSymbol.getTypeSymbols().values()) {
+            if (innerTypeSymbol instanceof IConvertibleTypeSymbol) {
+                convertibleTypeFound = true;
+                break;
+            } else if (innerTypeSymbol instanceof IContainerTypeSymbol) {
+                convertibleTypeFound = containsConvertibleType((IContainerTypeSymbol) innerTypeSymbol);
+                if (convertibleTypeFound) {
                     break;
-                } else if (innerTypeSymbol instanceof IContainerTypeSymbol) {
-                    convertibleTypeFound = containsConvertibleType((IContainerTypeSymbol) innerTypeSymbol);
-                    if (convertibleTypeFound) {
-                        break;
-                    }
                 }
             }
         }
