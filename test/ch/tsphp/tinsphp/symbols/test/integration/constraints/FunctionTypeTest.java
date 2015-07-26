@@ -33,6 +33,8 @@ import java.util.List;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class FunctionTypeTest extends ATypeTest
 {
@@ -475,6 +477,99 @@ public class FunctionTypeTest extends ATypeTest
         IFunctionType function = createFunction("foo", bindingCollection, new ArrayList<IVariable>());
         function.simplify();
         function.simplify();
+
+        //assert in annotation
+    }
+
+    @Test
+    public void hasConvertibleParameterTypes_HasNoParameters_ReturnsFalse() {
+        IBindingCollection bindingCollection = createBindingCollection();
+        bindingCollection.addVariable(TinsPHPConstants.RETURN_VARIABLE_NAME,
+                new FixedTypeVariableReference(new TypeVariableReference("V1")));
+
+        IFunctionType function = createFunction("foo", bindingCollection, new ArrayList<IVariable>());
+        function.manuallySimplified(new HashSet<String>(), 0, false);
+        boolean result = function.hasConvertibleParameterTypes();
+
+        assertThat(result, is(false));
+    }
+
+    @Test
+    public void hasConvertibleParameterTypes_HasOneParameterButNotConvertible_ReturnsFalse() {
+        IBindingCollection bindingCollection = createBindingCollection();
+        bindingCollection.addVariable("$x", new TypeVariableReference("V2"));
+        bindingCollection.addVariable(TinsPHPConstants.RETURN_VARIABLE_NAME,
+                new FixedTypeVariableReference(new TypeVariableReference("V1")));
+        bindingCollection.addLowerTypeBound("V1", intType);
+        IVariable param = mock(IVariable.class);
+        when(param.getAbsoluteName()).thenReturn("$x");
+
+        IFunctionType function = createFunction("foo", bindingCollection, asList(param));
+        function.simplify();
+        boolean result = function.hasConvertibleParameterTypes();
+
+        assertThat(result, is(false));
+        assertThat(function.getSignature(), is("mixed -> int"));
+    }
+
+    @Test
+    public void hasConvertibleParameterTypes_HasTwoParametersAndFirstConvertible_ReturnsTrue() {
+        IBindingCollection bindingCollection = createBindingCollection();
+        bindingCollection.addVariable("$x", new TypeVariableReference("V2"));
+        bindingCollection.addVariable("$y", new TypeVariableReference("V3"));
+        bindingCollection.addVariable("!help0", new TypeVariableReference("V4"));
+        bindingCollection.addVariable(TinsPHPConstants.RETURN_VARIABLE_NAME,
+                new FixedTypeVariableReference(new TypeVariableReference("V1")));
+        IConvertibleTypeSymbol asV4 = symbolFactory.createConvertibleTypeSymbol();
+        bindingCollection.addUpperTypeBound("V4", intType);
+        bindingCollection.bind(asV4, asList("V4"));
+        bindingCollection.addLowerTypeBound("V1", intType);
+        bindingCollection.addUpperTypeBound("V2", asV4);
+        bindingCollection.addUpperTypeBound("V3", floatType);
+        IVariable $x = mock(IVariable.class);
+        when($x.getAbsoluteName()).thenReturn("$x");
+        IVariable $y = mock(IVariable.class);
+        when($y.getAbsoluteName()).thenReturn("$y");
+
+        IFunctionType function = createFunction("foo", bindingCollection, asList($x, $y));
+        function.simplify();
+        boolean result = function.hasConvertibleParameterTypes();
+
+        assertThat(result, is(true));
+        assertThat(function.getSignature(), is("{as int} x float -> int"));
+    }
+
+    @Test
+    public void hasConvertibleParameterTypes_HasTwoParametersAndSecondConvertible_ReturnsTrue() {
+        IBindingCollection bindingCollection = createBindingCollection();
+        bindingCollection.addVariable("$x", new TypeVariableReference("V2"));
+        bindingCollection.addVariable("$y", new TypeVariableReference("V3"));
+        bindingCollection.addVariable(TinsPHPConstants.RETURN_VARIABLE_NAME,
+                new FixedTypeVariableReference(new TypeVariableReference("V1")));
+        IConvertibleTypeSymbol asString = symbolFactory.createConvertibleTypeSymbol();
+        asString.addUpperTypeBound(stringType);
+        bindingCollection.addLowerTypeBound("V1", intType);
+        bindingCollection.addUpperTypeBound("V2", asString);
+        bindingCollection.addUpperTypeBound("V3", floatType);
+        IVariable $x = mock(IVariable.class);
+        when($x.getAbsoluteName()).thenReturn("$x");
+        IVariable $y = mock(IVariable.class);
+        when($y.getAbsoluteName()).thenReturn("$y");
+
+        IFunctionType function = createFunction("foo", bindingCollection, asList($x, $y));
+        function.simplify();
+        boolean result = function.hasConvertibleParameterTypes();
+
+        assertThat(result, is(true));
+        assertThat(function.getSignature(), is("{as string} x float -> int"));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void hasConvertibleParameterTypes_NotYetSimplified_ThrowsIllegalStateException() {
+        IBindingCollection bindingCollection = createBindingCollection();
+
+        IFunctionType function = createFunction("foo", bindingCollection, new ArrayList<IVariable>());
+        function.hasConvertibleParameterTypes();
 
         //assert in annotation
     }
