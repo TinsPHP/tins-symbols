@@ -478,10 +478,12 @@ public class FunctionType implements IFunctionType
         String typeVariable = typeParameters.get(typeParameterIndex);
         if (!nonFixedTypeParameters.contains(typeVariable)) {
             List<String> bounds = new ArrayList<>();
+            String separator = " | ";
             if (bindingCollection.hasUpperTypeBounds(typeVariable)) {
                 SortedSet<String> sortedSet = new TreeSet<>(
                         bindingCollection.getUpperTypeBounds(typeVariable).getTypeSymbols().keySet());
                 bounds.addAll(sortedSet);
+                separator = " & ";
             } else if (bindingCollection.hasLowerTypeBounds(typeVariable)) {
                 SortedSet<String> sortedSet = new TreeSet<>(
                         bindingCollection.getLowerTypeBounds(typeVariable).getTypeSymbols().keySet());
@@ -491,7 +493,7 @@ public class FunctionType implements IFunctionType
                 SortedSet<String> sortedSet = new TreeSet<>(bindingCollection.getLowerRefBounds(typeVariable));
                 bounds.addAll(sortedSet);
             }
-            appendBound(stringBuilder, bounds);
+            appendBound(stringBuilder, bounds, separator);
         } else {
             stringBuilder.append(typeVariable);
             if (!typeVariablesAdded.contains(typeVariable)) {
@@ -525,7 +527,7 @@ public class FunctionType implements IFunctionType
                 SortedSet<String> sortedSet = new TreeSet<>(bindingCollection.getLowerRefBounds(typeVariable));
                 lowerBounds.addAll(sortedSet);
             }
-            appendBound(sbTypeParameters, lowerBounds);
+            appendBound(sbTypeParameters, lowerBounds, " | ");
             sbTypeParameters.append(" <: ");
         }
 
@@ -539,7 +541,7 @@ public class FunctionType implements IFunctionType
         }
     }
 
-    private void appendBound(StringBuilder stringBuilder, Collection<String> bounds) {
+    private void appendBound(StringBuilder stringBuilder, Collection<String> bounds, String separator) {
         if (bounds.size() != 1) {
             stringBuilder.append("(");
             Iterator<String> iterator = bounds.iterator();
@@ -547,7 +549,7 @@ public class FunctionType implements IFunctionType
                 stringBuilder.append(iterator.next());
             }
             while (iterator.hasNext()) {
-                stringBuilder.append(" | ").append(iterator.next());
+                stringBuilder.append(separator).append(iterator.next());
             }
             stringBuilder.append(")");
         } else {
