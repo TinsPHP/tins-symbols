@@ -29,7 +29,7 @@ public class ConvertibleTypeSymbolTest extends ATypeHelperTest
 
     @Test
     public void copy_WasBoundBefore_IsBoundAfterwards() {
-        IConvertibleTypeSymbol typeSymbol = createConvertibleType();
+        IConvertibleTypeSymbol typeSymbol = createConvertibleTypeSymbol();
         IBindingCollection bindings = new BindingCollection(symbolFactory, typeHelper);
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.bind(typeSymbol, asList("Ta"));
@@ -41,7 +41,7 @@ public class ConvertibleTypeSymbolTest extends ATypeHelperTest
 
     @Test
     public void copy_WasBoundBefore_PointsToSameBindingCollectionAsBefore() {
-        IConvertibleTypeSymbol typeSymbol = createConvertibleType();
+        IConvertibleTypeSymbol typeSymbol = createConvertibleTypeSymbol();
         IBindingCollection bindings = new BindingCollection(symbolFactory, typeHelper);
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.bind(typeSymbol, asList("Ta"));
@@ -53,7 +53,7 @@ public class ConvertibleTypeSymbolTest extends ATypeHelperTest
 
     @Test
     public void copy_WasFixedBefore_IsFixedAfterwards() {
-        IConvertibleTypeSymbol typeSymbol = createConvertibleType();
+        IConvertibleTypeSymbol typeSymbol = createConvertibleTypeSymbol();
         IBindingCollection bindings = new BindingCollection(symbolFactory, typeHelper);
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.addLowerTypeBound("Ta", intType);
@@ -68,7 +68,7 @@ public class ConvertibleTypeSymbolTest extends ATypeHelperTest
 
     @Test
     public void copy_Standard_SameTypeVariableAsBefore() {
-        IConvertibleTypeSymbol typeSymbol = createConvertibleType();
+        IConvertibleTypeSymbol typeSymbol = createConvertibleTypeSymbol();
         IBindingCollection bindings = new BindingCollection(symbolFactory, typeHelper);
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.bind(typeSymbol, asList("Ta"));
@@ -81,7 +81,7 @@ public class ConvertibleTypeSymbolTest extends ATypeHelperTest
     @Test(expected = IllegalArgumentException.class)
     public void renameTypeVariable_IsNotCurrentTypeVariable_ThrowsIllegalArgumentException() {
         //pre-act necessary for arrange
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol();
 
         //arrange
         IBindingCollection bindingCollection = new BindingCollection(symbolFactory, typeHelper);
@@ -98,7 +98,7 @@ public class ConvertibleTypeSymbolTest extends ATypeHelperTest
     public void renameTypeVariable_WasNotBound_ThrowsIllegalArgumentException() {
         //no arrange necessary
 
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol();
         convertibleTypeSymbol.renameTypeParameter(convertibleTypeSymbol.getTypeVariable(), "T2");
 
         //assert in annotation
@@ -107,7 +107,7 @@ public class ConvertibleTypeSymbolTest extends ATypeHelperTest
     @Test
     public void renameTypeVariable_WasBound_IsRenamedToGivenNewTypeVariable() {
         //pre-act necessary for arrange
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol();
 
         //arrange
         IBindingCollection bindingCollection = new BindingCollection(symbolFactory, typeHelper);
@@ -124,7 +124,7 @@ public class ConvertibleTypeSymbolTest extends ATypeHelperTest
     @Test
     public void renameTypeVariable_Standard_NotifiesRegisteredListeners() {
         //pre-act necessary for arrange
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol();
         IObservableTypeListener listener = mock(IObservableTypeListener.class);
         convertibleTypeSymbol.registerObservableListener(listener);
 
@@ -143,7 +143,7 @@ public class ConvertibleTypeSymbolTest extends ATypeHelperTest
     public void bindTo_NoTypeVariable_ThrowsIllegalArgumentException() {
         IBindingCollection bindingCollection = new BindingCollection(symbolFactory, typeHelper);
 
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol();
         convertibleTypeSymbol.bindTo(bindingCollection, new ArrayList<String>());
 
         //assert in annotation
@@ -153,7 +153,7 @@ public class ConvertibleTypeSymbolTest extends ATypeHelperTest
     public void bindTo_MoreThanOneTypeVariable_ThrowsIllegalArgumentException() {
         IBindingCollection bindingCollection = new BindingCollection(symbolFactory, typeHelper);
 
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol();
         convertibleTypeSymbol.bindTo(bindingCollection, asList("T1", "T2"));
 
         //assert in annotation

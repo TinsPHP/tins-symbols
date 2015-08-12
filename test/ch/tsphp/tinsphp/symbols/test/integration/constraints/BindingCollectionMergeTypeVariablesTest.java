@@ -170,7 +170,7 @@ public class BindingCollectionMergeTypeVariablesTest extends ATypeHelperTest
         bindingCollection.addVariable("$t1", new TypeVariableReference(t1));
         bindingCollection.addVariable("$t2", new TypeVariableReference(t2));
         bindingCollection.addVariable("$t3", new TypeVariableReference(t3));
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol();
         bindingCollection.bind(convertibleTypeSymbol, asList(t1));
         bindingCollection.addUpperTypeBound(t3, convertibleTypeSymbol);
 
@@ -197,7 +197,7 @@ public class BindingCollectionMergeTypeVariablesTest extends ATypeHelperTest
         bindingCollection.addVariable("$t1", new TypeVariableReference(t1));
         bindingCollection.addVariable("$t2", new TypeVariableReference(t2));
         bindingCollection.addVariable("$t3", new TypeVariableReference(t3));
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol();
         bindingCollection.bind(convertibleTypeSymbol, asList(t1));
         bindingCollection.addLowerTypeBound(t3, convertibleTypeSymbol);
 
@@ -224,7 +224,7 @@ public class BindingCollectionMergeTypeVariablesTest extends ATypeHelperTest
         bindingCollection.addVariable("$t1", new TypeVariableReference(t1));
         bindingCollection.addVariable("$t2", new TypeVariableReference(t2));
         bindingCollection.addVariable("$t3", new TypeVariableReference(t3));
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol();
         bindingCollection.addUpperTypeBound(t1, stringType);
         bindingCollection.bind(convertibleTypeSymbol, asList(t1));
         IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(convertibleTypeSymbol);
@@ -253,7 +253,7 @@ public class BindingCollectionMergeTypeVariablesTest extends ATypeHelperTest
         bindingCollection.addVariable("$t1", new TypeVariableReference(t1));
         bindingCollection.addVariable("$t2", new TypeVariableReference(t2));
         bindingCollection.addVariable("$t3", new TypeVariableReference(t3));
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol();
         bindingCollection.addUpperTypeBound(t1, stringType);
         bindingCollection.bind(convertibleTypeSymbol, asList(t1));
         IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(convertibleTypeSymbol);
@@ -283,7 +283,7 @@ public class BindingCollectionMergeTypeVariablesTest extends ATypeHelperTest
         bindingCollection.addVariable("$t2", new TypeVariableReference(t2));
         bindingCollection.addVariable("$t3", new TypeVariableReference(t3));
         bindingCollection.addUpperTypeBound(t1, fooType);
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol();
         bindingCollection.bind(convertibleTypeSymbol, asList(t1));
         IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(intType, convertibleTypeSymbol);
         bindingCollection.addUpperTypeBound(t3, unionTypeSymbol);
@@ -312,7 +312,7 @@ public class BindingCollectionMergeTypeVariablesTest extends ATypeHelperTest
         bindingCollection.addVariable("$t2", new TypeVariableReference(t2));
         bindingCollection.addVariable("$t3", new TypeVariableReference(t3));
         bindingCollection.addUpperTypeBound(t1, fooType);
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol();
         bindingCollection.bind(convertibleTypeSymbol, asList(t1));
         IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(intType, convertibleTypeSymbol);
         bindingCollection.addLowerTypeBound(t3, unionTypeSymbol);
@@ -340,7 +340,7 @@ public class BindingCollectionMergeTypeVariablesTest extends ATypeHelperTest
         bindings.addVariable("$t1", new TypeVariableReference(t1));
         bindings.addVariable("$t2", new TypeVariableReference(t2));
         bindings.addVariable("$t3", new TypeVariableReference(t3));
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol();
         bindings.bind(convertibleTypeSymbol, asList(t1));
         bindings.addUpperTypeBound(t3, convertibleTypeSymbol);
 
@@ -368,7 +368,7 @@ public class BindingCollectionMergeTypeVariablesTest extends ATypeHelperTest
         bindings.addVariable("$t1", new TypeVariableReference(t1));
         bindings.addVariable("$t2", new TypeVariableReference(t2));
         bindings.addVariable("$t3", new TypeVariableReference(t3));
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol();
         bindings.bind(convertibleTypeSymbol, asList(t1));
         IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(convertibleTypeSymbol);
         bindings.addUpperTypeBound(t3, unionTypeSymbol);
@@ -399,7 +399,7 @@ public class BindingCollectionMergeTypeVariablesTest extends ATypeHelperTest
         bindings.addVariable("$t2", new TypeVariableReference(t2));
         bindings.addVariable("$t3", new TypeVariableReference(t3));
         bindings.addUpperTypeBound(t1, fooType);
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol();
         bindings.bind(convertibleTypeSymbol, asList(t1));
         IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(floatType, convertibleTypeSymbol);
         bindings.addUpperTypeBound(t3, unionTypeSymbol);
@@ -430,7 +430,7 @@ public class BindingCollectionMergeTypeVariablesTest extends ATypeHelperTest
         bindings.addVariable("$t2", new TypeVariableReference(t2));
         bindings.addVariable("$t3", new TypeVariableReference(t3));
         bindings.addUpperTypeBound(t1, fooType);
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol();
         bindings.bind(convertibleTypeSymbol, asList(t1));
         IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol(floatType, convertibleTypeSymbol);
         bindings.addLowerTypeBound(t3, intersectionTypeSymbol);
@@ -466,7 +466,7 @@ public class BindingCollectionMergeTypeVariablesTest extends ATypeHelperTest
         bindings.addUpperTypeBound(t1, fooType);
         bindings.addUpperTypeBound(t2, interfaceBType);
 
-        IConvertibleTypeSymbol asT1 = createConvertibleType();
+        IConvertibleTypeSymbol asT1 = createConvertibleTypeSymbol();
         bindings.bind(asT1, asList(t1));
         IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol(floatType, asT1);
         IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(intType, intersectionTypeSymbol);
@@ -503,7 +503,7 @@ public class BindingCollectionMergeTypeVariablesTest extends ATypeHelperTest
         bindingCollection.addUpperTypeBound(t1, intType);
         bindingCollection.addUpperTypeBound(t2, interfaceBType);
 
-        IConvertibleTypeSymbol asT2 = createConvertibleType();
+        IConvertibleTypeSymbol asT2 = createConvertibleTypeSymbol();
         bindingCollection.bind(asT2, asList(t2));
         bindingCollection.addUpperTypeBound(t1, asT2);
 
@@ -530,7 +530,7 @@ public class BindingCollectionMergeTypeVariablesTest extends ATypeHelperTest
         bindingCollection.addVariable("$t2", new TypeVariableReference(t2));
         bindingCollection.addUpperTypeBound(t1, intType);
         bindingCollection.addUpperTypeBound(t2, interfaceBType);
-        IConvertibleTypeSymbol asT1 = createConvertibleType();
+        IConvertibleTypeSymbol asT1 = createConvertibleTypeSymbol();
         bindingCollection.bind(asT1, asList(t1));
         bindingCollection.addUpperTypeBound(t2, asT1);
 
@@ -555,7 +555,7 @@ public class BindingCollectionMergeTypeVariablesTest extends ATypeHelperTest
         String t2 = "T2";
         bindingCollection.addVariable("$t1", new TypeVariableReference(t1));
         bindingCollection.addVariable("$t2", new TypeVariableReference(t2));
-        IConvertibleTypeSymbol asT1 = createConvertibleType();
+        IConvertibleTypeSymbol asT1 = createConvertibleTypeSymbol();
         bindingCollection.bind(asT1, asList(t1));
         bindingCollection.addUpperTypeBound(t2, asT1);
 

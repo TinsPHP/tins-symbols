@@ -1786,7 +1786,7 @@ public class BindingCollectionTryToFixTest extends ATypeHelperTest
         bindingCollection.addVariable($y, new TypeVariableReference(ty));
         bindingCollection.addVariable(plus, new TypeVariableReference(tPlus));
         bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        IConvertibleTypeSymbol asTPlus = createConvertibleType();
+        IConvertibleTypeSymbol asTPlus = createConvertibleTypeSymbol();
         bindingCollection.bind(asTPlus, asList(tPlus));
         bindingCollection.addUpperTypeBound(tx, asTPlus);
         bindingCollection.addUpperTypeBound(ty, asTPlus);
@@ -1834,7 +1834,7 @@ public class BindingCollectionTryToFixTest extends ATypeHelperTest
         bindingCollection.addVariable(plus, new TypeVariableReference(tPlus));
         bindingCollection.addVariable($a, new TypeVariableReference(ta));
         bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        IConvertibleTypeSymbol asTPlus = createConvertibleType();
+        IConvertibleTypeSymbol asTPlus = createConvertibleTypeSymbol();
         bindingCollection.bind(asTPlus, asList(tPlus));
         bindingCollection.addUpperTypeBound(tx, asTPlus);
         bindingCollection.addUpperTypeBound(ty, asTPlus);
@@ -1884,7 +1884,7 @@ public class BindingCollectionTryToFixTest extends ATypeHelperTest
         bindingCollection.addVariable($z, new TypeVariableReference(tz));
         bindingCollection.addVariable(plus, new TypeVariableReference(tPlus));
         bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        IConvertibleTypeSymbol asTPlus = createConvertibleType();
+        IConvertibleTypeSymbol asTPlus = createConvertibleTypeSymbol();
         bindingCollection.bind(asTPlus, asList(tPlus));
         bindingCollection.addUpperTypeBound(tz, boolType);
         bindingCollection.addUpperTypeBound(tx, asTPlus);
@@ -1937,7 +1937,7 @@ public class BindingCollectionTryToFixTest extends ATypeHelperTest
         bindingCollection.addVariable($a, new TypeVariableReference(ta));
         bindingCollection.addVariable(plus, new TypeVariableReference(tPlus));
         bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        IConvertibleTypeSymbol asTPlus = createConvertibleType();
+        IConvertibleTypeSymbol asTPlus = createConvertibleTypeSymbol();
         bindingCollection.bind(asTPlus, asList(tPlus));
         bindingCollection.addUpperTypeBound(ta, mixedType);
         bindingCollection.addUpperTypeBound(tx, asTPlus);
@@ -1990,7 +1990,7 @@ public class BindingCollectionTryToFixTest extends ATypeHelperTest
         bindingCollection.addVariable(plus, new TypeVariableReference(tPlus));
         bindingCollection.addVariable($a, new TypeVariableReference(ta));
         bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        IConvertibleTypeSymbol asTPlus = createConvertibleType();
+        IConvertibleTypeSymbol asTPlus = createConvertibleTypeSymbol();
         bindingCollection.bind(asTPlus, asList(tPlus));
         bindingCollection.addUpperTypeBound(tx, asTPlus);
         bindingCollection.addUpperTypeBound(ty, asTPlus);
@@ -2037,7 +2037,7 @@ public class BindingCollectionTryToFixTest extends ATypeHelperTest
         bindingCollection.addVariable($x, new TypeVariableReference(tx));
         bindingCollection.addVariable(e1, new TypeVariableReference(te1));
         bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        IConvertibleTypeSymbol asTe1 = createConvertibleType();
+        IConvertibleTypeSymbol asTe1 = createConvertibleTypeSymbol();
         bindingCollection.bind(asTe1, asList(te1));
         bindingCollection.addUpperTypeBound(tx, asTe1);
         bindingCollection.addUpperTypeBound(te1, numType);
@@ -2085,10 +2085,10 @@ public class BindingCollectionTryToFixTest extends ATypeHelperTest
         bindingCollection.addVariable(e1, new TypeVariableReference(te1));
         bindingCollection.addVariable(e2, new TypeVariableReference(te2));
         bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-        IConvertibleTypeSymbol asTe1 = createConvertibleType();
+        IConvertibleTypeSymbol asTe1 = createConvertibleTypeSymbol();
         bindingCollection.bind(asTe1, asList(te1));
         bindingCollection.addUpperTypeBound(tx, asTe1);
-        IConvertibleTypeSymbol asTe2 = createConvertibleType();
+        IConvertibleTypeSymbol asTe2 = createConvertibleTypeSymbol();
         bindingCollection.bind(asTe2, asList(te2));
         bindingCollection.addUpperTypeBound(ty, asTe2);
         bindingCollection.addUpperTypeBound(te1, numType);
@@ -2637,12 +2637,12 @@ public class BindingCollectionTryToFixTest extends ATypeHelperTest
 //        bindingCollection.addVariable(e1, new TypeVariableReference(te1));
 //        bindingCollection.addVariable(e2, new TypeVariableReference(te2));
 //        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
-//        IConvertibleTypeSymbol asTe1 = createConvertibleType();
+//        IConvertibleTypeSymbol asTe1 = createConvertibleTypeSymbol();
 //        bindingCollection.bind(asTe1, asList(te1));
 //        bindingCollection.addUpperTypeBound(te1, numType);
 //        bindingCollection.addUpperTypeBound(tx, asTe1);
 //        bindingCollection.addUpperTypeBound(ty, asTe1);
-//        IConvertibleTypeSymbol asTe2 = createConvertibleType();
+//        IConvertibleTypeSymbol asTe2 = createConvertibleTypeSymbol();
 //        bindingCollection.bind(asTe2, asList(te2));
 //        bindingCollection.addUpperTypeBound(te2, numType);
 //        bindingCollection.addUpperTypeBound(te1, asTe2);

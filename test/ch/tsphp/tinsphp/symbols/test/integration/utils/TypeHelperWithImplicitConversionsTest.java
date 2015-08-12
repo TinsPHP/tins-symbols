@@ -83,7 +83,7 @@ public class TypeHelperWithImplicitConversionsTest extends ATypeHelperTest
 
         //arrange
         ITypeSymbol actual = boolType;
-        ITypeSymbol formal = createConvertibleType(floatType, symbolFactory, typeHelper);
+        ITypeSymbol formal = createConvertibleTypeSymbol(floatType, symbolFactory, typeHelper);
 
         //act
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);

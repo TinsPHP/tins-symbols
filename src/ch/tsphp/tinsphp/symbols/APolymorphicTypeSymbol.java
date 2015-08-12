@@ -18,7 +18,7 @@ import java.util.Set;
 
 public abstract class APolymorphicTypeSymbol implements ITypeSymbol, IObservableTypeSymbol
 {
-    private static final String ERROR_MESSAGE = "You are dealing with an AContainerTypeSymbol.";
+    private static final String ERROR_MESSAGE = "You are dealing with an APolymorphicTypeSymbol.";
 
     protected boolean hasAbsoluteNameChanged = true;
     protected String ownAbsoluteName;

@@ -32,13 +32,13 @@ public class IntersectionTypeSymbolTest extends ATypeHelperTest
         //arrange
         String tx = "Tx";
         ISymbolFactory symbolFactory = createSymbolFactory();
-        IConvertibleTypeSymbol asTx = createConvertibleType(symbolFactory, typeHelper);
+        IConvertibleTypeSymbol asTx = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         IBindingCollection bindingCollection = symbolFactory.createBindingCollection();
         bindingCollection.addVariable("$x", new TypeVariableReference(tx));
         bindingCollection.addUpperTypeBound(tx, numType);
         bindingCollection.bind(asTx, asList(tx));
         containerTypeSymbol.addTypeSymbol(asTx);
-        IConvertibleTypeSymbol asTy = createConvertibleType(symbolFactory, typeHelper);
+        IConvertibleTypeSymbol asTy = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         asTy.addLowerTypeBound(intType);
         asTy.addUpperTypeBound(intType);
 
@@ -56,7 +56,7 @@ public class IntersectionTypeSymbolTest extends ATypeHelperTest
         //arrange
         String tx = "Tx";
         ISymbolFactory symbolFactory = createSymbolFactory();
-        IConvertibleTypeSymbol asTx = createConvertibleType(symbolFactory, typeHelper);
+        IConvertibleTypeSymbol asTx = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         IBindingCollection bindingCollection = symbolFactory.createBindingCollection();
         bindingCollection.addVariable("$x", new TypeVariableReference(tx));
         bindingCollection.addUpperTypeBound(tx, intType);
@@ -78,7 +78,7 @@ public class IntersectionTypeSymbolTest extends ATypeHelperTest
         //arrange
         String tx = "Tx";
         ISymbolFactory symbolFactory = createSymbolFactory();
-        IConvertibleTypeSymbol asTx = createConvertibleType(symbolFactory, typeHelper);
+        IConvertibleTypeSymbol asTx = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         IBindingCollection bindingCollection = symbolFactory.createBindingCollection();
         bindingCollection.addVariable("$x", new TypeVariableReference(tx));
         bindingCollection.addUpperTypeBound(tx, intType);
@@ -100,8 +100,8 @@ public class IntersectionTypeSymbolTest extends ATypeHelperTest
         String tx = "Tx";
         String ty = "Ty";
         ISymbolFactory symbolFactory = createSymbolFactory();
-        IConvertibleTypeSymbol asTx = createConvertibleType(symbolFactory, typeHelper);
-        IConvertibleTypeSymbol asTy = createConvertibleType(symbolFactory, typeHelper);
+        IConvertibleTypeSymbol asTx = createConvertibleTypeSymbol(symbolFactory, typeHelper);
+        IConvertibleTypeSymbol asTy = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         IBindingCollection bindingCollection = symbolFactory.createBindingCollection();
         bindingCollection.addVariable("$x", new TypeVariableReference(tx));
         bindingCollection.addVariable("$y", new TypeVariableReference(ty));
@@ -127,8 +127,8 @@ public class IntersectionTypeSymbolTest extends ATypeHelperTest
         String tx = "Tx";
         String ty = "Ty";
         ISymbolFactory symbolFactory = createSymbolFactory();
-        IConvertibleTypeSymbol asTx = createConvertibleType(symbolFactory, typeHelper);
-        IConvertibleTypeSymbol asTy = createConvertibleType(symbolFactory, typeHelper);
+        IConvertibleTypeSymbol asTx = createConvertibleTypeSymbol(symbolFactory, typeHelper);
+        IConvertibleTypeSymbol asTy = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         IBindingCollection bindingCollection = symbolFactory.createBindingCollection();
         bindingCollection.addVariable("$x", new TypeVariableReference(tx));
         bindingCollection.addVariable("$y", new TypeVariableReference(ty));

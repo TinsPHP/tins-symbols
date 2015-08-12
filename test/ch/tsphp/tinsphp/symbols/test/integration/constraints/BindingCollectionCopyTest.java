@@ -151,7 +151,7 @@ public class BindingCollectionCopyTest extends ATypeHelperTest
         BindingCollection bindings1 = new BindingCollection(symbolFactory, typeHelper);
         bindings1.addVariable("$a", new TypeVariableReference("T1"));
         bindings1.addVariable("$b", new TypeVariableReference("T2"));
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol();
         bindings1.bind(convertibleTypeSymbol, asList("T2"));
         bindings1.addUpperTypeBound("T1", convertibleTypeSymbol);
 
@@ -169,7 +169,7 @@ public class BindingCollectionCopyTest extends ATypeHelperTest
         BindingCollection bindings1 = new BindingCollection(symbolFactory, typeHelper);
         bindings1.addVariable("$a", new TypeVariableReference("T1"));
         bindings1.addVariable("$b", new TypeVariableReference("T2"));
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol();
         bindings1.bind(convertibleTypeSymbol, asList("T2"));
         bindings1.addLowerTypeBound("T1", convertibleTypeSymbol);
 
@@ -188,7 +188,7 @@ public class BindingCollectionCopyTest extends ATypeHelperTest
         BindingCollection bindings1 = new BindingCollection(symbolFactory, typeHelper);
         bindings1.addVariable("$a", new TypeVariableReference("T1"));
         bindings1.addVariable("$b", new TypeVariableReference("T2"));
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol();
         bindings1.bind(convertibleTypeSymbol, asList("T2"));
         bindings1.addUpperTypeBound("T1", convertibleTypeSymbol);
 
@@ -206,7 +206,7 @@ public class BindingCollectionCopyTest extends ATypeHelperTest
         BindingCollection bindings1 = new BindingCollection(symbolFactory, typeHelper);
         bindings1.addVariable("$a", new TypeVariableReference("T1"));
         bindings1.addVariable("$b", new TypeVariableReference("T2"));
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol();
         bindings1.bind(convertibleTypeSymbol, asList("T2"));
         bindings1.addUpperTypeBound("T1", convertibleTypeSymbol);
 
@@ -225,7 +225,7 @@ public class BindingCollectionCopyTest extends ATypeHelperTest
         BindingCollection bindings1 = new BindingCollection(symbolFactory, typeHelper);
         bindings1.addVariable("$a", new TypeVariableReference("T1"));
         bindings1.addVariable("$b", new TypeVariableReference("T2"));
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol();
         bindings1.bind(convertibleTypeSymbol, asList("T2"));
         IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(convertibleTypeSymbol, interfaceBType);
         bindings1.addUpperTypeBound("T1", unionTypeSymbol);
@@ -245,7 +245,7 @@ public class BindingCollectionCopyTest extends ATypeHelperTest
         BindingCollection bindings1 = new BindingCollection(symbolFactory, typeHelper);
         bindings1.addVariable("$a", new TypeVariableReference("T1"));
         bindings1.addVariable("$b", new TypeVariableReference("T2"));
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol();
         bindings1.bind(convertibleTypeSymbol, asList("T2"));
         bindings1.addLowerTypeBound("T1", convertibleTypeSymbol);
 
@@ -263,7 +263,7 @@ public class BindingCollectionCopyTest extends ATypeHelperTest
         BindingCollection bindings1 = new BindingCollection(symbolFactory, typeHelper);
         bindings1.addVariable("$a", new TypeVariableReference("T1"));
         bindings1.addVariable("$b", new TypeVariableReference("T2"));
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol();
         bindings1.bind(convertibleTypeSymbol, asList("T2"));
         bindings1.addLowerTypeBound("T1", convertibleTypeSymbol);
 
@@ -283,7 +283,7 @@ public class BindingCollectionCopyTest extends ATypeHelperTest
         bindings1.addVariable("$a", new TypeVariableReference("T1"));
         bindings1.addVariable("$b", new TypeVariableReference("T2"));
         bindings1.addUpperTypeBound("T2", numType);
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType();
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol();
         bindings1.bind(convertibleTypeSymbol, asList("T2"));
         IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol(
                 convertibleTypeSymbol, interfaceBType);

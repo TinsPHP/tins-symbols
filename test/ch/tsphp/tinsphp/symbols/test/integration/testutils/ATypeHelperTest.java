@@ -79,19 +79,20 @@ public abstract class ATypeHelperTest extends ATypeTest
         return new IntersectionTypeSymbol(theTypeHelper);
     }
 
-    protected IConvertibleTypeSymbol createConvertibleType(
+    protected IConvertibleTypeSymbol createConvertibleTypeSymbol(
             ITypeSymbol typeSymbol, ISymbolFactory theSymbolFactory, ITypeHelper theTypeHelper) {
-        ConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType(theSymbolFactory, theTypeHelper);
+        ConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol(theSymbolFactory, theTypeHelper);
         convertibleTypeSymbol.addLowerTypeBound(typeSymbol);
         convertibleTypeSymbol.addUpperTypeBound(typeSymbol);
         return convertibleTypeSymbol;
     }
 
-    protected ConvertibleTypeSymbol createConvertibleType() {
-        return createConvertibleType(symbolFactory, typeHelper);
+    protected ConvertibleTypeSymbol createConvertibleTypeSymbol() {
+        return createConvertibleTypeSymbol(symbolFactory, typeHelper);
     }
 
-    protected ConvertibleTypeSymbol createConvertibleType(ISymbolFactory theSymbolFactory, ITypeHelper theTypeHelper) {
+    protected ConvertibleTypeSymbol createConvertibleTypeSymbol(ISymbolFactory theSymbolFactory,
+            ITypeHelper theTypeHelper) {
         return new ConvertibleTypeSymbol(new BindingCollection(theSymbolFactory, theTypeHelper));
     }
 

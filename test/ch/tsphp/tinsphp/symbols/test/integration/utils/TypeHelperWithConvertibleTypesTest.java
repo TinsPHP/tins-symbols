@@ -45,7 +45,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
-        ITypeSymbol actual = createConvertibleType(intType, symbolFactory, typeHelper);
+        ITypeSymbol actual = createConvertibleTypeSymbol(intType, symbolFactory, typeHelper);
         ITypeSymbol formal = intType;
 
         //act
@@ -61,7 +61,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
-        ITypeSymbol actual = createConvertibleType(intType, symbolFactory, typeHelper);
+        ITypeSymbol actual = createConvertibleTypeSymbol(intType, symbolFactory, typeHelper);
         ITypeSymbol formal = mixedType;
 
         //act
@@ -77,7 +77,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
-        ITypeSymbol actual = createConvertibleType(intType, symbolFactory, typeHelper);
+        ITypeSymbol actual = createConvertibleTypeSymbol(intType, symbolFactory, typeHelper);
         ITypeSymbol formal = intType;
 
         //act
@@ -93,7 +93,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
-        ITypeSymbol actual = createConvertibleType(numType, symbolFactory, typeHelper);
+        ITypeSymbol actual = createConvertibleTypeSymbol(numType, symbolFactory, typeHelper);
         ITypeSymbol formal = intType;
 
         //act
@@ -109,7 +109,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
-        ITypeSymbol actual = createConvertibleType(numType, symbolFactory, typeHelper);
+        ITypeSymbol actual = createConvertibleTypeSymbol(numType, symbolFactory, typeHelper);
         ITypeSymbol formal = mixedType;
 
         //act
@@ -125,7 +125,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
-        ITypeSymbol actual = createConvertibleType(numType, symbolFactory, typeHelper);
+        ITypeSymbol actual = createConvertibleTypeSymbol(numType, symbolFactory, typeHelper);
         ITypeSymbol formal = createIntersectionTypeSymbol(typeHelper);
 
         //act
@@ -141,9 +141,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
-        ITypeSymbol actual = createConvertibleType(numType, symbolFactory, typeHelper);
+        ITypeSymbol actual = createConvertibleTypeSymbol(numType, symbolFactory, typeHelper);
         IIntersectionTypeSymbol formal = createIntersectionTypeSymbol(typeHelper);
-        formal.addTypeSymbol(createConvertibleType(numType, symbolFactory, typeHelper));
+        formal.addTypeSymbol(createConvertibleTypeSymbol(numType, symbolFactory, typeHelper));
 
         //act
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -158,9 +158,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
-        ITypeSymbol actual = createConvertibleType(numType, symbolFactory, typeHelper);
+        ITypeSymbol actual = createConvertibleTypeSymbol(numType, symbolFactory, typeHelper);
         IUnionTypeSymbol formal = createUnionTypeSymbol(typeHelper);
-        formal.addTypeSymbol(createConvertibleType(numType, symbolFactory, typeHelper));
+        formal.addTypeSymbol(createConvertibleTypeSymbol(numType, symbolFactory, typeHelper));
 
         //act
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -175,9 +175,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
-        ITypeSymbol actual = createConvertibleType(intType, symbolFactory, typeHelper);
+        ITypeSymbol actual = createConvertibleTypeSymbol(intType, symbolFactory, typeHelper);
         IIntersectionTypeSymbol formal = createIntersectionTypeSymbol(typeHelper);
-        formal.addTypeSymbol(createConvertibleType(numType, symbolFactory, typeHelper));
+        formal.addTypeSymbol(createConvertibleTypeSymbol(numType, symbolFactory, typeHelper));
 
         //act
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -192,9 +192,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
-        ITypeSymbol actual = createConvertibleType(intType, symbolFactory, typeHelper);
+        ITypeSymbol actual = createConvertibleTypeSymbol(intType, symbolFactory, typeHelper);
         IUnionTypeSymbol formal = createUnionTypeSymbol(typeHelper);
-        formal.addTypeSymbol(createConvertibleType(numType, symbolFactory, typeHelper));
+        formal.addTypeSymbol(createConvertibleTypeSymbol(numType, symbolFactory, typeHelper));
 
         //act
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -209,9 +209,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
-        ITypeSymbol actual = createConvertibleType(intType, symbolFactory, typeHelper);
+        ITypeSymbol actual = createConvertibleTypeSymbol(intType, symbolFactory, typeHelper);
         IUnionTypeSymbol formal = createUnionTypeSymbol(typeHelper);
-        formal.addTypeSymbol(createConvertibleType(numType, symbolFactory, typeHelper));
+        formal.addTypeSymbol(createConvertibleTypeSymbol(numType, symbolFactory, typeHelper));
         formal.addTypeSymbol(stringType);
 
         //act
@@ -227,10 +227,10 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
-        ITypeSymbol actual = createConvertibleType(intType, symbolFactory, typeHelper);
+        ITypeSymbol actual = createConvertibleTypeSymbol(intType, symbolFactory, typeHelper);
         IUnionTypeSymbol formal = createUnionTypeSymbol(typeHelper);
         formal.addTypeSymbol(boolType);
-        formal.addTypeSymbol(createConvertibleType(numType, symbolFactory, typeHelper));
+        formal.addTypeSymbol(createConvertibleTypeSymbol(numType, symbolFactory, typeHelper));
         formal.addTypeSymbol(stringType);
 
         //act
@@ -246,9 +246,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
-        ITypeSymbol actual = createConvertibleType(numType, symbolFactory, typeHelper);
+        ITypeSymbol actual = createConvertibleTypeSymbol(numType, symbolFactory, typeHelper);
         IIntersectionTypeSymbol formal = createIntersectionTypeSymbol(typeHelper);
-        formal.addTypeSymbol(createConvertibleType(intType, symbolFactory, typeHelper));
+        formal.addTypeSymbol(createConvertibleTypeSymbol(intType, symbolFactory, typeHelper));
 
         //act
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -263,9 +263,9 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
-        ITypeSymbol actual = createConvertibleType(numType, symbolFactory, typeHelper);
+        ITypeSymbol actual = createConvertibleTypeSymbol(numType, symbolFactory, typeHelper);
         IUnionTypeSymbol formal = createUnionTypeSymbol(typeHelper);
-        formal.addTypeSymbol(createConvertibleType(intType, symbolFactory, typeHelper));
+        formal.addTypeSymbol(createConvertibleTypeSymbol(intType, symbolFactory, typeHelper));
 
         //act
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -287,7 +287,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
 
         //arrange
         ITypeSymbol actual = stringType;
-        ITypeSymbol formal = createConvertibleType(intType, symbolFactory, typeHelper);
+        ITypeSymbol formal = createConvertibleTypeSymbol(intType, symbolFactory, typeHelper);
 
         //act
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -308,7 +308,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
 
         //arrange
         ITypeSymbol actual = stringType;
-        ITypeSymbol formal = createConvertibleType(intType, symbolFactory, typeHelper);
+        ITypeSymbol formal = createConvertibleTypeSymbol(intType, symbolFactory, typeHelper);
 
         //act
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -328,7 +328,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
 
         //arrange
         ITypeSymbol actual = intType;
-        ITypeSymbol formal = createConvertibleType(intType, symbolFactory, typeHelper);
+        ITypeSymbol formal = createConvertibleTypeSymbol(intType, symbolFactory, typeHelper);
 
         //act
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -348,7 +348,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
 
         //arrange
         ITypeSymbol actual = intType;
-        ITypeSymbol formal = createConvertibleType(numType, symbolFactory, typeHelper);
+        ITypeSymbol formal = createConvertibleTypeSymbol(numType, symbolFactory, typeHelper);
 
         //act
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -369,7 +369,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
 
         //arrange
         ITypeSymbol actual = intType;
-        ITypeSymbol formal = createConvertibleType(floatType, symbolFactory, typeHelper);
+        ITypeSymbol formal = createConvertibleTypeSymbol(floatType, symbolFactory, typeHelper);
 
         //act
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -390,7 +390,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
 
         //arrange
         ITypeSymbol actual = intType;
-        ITypeSymbol formal = createConvertibleType(stringType, symbolFactory, typeHelper);
+        ITypeSymbol formal = createConvertibleTypeSymbol(stringType, symbolFactory, typeHelper);
 
         //act
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -411,7 +411,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
 
         //arrange
         ITypeSymbol actual = numType;
-        ITypeSymbol formal = createConvertibleType(stringType, symbolFactory, typeHelper);
+        ITypeSymbol formal = createConvertibleTypeSymbol(stringType, symbolFactory, typeHelper);
 
         //act
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -431,7 +431,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
 
         //arrange
         ITypeSymbol actual = fooType;
-        ITypeSymbol formal = createConvertibleType(stringType, symbolFactory, typeHelper);
+        ITypeSymbol formal = createConvertibleTypeSymbol(stringType, symbolFactory, typeHelper);
 
         //act
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -452,7 +452,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
 
         //arrange
         ITypeSymbol actual = fooType;
-        ITypeSymbol formal = createConvertibleType(scalarType, symbolFactory, typeHelper);
+        ITypeSymbol formal = createConvertibleTypeSymbol(scalarType, symbolFactory, typeHelper);
 
         //act
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -472,7 +472,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
 
         //arrange
         ITypeSymbol actual = interfaceSubAType;
-        ITypeSymbol formal = createConvertibleType(stringType, symbolFactory, typeHelper);
+        ITypeSymbol formal = createConvertibleTypeSymbol(stringType, symbolFactory, typeHelper);
 
         //act
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -492,7 +492,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
 
         //arrange
         ITypeSymbol actual = interfaceSubAType;
-        ITypeSymbol formal = createConvertibleType(stringType, symbolFactory, typeHelper);
+        ITypeSymbol formal = createConvertibleTypeSymbol(stringType, symbolFactory, typeHelper);
 
         //act
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -509,8 +509,8 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
-        ITypeSymbol actual = createConvertibleType(intType, symbolFactory, typeHelper);
-        ITypeSymbol formal = createConvertibleType(intType, symbolFactory, typeHelper);
+        ITypeSymbol actual = createConvertibleTypeSymbol(intType, symbolFactory, typeHelper);
+        ITypeSymbol formal = createConvertibleTypeSymbol(intType, symbolFactory, typeHelper);
 
         //act
         boolean result = typeHelper.areSame(actual, formal);
@@ -525,8 +525,8 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
-        ITypeSymbol actual = createConvertibleType(intType, symbolFactory, typeHelper);
-        ITypeSymbol formal = createConvertibleType(numType, symbolFactory, typeHelper);
+        ITypeSymbol actual = createConvertibleTypeSymbol(intType, symbolFactory, typeHelper);
+        ITypeSymbol formal = createConvertibleTypeSymbol(numType, symbolFactory, typeHelper);
 
         //act
         boolean result = typeHelper.areSame(actual, formal);
@@ -541,8 +541,8 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
-        ITypeSymbol actual = createConvertibleType(numType, symbolFactory, typeHelper);
-        ITypeSymbol formal = createConvertibleType(intType, symbolFactory, typeHelper);
+        ITypeSymbol actual = createConvertibleTypeSymbol(numType, symbolFactory, typeHelper);
+        ITypeSymbol formal = createConvertibleTypeSymbol(intType, symbolFactory, typeHelper);
 
         //act
         boolean result = typeHelper.areSame(actual, formal);
@@ -557,8 +557,8 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
-        ITypeSymbol actual = createConvertibleType(intType, symbolFactory, typeHelper);
-        ITypeSymbol formal = createConvertibleType(intType, symbolFactory, typeHelper);
+        ITypeSymbol actual = createConvertibleTypeSymbol(intType, symbolFactory, typeHelper);
+        ITypeSymbol formal = createConvertibleTypeSymbol(intType, symbolFactory, typeHelper);
 
         //act
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -573,8 +573,8 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
-        ITypeSymbol actual = createConvertibleType(intType, symbolFactory, typeHelper);
-        ITypeSymbol formal = createConvertibleType(numType, symbolFactory, typeHelper);
+        ITypeSymbol actual = createConvertibleTypeSymbol(intType, symbolFactory, typeHelper);
+        ITypeSymbol formal = createConvertibleTypeSymbol(numType, symbolFactory, typeHelper);
 
         //act
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -589,8 +589,8 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
-        ITypeSymbol actual = createConvertibleType(intType, symbolFactory, typeHelper);
-        ITypeSymbol formal = createConvertibleType(scalarType, symbolFactory, typeHelper);
+        ITypeSymbol actual = createConvertibleTypeSymbol(intType, symbolFactory, typeHelper);
+        ITypeSymbol formal = createConvertibleTypeSymbol(scalarType, symbolFactory, typeHelper);
 
         //act
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -605,8 +605,8 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
-        ITypeSymbol actual = createConvertibleType(intType, symbolFactory, typeHelper);
-        ITypeSymbol formal = createConvertibleType(floatType, symbolFactory, typeHelper);
+        ITypeSymbol actual = createConvertibleTypeSymbol(intType, symbolFactory, typeHelper);
+        ITypeSymbol formal = createConvertibleTypeSymbol(floatType, symbolFactory, typeHelper);
 
         //act
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -621,8 +621,8 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
-        ITypeSymbol actual = createConvertibleType(numType, symbolFactory, typeHelper);
-        ITypeSymbol formal = createConvertibleType(floatType, symbolFactory, typeHelper);
+        ITypeSymbol actual = createConvertibleTypeSymbol(numType, symbolFactory, typeHelper);
+        ITypeSymbol formal = createConvertibleTypeSymbol(floatType, symbolFactory, typeHelper);
 
         //act
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(actual, formal);
@@ -640,7 +640,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
 
         //arrange
         ITypeSymbol actual = intType;
-        IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
+        IParametricTypeSymbol formal = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         IBindingCollection bindings = symbolFactory.createBindingCollection();
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.addUpperTypeBound("Ta", numType);
@@ -666,7 +666,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
 
         //arrange
         ITypeSymbol actual = boolType;
-        IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
+        IParametricTypeSymbol formal = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         IBindingCollection bindings = symbolFactory.createBindingCollection();
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.addUpperTypeBound("Ta", numType);
@@ -693,7 +693,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
 
         //arrange
         ITypeSymbol actual = boolType;
-        IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
+        IParametricTypeSymbol formal = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         IBindingCollection bindings = symbolFactory.createBindingCollection();
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.addUpperTypeBound("Ta", floatType);
@@ -720,7 +720,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
 
         //arrange
         ITypeSymbol actual = createUnionTypeSymbol(intType, floatType);
-        IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
+        IParametricTypeSymbol formal = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         IBindingCollection bindings = symbolFactory.createBindingCollection();
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.addUpperTypeBound("Ta", stringType);
@@ -747,7 +747,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
 
         //arrange
         ITypeSymbol actual = boolType;
-        IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
+        IParametricTypeSymbol formal = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         IBindingCollection bindings = symbolFactory.createBindingCollection();
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.bind(formal, asList("Ta"));
@@ -775,7 +775,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
 
         //arrange
         ITypeSymbol actual = intType;
-        IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
+        IParametricTypeSymbol formal = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         IBindingCollection bindings = symbolFactory.createBindingCollection();
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.bind(formal, asList("Ta"));
@@ -804,7 +804,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
 
         //arrange
         ITypeSymbol actual = boolType;
-        IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
+        IParametricTypeSymbol formal = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         IBindingCollection bindings = symbolFactory.createBindingCollection();
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.bind(formal, asList("Ta"));
@@ -833,7 +833,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
 
         //arrange
         ITypeSymbol actual = intType;
-        IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
+        IParametricTypeSymbol formal = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         IBindingCollection bindings = symbolFactory.createBindingCollection();
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.bind(formal, asList("Ta"));
@@ -861,7 +861,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
 
         //arrange
         ITypeSymbol actual = intType;
-        IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
+        IParametricTypeSymbol formal = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         IBindingCollection bindings = symbolFactory.createBindingCollection();
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.bind(formal, asList("Ta"));
@@ -889,7 +889,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         //arrange
         IUnionTypeSymbol numOrString = createUnionTypeSymbol(typeHelper, numType, stringType);
         ITypeSymbol actual = numOrString;
-        IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
+        IParametricTypeSymbol formal = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         IBindingCollection bindings = symbolFactory.createBindingCollection();
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.bind(formal, asList("Ta"));
@@ -918,7 +918,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         IIntersectionTypeSymbol IBAndISubA = createIntersectionTypeSymbol(typeHelper, interfaceBType,
                 interfaceSubAType);
         ITypeSymbol actual = IBAndISubA;
-        IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
+        IParametricTypeSymbol formal = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         IBindingCollection bindings = symbolFactory.createBindingCollection();
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.bind(formal, asList("Ta"));
@@ -947,7 +947,7 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         IIntersectionTypeSymbol IBAndISubA = createIntersectionTypeSymbol(typeHelper, interfaceBType,
                 interfaceSubAType);
         ITypeSymbol actual = IBAndISubA;
-        IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
+        IParametricTypeSymbol formal = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         IBindingCollection bindings = symbolFactory.createBindingCollection();
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.bind(formal, asList("Ta"));
@@ -974,11 +974,11 @@ public class TypeHelperWithConvertibleTypesTest extends ATypeHelperTest
         ISymbolFactory symbolFactory = createSymbolFactory(typeHelper);
 
         //arrange
-        IConvertibleTypeSymbol asISubA = createConvertibleType(interfaceSubAType, symbolFactory, typeHelper);
+        IConvertibleTypeSymbol asISubA = createConvertibleTypeSymbol(interfaceSubAType, symbolFactory, typeHelper);
         IIntersectionTypeSymbol IBAndAsISubA = createIntersectionTypeSymbol(typeHelper, interfaceBType, asISubA);
         IUnionTypeSymbol IBAndAsISubAOrIA = createUnionTypeSymbol(typeHelper, IBAndAsISubA, interfaceAType);
         ITypeSymbol actual = IBAndAsISubAOrIA;
-        IParametricTypeSymbol formal = createConvertibleType(symbolFactory, typeHelper);
+        IParametricTypeSymbol formal = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         IBindingCollection bindings = symbolFactory.createBindingCollection();
         bindings.addVariable("$a", new TypeVariableReference("Ta"));
         bindings.bind(formal, asList("Ta"));

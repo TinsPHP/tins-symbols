@@ -426,7 +426,7 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
 
         //pre-act necessary for arrange
         IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
-        IConvertibleTypeSymbol asIB = createConvertibleType(interfaceBType, symbolFactory, typeHelper);
+        IConvertibleTypeSymbol asIB = createConvertibleTypeSymbol(interfaceBType, symbolFactory, typeHelper);
 
         //arrange
         String tLhs = "Tlhs";
@@ -461,7 +461,8 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         //arrange
         String tLhs = "Tlhs";
         bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType(floatType, symbolFactory, typeHelper);
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol(
+                floatType, symbolFactory, typeHelper);
         bindingCollection.addUpperTypeBound(tLhs, convertibleTypeSymbol);
 
         //act
@@ -491,7 +492,8 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         //arrange
         String tLhs = "Tlhs";
         bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType(interfaceBType, symbolFactory, typeHelper);
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol(
+                interfaceBType, symbolFactory, typeHelper);
         bindingCollection.addUpperTypeBound(tLhs, convertibleTypeSymbol);
 
         //act
@@ -958,7 +960,8 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         String tLhs = "Tlhs";
         bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
         bindingCollection.addLowerTypeBound(tLhs, boolType);
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType(floatType, symbolFactory, typeHelper);
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol(floatType, symbolFactory,
+                typeHelper);
 
         //act
         BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tLhs, convertibleTypeSymbol);
@@ -987,7 +990,8 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         String tLhs = "Tlhs";
         bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
         bindingCollection.addLowerTypeBound(tLhs, boolType);
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType(interfaceBType, symbolFactory, typeHelper);
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol(
+                interfaceBType, symbolFactory, typeHelper);
 
         //act
         BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tLhs, convertibleTypeSymbol);
@@ -1019,7 +1023,7 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         bindingCollection.addVariable("$y", new TypeVariableReference(ty));
         bindingCollection.addLowerTypeBound(tx, createUnionTypeSymbol(intType, floatType));
         bindingCollection.addUpperTypeBound(ty, stringType);
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType(symbolFactory, typeHelper);
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         bindingCollection.bind(convertibleTypeSymbol, asList(ty));
 
         //act
@@ -1054,7 +1058,7 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         bindingCollection.addLowerTypeBound(tx, floatType);
         bindingCollection.addLowerTypeBound(ty, intType);
         bindingCollection.addUpperTypeBound(ty, numType);
-        IConvertibleTypeSymbol asTy = createConvertibleType(symbolFactory, typeHelper);
+        IConvertibleTypeSymbol asTy = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         bindingCollection.bind(asTy, asList(ty));
 
         //act
@@ -1087,7 +1091,7 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         bindingCollection.addLowerTypeBound(tx, intType);
         bindingCollection.addLowerTypeBound(ty, floatType);
         bindingCollection.addUpperTypeBound(ty, numType);
-        IConvertibleTypeSymbol asTy = createConvertibleType(symbolFactory, typeHelper);
+        IConvertibleTypeSymbol asTy = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         bindingCollection.bind(asTy, asList(ty));
 
         //act
@@ -1123,7 +1127,7 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         bindingCollection.addLowerTypeBound(tx, stringType);
         bindingCollection.addLowerTypeBound(ty, floatType);
         bindingCollection.addUpperTypeBound(ty, numType);
-        IConvertibleTypeSymbol asTy = createConvertibleType(symbolFactory, typeHelper);
+        IConvertibleTypeSymbol asTy = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         bindingCollection.bind(asTy, asList(ty));
 
         //act
@@ -1159,7 +1163,7 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         bindingCollection.addLowerTypeBound(tx, stringType);
         bindingCollection.addLowerTypeBound(ty, intType);
         bindingCollection.addUpperTypeBound(ty, numType);
-        IConvertibleTypeSymbol asTy = createConvertibleType(symbolFactory, typeHelper);
+        IConvertibleTypeSymbol asTy = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         bindingCollection.bind(asTy, asList(ty));
 
         //act
@@ -1194,7 +1198,7 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         bindingCollection.addVariable("$y", new TypeVariableReference(ty));
         bindingCollection.addLowerTypeBound(tx, createUnionTypeSymbol(intType, floatType));
         bindingCollection.addUpperTypeBound(ty, stringType);
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleType(symbolFactory, typeHelper);
+        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         bindingCollection.bind(convertibleTypeSymbol, asList(ty));
 
         //act
@@ -1224,7 +1228,7 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         bindingCollection.addVariable("$y", new TypeVariableReference(ty));
         bindingCollection.addUpperTypeBound(tx, numType);
         bindingCollection.addUpperTypeBound(ty, numType);
-        IConvertibleTypeSymbol asTy = createConvertibleType(symbolFactory, typeHelper);
+        IConvertibleTypeSymbol asTy = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         bindingCollection.bind(asTy, asList(ty));
 
         //act
@@ -1251,7 +1255,7 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         bindingCollection.addVariable("$y", new TypeVariableReference(ty));
         bindingCollection.addUpperTypeBound(tx, intType);
         bindingCollection.addUpperTypeBound(ty, numType);
-        IConvertibleTypeSymbol asTy = createConvertibleType(symbolFactory, typeHelper);
+        IConvertibleTypeSymbol asTy = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         bindingCollection.bind(asTy, asList(ty));
 
         //act
@@ -1278,7 +1282,7 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         bindingCollection.addVariable("$y", new TypeVariableReference(ty));
         bindingCollection.addUpperTypeBound(tx, floatType);
         bindingCollection.addUpperTypeBound(ty, numType);
-        IConvertibleTypeSymbol asTy = createConvertibleType(symbolFactory, typeHelper);
+        IConvertibleTypeSymbol asTy = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         bindingCollection.bind(asTy, asList(ty));
 
         //act
@@ -1312,7 +1316,7 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         bindingCollection.addVariable("$y", new TypeVariableReference(ty));
         bindingCollection.addUpperTypeBound(tx, stringType);
         bindingCollection.addUpperTypeBound(ty, createUnionTypeSymbol(intType, floatType));
-        IConvertibleTypeSymbol asTy = createConvertibleType(symbolFactory, typeHelper);
+        IConvertibleTypeSymbol asTy = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         bindingCollection.bind(asTy, asList(ty));
 
         //act
@@ -1348,7 +1352,7 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         bindingCollection.addVariable("$y", new TypeVariableReference(ty));
         bindingCollection.addLowerTypeBound(tx, stringType);
         bindingCollection.addUpperTypeBound(ty, createUnionTypeSymbol(intType, floatType));
-        IConvertibleTypeSymbol asTy = createConvertibleType(symbolFactory, typeHelper);
+        IConvertibleTypeSymbol asTy = createConvertibleTypeSymbol(symbolFactory, typeHelper);
         bindingCollection.bind(asTy, asList(ty));
 
         //act
