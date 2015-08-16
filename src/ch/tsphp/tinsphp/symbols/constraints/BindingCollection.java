@@ -204,6 +204,11 @@ public class BindingCollection implements IBindingCollection
     }
 
     @Override
+    public boolean containsTypeVariable(String typeVariable) {
+        return typeVariable2Variables.containsKey(typeVariable);
+    }
+
+    @Override
     public Set<String> getVariableIds() {
         return variable2TypeVariable.keySet();
     }
@@ -917,8 +922,11 @@ public class BindingCollection implements IBindingCollection
 
         boolean hasConstantReturn = propagateOrFixTypeParameters(dto);
 
-        //in case of recursion
-        removeUpperRefBounds(returnTypeVariable);
+        //only if return type variable is not itself a type parameter
+        if (!dto.typeParameters.contains(returnTypeVariable)) {
+            //in case of recursion
+            removeUpperRefBounds(returnTypeVariable);
+        }
 
         returnTypeVariable = renameToRecursiveTypeParameters(dto);
 
@@ -1031,11 +1039,11 @@ public class BindingCollection implements IBindingCollection
         Iterator<String> iterator = dto.typeParameters.iterator();
         while (iterator.hasNext()) {
             String typeParameter = iterator.next();
-            Set<String> parameterUpperRefBounds = upperRefBounds.get(typeParameter);
             if (doesContributeToTheReturnType(typeParameter, dto.returnTypeVariable)) {
                 hasConstantReturn = false;
 
                 Set<String> addToUpperRef = new HashSet<>();
+                Set<String> parameterUpperRefBounds = upperRefBounds.get(typeParameter);
                 for (String refTypeVariable : parameterUpperRefBounds) {
                     if (!dto.typeParameters.contains(refTypeVariable)) {
                         propagateTypeParameterUpwards(refTypeVariable, typeParameter, addToUpperRef, dto);
@@ -1045,7 +1053,8 @@ public class BindingCollection implements IBindingCollection
                 for (String refTypeVariable : addToUpperRef) {
                     parameterUpperRefBounds.add(refTypeVariable);
                 }
-
+            } else if (typeParameter.equals(dto.returnTypeVariable)) {
+                hasConstantReturn = false;
             } else {
                 dto.removeReturnTypeVariable.remove(typeParameter);
                 fixTypeParameter(typeParameter);
@@ -1056,18 +1065,18 @@ public class BindingCollection implements IBindingCollection
         return hasConstantReturn;
     }
 
-    private boolean doesContributeToTheReturnType(String parameterTypeVariable, String returnTypeVariable) {
+    private boolean doesContributeToTheReturnType(String typeParameter, String returnTypeVariable) {
         boolean doesContribute = false;
-        if (hasUpperRefBounds(parameterTypeVariable)) {
-            doesContribute = upperRefBounds.get(parameterTypeVariable).contains(returnTypeVariable);
+        if (hasUpperRefBounds(typeParameter)) {
+            doesContribute = upperRefBounds.get(typeParameter).contains(returnTypeVariable);
             if (doesContribute) {
-                IIntersectionTypeSymbol upperTypeBound = upperTypeBounds.get(parameterTypeVariable);
-                IUnionTypeSymbol lowerTypeBound = lowerTypeBounds.get(parameterTypeVariable);
+                IIntersectionTypeSymbol upperTypeBound = upperTypeBounds.get(typeParameter);
+                IUnionTypeSymbol lowerTypeBound = lowerTypeBounds.get(typeParameter);
                 if (lowerTypeBound != null && upperTypeBound != null) {
                     doesContribute = !typeHelper.areSame(lowerTypeBound, upperTypeBound);
                 }
 
-                //When a function has multiple returns then the type parameter does not contribute to the return type
+                // When a function has multiple returns then the type parameter does not contribute to the return type
                 // if the lower type bound of the type variable of the return variable is a parent type of the
                 // type parameters' upper type bound
                 if (doesContribute && upperTypeBound != null && lowerTypeBounds.containsKey(returnTypeVariable)) {
@@ -1137,7 +1146,9 @@ public class BindingCollection implements IBindingCollection
                 for (String variableId : entry.getValue()) {
                     fixTypeAfterContainsCheck(variableId, isNotParameter);
                 }
-                upperTypeBounds.remove(typeVariable);
+                if (hasLowerTypeBounds(typeVariable)) {
+                    upperTypeBounds.remove(typeVariable);
+                }
             }
         }
         return variablesToRename;
@@ -1298,6 +1309,11 @@ public class BindingCollection implements IBindingCollection
         }
     }
 
+    @Override
+    public void renameTypeVariableToNextFreeName(String typeVariable) {
+        renameTypeVariable(typeVariable, "V" + count++);
+    }
+
     private void renameTypeVariableAfterContainsCheck(String typeVariable, String newName) {
         IUnionTypeSymbol lowerBound = lowerTypeBounds.remove(typeVariable);
         if (lowerBound != null) {
@@ -1435,8 +1451,8 @@ public class BindingCollection implements IBindingCollection
         return upperTypeBounds.remove(typeVariable);
     }
 
-    private void mergeFirstIntoSecondAfterContainsCheck(String typeVariable, String newTypeVariable,
-            boolean avoidSelfRef) {
+    private void mergeFirstIntoSecondAfterContainsCheck(
+            String typeVariable, String newTypeVariable, boolean avoidSelfRef) {
         if (hasLowerTypeBounds(typeVariable)) {
             addLowerTypeBoundAfterContainsCheck(newTypeVariable, lowerTypeBounds.remove(typeVariable));
         }
@@ -1480,11 +1496,11 @@ public class BindingCollection implements IBindingCollection
             }
         }
 
-        //we are not interested in registering convertible types again hence we provide a dummy map which is not used
-        // afterwards instead of typeVariablesWithLowerConvertible and typeVariablesWithUpperConvertible
-        Map<String, Set<String>> dummyTypesWithConvertible = new HashMap<>();
         if (hasFirstConvertibleToSecond(typeVariablesWithLowerConvertible, newTypeVariable, typeVariable)) {
             typeVariablesWithLowerConvertible.get(newTypeVariable).remove(typeVariable);
+            // we are not interested in registering convertible types again hence we provide a dummy map which is not
+            // used afterwards instead of typeVariablesWithLowerConvertible
+            Map<String, Set<String>> dummyTypesWithConvertible = new HashMap<>();
             ITypeSymbol newLowerBound = checkForAndRegisterConvertibleType(
                     newTypeVariable, lowerTypeBounds.get(newTypeVariable), dummyTypesWithConvertible);
             if (newLowerBound == null) {
@@ -1494,6 +1510,9 @@ public class BindingCollection implements IBindingCollection
 
         if (hasFirstConvertibleToSecond(typeVariablesWithUpperConvertible, newTypeVariable, typeVariable)) {
             typeVariablesWithUpperConvertible.get(newTypeVariable).remove(typeVariable);
+            // we are not interested in registering convertible types again hence we provide a dummy map which is not
+            // used afterwards instead of typeVariablesWithUpperConvertible
+            Map<String, Set<String>> dummyTypesWithConvertible = new HashMap<>();
             ITypeSymbol newUpperBound = checkForAndRegisterConvertibleType(
                     newTypeVariable, upperTypeBounds.get(newTypeVariable), dummyTypesWithConvertible);
             if (newUpperBound == null) {
