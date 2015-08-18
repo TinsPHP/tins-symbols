@@ -1073,7 +1073,7 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
     }
 
     @Test
-    public void addUpperTypeBound_AddAsTWhereTLowerIsFloatAndTUpperIsNumAndLowerIsInt_LowerConstraintIsInt() {
+    public void addUpperTypeBound_AddAsTyWhereTyLowerIsFloatAndTyUpperIsNumAndLowerIsInt_LowerConstraintIsInt() {
         //pre-arrange
         Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions = new HashMap<>();
         Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
@@ -1238,7 +1238,7 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
                 varBinding("$x", tx, null, asList("num", "@" + ty), false),
                 varBinding("$y", ty, asList("@" + tx), asList("num"), false)
         ));
-        assertThat(resultDto.hasChanged, is(false));
+        assertThat(resultDto.hasChanged, is(true));
         assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
@@ -1265,7 +1265,7 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
                 varBinding("$x", tx, null, asList("int", "@" + ty), false),
                 varBinding("$y", ty, asList("@" + tx), asList("num"), false)
         ));
-        assertThat(resultDto.hasChanged, is(false));
+        assertThat(resultDto.hasChanged, is(true));
         assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
@@ -1292,7 +1292,7 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
                 varBinding("$x", tx, null, asList("float", "@" + ty), false),
                 varBinding("$y", ty, asList("@" + tx), asList("num"), false)
         ));
-        assertThat(resultDto.hasChanged, is(false));
+        assertThat(resultDto.hasChanged, is(true));
         assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
@@ -1726,6 +1726,59 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
 //        ));
 //        assertThat(resultDto.hasChanged, is(true));
 //    }
+
+    @Test
+    public void
+    addUpperTypeBound_AddAsT1WhereT1IsLowerNumAndCurrentUpperIsNum_EstablishRelation() {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+
+        //arrange
+        String tx = "Tx";
+        String t1 = "T1";
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addVariable("+@1|2", new TypeVariableReference(t1));
+        bindingCollection.addUpperTypeBound(t1, numType);
+        IConvertibleTypeSymbol asT1 = createConvertibleTypeSymbol(symbolFactory, typeHelper);
+        bindingCollection.bind(asT1, asList(t1));
+        bindingCollection.addUpperTypeBound(tx, numType);
+
+        //act
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, asT1);
+
+        assertThat(bindingCollection, withVariableBindings(
+                varBinding("$x", tx, null, asList("num", "@T1"), false),
+                varBinding("+@1|2", t1, asList("@Tx"), asList("num"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+    }
+
+    @Test
+    public void
+    addUpperTypeBound_AddAsT1WhereIntIsLowerT1IsLowerNumAndCurrentUpperIsNum_EstablishRelation() {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+
+        //arrange
+        String tx = "Tx";
+        String t1 = "T1";
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addVariable("+@1|2", new TypeVariableReference(t1));
+        bindingCollection.addUpperTypeBound(t1, numType);
+        IConvertibleTypeSymbol asT1 = createConvertibleTypeSymbol(symbolFactory, typeHelper);
+        bindingCollection.bind(asT1, asList(t1));
+        bindingCollection.addLowerTypeBound(tx, intType);
+        bindingCollection.addUpperTypeBound(tx, numType);
+
+        //act
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, asT1);
+
+        assertThat(bindingCollection, withVariableBindings(
+                varBinding("$x", tx, asList("int"), asList("num", "@T1"), false),
+                varBinding("+@1|2", t1, asList("int", "@Tx"), asList("num"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+    }
 
     @Test(expected = IntersectionBoundException.class)
     public void addUpperTypeBound_ContainsFinalIsNotInSameTypeHierarchy_ThrowsIntersectionBoundException() {

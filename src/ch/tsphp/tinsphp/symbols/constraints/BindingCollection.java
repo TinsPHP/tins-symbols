@@ -559,8 +559,8 @@ public class BindingCollection implements IBindingCollection
                 }
             }
 
-            if (newConvertibleTypeSymbol != null && !hasChanged && !hasLowerTypeBounds(typeVariable)) {
-                postConstrainConvertibleType(typeVariable, dto, newConvertibleTypeSymbol);
+            if (newConvertibleTypeSymbol != null && !hasChanged) {
+                hasChanged = postConstrainConvertibleType(typeVariable, dto, newConvertibleTypeSymbol);
             }
 
             if (propagateToLower && hasChanged && hasLowerRefBounds(typeVariable)) {
@@ -743,7 +743,7 @@ public class BindingCollection implements IBindingCollection
     private void throwIntersectionBoundException(ITypeSymbol typeSymbol, IIntersectionTypeSymbol upperBound) {
         if (typeSymbol.isFinal()) {
             throw new IntersectionBoundException(
-                    "The new type " + typeSymbol.getAbsoluteName() + "is final and is not in the same "
+                    "The new type " + typeSymbol.getAbsoluteName() + " is final and is not in the same "
                             + "type hierarchy as the upper type bound " + upperBound.getAbsoluteName() + ".",
                     upperBound, typeSymbol);
         } else if (upperBound.isFinal()) {
@@ -759,9 +759,10 @@ public class BindingCollection implements IBindingCollection
         }
     }
 
-    private void postConstrainConvertibleType(
+    private boolean postConstrainConvertibleType(
             String typeVariable, BoundResultDto dto, ITypeSymbol newTypeSymbol) {
 
+        boolean hasChanged = false;
         IConvertibleTypeSymbol convertibleTypeSymbol = (IConvertibleTypeSymbol) newTypeSymbol;
         if (convertibleTypeSymbol.getBindingCollection() == this) {
             IIntersectionTypeSymbol currentUpperTypeBound = upperTypeBounds.get(typeVariable);
@@ -776,13 +777,15 @@ public class BindingCollection implements IBindingCollection
                     currentUpperTypeBound, targetTypeSymbol);
 
             if (resultDto.relation == ERelation.HAS_RELATION) {
-                addLowerRefBound(convertibleTypeParameter, typeVariable, true);
+                BoundResultDto boundResultDto = addLowerRefBound(convertibleTypeParameter, typeVariable, true);
+                hasChanged = boundResultDto.hasChanged;
             } else {
                 TypeHelperDto typeHelperDto = typeHelper.isFirstSameOrSubTypeOfSecond(
                         currentUpperTypeBound, convertibleTypeSymbol);
                 transferBoundConstraints(dto, typeHelperDto.lowerConstraints, typeHelperDto.upperConstraints);
             }
         }
+        return hasChanged;
     }
 
     private boolean addToUpperIntersectionTypeSymbol(String typeVariable, ITypeSymbol typeSymbol) {
