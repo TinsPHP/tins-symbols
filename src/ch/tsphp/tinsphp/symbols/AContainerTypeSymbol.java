@@ -58,9 +58,9 @@ public abstract class AContainerTypeSymbol extends APolymorphicTypeSymbol implem
         }
     }
 
-    protected abstract boolean firstReplacesSecondType(ITypeSymbol newTypeSymbol, ITypeSymbol existingTypeSymbol);
+    protected abstract boolean firstTypeReplacesSecond(ITypeSymbol newTypeSymbol, ITypeSymbol existingTypeSymbol);
 
-    protected abstract boolean secondReplacesFirstType(ITypeSymbol newTypeSymbol, ITypeSymbol existingTypeSymbol);
+    protected abstract boolean secondTypeReplacesFirst(ITypeSymbol newTypeSymbol, ITypeSymbol existingTypeSymbol);
 
     public abstract String getTypeSeparator();
 
@@ -187,13 +187,13 @@ public abstract class AContainerTypeSymbol extends APolymorphicTypeSymbol implem
         Iterator<Map.Entry<String, ITypeSymbol>> iterator = typeSymbols.entrySet().iterator();
         while (iterator.hasNext()) {
             ITypeSymbol existingTypeSymbol = iterator.next().getValue();
-            if (firstReplacesSecondType(newTypeSymbol, existingTypeSymbol)) {
+            if (firstTypeReplacesSecond(newTypeSymbol, existingTypeSymbol)) {
                 // new type is more specific for the container type; hence the existing type does no longer provide
                 // useful information for this container type
                 status = REPLACES_EXISTING;
                 unregisterAndDecreaseNonFixedCounter(existingTypeSymbol);
                 iterator.remove();
-            } else if (status == CAN_BE_ADDED && secondReplacesFirstType(newTypeSymbol, existingTypeSymbol)) {
+            } else if (status == CAN_BE_ADDED && secondTypeReplacesFirst(newTypeSymbol, existingTypeSymbol)) {
                 status = DOES_NOT_ADD_NEW_INFORMATION;
                 break;
             }

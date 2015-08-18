@@ -35,12 +35,12 @@ public class AContainerTypeSymbolTest
         }
 
         @Override
-        protected boolean firstReplacesSecondType(ITypeSymbol newTypeSymbol, ITypeSymbol existingTypeSymbol) {
+        protected boolean firstTypeReplacesSecond(ITypeSymbol newTypeSymbol, ITypeSymbol existingTypeSymbol) {
             return false;
         }
 
         @Override
-        protected boolean secondReplacesFirstType(ITypeSymbol newTypeSymbol, ITypeSymbol existingTypeSymbol) {
+        protected boolean secondTypeReplacesFirst(ITypeSymbol newTypeSymbol, ITypeSymbol existingTypeSymbol) {
             return false;
         }
 

@@ -70,13 +70,13 @@ public class UnionTypeSymbol extends AContainerTypeSymbol implements IUnionTypeS
     //Warning! end code duplication - almost the same as in IntersectionTypeSymbol
 
     @Override
-    protected boolean firstReplacesSecondType(ITypeSymbol newTypeSymbol, ITypeSymbol existingTypeSymbol) {
+    protected boolean firstTypeReplacesSecond(ITypeSymbol newTypeSymbol, ITypeSymbol existingTypeSymbol) {
         TypeHelperDto result = typeHelper.isFirstSameOrParentTypeOfSecond(newTypeSymbol, existingTypeSymbol, false);
         return result.relation == ERelation.HAS_RELATION;
     }
 
     @Override
-    protected boolean secondReplacesFirstType(ITypeSymbol newTypeSymbol, ITypeSymbol existingTypeSymbol) {
+    protected boolean secondTypeReplacesFirst(ITypeSymbol newTypeSymbol, ITypeSymbol existingTypeSymbol) {
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(newTypeSymbol, existingTypeSymbol, false);
         return result.relation == ERelation.HAS_RELATION;
     }
