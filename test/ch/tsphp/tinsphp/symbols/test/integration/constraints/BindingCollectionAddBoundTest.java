@@ -1368,6 +1368,7 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         assertThat(resultDto.upperConstraints, is(nullValue()));
     }
 
+    //see TINS-627 multiple convertible types for same parameter
     @Test
     public void addUpperTypeBound_AddAsT2AndT2IsLowerNumAndCurrentUpperIsAsT1AndT1IsLowerNum_T1IsLowerT2LowerNum() {
         //pre-act necessary for arrange
@@ -1399,6 +1400,7 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         assertThat(resultDto.hasChanged, is(true));
     }
 
+    //see TINS-627 multiple convertible types for same parameter
     @Test
     public void addUpperTypeBound_AddAsT2AndT2IsLowerIntAndCurrentUpperIsAsT1AndT1IsLowerNum_T2IsLowerT1LowerInt() {
         //pre-act necessary for arrange
@@ -1430,6 +1432,7 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         assertThat(resultDto.hasChanged, is(true));
     }
 
+    //see TINS-627 multiple convertible types for same parameter
     @Test
     public void addUpperTypeBound_AddAsT2AndT2IsLowerNumAndCurrentUpperIsAsT1AndT1IsLowerInt_T1IsLowerT2AndLowerInt() {
         //pre-act necessary for arrange
@@ -1461,6 +1464,7 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         assertThat(resultDto.hasChanged, is(true));
     }
 
+    //see TINS-627 multiple convertible types for same parameter
     @Test
     public void addUpperTypeBound_AddAsNumAndCurrentUpperIsAsT1AndT1IsLowerNum_RemainsAsT1() {
         //pre-act necessary for arrange
@@ -1487,6 +1491,7 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         assertThat(resultDto.hasChanged, is(false));
     }
 
+    //see TINS-627 multiple convertible types for same parameter
     @Test
     public void addUpperTypeBound_AddAsIntAndCurrentUpperIsAsT1AndT1IsLowerNum_RemainsAsT1AndT1IsLowerInt() {
         //pre-act necessary for arrange
@@ -1512,6 +1517,215 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         ));
         assertThat(resultDto.hasChanged, is(true));
     }
+
+    //see TINS-630 multiple convertible types in intersection
+    @Test
+    public void addUpperTypeBound_AddAsNumAndCurrentUpperIsAsT1AndAsStringWhereT1IsLowerNum_RemainsAsT1() {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+
+        //arrange
+        String tx = "Tx";
+        String t1 = "T1";
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addVariable("+@1|2", new TypeVariableReference(t1));
+        bindingCollection.addUpperTypeBound(t1, numType);
+        IConvertibleTypeSymbol asT1 = createConvertibleTypeSymbol(symbolFactory, typeHelper);
+        bindingCollection.bind(asT1, asList(t1));
+        bindingCollection.addUpperTypeBound(tx, asT1);
+        bindingCollection.addUpperTypeBound(tx, createConvertibleTypeSymbol(stringType, symbolFactory, typeHelper));
+        IConvertibleTypeSymbol asNum = createConvertibleTypeSymbol(numType, symbolFactory, typeHelper);
+
+        //act
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, asNum);
+
+        assertThat(bindingCollection, withVariableBindings(
+                varBinding("$x", tx, null, asList("{as T1}", "{as string}"), false),
+                varBinding("+@1|2", t1, null, asList("num"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(false));
+    }
+
+    //see TINS-630 multiple convertible types in intersection
+    @Test
+    public void
+    addUpperTypeBound_AddAsIntAndCurrentUpperIsAsT1AndAsStringWhereT1IsLowerNum_RemainsAsT1AndT1IsLowerInt() {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+
+        //arrange
+        String tx = "Tx";
+        String t1 = "T1";
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addVariable("+@1|2", new TypeVariableReference(t1));
+        bindingCollection.addUpperTypeBound(t1, numType);
+        IConvertibleTypeSymbol asT1 = createConvertibleTypeSymbol(symbolFactory, typeHelper);
+        bindingCollection.bind(asT1, asList(t1));
+        bindingCollection.addUpperTypeBound(tx, asT1);
+        bindingCollection.addUpperTypeBound(tx, createConvertibleTypeSymbol(stringType, symbolFactory, typeHelper));
+        IConvertibleTypeSymbol asInt = createConvertibleTypeSymbol(intType, symbolFactory, typeHelper);
+
+        //act
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, asInt);
+
+        assertThat(bindingCollection, withVariableBindings(
+                varBinding("$x", tx, null, asList("{as T1}", "{as string}"), false),
+                varBinding("+@1|2", t1, null, asList("int"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+    }
+
+    @Test
+    public void
+    addUpperTypeBound_AddAsNumAndCurrentUpperIsAsT1AndAsT2WhereT1IsLowerNumAndT2LowerString_RemainsAsT1AsT2() {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+
+        //arrange
+        String tx = "Tx";
+        String t1 = "T1";
+        String t2 = "T2";
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addVariable("+@1|2", new TypeVariableReference(t1));
+        bindingCollection.addVariable(".@1|2", new TypeVariableReference(t2));
+        bindingCollection.addUpperTypeBound(t1, numType);
+        bindingCollection.addUpperTypeBound(t2, stringType);
+        IConvertibleTypeSymbol asT1 = createConvertibleTypeSymbol(symbolFactory, typeHelper);
+        bindingCollection.bind(asT1, asList(t1));
+        bindingCollection.addUpperTypeBound(tx, asT1);
+        IConvertibleTypeSymbol asT2 = createConvertibleTypeSymbol(symbolFactory, typeHelper);
+        bindingCollection.bind(asT2, asList(t2));
+        bindingCollection.addUpperTypeBound(tx, asT2);
+        IConvertibleTypeSymbol asNum = createConvertibleTypeSymbol(numType, symbolFactory, typeHelper);
+
+        //act
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, asNum);
+
+        assertThat(bindingCollection, withVariableBindings(
+                varBinding("$x", tx, null, asList("{as T1}", "{as T2}"), false),
+                varBinding("+@1|2", t1, null, asList("num"), false),
+                varBinding(".@1|2", t2, null, asList("string"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(false));
+    }
+
+    @Test
+    public void
+    addUpperTypeBound_AddAsIntAndCurrentUpperIsAsT1AndAsT2WhereT1IsLowerNumAndT2LowerString_RemainsAsT1AsT2() {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+
+        //arrange
+        String tx = "Tx";
+        String t1 = "T1";
+        String t2 = "T2";
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addVariable("+@1|2", new TypeVariableReference(t1));
+        bindingCollection.addVariable(".@1|2", new TypeVariableReference(t2));
+        bindingCollection.addUpperTypeBound(t1, numType);
+        bindingCollection.addUpperTypeBound(t2, stringType);
+        IConvertibleTypeSymbol asT1 = createConvertibleTypeSymbol(symbolFactory, typeHelper);
+        bindingCollection.bind(asT1, asList(t1));
+        bindingCollection.addUpperTypeBound(tx, asT1);
+        IConvertibleTypeSymbol asT2 = createConvertibleTypeSymbol(symbolFactory, typeHelper);
+        bindingCollection.bind(asT2, asList(t2));
+        bindingCollection.addUpperTypeBound(tx, asT2);
+        IConvertibleTypeSymbol asInt = createConvertibleTypeSymbol(intType, symbolFactory, typeHelper);
+
+        //act
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, asInt);
+
+        assertThat(bindingCollection, withVariableBindings(
+                varBinding("$x", tx, null, asList("{as T1}", "{as T2}"), false),
+                varBinding("+@1|2", t1, null, asList("int"), false),
+                varBinding(".@1|2", t2, null, asList("string"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+    }
+
+    @Test
+    public void
+    addUpperTypeBound_AddAsT3AndAsStringWhereCurrentUpperIsAsT1AndAsT2WhereT1LowNumT2LowStringT3LowNum_EstablishRelation() {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+
+        //arrange
+        String tx = "Tx";
+        String t1 = "T1";
+        String t2 = "T2";
+        String t3 = "T3";
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addVariable("+@1|2", new TypeVariableReference(t1));
+        bindingCollection.addVariable(".@1|2", new TypeVariableReference(t2));
+        bindingCollection.addVariable("+@3|0", new TypeVariableReference(t3));
+        bindingCollection.addUpperTypeBound(t1, numType);
+        bindingCollection.addUpperTypeBound(t2, stringType);
+        bindingCollection.addUpperTypeBound(t3, numType);
+        IConvertibleTypeSymbol asT1 = createConvertibleTypeSymbol(symbolFactory, typeHelper);
+        bindingCollection.bind(asT1, asList(t1));
+        bindingCollection.addUpperTypeBound(tx, asT1);
+        IConvertibleTypeSymbol asT2 = createConvertibleTypeSymbol(symbolFactory, typeHelper);
+        bindingCollection.bind(asT2, asList(t2));
+        bindingCollection.addUpperTypeBound(tx, asT2);
+        IConvertibleTypeSymbol asT3 = createConvertibleTypeSymbol(symbolFactory, typeHelper);
+        bindingCollection.bind(asT3, asList(t3));
+        IConvertibleTypeSymbol asString = createConvertibleTypeSymbol(stringType, symbolFactory, typeHelper);
+        IIntersectionTypeSymbol asT3AndAsString = createIntersectionTypeSymbol(asT3, asString);
+
+        //act
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, asT3AndAsString);
+
+        assertThat(bindingCollection, withVariableBindings(
+                varBinding("$x", tx, null, asList("{as T3}", "{as T2}"), false),
+                varBinding("+@1|2", t1, null, asList("num"), false),
+                varBinding(".@1|2", t2, null, asList("string"), false),
+                varBinding("+@3|0", t3, null, asList("num"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+    }
+
+    //TODO TINS-632 - handle convertible type in upper bound
+//    @Test
+//    public void
+//    addUpperTypeBound_AddAsT3AndAsISubAWhereCurrentUpperIsAsT1AndAsT2WhereT1LowNumT2LowIAT3LowInt_EstablishRelation
+// () {
+//        //pre-act necessary for arrange
+//        IBindingCollection bindingCollection = createBindingCollection();
+//
+//        //arrange
+//        String tx = "Tx";
+//        String t1 = "T1";
+//        String t2 = "T2";
+//        String t3 = "T3";
+//        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+//        bindingCollection.addVariable("+@1|2", new TypeVariableReference(t1));
+//        bindingCollection.addVariable(".@1|2", new TypeVariableReference(t2));
+//        bindingCollection.addVariable("+@3|0", new TypeVariableReference(t3));
+//        bindingCollection.addUpperTypeBound(t1, numType);
+//        bindingCollection.addUpperTypeBound(t2, interfaceAType);
+//        bindingCollection.addUpperTypeBound(t3, intType);
+//        IConvertibleTypeSymbol asT1 = createConvertibleTypeSymbol(symbolFactory, typeHelper);
+//        bindingCollection.bind(asT1, asList(t1));
+//        bindingCollection.addUpperTypeBound(tx, asT1);
+//        IConvertibleTypeSymbol asT2 = createConvertibleTypeSymbol(symbolFactory, typeHelper);
+//        bindingCollection.bind(asT2, asList(t2));
+//        bindingCollection.addUpperTypeBound(tx, asT2);
+//        IConvertibleTypeSymbol asT3 = createConvertibleTypeSymbol(symbolFactory, typeHelper);
+//        bindingCollection.bind(asT3, asList(t3));
+//        IConvertibleTypeSymbol asISubA = createConvertibleTypeSymbol(interfaceSubAType, symbolFactory, typeHelper);
+//        IIntersectionTypeSymbol asT3AndAsISubA = createIntersectionTypeSymbol(asT3, asISubA);
+//
+//        //act
+//        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, asT3AndAsISubA);
+//
+//        assertThat(bindingCollection, withVariableBindings(
+//                varBinding("$x", tx, null, asList("{as T3}", "{as T2}"), false),
+//                varBinding("+@1|2", t1, null, asList("num"), false),
+//                varBinding(".@1|2", t2, null, asList("ISubA"), false),
+//                varBinding("+@3|0", t3, null, asList("int"), false)
+//        ));
+//        assertThat(resultDto.hasChanged, is(true));
+//    }
 
     @Test(expected = IntersectionBoundException.class)
     public void addUpperTypeBound_ContainsFinalIsNotInSameTypeHierarchy_ThrowsIntersectionBoundException() {

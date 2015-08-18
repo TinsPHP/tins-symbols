@@ -8,6 +8,7 @@ package ch.tsphp.tinsphp.symbols;
 
 import ch.tsphp.common.symbols.ITypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IContainerTypeSymbol;
+import ch.tsphp.tinsphp.common.symbols.IConvertibleTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IIntersectionTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.IParametricTypeSymbol;
 import ch.tsphp.tinsphp.common.symbols.PrimitiveTypeNames;
@@ -74,7 +75,18 @@ public class IntersectionTypeSymbol extends AContainerTypeSymbol implements IInt
     @Override
     protected boolean firstTypeReplacesSecond(ITypeSymbol newTypeSymbol, ITypeSymbol existingTypeSymbol) {
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(newTypeSymbol, existingTypeSymbol, false);
-        return result.relation == ERelation.HAS_RELATION;
+        boolean replacesIt = result.relation == ERelation.HAS_RELATION;
+        if (replacesIt
+                && existingTypeSymbol instanceof IConvertibleTypeSymbol
+                && newTypeSymbol instanceof IConvertibleTypeSymbol) {
+            IConvertibleTypeSymbol oldConvertibleType = (IConvertibleTypeSymbol) existingTypeSymbol;
+            IConvertibleTypeSymbol newConvertibleType = (IConvertibleTypeSymbol) newTypeSymbol;
+            if (!oldConvertibleType.isFixed() && newConvertibleType.isFixed()) {
+                replacesIt = !typeHelper.areSame(
+                        oldConvertibleType.getUpperTypeBounds(), newConvertibleType.getUpperTypeBounds());
+            }
+        }
+        return replacesIt;
     }
 
     @Override
