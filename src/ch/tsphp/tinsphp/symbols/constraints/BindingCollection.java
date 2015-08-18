@@ -354,7 +354,7 @@ public class BindingCollection implements IBindingCollection
         BoundResultDto dto = checkUpperTypeBounds(typeVariable, typeSymbol);
         boolean hasChanged = false;
 
-        ITypeSymbol newTypeSymbol = checkForAndRegisterConvertibleType(
+        ITypeSymbol newTypeSymbol = checkForAndRegisterOrDeleteConvertibleType(
                 typeVariable, typeSymbol, typeVariablesWithLowerConvertible);
 
         if (newTypeSymbol != null) {
@@ -434,49 +434,59 @@ public class BindingCollection implements IBindingCollection
      * @return The typeSymbol which shall be added or null if it is a self ref (or a container which is empty after
      * removing self references)
      */
-    private ITypeSymbol checkForAndRegisterConvertibleType(
+    private ITypeSymbol checkForAndRegisterOrDeleteConvertibleType(
             String typeVariable, ITypeSymbol typeSymbol, Map<String, Set<String>> typeVariablesWithConvertible) {
-        ITypeSymbol nonConvertibleType = null;
+        ITypeSymbol nonSelfRefType = null;
         if (typeSymbol instanceof IContainerTypeSymbol) {
             IContainerTypeSymbol containerTypeSymbol = (IContainerTypeSymbol) typeSymbol;
             if (containerTypeSymbol.isFixed()) {
-                nonConvertibleType = containerTypeSymbol;
+                nonSelfRefType = containerTypeSymbol;
             } else {
                 Map<String, ITypeSymbol> typeSymbols = containerTypeSymbol.getTypeSymbols();
                 Set<String> absoluteNames = new HashSet<>();
                 for (Map.Entry<String, ITypeSymbol> entry : typeSymbols.entrySet()) {
                     ITypeSymbol innerTypeSymbol = entry.getValue();
-                    ITypeSymbol nonConvertibleInnerType = checkForAndRegisterConvertibleType(
+                    ITypeSymbol nonConvertibleInnerType = checkForAndRegisterOrDeleteConvertibleType(
                             typeVariable, innerTypeSymbol, typeVariablesWithConvertible);
                     if (nonConvertibleInnerType == null) {
+                        // collecting names of convertibles which are self refs
+                        // and hence need to be removed prior it can be applied
                         absoluteNames.add(entry.getKey());
                     }
                 }
+
+                // if typeVariablesWithConvertible == null then we want to remove it from the original type symbol
+                // otherwise we create a copy in order that we use the remaining type (e.g. as upper type bound)
+                if (typeVariablesWithConvertible != null && !absoluteNames.isEmpty()) {
+                    containerTypeSymbol = containerTypeSymbol.copy(new ArrayDeque<IParametricTypeSymbol>());
+                    typeSymbols = containerTypeSymbol.getTypeSymbols();
+                }
                 for (String absoluteName : absoluteNames) {
+                    //remove all convertible types with self refs
                     containerTypeSymbol.remove(absoluteName);
                 }
                 int size = typeSymbols.size();
                 if (size == 1) {
-                    nonConvertibleType = typeSymbols.values().iterator().next();
+                    nonSelfRefType = typeSymbols.values().iterator().next();
                 } else if (size > 1) {
-                    nonConvertibleType = containerTypeSymbol;
+                    nonSelfRefType = containerTypeSymbol;
                 }
             }
         } else if (typeSymbol instanceof IConvertibleTypeSymbol) {
             IConvertibleTypeSymbol convertibleTypeSymbol = (IConvertibleTypeSymbol) typeSymbol;
             if (convertibleTypeSymbol.getBindingCollection() == this) {
                 String convertibleTypeVariable = convertibleTypeSymbol.getTypeVariable();
-                if (!convertibleTypeVariable.equals(typeVariable)) {
-                    nonConvertibleType = typeSymbol;
+                if (typeVariablesWithConvertible != null && !convertibleTypeVariable.equals(typeVariable)) {
+                    nonSelfRefType = typeSymbol;
                     MapHelper.addToSetInMap(typeVariablesWithConvertible, typeVariable, convertibleTypeVariable);
                 }
             } else {
-                nonConvertibleType = typeSymbol;
+                nonSelfRefType = typeSymbol;
             }
         } else {
-            nonConvertibleType = typeSymbol;
+            nonSelfRefType = typeSymbol;
         }
-        return nonConvertibleType;
+        return nonSelfRefType;
     }
 
     private boolean addToLowerUnionTypeSymbol(String typeVariable, ITypeSymbol typeSymbol) {
@@ -531,7 +541,7 @@ public class BindingCollection implements IBindingCollection
 
         ITypeSymbol newTypeSymbol;
         if (dto.implicitConversionProvider == null) {
-            newTypeSymbol = checkForAndRegisterConvertibleType(
+            newTypeSymbol = checkForAndRegisterOrDeleteConvertibleType(
                     typeVariable, typeSymbol, typeVariablesWithUpperConvertible);
         } else {
             newTypeSymbol = dto.implicitConversionProvider;
@@ -1587,11 +1597,9 @@ public class BindingCollection implements IBindingCollection
 
         if (hasFirstConvertibleToSecond(typeVariablesWithLowerConvertible, newTypeVariable, typeVariable)) {
             typeVariablesWithLowerConvertible.get(newTypeVariable).remove(typeVariable);
-            // we are not interested in registering convertible types again hence we provide a dummy map which is not
-            // used afterwards instead of typeVariablesWithLowerConvertible
-            Map<String, Set<String>> dummyTypesWithConvertible = new HashMap<>();
-            ITypeSymbol newLowerBound = checkForAndRegisterConvertibleType(
-                    newTypeVariable, lowerTypeBounds.get(newTypeVariable), dummyTypesWithConvertible);
+            //null indicates that it shall be deleted
+            ITypeSymbol newLowerBound = checkForAndRegisterOrDeleteConvertibleType(
+                    newTypeVariable, lowerTypeBounds.get(newTypeVariable), null);
             if (newLowerBound == null) {
                 lowerTypeBounds.remove(newTypeVariable);
             }
@@ -1599,11 +1607,9 @@ public class BindingCollection implements IBindingCollection
 
         if (hasFirstConvertibleToSecond(typeVariablesWithUpperConvertible, newTypeVariable, typeVariable)) {
             typeVariablesWithUpperConvertible.get(newTypeVariable).remove(typeVariable);
-            // we are not interested in registering convertible types again hence we provide a dummy map which is not
-            // used afterwards instead of typeVariablesWithUpperConvertible
-            Map<String, Set<String>> dummyTypesWithConvertible = new HashMap<>();
-            ITypeSymbol newUpperBound = checkForAndRegisterConvertibleType(
-                    newTypeVariable, upperTypeBounds.get(newTypeVariable), dummyTypesWithConvertible);
+            //null indicates that it shall be deleted
+            ITypeSymbol newUpperBound = checkForAndRegisterOrDeleteConvertibleType(
+                    newTypeVariable, upperTypeBounds.get(newTypeVariable), null);
             if (newUpperBound == null) {
                 upperTypeBounds.remove(newTypeVariable);
             }
