@@ -308,7 +308,8 @@ public class BindingCollection implements IBindingCollection
 
         if (to.implicitConversionProvider == null) {
             to.implicitConversionProvider = from.implicitConversionProvider;
-        } else if (from.implicitConversionProvider != null) {
+        } else if (from.implicitConversionProvider != null
+                && !typeHelper.areSame(to.implicitConversionProvider, from.implicitConversionProvider)) {
             throw new UnsupportedOperationException("more than one conversion provider");
         }
 
