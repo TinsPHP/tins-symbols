@@ -352,6 +352,11 @@ public class BindingCollection implements IBindingCollection
     }
 
     private BoundResultDto addLowerTypeBoundAfterContainsCheck(String typeVariable, ITypeSymbol typeSymbol) {
+        //no need to proceed if the same type is added
+        if (hasLowerTypeBounds(typeVariable) && typeHelper.areSame(lowerTypeBounds.get(typeVariable), typeSymbol)) {
+            return new BoundResultDto();
+        }
+
         BoundResultDto dto = checkUpperTypeBounds(typeVariable, typeSymbol);
         boolean hasChanged = false;
 
@@ -537,6 +542,12 @@ public class BindingCollection implements IBindingCollection
 
     private BoundResultDto addUpperTypeBoundAfterContainsCheck(
             String typeVariable, ITypeSymbol typeSymbol, boolean propagateToLower) {
+
+        //no need to proceed if the same type is added
+        if (hasUpperTypeBounds(typeVariable) && typeHelper.areSame(upperTypeBounds.get(typeVariable), typeSymbol)) {
+            return new BoundResultDto();
+        }
+
         BoundResultDto dto = checkLowerTypeBounds(typeVariable, typeSymbol);
         boolean hasChanged = false;
 
@@ -692,11 +703,107 @@ public class BindingCollection implements IBindingCollection
             String typeVariable, BoundResultDto dto, ITypeSymbol typeSymbol) {
 
         boolean hasChanged = false;
-
         IIntersectionTypeSymbol upperBound = upperTypeBounds.get(typeVariable);
-        // if (a) the current upper type bound or/and the new typeSymbol are final or
-        // (b) the current or the new typeSymbol cannot be used in an intersection type with
-        // others which cannot be used in an intersection
+        if (upperBound.isFinal() && typeSymbol.isFinal()) {
+            throw new IntersectionBoundException("The current upper type bound " + upperBound.getAbsoluteName()
+                    + " is final and the new type " + typeSymbol.getAbsoluteName() + " as well.",
+                    upperBound, typeSymbol);
+        }
+
+        Iterator<ITypeSymbol> iterator = upperBound.getTypeSymbols().values().iterator();
+        ITypeSymbol firstType = iterator.next();
+        boolean hasOnlyOneType = !iterator.hasNext();
+        if (hasOnlyOneType && firstType instanceof IUnionTypeSymbol) {
+            hasChanged = checkUnionTypeAndAddToUpperTypeBounds(
+                    typeVariable, typeSymbol, upperBound, (IUnionTypeSymbol) firstType, true);
+        } else if (typeSymbol instanceof IContainerTypeSymbol) {
+            if (typeSymbol instanceof IUnionTypeSymbol) {
+                hasChanged = checkUnionTypeAndAddToUpperTypeBounds(
+                        typeVariable, typeSymbol, upperBound, (IUnionTypeSymbol) typeSymbol, false);
+            } else {
+                Iterator<ITypeSymbol> newTypeIterator
+                        = ((IContainerTypeSymbol) typeSymbol).getTypeSymbols().values().iterator();
+                if (newTypeIterator.hasNext()) {
+                    ITypeSymbol firstNewType = newTypeIterator.next();
+                    hasOnlyOneType = !newTypeIterator.hasNext();
+                    if (hasOnlyOneType && firstNewType instanceof IUnionTypeSymbol) {
+                        hasChanged = checkUnionTypeAndAddToUpperTypeBounds(
+                                typeVariable, typeSymbol, upperBound, (IUnionTypeSymbol) firstNewType, false);
+                    } else {
+                        hasChanged = checkNonUnionTypeAndAddToUpperTypeBounds(
+                                typeVariable, dto, upperBound, typeSymbol);
+                    }
+                } else {
+                    //add empty intersection type = mixed to upper type bound does not make sense
+                    //just neglect it
+                }
+            }
+        } else {
+            hasChanged = checkNonUnionTypeAndAddToUpperTypeBounds(typeVariable, dto, upperBound, typeSymbol);
+        }
+
+        return hasChanged;
+    }
+
+    private boolean checkUnionTypeAndAddToUpperTypeBounds(
+            String typeVariable,
+            ITypeSymbol typeSymbol,
+            IIntersectionTypeSymbol upperBound,
+            IUnionTypeSymbol unionTypeSymbol,
+            boolean checkCurrentTypeBound) {
+
+        boolean hasChanged;
+        boolean areAllFinal = true;
+        Collection<ITypeSymbol> values = unionTypeSymbol.getTypeSymbols().values();
+        for (ITypeSymbol innerTypeSymbol : values) {
+            if (!innerTypeSymbol.isFinal()) {
+                areAllFinal = false;
+                break;
+            }
+        }
+
+        if (areAllFinal) {
+            boolean oneIsSubtype = false;
+            for (ITypeSymbol innerTypeSymbol : values) {
+                TypeHelperDto resultDto;
+                if (checkCurrentTypeBound) {
+                    resultDto = typeHelper.isFirstSameOrSubTypeOfSecond(innerTypeSymbol, typeSymbol, false);
+                } else {
+                    resultDto = typeHelper.isFirstSameOrSubTypeOfSecond(innerTypeSymbol, upperBound, false);
+                }
+                if (resultDto.relation == ERelation.HAS_RELATION) {
+                    oneIsSubtype = true;
+                    break;
+                }
+            }
+            if (oneIsSubtype) {
+                hasChanged = addToUpperIntersectionTypeSymbol(typeVariable, typeSymbol);
+            } else if (checkCurrentTypeBound) {
+                throw new IntersectionBoundException("The current upper type bound "
+                        + upperBound.getAbsoluteName() + " contains only final types of which "
+                        + "none is a subtype of the new type " + typeSymbol.getAbsoluteName(),
+                        upperBound, typeSymbol);
+            } else {
+                throw new IntersectionBoundException("The new type"
+                        + typeSymbol.getAbsoluteName() + " contains only final types of which "
+                        + "none is a subtype of the current upper type bound " + upperBound.getAbsoluteName(),
+                        upperBound, typeSymbol);
+            }
+        } else {
+            hasChanged = addToUpperIntersectionTypeSymbol(typeVariable, typeSymbol);
+        }
+        return hasChanged;
+    }
+
+    private boolean checkNonUnionTypeAndAddToUpperTypeBounds(
+            String typeVariable, BoundResultDto dto, IIntersectionTypeSymbol upperBound, ITypeSymbol typeSymbol) {
+
+        boolean hasChanged = false;
+
+        // if
+        // (a) the current upper type bound or/and the new typeSymbol are final or
+        // (c) the current or the new typeSymbol cannot be used in an intersection type with
+        //     others which cannot be used in an intersection
         // ==> then either the current upper type bound and the new typeSymbol are in the same type hierarchy or
         // the new typeSymbol is a coercive subtype of the current upper type bound and hence can be narrowed.
         // Otherwise we have a bound constraint.

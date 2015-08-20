@@ -58,6 +58,11 @@ public class AContainerTypeSymbolTest
         public IContainerTypeSymbol copy(Collection<IParametricTypeSymbol> parametricTypeSymbols) {
             return null;
         }
+
+        @Override
+        public boolean isFinal() {
+            return false;
+        }
     }
 
     @Test

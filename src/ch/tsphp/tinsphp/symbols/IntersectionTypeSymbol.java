@@ -94,4 +94,19 @@ public class IntersectionTypeSymbol extends AContainerTypeSymbol implements IInt
         TypeHelperDto result = typeHelper.isFirstSameOrParentTypeOfSecond(newTypeSymbol, existingTypeSymbol, false);
         return result.relation == ERelation.HAS_RELATION;
     }
+
+    @Override
+    public boolean isFinal() {
+        switch (typeSymbols.size()) {
+            case 0:
+                //empty intersection = mixed, mixed has subtypes
+                return false;
+            case 1:
+                return typeSymbols.values().iterator().next().isFinal();
+            default:
+                //an intersection with multiple types must have subtypes we do not create one if its types are not
+                // none-final
+                return false;
+        }
+    }
 }

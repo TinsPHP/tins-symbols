@@ -80,4 +80,18 @@ public class UnionTypeSymbol extends AContainerTypeSymbol implements IUnionTypeS
         TypeHelperDto result = typeHelper.isFirstSameOrSubTypeOfSecond(newTypeSymbol, existingTypeSymbol, false);
         return result.relation == ERelation.HAS_RELATION;
     }
+
+    @Override
+    public boolean isFinal() {
+        switch (typeSymbols.size()) {
+            case 0:
+                //empty union = nothing => is always fixed
+                return true;
+            case 1:
+                return typeSymbols.values().iterator().next().isFinal();
+            default:
+                //there is always a subtype of a union with multiple types
+                return false;
+        }
+    }
 }

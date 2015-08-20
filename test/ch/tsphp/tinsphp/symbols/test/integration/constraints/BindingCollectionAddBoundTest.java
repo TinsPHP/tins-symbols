@@ -1194,23 +1194,29 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         //arrange
         String tx = "Tx";
         String ty = "Ty";
+        String tz = "Tz";
         bindingCollection.addVariable("$x", new TypeVariableReference(tx));
         bindingCollection.addVariable("$y", new TypeVariableReference(ty));
+        bindingCollection.addVariable("$z", new TypeVariableReference(tz));
         bindingCollection.addLowerTypeBound(tx, createUnionTypeSymbol(intType, floatType));
         bindingCollection.addUpperTypeBound(ty, stringType);
-        IConvertibleTypeSymbol convertibleTypeSymbol = createConvertibleTypeSymbol(symbolFactory, typeHelper);
-        bindingCollection.bind(convertibleTypeSymbol, asList(ty));
+        bindingCollection.addUpperTypeBound(tz, stringType);
+        IConvertibleTypeSymbol asTy = createConvertibleTypeSymbol(symbolFactory, typeHelper);
+        bindingCollection.bind(asTy, asList(ty));
+        IConvertibleTypeSymbol asTz = createConvertibleTypeSymbol(symbolFactory, typeHelper);
+        bindingCollection.bind(asTz, asList(tz));
 
         //act
-        bindingCollection.addUpperTypeBound(tx, convertibleTypeSymbol);
-        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, convertibleTypeSymbol);
+        bindingCollection.addUpperTypeBound(tx, asTy);
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, asTz);
 
         assertThat(bindingCollection, withVariableBindings(
-                varBinding("$x", tx, asList("int", "float"), asList("{as " + ty + "}"), false),
-                varBinding("$y", ty, null, asList("string"), false)
+                varBinding("$x", tx, asList("int", "float"), asList("{as " + tz + "}"), false),
+                varBinding("$y", ty, null, asList("string", "@Tz"), false),
+                varBinding("$z", tz, asList("@Ty"), asList("string"), false)
         ));
-        assertThat(resultDto.lowerConstraints, isConstraints(pair(ty, set("string"))));
-        assertThat(resultDto.hasChanged, is(false));
+        assertThat(resultDto.lowerConstraints, isConstraints(pair(tz, set("string"))));
+        assertThat(resultDto.hasChanged, is(true));
         assertThat(resultDto.usedImplicitConversion, is(false));
     }
 
@@ -1858,7 +1864,7 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         String tLhs = "Tlhs";
         bindingCollection.addVariable("$lhs", new TypeVariableReference(tLhs));
         ITypeSymbol typeSymbol2 = mock(ITypeSymbol.class);
-        when(typeSymbol2.isFinal()).thenReturn(true);
+        when(typeSymbol2.isFinal()).thenReturn(false);
         when(typeSymbol2.getAbsoluteName()).thenReturn("B");
 
         Set<ITypeSymbol> parentTypes = new HashSet<>();
@@ -1928,6 +1934,336 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         ));
         assertThat(resultDto.hasChanged, is(true));
         assertThat(resultDto.usedImplicitConversion, is(true));
+    }
+
+
+    //see TINS-553 isFinal, container types and upper type bounds
+    @Test(expected = IntersectionBoundException.class)
+    public void addUpperTypeBound_AddFinalTypeAndCurrentIsFinalAlready_ThrowsIntersectionBoundException() {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+
+        //arrange
+        ITypeSymbol finalType1 = mock(ITypeSymbol.class);
+        when(finalType1.isFinal()).thenReturn(true);
+        when(finalType1.getAbsoluteName()).thenReturn("dummy1");
+        when(finalType1.getParentTypeSymbols()).thenReturn(new HashSet<ITypeSymbol>());
+        ITypeSymbol finalType2 = mock(ITypeSymbol.class);
+        when(finalType2.isFinal()).thenReturn(true);
+        when(finalType2.getAbsoluteName()).thenReturn("dummy2");
+        when(finalType2.getParentTypeSymbols()).thenReturn(new HashSet<ITypeSymbol>());
+
+        String tx = "Tx";
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addUpperTypeBound(tx, createUnionTypeSymbol(finalType1, finalType1));
+
+
+        //act
+        bindingCollection.addUpperTypeBound(tx, finalType2);
+
+
+        //assert in annotation
+    }
+
+    //see TINS-553 isFinal, container types and upper type bounds
+    @Test
+    public void addUpperTypeBound_AddFinalTypeAndCurrentIsTheSameType_DoesNothingHasNotChanged() {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+
+        //arrange
+        ITypeSymbol finalType1 = mock(ITypeSymbol.class);
+        when(finalType1.isFinal()).thenReturn(true);
+        when(finalType1.getAbsoluteName()).thenReturn("dummy1");
+        when(finalType1.getParentTypeSymbols()).thenReturn(new HashSet<ITypeSymbol>());
+
+        String tx = "Tx";
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addUpperTypeBound(tx, createUnionTypeSymbol(finalType1, finalType1));
+
+
+        //act
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, finalType1);
+
+
+        //assert
+        assertThat(bindingCollection, withVariableBindings(
+                varBinding("$x", tx, null, asList("dummy1"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(false));
+    }
+
+    //see TINS-553 isFinal, container types and upper type bounds
+    @Test(expected = IntersectionBoundException.class)
+    public void addUpperTypeBound_AddIBAndCurrentAreTwoFinalTypesInUnion_ThrowsIntersectionBoundException() {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+
+        //arrange
+        ITypeSymbol finalType1 = mock(ITypeSymbol.class);
+        when(finalType1.isFinal()).thenReturn(true);
+        when(finalType1.getAbsoluteName()).thenReturn("dummy1");
+        when(finalType1.getParentTypeSymbols()).thenReturn(new HashSet<ITypeSymbol>());
+        ITypeSymbol finalType2 = mock(ITypeSymbol.class);
+        when(finalType2.isFinal()).thenReturn(true);
+        when(finalType2.getAbsoluteName()).thenReturn("dummy2");
+        when(finalType2.getParentTypeSymbols()).thenReturn(new HashSet<ITypeSymbol>());
+
+        String tx = "Tx";
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addUpperTypeBound(tx, createUnionTypeSymbol(finalType1, finalType2));
+
+
+        //act
+        bindingCollection.addUpperTypeBound(tx, interfaceBType);
+
+
+        //assert in annotation
+    }
+
+    //see TINS-553 isFinal, container types and upper type bounds
+    @Test(expected = IntersectionBoundException.class)
+    public void addUpperTypeBound_AddTwoFinalTypesInUnionAndCurrentIsIB_ThrowsIntersectionBoundException() {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+
+        //arrange
+        ITypeSymbol finalType1 = mock(ITypeSymbol.class);
+        when(finalType1.isFinal()).thenReturn(true);
+        when(finalType1.getAbsoluteName()).thenReturn("dummy1");
+        when(finalType1.getParentTypeSymbols()).thenReturn(new HashSet<ITypeSymbol>());
+        ITypeSymbol finalType2 = mock(ITypeSymbol.class);
+        when(finalType2.isFinal()).thenReturn(true);
+        when(finalType2.getAbsoluteName()).thenReturn("dummy2");
+        when(finalType2.getParentTypeSymbols()).thenReturn(new HashSet<ITypeSymbol>());
+
+        String tx = "Tx";
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addUpperTypeBound(tx, interfaceBType);
+
+
+        //act
+        bindingCollection.addUpperTypeBound(tx, createUnionTypeSymbol(finalType1, finalType2));
+
+
+        //assert in annotation
+    }
+
+    //see TINS-553 isFinal, container types and upper type bounds
+    @Test(expected = IntersectionBoundException.class)
+    public void
+    addUpperTypeBound_AddTwoFinalTypesInUnionInIntersectionAndCurrentIsIB_ThrowsIntersectionBoundException() {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+
+        //arrange
+        ITypeSymbol finalType1 = mock(ITypeSymbol.class);
+        when(finalType1.isFinal()).thenReturn(true);
+        when(finalType1.getAbsoluteName()).thenReturn("dummy1");
+        when(finalType1.getParentTypeSymbols()).thenReturn(new HashSet<ITypeSymbol>());
+        ITypeSymbol finalType2 = mock(ITypeSymbol.class);
+        when(finalType2.isFinal()).thenReturn(true);
+        when(finalType2.getAbsoluteName()).thenReturn("dummy2");
+        when(finalType2.getParentTypeSymbols()).thenReturn(new HashSet<ITypeSymbol>());
+
+        String tx = "Tx";
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addUpperTypeBound(tx, interfaceBType);
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(finalType1, finalType2);
+        IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol(unionTypeSymbol);
+
+
+        //act
+        bindingCollection.addUpperTypeBound(tx, intersectionTypeSymbol);
+
+
+        //assert in annotation
+    }
+
+    //see TINS-553 isFinal, container types and upper type bounds
+    @Test
+    public void addUpperTypeBound_AddIBAndCurrentAreTwoFinalTypesInUnionOfWhichOneIsSubTypeOfIB_AddsIt() {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+
+        //arrange
+        ITypeSymbol finalType1 = mock(ITypeSymbol.class);
+        when(finalType1.isFinal()).thenReturn(true);
+        when(finalType1.getAbsoluteName()).thenReturn("dummy1");
+        when(finalType1.getParentTypeSymbols()).thenReturn(new HashSet<ITypeSymbol>());
+        ITypeSymbol finalType2 = mock(ITypeSymbol.class);
+        when(finalType2.isFinal()).thenReturn(true);
+        when(finalType2.getAbsoluteName()).thenReturn("dummy2");
+        HashSet<ITypeSymbol> parentTypes = new HashSet<>();
+        parentTypes.add(interfaceBType);
+        when(finalType2.getParentTypeSymbols()).thenReturn(parentTypes);
+
+        String tx = "Tx";
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addUpperTypeBound(tx, createUnionTypeSymbol(finalType1, finalType2));
+
+
+        //act
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, interfaceBType);
+
+        //assert
+        assertThat(bindingCollection, withVariableBindings(
+                varBinding("$x", tx, null, asList("(dummy1 | dummy2)", "IB"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+    }
+
+    //see TINS-553 isFinal, container types and upper type bounds
+    @Test
+    public void addUpperTypeBound_AddTwoFinalTypesInUnionOfWhichOneIsSubTypeOfIBAndCurrentIsIB_AddsThem() {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+
+        //arrange
+        ITypeSymbol finalType1 = mock(ITypeSymbol.class);
+        when(finalType1.isFinal()).thenReturn(true);
+        when(finalType1.getAbsoluteName()).thenReturn("dummy1");
+        when(finalType1.getParentTypeSymbols()).thenReturn(new HashSet<ITypeSymbol>());
+        ITypeSymbol finalType2 = mock(ITypeSymbol.class);
+        when(finalType2.isFinal()).thenReturn(true);
+        when(finalType2.getAbsoluteName()).thenReturn("dummy2");
+        HashSet<ITypeSymbol> parentTypes = new HashSet<>();
+        parentTypes.add(interfaceBType);
+        when(finalType2.getParentTypeSymbols()).thenReturn(parentTypes);
+
+        String tx = "Tx";
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addUpperTypeBound(tx, interfaceBType);
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(finalType1, finalType2);
+
+
+        //act
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, unionTypeSymbol);
+
+
+        //assert
+        assertThat(bindingCollection, withVariableBindings(
+                varBinding("$x", tx, null, asList("(dummy1 | dummy2)", "IB"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+    }
+
+    //see TINS-553 isFinal, container types and upper type bounds
+    @Test
+    public void addUpperTypeBound_AddTwoFinalTypesInUnionInIntersectionOfWhichOneIsSubTypeOfIBAndCurrentIsIB_AddsThem
+    () {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+
+        //arrange
+        ITypeSymbol finalType1 = mock(ITypeSymbol.class);
+        when(finalType1.isFinal()).thenReturn(true);
+        when(finalType1.getAbsoluteName()).thenReturn("dummy1");
+        when(finalType1.getParentTypeSymbols()).thenReturn(new HashSet<ITypeSymbol>());
+        ITypeSymbol finalType2 = mock(ITypeSymbol.class);
+        when(finalType2.isFinal()).thenReturn(true);
+        when(finalType2.getAbsoluteName()).thenReturn("dummy2");
+        HashSet<ITypeSymbol> parentTypes = new HashSet<>();
+        parentTypes.add(interfaceBType);
+        when(finalType2.getParentTypeSymbols()).thenReturn(parentTypes);
+
+        String tx = "Tx";
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addUpperTypeBound(tx, interfaceBType);
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(finalType1, finalType2);
+        IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol(unionTypeSymbol);
+
+        //act
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, intersectionTypeSymbol);
+
+
+        //assert
+        assertThat(bindingCollection, withVariableBindings(
+                varBinding("$x", tx, null, asList("(dummy1 | dummy2)", "IB"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+    }
+
+    //see TINS-553 isFinal, container types and upper type bounds
+    @Test
+    public void addUpperTypeBound_AddIBAndCurrentIsFinalOrFoo_UpperIsIntOrFooAndIB() {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+
+        //arrange
+        ITypeSymbol finalType = mock(ITypeSymbol.class);
+        when(finalType.isFinal()).thenReturn(true);
+        when(finalType.getAbsoluteName()).thenReturn("dummy");
+        when(finalType.getParentTypeSymbols()).thenReturn(new HashSet<ITypeSymbol>());
+
+        String tx = "Tx";
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addUpperTypeBound(tx, createUnionTypeSymbol(finalType, fooType));
+
+        //act
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, interfaceBType);
+
+        //assert
+        assertThat(bindingCollection, withVariableBindings(
+                varBinding("$x", tx, null, asList("(Foo | dummy)", "IB"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+    }
+
+    //see TINS-553 isFinal, container types and upper type bounds
+    @Test
+    public void addUpperTypeBound_AddFooOrFinalTypeAndCurrentIsIB_UpperIsIntOrFooAndIB() {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+
+        //arrange
+        ITypeSymbol finalType = mock(ITypeSymbol.class);
+        when(finalType.isFinal()).thenReturn(true);
+        when(finalType.getAbsoluteName()).thenReturn("dummy");
+        when(finalType.getParentTypeSymbols()).thenReturn(new HashSet<ITypeSymbol>());
+
+        String tx = "Tx";
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(finalType, fooType);
+        bindingCollection.addUpperTypeBound(tx, interfaceBType);
+
+
+        //act
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, unionTypeSymbol);
+
+        //assert
+        assertThat(bindingCollection, withVariableBindings(
+                varBinding("$x", tx, null, asList("(Foo | dummy)", "IB"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+    }
+
+    //see TINS-553 isFinal, container types and upper type bounds
+    @Test
+    public void addUpperTypeBound_AddFooOrFinalTypeInIntersectionAndCurrentIsIB_UpperIsIntOrFooAndIB() {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+
+        //arrange
+        ITypeSymbol finalType = mock(ITypeSymbol.class);
+        when(finalType.isFinal()).thenReturn(true);
+        when(finalType.getAbsoluteName()).thenReturn("dummy");
+        when(finalType.getParentTypeSymbols()).thenReturn(new HashSet<ITypeSymbol>());
+
+        String tx = "Tx";
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addUpperTypeBound(tx, interfaceBType);
+        IUnionTypeSymbol unionTypeSymbol = createUnionTypeSymbol(finalType, fooType);
+        IIntersectionTypeSymbol intersectionTypeSymbol = createIntersectionTypeSymbol(unionTypeSymbol);
+
+        //act
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, intersectionTypeSymbol);
+
+        //assert
+        assertThat(bindingCollection, withVariableBindings(
+                varBinding("$x", tx, null, asList("(Foo | dummy)", "IB"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
     }
 
     @Test(expected = IllegalArgumentException.class)
