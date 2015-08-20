@@ -784,7 +784,7 @@ public class BindingCollection implements IBindingCollection
                         + "none is a subtype of the new type " + typeSymbol.getAbsoluteName(),
                         upperBound, typeSymbol);
             } else {
-                throw new IntersectionBoundException("The new type"
+                throw new IntersectionBoundException("The new type "
                         + typeSymbol.getAbsoluteName() + " contains only final types of which "
                         + "none is a subtype of the current upper type bound " + upperBound.getAbsoluteName(),
                         upperBound, typeSymbol);
