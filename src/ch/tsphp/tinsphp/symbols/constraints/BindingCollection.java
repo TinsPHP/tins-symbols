@@ -1125,6 +1125,7 @@ public class BindingCollection implements IBindingCollection
             propagateReturnTypeVariableToParameters(dto);
         } else {
             fixType(TinsPHPConstants.RETURN_VARIABLE_NAME);
+            dto.typeParameters.remove(returnTypeVariable);
         }
 
         boolean hasConstantReturn = propagateOrFixTypeParameters(dto);
@@ -1661,10 +1662,10 @@ public class BindingCollection implements IBindingCollection
     private void mergeFirstIntoSecondAfterContainsCheck(
             String typeVariable, String newTypeVariable, boolean avoidSelfRef) {
         if (hasLowerTypeBounds(typeVariable)) {
-            addLowerTypeBoundAfterContainsCheck(newTypeVariable, lowerTypeBounds.remove(typeVariable));
+            addLowerTypeBoundAfterContainsCheck(newTypeVariable, lowerTypeBounds.get(typeVariable));
         }
         if (hasUpperTypeBounds(typeVariable)) {
-            addUpperTypeBoundAfterContainsCheck(newTypeVariable, upperTypeBounds.remove(typeVariable));
+            addUpperTypeBoundAfterContainsCheck(newTypeVariable, upperTypeBounds.get(typeVariable));
         }
 
         if (hasLowerRefBounds(typeVariable)) {
@@ -1683,6 +1684,12 @@ public class BindingCollection implements IBindingCollection
                 lowerRefBounds.get(upperRefTypeVariable).remove(typeVariable);
             }
         }
+
+        // we have to remove it afterwards because otherwise we might have convertible types without bounds which
+        // leads to BoundExceptions (either during adding the type bounds to the newTypeVariable or during adding
+        // lower refs)
+        lowerTypeBounds.remove(typeVariable);
+        upperTypeBounds.remove(typeVariable);
 
         Set<String> variables = typeVariable2Variables.get(newTypeVariable);
         for (String variableId : typeVariable2Variables.remove(typeVariable)) {
