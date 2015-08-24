@@ -2375,6 +2375,91 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         assertThat(resultDto.hasChanged, is(true));
     }
 
+    //see TINS-652 soft typing and convertible types
+    @Test
+    public void addUpperTypeBound_AddAsTWhereTLowerNumAndLowerIsAsNum_LowerConstraintIsNum() {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+        //arrange
+        String tx = "Tx";
+        String ty = "Ty";
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addVariable("$y", new TypeVariableReference(ty));
+        IConvertibleTypeSymbol asNum = createConvertibleTypeSymbol(numType, symbolFactory, typeHelper);
+        bindingCollection.addLowerTypeBound(tx, asNum);
+        bindingCollection.addUpperTypeBound(ty, numType);
+        IConvertibleTypeSymbol asTy = createConvertibleTypeSymbol();
+        bindingCollection.bind(asTy, asList(ty));
+
+        //act
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, asTy);
+
+        //assert
+        assertThat(bindingCollection, withVariableBindings(
+                varBinding("$x", tx, asList("{as num}"), asList("{as Ty}"), false),
+                varBinding("$y", ty, null, asList("num"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.lowerConstraints, isConstraints(pair(ty, set("num"))));
+    }
+
+    //see TINS-652 soft typing and convertible types
+    @Test
+    public void addUpperTypeBound_AddAsTWhereTLowerIntOrFloatAndLowerIsAsIntOrFloat_LowerConstraintIsIntOrFloat() {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+        //arrange
+        String tx = "Tx";
+        String ty = "Ty";
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addVariable("$y", new TypeVariableReference(ty));
+        IUnionTypeSymbol intOrFloat = createUnionTypeSymbol(intType, floatType);
+        IConvertibleTypeSymbol asIntOrFloat = createConvertibleTypeSymbol(intOrFloat, symbolFactory, typeHelper);
+        bindingCollection.addLowerTypeBound(tx, asIntOrFloat);
+        bindingCollection.addUpperTypeBound(ty, intOrFloat);
+        IConvertibleTypeSymbol asTy = createConvertibleTypeSymbol();
+        bindingCollection.bind(asTy, asList(ty));
+
+        //act
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, asTy);
+
+        //assert
+        assertThat(bindingCollection, withVariableBindings(
+                varBinding("$x", tx, asList("{as (float | int)}"), asList("{as Ty}"), false),
+                varBinding("$y", ty, null, asList("(float | int)"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.lowerConstraints, isConstraints(pair(ty, set("(float | int)"))));
+    }
+
+    //see TINS-652 soft typing and convertible types
+    @Test
+    public void addUpperTypeBound_AddAsTWhereTLowerNumAndLowerIsAsInt_LowerConstraintIsInt() {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+        //arrange
+        String tx = "Tx";
+        String ty = "Ty";
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addVariable("$y", new TypeVariableReference(ty));
+        IConvertibleTypeSymbol asInt = createConvertibleTypeSymbol(intType, symbolFactory, typeHelper);
+        bindingCollection.addLowerTypeBound(tx, asInt);
+        bindingCollection.addUpperTypeBound(ty, numType);
+        IConvertibleTypeSymbol asTy = createConvertibleTypeSymbol();
+        bindingCollection.bind(asTy, asList(ty));
+
+        //act
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, asTy);
+
+        //assert
+        assertThat(bindingCollection, withVariableBindings(
+                varBinding("$x", tx, asList("{as int}"), asList("{as Ty}"), false),
+                varBinding("$y", ty, null, asList("num"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(true));
+        assertThat(resultDto.lowerConstraints, isConstraints(pair(ty, set("int"))));
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void addLowerRefBound_ForNonExistingBinding_ThrowsIllegalArgumentException() {
         //no arrange necessary
