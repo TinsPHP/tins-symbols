@@ -2667,6 +2667,50 @@ public class BindingCollectionTryToFixTest extends ATypeHelperTest
 //        ));
 //    }
 
+    //see TINS-657 fixing convertible type and lower type bound propagation
+    @Test
+    public void tryToFix_ParamHasConvertibleAndUpperRefDoesNotContributeToReturn_UpperRefIsPropagated() {
+        //corresponds:
+        // function foo($x){ $a = $x + 1; return 1;}
+
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+
+        //arrange
+        String $x = "$x";
+        String tx = "Tx";
+        String $a = "$a";
+        String ta = "Ta";
+        String plus = "+@2|1";
+        String tPlus = "Tplus";
+        String tReturn = "Treturn";
+
+        bindingCollection.addVariable($x, new TypeVariableReference(tx));
+        bindingCollection.addVariable($a, new TypeVariableReference(ta));
+        bindingCollection.addVariable(plus, new TypeVariableReference(tPlus));
+        bindingCollection.addVariable(RETURN_VARIABLE_NAME, new TypeVariableReference(tReturn));
+        bindingCollection.addLowerTypeBound(tPlus, intType);
+        bindingCollection.addUpperTypeBound(tPlus, numType);
+        IConvertibleTypeSymbol asTplus = createConvertibleTypeSymbol();
+        bindingCollection.bind(asTplus, asList(tPlus));
+        bindingCollection.addUpperTypeBound(tx, asTplus);
+        bindingCollection.addLowerRefBound(ta, new TypeVariableReference(tPlus));
+        bindingCollection.addLowerTypeBound(tReturn, intType);
+
+        Set<String> parameterTypeVariables = new HashSet<>();
+        parameterTypeVariables.add(tx);
+
+        //act
+        bindingCollection.tryToFix(parameterTypeVariables);
+
+        assertThat(bindingCollection, withVariableBindings(
+                varBinding($x, tx, null, asList("{as num}"), true),
+                varBinding($a, ta, asList("num"), null, true),
+                varBinding(plus, tPlus, null, asList("num"), true),
+                varBinding(RETURN_VARIABLE_NAME, tReturn, asList("int"), null, true)
+        ));
+    }
+
     private IBindingCollection createBindingCollection() {
         return createBindingCollection(symbolFactory, typeHelper);
     }
