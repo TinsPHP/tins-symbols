@@ -2300,6 +2300,78 @@ public class BindingCollectionAddBoundTest extends ATypeHelperTest
         assertThat(bindingCollection, withVariableBindings(
                 varBinding("$x", tx, asList("int"), asList("int"), false)
         ));
+        assertThat(resultDto.hasChanged, is(false));
+    }
+
+    //see TINS-656 bound exception adding float as upper and current is int
+    @Test
+    public void addUpperTypeBound_AddFloatAndCurrentUpperIsInt_DoesNotThrowABoundException() {
+        //pre-arrange
+        //intType from ATypeTest is not final, hence the own type
+        ITypeSymbol finalInt = mock(ITypeSymbol.class);
+        when(finalInt.isFinal()).thenReturn(true);
+        when(finalInt.getAbsoluteName()).thenReturn("int");
+        when(finalInt.getParentTypeSymbols()).thenReturn(set(mixedType));
+        ITypeSymbol finalFloat = mock(ITypeSymbol.class);
+        when(finalFloat.isFinal()).thenReturn(true);
+        when(finalFloat.getAbsoluteName()).thenReturn("float");
+        when(finalFloat.getParentTypeSymbols()).thenReturn(set(mixedType));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(finalInt, asList(finalFloat)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
+
+        //arrange
+        String tx = "Tx";
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addUpperTypeBound(tx, finalInt);
+
+        //act
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, finalFloat);
+
+        //assert
+        assertThat(bindingCollection, withVariableBindings(
+                varBinding("$x", tx, null, asList("int"), false)
+        ));
+        assertThat(resultDto.hasChanged, is(false));
+    }
+
+    //see TINS-656 bound exception adding float as upper and current is int
+    @Test
+    public void addUpperTypeBound_AddIntAndCurrentUpperIsFloat_DoesNotThrowABoundException() {
+        //pre-arrange
+        //intType from ATypeTest is not final, hence the own type
+        ITypeSymbol finalInt = mock(ITypeSymbol.class);
+        when(finalInt.isFinal()).thenReturn(true);
+        when(finalInt.getAbsoluteName()).thenReturn("int");
+        when(finalInt.getParentTypeSymbols()).thenReturn(set(mixedType));
+        ITypeSymbol finalFloat = mock(ITypeSymbol.class);
+        when(finalFloat.isFinal()).thenReturn(true);
+        when(finalFloat.getAbsoluteName()).thenReturn("float");
+        when(finalFloat.getParentTypeSymbols()).thenReturn(set(mixedType));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> implicitConversions
+                = createConversions(pair(finalInt, asList(finalFloat)));
+        Map<String, Map<String, Pair<ITypeSymbol, IConversionMethod>>> explicitConversions = new HashMap<>();
+        ITypeHelper typeHelper = createTypeHelperAndInit(implicitConversions, explicitConversions);
+
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection(symbolFactory, typeHelper);
+
+        //arrange
+        String tx = "Tx";
+        bindingCollection.addVariable("$x", new TypeVariableReference(tx));
+        bindingCollection.addUpperTypeBound(tx, finalFloat);
+
+        //act
+        BoundResultDto resultDto = bindingCollection.addUpperTypeBound(tx, finalInt);
+
+        //assert
+        assertThat(bindingCollection, withVariableBindings(
+                varBinding("$x", tx, null, asList("int"), false)
+        ));
         assertThat(resultDto.hasChanged, is(true));
     }
 

@@ -704,11 +704,6 @@ public class BindingCollection implements IBindingCollection
 
         boolean hasChanged = false;
         IIntersectionTypeSymbol upperBound = upperTypeBounds.get(typeVariable);
-        if (upperBound.isFinal() && typeSymbol.isFinal()) {
-            throw new IntersectionBoundException("The current upper type bound " + upperBound.getAbsoluteName()
-                    + " is final and the new type " + typeSymbol.getAbsoluteName() + " as well.",
-                    upperBound, typeSymbol);
-        }
 
         Iterator<ITypeSymbol> iterator = upperBound.getTypeSymbols().values().iterator();
         ITypeSymbol firstType = iterator.next();
