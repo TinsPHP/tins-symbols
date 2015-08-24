@@ -1057,11 +1057,12 @@ public class BindingCollection implements IBindingCollection
 
     @Override
     public void fixTypeParameter(String typeParameter) {
-        // if only upper type bounds (no lower type bounds) were defined for the parameter,
-        // then we need to propagate those to the upper refs (if there are any) before we fix all variables
-        // belonging to the type variable of the parameter, otherwise they might turn out to be mixed (which
-        // is less intuitive). see TINS-449 unused ad-hoc polymorphic parameters
-        if (hasUpperRefBoundAndOnlyUpperTypeBound(typeParameter)) {
+        // We need to propagate upper type bounds to the upper refs before we disconnect the relation.
+        // So far, we have only propagated the lower type bounds to the upper refs, if we do not propagate it we
+        // actually get into things like $a = $x  int <: Ta  Tx <: num => Ta should be num <: Ta
+        // we might also end up with mixed for other variables if it does not have any lower type bounds.
+        // See TINS-449 unused ad-hoc polymorphic parameters
+        if (hasUpperRefBounds(typeParameter) && hasUpperTypeBounds(typeParameter)) {
             IIntersectionTypeSymbol upperTypeBound = upperTypeBounds.get(typeParameter);
             for (String refTypeVariable : upperRefBounds.get(typeParameter)) {
                 addToLowerUnionTypeSymbol(refTypeVariable, upperTypeBound);
@@ -1087,12 +1088,6 @@ public class BindingCollection implements IBindingCollection
         }
 
         informBoundTypes(typeParameter);
-    }
-
-    private boolean hasUpperRefBoundAndOnlyUpperTypeBound(String parameterTypeVariable) {
-        return hasUpperRefBounds(parameterTypeVariable)
-                && !hasLowerTypeBounds(parameterTypeVariable)
-                && hasUpperTypeBounds(parameterTypeVariable);
     }
 
     private void informBoundTypes(String typeParameter) {
