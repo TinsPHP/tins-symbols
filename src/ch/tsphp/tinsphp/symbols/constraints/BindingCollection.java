@@ -647,6 +647,19 @@ public class BindingCollection implements IBindingCollection
                 }
             }
         }
+        if (hasLowerTypeBounds(typeVariable)) {
+            for (ITypeSymbol innerTypeSymbol : lowerTypeBounds.get(typeVariable).getTypeSymbols().values()) {
+                if (innerTypeSymbol instanceof IConvertibleTypeSymbol) {
+                    IConvertibleTypeSymbol oldConvertibleType = (IConvertibleTypeSymbol) innerTypeSymbol;
+                    String newTargetTypeVariable = newConvertibleType.getTypeVariable();
+                    if (dto.lowerConstraints == null) {
+                        dto.lowerConstraints = new HashMap<>();
+                    }
+                    MapHelper.addToSetInMap(dto.lowerConstraints,
+                            newTargetTypeVariable, oldConvertibleType.getUpperTypeBounds());
+                }
+            }
+        }
         if (result == null) {
             result = new Pair<>(true, false);
         }
