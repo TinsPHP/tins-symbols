@@ -1052,6 +1052,14 @@ public class BindingCollection implements IBindingCollection
             addToLowerUnionTypeSymbol(typeVariable, mixedTypeSymbol);
             addToUpperIntersectionTypeSymbol(typeVariable, mixedTypeSymbol);
         }
+
+        // notice, that not adding the type bounds above is not an option
+        // since we want to propagate the type bounds first before removing it.
+        if (isNotParameter) {
+            upperTypeBounds.remove(typeVariable);
+        } else {
+            lowerTypeBounds.remove(typeVariable);
+        }
     }
 
 
@@ -1081,7 +1089,6 @@ public class BindingCollection implements IBindingCollection
             if (!typeVariableFixed) {
                 String typeVariable = reference.getTypeVariable();
                 fixTypeVariableType(isNotParameter, typeVariable);
-                lowerTypeBounds.remove(typeVariable);
                 typeVariableFixed = true;
             }
             //Warning! end code duplication, more or less same as in fixTypeAfterContainsCheck

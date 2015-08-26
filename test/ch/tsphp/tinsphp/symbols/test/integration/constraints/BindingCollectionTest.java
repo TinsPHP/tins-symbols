@@ -16,6 +16,7 @@ import ch.tsphp.tinsphp.common.symbols.ISymbolFactory;
 import ch.tsphp.tinsphp.common.utils.ITypeHelper;
 import ch.tsphp.tinsphp.symbols.constraints.BindingCollection;
 import ch.tsphp.tinsphp.symbols.test.integration.testutils.ATypeHelperTest;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import java.util.Set;
@@ -198,6 +199,87 @@ public class BindingCollectionTest extends ATypeHelperTest
         OverloadApplicationDto result = bindingCollection.getAppliedOverload("$a");
 
         assertThat(result, is(dto));
+    }
+
+    @Test
+    public void fixTypeParameter_LowerInt_LowerNullAndUpperTypeBoundIsInt() {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+
+        //arrange
+        bindingCollection.addVariable("$a", new TypeVariableReference("T"));
+        bindingCollection.addLowerTypeBound("T", intType);
+
+        //act
+        bindingCollection.fixTypeParameter("T");
+
+        assertThat(bindingCollection.getLowerTypeBounds("T"), is(nullValue()));
+        assertThat(bindingCollection.getUpperTypeBounds("T").getAbsoluteName(), is("int"));
+    }
+
+    @Test
+    public void fixTypeParameter_UpperInt_LowerNullAndUpperTypeBoundIsInt() {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+
+        //arrange
+        bindingCollection.addVariable("$a", new TypeVariableReference("T"));
+        bindingCollection.addUpperTypeBound("T", intType);
+
+        //act
+        bindingCollection.fixTypeParameter("T");
+
+        assertThat(bindingCollection.getLowerTypeBounds("T"), is(nullValue()));
+        assertThat(bindingCollection.getUpperTypeBounds("T").getAbsoluteName(), is("int"));
+    }
+
+    @Test
+    public void fixTypeParameter_NoType_LowerNullAndUpperTypeBoundIsMixed() {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+
+        //arrange
+        bindingCollection.addVariable("$a", new TypeVariableReference("T"));
+
+        //act
+        bindingCollection.fixTypeParameter("T");
+
+        assertThat(bindingCollection.getLowerTypeBounds("T"), is(nullValue()));
+        assertThat(bindingCollection.getUpperTypeBounds("T").getAbsoluteName(), is("mixed"));
+    }
+
+    @Test
+    public void fixType_LowerInt_LowerIntAndUpperTypeBoundIsNull() {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+
+        //arrange
+        bindingCollection.addVariable("$a", new TypeVariableReference("T"));
+        bindingCollection.addLowerTypeBound("T", intType);
+
+        //act
+        bindingCollection.fixType("$a");
+
+
+        assertThat(bindingCollection.getLowerTypeBounds("T").getAbsoluteName(), is("int"));
+        assertThat(bindingCollection.getUpperTypeBounds("T"), is(Matchers.nullValue()));
+    }
+
+    @Test
+    public void fixType_UpperInt_LowerIntAndUpperTypeBoundIsNull() {
+        //pre-act necessary for arrange
+        IBindingCollection bindingCollection = createBindingCollection();
+
+        //arrange
+        bindingCollection.addVariable("$a", new TypeVariableReference("T"));
+        bindingCollection.addUpperTypeBound("T", intType);
+
+        //act
+        bindingCollection.fixType("$a");
+
+
+        assertThat(bindingCollection.getLowerTypeBounds("T").getAbsoluteName(), is("int"));
+        assertThat(bindingCollection.getUpperTypeBounds("T"), is(Matchers.nullValue()));
     }
 
     private IBindingCollection createBindingCollection() {
