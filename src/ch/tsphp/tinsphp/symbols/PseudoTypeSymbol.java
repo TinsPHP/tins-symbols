@@ -18,9 +18,16 @@ import ch.tsphp.tinsphp.common.symbols.IPseudoTypeSymbol;
 
 public class PseudoTypeSymbol extends ATypeSymbol implements IPseudoTypeSymbol
 {
+    private final boolean isFinal;
 
-    public PseudoTypeSymbol(String name, ITypeSymbol parentTypeSymbol) {
+    public PseudoTypeSymbol(String name, ITypeSymbol parentTypeSymbol, boolean isItFinal) {
         super(null, name, parentTypeSymbol);
+        isFinal = isItFinal;
+    }
+
+    @Override
+    public boolean isFinal() {
+        return isFinal;
     }
 
     @Override

@@ -21,13 +21,13 @@ public class PseudoTypeSymbolTest
     public void getDefaultValue_Standard_ThrowsUnsupportedOperationException() {
         //no arrange necessary
 
-        IPseudoTypeSymbol symbol = createPseudoTypeSymbol("foo", mock(ITypeSymbol.class));
+        IPseudoTypeSymbol symbol = createPseudoTypeSymbol("foo", mock(ITypeSymbol.class), false);
         symbol.getDefaultValue();
 
         //assert in annotation
     }
 
-    protected IPseudoTypeSymbol createPseudoTypeSymbol(String name, ITypeSymbol parentTypeSymbol) {
-        return new PseudoTypeSymbol(name, parentTypeSymbol);
+    protected IPseudoTypeSymbol createPseudoTypeSymbol(String name, ITypeSymbol parentTypeSymbol, boolean isFinal) {
+        return new PseudoTypeSymbol(name, parentTypeSymbol, isFinal);
     }
 }

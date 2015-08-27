@@ -107,12 +107,17 @@ public class SymbolFactory implements ISymbolFactory
 
     @Override
     public IPseudoTypeSymbol createPseudoTypeSymbol(String name) {
-        return createPseudoTypeSymbol(name, mixedTypeSymbol);
+        return createPseudoTypeSymbol(name, mixedTypeSymbol, false);
     }
 
     @Override
-    public IPseudoTypeSymbol createPseudoTypeSymbol(String name, ITypeSymbol parentTypeSymbol) {
-        return new PseudoTypeSymbol(name, parentTypeSymbol);
+    public IPseudoTypeSymbol createPseudoTypeSymbol(String name, boolean isFinal) {
+        return createPseudoTypeSymbol(name, mixedTypeSymbol, isFinal);
+    }
+
+    @Override
+    public IPseudoTypeSymbol createPseudoTypeSymbol(String name, ITypeSymbol parentTypeSymbol, boolean isFinal) {
+        return new PseudoTypeSymbol(name, parentTypeSymbol, isFinal);
     }
 
     @Override

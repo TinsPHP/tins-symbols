@@ -168,7 +168,7 @@ public class SymbolFactoryTest
         String name = "foo";
 
         ISymbolFactory symbolFactory = createSymbolFactory();
-        IPseudoTypeSymbol result = symbolFactory.createPseudoTypeSymbol(name, mock(ITypeSymbol.class));
+        IPseudoTypeSymbol result = symbolFactory.createPseudoTypeSymbol(name, mock(ITypeSymbol.class), false);
 
         assertThat(result.getName(), is(name));
     }
@@ -179,7 +179,7 @@ public class SymbolFactoryTest
         ITypeSymbol parentTypeSymbol = mock(ITypeSymbol.class);
 
         ISymbolFactory symbolFactory = createSymbolFactory();
-        IPseudoTypeSymbol result = symbolFactory.createPseudoTypeSymbol("", parentTypeSymbol);
+        IPseudoTypeSymbol result = symbolFactory.createPseudoTypeSymbol("", parentTypeSymbol, false);
 
         assertThat(result.getParentTypeSymbols(), containsInAnyOrder(parentTypeSymbol));
     }

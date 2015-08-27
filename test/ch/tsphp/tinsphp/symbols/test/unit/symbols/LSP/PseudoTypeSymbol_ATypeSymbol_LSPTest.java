@@ -18,13 +18,19 @@ public class PseudoTypeSymbol_ATypeSymbol_LSPTest extends ATypeSymbolTest
 {
 
     @Override
+    public void isFinal_Standard_ReturnsFalse() {
+        //a pseudo type can be final, we defined false below
+        super.isFinal_Standard_ReturnsFalse();
+    }
+
+    @Override
     public void getParentTypeSymbols_StandardWithSet_ReturnsOnePassedToConstructor() {
         // different behaviour - PseudoTypeSymbol does not support multiple parent types
     }
 
     @Override
     protected ATypeSymbol createTypeSymbol(ITSPHPAst definitionAst, String name, ITypeSymbol parentTypeSymbol) {
-        return new PseudoTypeSymbol(name, parentTypeSymbol);
+        return new PseudoTypeSymbol(name, parentTypeSymbol, false);
     }
 
     @Override

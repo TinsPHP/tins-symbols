@@ -61,6 +61,6 @@ public class PseudoTypeSymbol_ASymbol_LSPTest extends ASymbolTest
 
     @Override
     protected ASymbol createSymbol(ITSPHPAst definitionAst, String name) {
-        return new PseudoTypeSymbol(name, null);
+        return new PseudoTypeSymbol(name, null, false);
     }
 }

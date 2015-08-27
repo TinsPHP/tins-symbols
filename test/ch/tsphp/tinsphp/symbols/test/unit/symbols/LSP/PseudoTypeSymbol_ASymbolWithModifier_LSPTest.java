@@ -18,7 +18,7 @@ public class PseudoTypeSymbol_ASymbolWithModifier_LSPTest extends ASymbolWithMod
     @Override
     protected ASymbolWithModifier createSymbolWithModifier(
             ITSPHPAst definitionAst, IModifierSet modifiers, String name) {
-        PseudoTypeSymbol symbol = new PseudoTypeSymbol(name, null);
+        PseudoTypeSymbol symbol = new PseudoTypeSymbol(name, null, false);
         symbol.setModifiers(modifiers);
         return symbol;
     }
