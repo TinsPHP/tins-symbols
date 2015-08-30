@@ -16,7 +16,7 @@ import java.util.List;
 public class ConstraintCollection implements IConstraintCollection
 {
     private final List<IConstraint> constraints = new ArrayList<>();
-    private List<IBindingCollection> bindings;
+    private List<IBindingCollection> bindings = new ArrayList<>();
     private String absoluteName;
 
     public ConstraintCollection(String theAbsoluteName) {
@@ -36,6 +36,11 @@ public class ConstraintCollection implements IConstraintCollection
     @Override
     public void addConstraint(IConstraint constraint) {
         constraints.add(constraint);
+    }
+
+    @Override
+    public void addBindingCollection(IBindingCollection bindingCollection) {
+        bindings.add(bindingCollection);
     }
 
     @Override

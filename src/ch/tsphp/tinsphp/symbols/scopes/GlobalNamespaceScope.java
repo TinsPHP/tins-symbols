@@ -115,6 +115,11 @@ public class GlobalNamespaceScope extends AScope implements IGlobalNamespaceScop
     }
 
     @Override
+    public void addBindingCollection(IBindingCollection bindingCollection) {
+        constraintCollection.addBindingCollection(bindingCollection);
+    }
+
+    @Override
     public void setBindings(List<IBindingCollection> theBindings) {
         constraintCollection.setBindings(theBindings);
     }

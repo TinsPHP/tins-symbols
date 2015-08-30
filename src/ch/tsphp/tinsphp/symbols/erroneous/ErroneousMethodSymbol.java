@@ -109,6 +109,11 @@ public class ErroneousMethodSymbol extends AErroneousScopedSymbol implements IEr
     }
 
     @Override
+    public void addBindingCollection(IBindingCollection bindingCollection) {
+        throw new UnsupportedOperationException(ERROR_MESSAGE);
+    }
+
+    @Override
     public void setBindings(List<IBindingCollection> bindings) {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }

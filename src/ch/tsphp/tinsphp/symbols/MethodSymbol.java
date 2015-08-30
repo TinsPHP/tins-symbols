@@ -153,6 +153,11 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
     }
 
     @Override
+    public void addBindingCollection(IBindingCollection bindingCollection) {
+        constraintCollection.addBindingCollection(bindingCollection);
+    }
+
+    @Override
     public void setBindings(List<IBindingCollection> theBindings) {
         constraintCollection.setBindings(theBindings);
     }
