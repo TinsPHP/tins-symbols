@@ -30,7 +30,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
-import static org.hamcrest.core.IsNull.nullValue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -168,7 +167,7 @@ public class MethodSymbolTest
         IMethodSymbol methodSymbol = createMethodSymbol();
         List<IBindingCollection> result = methodSymbol.getBindings();
 
-        Assert.assertThat(result, is(nullValue()));
+        Assert.assertThat(result, empty());
     }
 
     @Test

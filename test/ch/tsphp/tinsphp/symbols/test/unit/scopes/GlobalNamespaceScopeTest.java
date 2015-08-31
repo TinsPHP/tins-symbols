@@ -277,7 +277,7 @@ public class GlobalNamespaceScopeTest
         IGlobalNamespaceScope globalNamespaceScope = createGlobalNamespaceScope();
         List<IBindingCollection> result = globalNamespaceScope.getBindings();
 
-        assertThat(result, is(nullValue()));
+        assertThat(result, empty());
     }
 
     @Test
