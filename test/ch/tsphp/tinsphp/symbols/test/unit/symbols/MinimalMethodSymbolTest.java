@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import java.util.Collection;
 
+import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
@@ -32,11 +33,11 @@ public class MinimalMethodSymbolTest
     }
 
     @Test
-    public void addAndGetOverloads_OneDefined_ReturnsListWithIt() {
+    public void setAndGetOverloads_OneDefined_ReturnsListWithIt() {
         IFunctionType functionTypeSymbol = mock(IFunctionType.class);
 
         IMinimalMethodSymbol symbol = createMinimalMethodSymbol("foo");
-        symbol.addOverload(functionTypeSymbol);
+        symbol.setOverloads(asList(functionTypeSymbol));
         Collection<IFunctionType> result = symbol.getOverloads();
 
         assertThat(result, contains(functionTypeSymbol));

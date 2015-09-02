@@ -29,6 +29,7 @@ import ch.tsphp.tinsphp.symbols.constraints.ConstraintCollection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -38,8 +39,8 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
     private final List<IVariableSymbol> parameters = new ArrayList<>();
     private final IMinimalVariableSymbol returnVariable;
     private final IModifierSet returnTypeModifiers;
-    private final Map<String, IFunctionType> overloads = new HashMap<>();
     private final IConstraintCollection constraintCollection;
+    private Map<String, IFunctionType> overloads = new HashMap<>(0);
 
     @SuppressWarnings("checkstyle:parameternumber")
     public MethodSymbol(
@@ -163,17 +164,37 @@ public class MethodSymbol extends AScopedSymbol implements IMethodSymbol
     }
     //Warning! end code duplication - same as in GlobalNamespaceScope
 
+
     @Override
-    public void addOverload(IFunctionType overload) {
-        String signature = overload.getSignature();
-        if (!overloads.containsKey(signature)) {
-            overloads.put(signature, overload);
-        } else {
-            IFunctionType currentOverload = overloads.get(signature);
-            if (overload.getNumberOfConvertibleApplications() < currentOverload.getNumberOfConvertibleApplications()) {
-                overloads.put(signature, overload);
+    public void setOverloads(Collection<IFunctionType> theOverloads) {
+        Iterator<IFunctionType> iterator = theOverloads.iterator();
+        if (iterator.hasNext()) {
+            IFunctionType firstOverload = iterator.next();
+            if (iterator.hasNext()) {
+                overloads = filterOverloads(iterator, firstOverload);
+            } else {
+                overloads.put(firstOverload.getSignature(), firstOverload);
             }
         }
+    }
+
+    private Map<String, IFunctionType> filterOverloads(Iterator<IFunctionType> iterator, IFunctionType firstOverload) {
+        Map<String, IFunctionType> newOverloads = new HashMap<>();
+        newOverloads.put(firstOverload.getSignature(), firstOverload);
+        while (iterator.hasNext()) {
+            IFunctionType overload = iterator.next();
+            String signature = overload.getSignature();
+            if (!newOverloads.containsKey(signature)) {
+                newOverloads.put(signature, overload);
+            } else {
+                IFunctionType currentOverload = newOverloads.get(signature);
+                if (overload.getNumberOfConvertibleApplications()
+                        < currentOverload.getNumberOfConvertibleApplications()) {
+                    newOverloads.put(signature, overload);
+                }
+            }
+        }
+        return newOverloads;
     }
 
     @Override

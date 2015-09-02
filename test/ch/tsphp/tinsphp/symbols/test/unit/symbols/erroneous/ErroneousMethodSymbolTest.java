@@ -18,6 +18,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 
+import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -146,11 +147,11 @@ public class ErroneousMethodSymbolTest
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void addOverload_Standard_ThrowsUnsupportedOperationException() {
+    public void setOverloads_Standard_ThrowsUnsupportedOperationException() {
         //no arrange necessary
 
         IErroneousMethodSymbol methodSymbol = createMethodSymbol();
-        methodSymbol.addOverload(mock(IFunctionType.class));
+        methodSymbol.setOverloads(asList(mock(IFunctionType.class)));
 
         //assert in annotation
     }

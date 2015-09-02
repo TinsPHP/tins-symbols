@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
@@ -192,15 +193,16 @@ public class MethodSymbolTest
     }
 
     @Test
-    public void addAndGetOverloads_OneAdded_ReturnsListWithOne() {
+    public void setAndGetOverloads_OneAdded_ReturnsListWithOne() {
         IFunctionType functionType = mock(IFunctionType.class);
 
         IMethodSymbol methodSymbol = createMethodSymbol();
-        methodSymbol.addOverload(functionType);
+        methodSymbol.setOverloads(asList(functionType));
         Collection<IFunctionType> result = methodSymbol.getOverloads();
 
         Assert.assertThat(result, contains(functionType));
     }
+
 
     @Test
     public void getReturnVariable_Standard_IsOnePassedInConstructor() {

@@ -12,19 +12,18 @@ import ch.tsphp.tinsphp.common.symbols.IMinimalMethodSymbol;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 public class MinimalMethodSymbol extends ASymbol implements IMinimalMethodSymbol
 {
-    private final List<IFunctionType> overloads = new ArrayList<>();
+    private Collection<IFunctionType> overloads = new ArrayList<>();
 
     public MinimalMethodSymbol(String name) {
         super(null, name);
     }
 
     @Override
-    public void addOverload(IFunctionType overload) {
-        overloads.add(overload);
+    public void setOverloads(Collection<IFunctionType> theOverloads) {
+        overloads = theOverloads;
     }
 
     @Override

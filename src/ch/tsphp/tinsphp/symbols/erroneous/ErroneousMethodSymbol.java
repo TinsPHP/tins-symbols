@@ -21,6 +21,7 @@ import ch.tsphp.tinsphp.common.symbols.IMinimalVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.IVariableSymbol;
 import ch.tsphp.tinsphp.common.symbols.erroneous.IErroneousMethodSymbol;
 
+import java.util.Collection;
 import java.util.List;
 
 
@@ -119,7 +120,7 @@ public class ErroneousMethodSymbol extends AErroneousScopedSymbol implements IEr
     }
 
     @Override
-    public void addOverload(IFunctionType overload) {
+    public void setOverloads(Collection<IFunctionType> overloads) {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 
