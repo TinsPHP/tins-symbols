@@ -13,8 +13,9 @@ import ch.tsphp.common.symbols.modifiers.IModifierSet;
 import ch.tsphp.tinsphp.common.symbols.IObservableTypeListener;
 import ch.tsphp.tinsphp.common.symbols.IObservableTypeSymbol;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public abstract class APolymorphicTypeSymbol implements ITypeSymbol, IObservableTypeSymbol
 {
@@ -22,7 +23,8 @@ public abstract class APolymorphicTypeSymbol implements ITypeSymbol, IObservable
 
     protected boolean hasAbsoluteNameChanged = true;
     protected String ownAbsoluteName;
-    protected Set<IObservableTypeListener> listeners = new HashSet<>();
+    protected ConcurrentMap<IObservableTypeListener, Boolean> listeners = new ConcurrentHashMap<>(5, 0.9f, 1);
+    private Boolean dummyValue = true;
 
     @Override
     public String getName() {
@@ -52,7 +54,7 @@ public abstract class APolymorphicTypeSymbol implements ITypeSymbol, IObservable
 
     @Override
     public void registerObservableListener(IObservableTypeListener subscriberType) {
-        listeners.add(subscriberType);
+        listeners.put(subscriberType, dummyValue);
     }
 
     @Override
@@ -63,13 +65,13 @@ public abstract class APolymorphicTypeSymbol implements ITypeSymbol, IObservable
     protected void notifyNameHasChanged() {
         String oldAbsoluteName = getAbsoluteName();
         hasAbsoluteNameChanged = true;
-        for (IObservableTypeListener listener : listeners) {
+        for (IObservableTypeListener listener : listeners.keySet()) {
             listener.nameOfObservableHasChanged(this, oldAbsoluteName);
         }
     }
 
     protected void notifyWasFixed() {
-        for (IObservableTypeListener listener : listeners) {
+        for (IObservableTypeListener listener : listeners.keySet()) {
             listener.observableWasFixed(this);
         }
     }
